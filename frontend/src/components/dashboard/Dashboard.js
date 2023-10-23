@@ -72,6 +72,9 @@ function Dashboard() {
       <NavButton to={`/themes`} icon={<Edit/>} key={'themes'}
                  text="Manage Themes"/>
 
+      <NavButton to={`/organization-impactReports`} icon={<Edit/>} key={'impactReports'}
+                 text="Manage Impact Reports"/>
+
       {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={`/fileUploading`} icon={<FileUpload/>} key={'fileUploading'}
                   text="File Upload"/>:null}
 

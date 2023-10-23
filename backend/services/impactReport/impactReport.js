@@ -3,6 +3,7 @@ const {Server400Error} = require("../../utils");
 const {GDBImpactReportModel} = require("../../models/impactReport");
 const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("./impactReportBuilder");
+const {GDBUserAccountModel} = require("../../models/userAccount");
 
 
 const RESOURCE = 'ImpactReport';
@@ -70,9 +71,10 @@ const fetchImpactReports = async (req, res) => {
   if (orgUri === 'all') {
     impactReports = await GDBImpactReportModel.find({}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
   } else {
-    impactReports = await GDBImpactReportModel.find({forOrganization: orgUri}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
+    impactReports = await GDBImpactReportModel.find({forOrganization: orgUri}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome', 'hasTime.hasBeginning', 'hasTime.hasEnd']});
   }
-  return res.status(200).json({success: true, impactReports});
+  const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
+  return res.status(200).json({success: true, impactReports, editable: userAccount.isSuperuser});
 };
 
 const fetchImpactReport = async (req, res) => {
