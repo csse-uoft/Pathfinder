@@ -2,10 +2,9 @@ const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {GDBStakeholderModel} = require("../../models/stakeholder");
 const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
-const {GDBOrganizationModel} = require("../../models/organization");
+const {GDBUserAccountModel} = require("../../models/userAccount");
 
 const DATATYPE = 'StakeholderOutcome'
 
@@ -45,7 +44,9 @@ const fetchStakeholderOutcomesThroughOrganization = async (req, res) => {
   if (!impactNorms)
     return res.status(200).json({success: true, stakeholderOutcomes: []})
   const stakeholderOutcomes = impactNorms.stakeholderOutcomes
-  return res.status(200).json({success: true, stakeholderOutcomes})
+  const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
+
+  return res.status(200).json({success: true, stakeholderOutcomes, editable: userAccount.isSuperuser})
 }
 
 

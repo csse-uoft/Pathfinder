@@ -59,6 +59,8 @@ import ImpactReports_ReportGenerate from "./components/ReportGenerate/ImpactRepo
 import AddEditImpactReport from "./components/impactReport/AddEditImpactReport";
 import Organization_impactReports from "./components/impactReport/Organization-impactReports";
 import ImpactReports from "./components/impactReport/ImpactReports";
+import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
+import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutcomes";
 
 const routes = (
   <Routes>
@@ -140,11 +142,15 @@ const routes = (
            element={<PrivateRoute element={AddEditOutcome}/>}/>
 
     {/*stakeholderOutcome*/}
+    <Route path={`${process.env.PUBLIC_URL}/organization-stakeholderOutcomes`}
+           element={<PrivateRoute element={Organization_stakeholderOutcomes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/new`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcomes/:uri`} element={<PrivateRoute element={StakeholderOutcomes}/>}/>
 
+    {/*impactReport*/}
     <Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}
            element={<PrivateRoute element={Organization_impactReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReports/:uri`} element={<PrivateRoute element={ImpactReports}/>}/>

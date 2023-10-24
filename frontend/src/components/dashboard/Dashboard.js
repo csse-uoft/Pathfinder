@@ -75,6 +75,9 @@ function Dashboard() {
       <NavButton to={`/organization-impactReports`} icon={<Edit/>} key={'impactReports'}
                  text="Manage Impact Reports"/>
 
+      <NavButton to={`/organization-stakeholderOutcomes`} icon={<Edit/>} key={'stakeholderOutcomes'}
+                 text="Manage Stakeholder Outcomes"/>
+
       {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={`/fileUploading`} icon={<FileUpload/>} key={'fileUploading'}
                   text="File Upload"/>:null}
 
