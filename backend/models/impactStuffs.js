@@ -9,6 +9,7 @@ const GDBImpactModelModel = createGraphDBModel({
   name: {type: String, internalKey: 'cids:hasName'},
   description: {type: String, internalKey: 'cids:hasName'},
   organization: {type: GDBOrganizationModel, internalKey: 'cids:forDescription'},
+  dateCreated: {type: Date, internalKey: "schema:dateCreated"}
 }, {
   rdfTypes: ['cids:ImpactModel'], name: 'impactModel'
 });
@@ -30,5 +31,5 @@ const GDBImpactNormsModel = createGraphDBModel({
 
 module.exports = {
   GDBImpactModelModel,
-  GDBImpactNormsModel
+  GDBImpactNormsModel,
 }

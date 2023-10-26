@@ -27,6 +27,7 @@ const GDBOrganizationModel = createGraphDBModel({
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
   email: {type: String, internalKey: ':hasEmail'},
+  impactModels: {type: [() => require('./impactStuffs').GDBImpactModelModel], internalKey: 'cids:hasImpactModel'},
   characteristics: {type: [() => require("./characteristic").GDBCharacteristicModel], internalKey: 'cids:hasCharacteristic'}
 }, {
   rdfTypes: ['cids:Organization'], name: 'organization'
@@ -50,6 +51,7 @@ const GDBStakeholderOrganizationModel = createGraphDBModel({
 
   // its own property
   description: {type: String, internalKey: 'schema:description'},
+  partOfs: {type: [() => require('./impactStuffs').GDBImpactModelModel], internalKey: 'oep:partOf'},
   catchmentArea: {type: String, internalKey: 'cids:hasCatchmentArea'},
   name: {type: String, internalKey: 'genprops:hasName'},
   characteristic: {type: () => require("./characteristic").GDBCharacteristicModel, internalKey: 'cids:hasCharacteristic'}

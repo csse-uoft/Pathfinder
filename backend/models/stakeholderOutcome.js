@@ -10,7 +10,9 @@ const GDBStakeholderOutcomeModel = createGraphDBModel({
   importance: {type: String, internalKey: 'cids:hasImportance'},
   isUnderserved: {type: Boolean, internalKey: 'cids:isUnderserved'},
   indicators: {type: [() => require('./indicator').GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
-  impactReports: {type: [() => require('./impactReport').GDBImpactReportModel], internalKey: 'cids:hasImpactReport'}
+  impactReports: {type: [() => require('./impactReport').GDBImpactReportModel], internalKey: 'cids:hasImpactReport'},
+  formPerspectiveOf: {type: () => require('./stakeholder').GDBStakeholderModel, internalKey: 'cids:fromPerspectiveOf'},
+  intendedImpact: {type: String, internalKey: 'cids:intendedImpact'}
 },{
   rdfTypes: ['cids:StakeholderOutcome'], name: 'stakeholderOutcome'
 })

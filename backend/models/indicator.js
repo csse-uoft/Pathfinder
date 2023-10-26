@@ -2,6 +2,7 @@ const {createGraphDBModel, Types} = require("graphdb-utils");
 const {GDBIndicatorReportModel} = require("./indicatorReport");
 const {GDBOutcomeModel} = require("./outcome");
 const {GDBMeasureModel} = require("./measure");
+const {GDBOrganizationModel} = require("./organization");
 
 const GDBIndicatorModel = createGraphDBModel({
   name: {type: String, internalKey: 'cids:hasName'}, // todo: here is issue, on protege, it should be tov_org:hasName
@@ -11,7 +12,11 @@ const GDBIndicatorModel = createGraphDBModel({
   forOrganization: {type: () => require('./organization').GDBOrganizationModel, internalKey: 'cids:definedBy'},
   unitOfMeasure: {type: GDBMeasureModel, internalKey: 'iso21972:unit_of_measure'},
   codes: {type: [() => require('./code').GDBCodeModel], internalKey: 'cids:hasCode'},
-  baseline: {type: GDBMeasureModel, internalKey: 'cids:hasBaseline'}
+  baseline: {type: GDBMeasureModel, internalKey: 'cids:hasBaseline'},
+  threshold: {type: GDBMeasureModel, internalKey: 'cids:hasThreshold'},
+  hasAccess: {type: GDBOrganizationModel, internalKey: 'cids:hasAccess'},
+  identifier: {type: String, internalKey: 'cids:hasIdentifier'},
+  dateCreated: {type: Date, internalKey: 'schema:dateCreated'},
 }, {
   rdfTypes: ['cids:Indicator'], name: 'indicator'
 });
