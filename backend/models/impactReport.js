@@ -8,9 +8,11 @@ const GDBImpactReportModel = createGraphDBModel({
   forOrganization: {type: () => require('./organization').GDBOrganizationModel, internalKey: 'cids:forOrganization'},
   impactScale: {type: () => require('./howMuchImpact').GDBImpactScaleModel, internalKey: 'cids:hasImpactScale'},
   impactDepth: {type: () => require('./howMuchImpact').GDBImpactDepthModel, internalKey: 'cids:hasImpactDepth'},
+  impactDuration: {type: () => require('./howMuchImpact').GDBImpactDurationModel, internalKey: 'cids:hasImpactDuration'},
   hasTime: {type: GDBDateTimeIntervalModel, internalKey: 'time:hasTime'},
   reportedImpact: {type: String, internalKey: 'cids:hasReportedImpact'},
-  expectation: {type: String, internalKey: 'cids:hasExpectation'}
+  expectation: {type: String, internalKey: 'cids:hasExpectation'},
+  impactRisks: {type: [() => require('./impactRisk').GDBImpactRiskModel], internalKey: 'cids:hasImpactRisk'}
 }, {
   rdfTypes: ['cids:ImpactReport'], name: 'impactReport'
 });

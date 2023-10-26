@@ -48,6 +48,8 @@ const GDBStakeholderOrganizationModel = createGraphDBModel({
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
   email: {type: String, internalKey: ':hasEmail'},
+  impactModels: {type: [() => require('./impactStuffs').GDBImpactModelModel], internalKey: 'cids:hasImpactModel'},
+  characteristics: {type: [() => require("./characteristic").GDBCharacteristicModel], internalKey: 'cids:hasCharacteristic'},
 
   // its own property
   description: {type: String, internalKey: 'schema:description'},

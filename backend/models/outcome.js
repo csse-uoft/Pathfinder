@@ -1,4 +1,5 @@
 const {createGraphDBModel, Types} = require("graphdb-utils");
+const {GDBFeatureModel} = require("./feature");
 
 
 const GDBOutcomeModel = createGraphDBModel({
@@ -10,7 +11,9 @@ const GDBOutcomeModel = createGraphDBModel({
   stakeholderOutcomes: {type: [() => require("./stakeholderOutcome").GDBStakeholderOutcomeModel], internalKey: 'cids:hasStakeholderOutcome'},
   forOrganization: {type: () => require("./organization").GDBOrganizationModel, internalKey: 'cids:forOrganization'},
   indicators: {type:　[() => require("./indicator").GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
-  codes: {type: [() => require('./code').GDBCodeModel], internalKey: 'cids:hasCode'}
+  codes: {type: [() => require('./code').GDBCodeModel], internalKey: 'cids:hasCode'},
+  locatedIns: {type: [GDBFeatureModel], internalKey: 'iso21972:located_in'},
+  dateCreated: {type: Date, internalKey: 'schema:dateCreated'},
 }, {
   rdfTypes: ['cids:Outcome'], name: 'outcome'
 });
