@@ -115,6 +115,8 @@ const fileUploading = async (req, res, next) => {
         title = 'Warning';
       } else if (ignoreInstance) {
         title = 'Object Ignored'
+      } else {
+        title = 'Error'
       }
 
 
@@ -239,12 +241,12 @@ const fileUploading = async (req, res, next) => {
         } else {
           error += 1;
           addTrace('        Error: Invalid URI');
-          addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, property))}  contains invalid value(s): ${obj['@value']}`);
+          addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(graphdbModel, property))}  contains invalid value(s): ${obj['@value']}`);
           addMessage(8, 'invalidValue',
             {
               uri: object['@id'],
               type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, property)),
+              property: getPrefixedURI(getFullPropertyURI(graphdbModel, property)),
               value: obj['@value']
             }, {});
         }
@@ -726,7 +728,7 @@ const fileUploading = async (req, res, next) => {
     if (trans.active)
       await trans.rollback();
     if (e.name === 'jsonld.InvalidUrl') {
-      addMessage(4, 'invalidURL', {url: e.details.url});
+      addMessage(4, 'invalidURL', {url: e.details.url}, {});
       e.message = formatMessage();
     }
     next(e);
