@@ -53,7 +53,7 @@ async function transSave(trans, object) {
     .setTimeout(5));
 }
 
-async function assignImpactNorms(config, object, mainModel, mainObject, propertyName, internalKey, addMessage, organizationUri, uri, hasError, error, impactNormsDict) {
+async function assignImpactNorms(config, object, mainModel, mainObject, propertyName, internalKey, addMessage, organizationUri, uri, hasError, error, impactNormsDict, mainModelType) {
   let ignore;
   if (object && object[getFullPropertyURI(mainModel, propertyName)]) {
     mainObject[propertyName] = getValue(object, mainModel, propertyName)
@@ -70,8 +70,16 @@ async function assignImpactNorms(config, object, mainModel, mainObject, property
     )
     ignore = true;
   }
-  const impactNorms = await GDBImpactNormsModel.findOne({_uri: mainObject[propertyName], organization: organizationUri}) || impactNormsDict[mainObject[propertyName]];
-  if (!impactNorms) {
+  const impactNormsInDatabase = await GDBImpactNormsModel.findOne({_uri: mainObject[propertyName], organization: organizationUri})
+  const impactNormsInFile = impactNormsDict[mainObject[propertyName]];
+  if (impactNormsInDatabase) {
+    // add the outcome to the impactNorms
+    if (!impactNormsInDatabase[mainModelType])
+      impactNormsInDatabase[mainModelType] = []
+    impactNormsInDatabase[mainModelType] = [...impactNormsInDatabase[mainModelType], uri]
+    await impactNormsInDatabase.save();
+  }
+  if (!impactNormsInDatabase && !impactNormsInFile) {
     error += 1;
     addMessage(8, 'NoSuchImpactNorms',
       {

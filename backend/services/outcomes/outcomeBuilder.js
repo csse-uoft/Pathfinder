@@ -54,7 +54,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error, impactNormsDict)
+    ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error, impactNormsDict, 'outcomes')
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
