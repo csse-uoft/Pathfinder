@@ -2,6 +2,7 @@ const {Server400Error} = require("../utils");
 const {GDBMeasureModel} = require("../models/measure");
 const {Transaction} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
+const {GDBDateTimeIntervalModel, GDBInstant} = require("../models/time");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
@@ -96,6 +97,72 @@ async function assignImpactNorms(config, object, mainModel, mainObject, property
   return {hasError, error, ignore};
 
 
+}
+
+function assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error) {
+  let ignore;
+  if (environment === 'fileUploading') {
+    mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
+      GDBDateTimeIntervalModel({
+        hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+            GDBDateTimeIntervalModel, 'hasBeginning') ||
+          GDBInstant({
+            date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+              [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+          }, {
+            uri: getFullObjectURI(
+              object[getFullPropertyURI(mainModel, 'hasTime')][0]
+                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+            )
+          }),
+
+        hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+            GDBDateTimeIntervalModel, 'hasEnd') ||
+          GDBInstant({
+            date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+              [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+          }, {
+            uri: getFullObjectURI(
+              object[getFullPropertyURI(mainModel, 'hasTime')][0]
+                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+            )
+          })
+      }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])})
+  }
+
+  if (environment === 'interface') {
+    if (form.startTime && form.endTime)
+      mainObject.hasTime =  GDBDateTimeIntervalModel({
+        hasBeginning: {date: new Date(form.startTime)},
+        hasEnd: {date: new Date(form.endTime)}
+      })
+  }
+
+  if (!mainObject.hasTime && config[internalKey]) {
+    if (config['time:hasTime'].rejectFile) {
+      if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      } else if (environment === 'interface') {
+        Transaction.rollback();
+        throw new Server400Error(`hasTime is mandatory`);
+      }
+    } else if (config['time:hasTime'].ignoreInstance) {
+      if (environment === 'fileUploading') {
+        ignore = true;
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, 'hasTime'))
+        },
+        config['time:hasTime']
+      );
+  }
+  return {hasError, error, ignore};
 }
 
 
@@ -197,6 +264,7 @@ function assignMeasure(environment, config, object, mainModel, mainObject, prope
 }
 
 
+
 module.exports = {
   transSave,
   getFullPropertyURI,
@@ -207,5 +275,6 @@ module.exports = {
   assignValues,
   assignMeasure,
   getFullObjectURI,
-  assignImpactNorms
+  assignImpactNorms,
+  assignTimeInterval
 };

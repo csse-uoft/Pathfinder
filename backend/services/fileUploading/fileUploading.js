@@ -29,6 +29,8 @@ const {impactNormsBuilder} = require("../impactStuffs/impactStuffs");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {GDBHowMuchImpactModel, GDBImpactDepthModel, GDBImpactScaleModel} = require("../../models/howMuchImpact");
 const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
+const {GDBCounterfactualModel} = require("../../models/counterfactual");
+const {counterfactualBuilder} = require("../counterfactual/counterfactualBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -59,6 +61,7 @@ const fileUploading = async (req, res, next) => {
     const impactReportDict = {};
     const stakeholderOutcomeDict = {};
     const howMuchImpactDict = {};
+    const counterfactualDict = {}
 
     let messageBuffer = {
       begin: [], end: [], noURI: []
@@ -380,6 +383,10 @@ const fileUploading = async (req, res, next) => {
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorDict[uri] = {_uri: uri};
 
+      } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        counterfactualDict[uri] = {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
@@ -547,6 +554,8 @@ const fileUploading = async (req, res, next) => {
     for (let [uri, object] of Object.entries(objectDict)) {
       if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
         error = await outcomeBuilder('fileUploading', object, organization, error, {objectDict, outcomeDict, impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue}, null);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
+        error = await counterfactualBuilder('fileUploading', object, organization, error, {counterfactualDict, objectDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue});
       } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
         error = await impactNormsBuilder('fileUploading', object, organization, error, {impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue})
       } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
@@ -678,6 +687,8 @@ const fileUploading = async (req, res, next) => {
           impactNorms, {_uri: uri}
         )
       });
+
+      // todo: have an auto saving function
 
       await Promise.all(impactNorms.map(impactNorms => impactNorms.save()))
 

@@ -1,8 +1,10 @@
 const {baseLevelConfig} = require("../fileUploading/configs");
-const {GDBImpactScaleModel, GDBImpactDepthModel} = require("../../models/howMuchImpact");
-const {assignValue, getObjectValue, assignValues} = require("../helpers");
+const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
+const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval} = require("../helpers");
 const {GDBMeasureModel} = require("../../models/measure");
 const {Server400Error} = require("../../utils");
+const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
+const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function howMuchImpactBuilder(environment, subType, object, organization, impactNorms, error, {
@@ -20,7 +22,7 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
   let hasError = false;
   let ret;
   let ignore;
-  const GDBDict = {impactScale: GDBImpactScaleModel, impactDepth: GDBImpactDepthModel}
+  const GDBDict = {impactScale: GDBImpactScaleModel, impactDepth: GDBImpactDepthModel, impactDuration: GDBImpactDurationModel}
   const mainModel = GDBDict[subType];
   const mainObject = environment === 'fileUploading' ? howMuchImpactDict[uri] : mainModel({}, {uri: form.uri});
   mainObject.subType = subType
@@ -44,6 +46,13 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
     ret = assignValues(environment, config, object, mainModel, mainObject, 'counterfactuals', 'cids:hasCounterfactual', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
+
+    if (subType === 'impactDuration') {
+      // add hasTime
+      ret = assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error)
+      hasError = ret.hasError;
+      error = ret.error;
+    }
 
     let measureURI = getValue(object, mainModel, 'value');
     let measureObject = getObjectValue(object, mainModel, 'value');
@@ -81,6 +90,12 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
       addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
+    }
+
+    if (environment === 'interface') {
+      await mainObject.save();
+      await Transaction.commit();
+      return true
     }
 
   }
