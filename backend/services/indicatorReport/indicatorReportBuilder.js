@@ -13,14 +13,13 @@ const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function indicatorReportBuilder(environment, trans, object, organization, impactNorms, error, {
+async function indicatorReportBuilder(environment, object, organization, impactNorms, error, {
   indicatorDict,
   indicatorReportDict,
   objectDict
 }, {
                                         addMessage,
                                         addTrace,
-                                        transSave,
                                         getFullPropertyURI,
                                         getValue,
                                         getListOfValue
@@ -108,12 +107,7 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
           indicator.indicatorReports = [];
         }
         indicator.indicatorReports = [...indicator.indicatorReports, uri];
-        if (environment === 'interface') {
-          await indicator.save();
-        } else {
-          await transSave(trans, indicator);
-        }
-
+        await indicator.save();
       }
     }
 

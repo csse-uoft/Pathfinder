@@ -9,7 +9,7 @@ const createCharacteristicHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createCharacteristic')) {
       const {form} = req.body;
-      if (await characteristicBuilder('interface', null, null, null, {}, {}, form))
+      if (await characteristicBuilder('interface', null, null, {}, {}, form))
         return res.status(200).json({success: true});
     } else {
       return res.status(400).json({message: 'Wrong Auth'});

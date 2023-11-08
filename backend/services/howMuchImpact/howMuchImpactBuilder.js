@@ -5,13 +5,12 @@ const {GDBMeasureModel} = require("../../models/measure");
 const {Server400Error} = require("../../utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function howMuchImpactBuilder(environment, subType,trans, object, organization, impactNorms, error, {
+async function howMuchImpactBuilder(environment, subType, object, organization, impactNorms, error, {
   howMuchImpactDict,
   objectDict
 }, {
                                            addMessage,
                                            addTrace,
-                                           transSave,
                                            getFullPropertyURI,
                                            getValue,
                                            getListOfValue
@@ -27,7 +26,7 @@ async function howMuchImpactBuilder(environment, subType,trans, object, organiza
   mainObject.subType = subType
 
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await mainObject.save();
     uri = mainObject._uri;
   }
   const config = baseLevelConfig[subType];

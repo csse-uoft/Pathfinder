@@ -6,10 +6,9 @@ const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {Transaction} = require('graphdb-utils')
 const {getObjectValue, assignValue, assignMeasure} = require("../helpers");
 
-async function codeBuilder(environment, trans, object, organization, error, {codeDict}, {
+async function codeBuilder(environment, object, organization, error, {codeDict}, {
   addMessage,
   addTrace,
-  transSave,
   getFullPropertyURI,
   getValue,
   getListOfValue

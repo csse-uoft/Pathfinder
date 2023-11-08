@@ -13,7 +13,7 @@ const createImpactReportHandler = async (req, res, next) => {
     const {form} = req.body;
     await Transaction.beginTransaction();
     if (await hasAccess(req, 'create' + RESOURCE)) {
-      if (await impactReportBuilder('interface', null, null, null, null, null, {}, {}, form)){
+      if (await impactReportBuilder('interface', null, null, null, null, {}, {}, form)){
         await Transaction.commit();
         return res.status(200).json({success: true})
       }

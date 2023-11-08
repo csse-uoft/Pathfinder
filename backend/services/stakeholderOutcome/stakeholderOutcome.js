@@ -13,7 +13,7 @@ const createStakeholderOutcomeHandler = async (req, res, next) => {
     await Transaction.beginTransaction();
     const {form} = req.body;
     if (await hasAccess(req, 'create' + DATATYPE)) {
-      if (await stakeholderOutcomeBuilder('interface', null, null, null, null, null, {}, {}, form)) {
+      if (await stakeholderOutcomeBuilder('interface', null, null, null, null, {}, {}, form)) {
         return res.status(200).json({success: true});
       }
     }

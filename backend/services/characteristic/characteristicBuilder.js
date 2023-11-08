@@ -5,10 +5,9 @@ const {assignValue, assignValues} = require("../helpers");
 const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function characteristicBuilder(environment, trans, object, error, {characteristicDict}, {
+async function characteristicBuilder(environment, object, error, {characteristicDict}, {
   addMessage,
   addTrace,
-  transSave,
   getFullPropertyURI,
   getValue,
   getListOfValue

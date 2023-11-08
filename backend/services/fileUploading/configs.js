@@ -20,6 +20,18 @@ const baseLevelConfig = {
   code: {}
 };
 
+const fullLevelConfig = {
+  outcome: {
+    'cids:hasIndicator': {flag: true},
+    'oep:partOf': {ignoreInstance: true}
+  },
+  impactNorms: {},
+  indicator: {
+    'cids:forOutcome': {flag: true},
+    'oep:partOf': {ignoreInstance: true}
+  },
+}
+
 module.exports = {
-  baseLevelConfig
+  baseLevelConfig, fullLevelConfig
 };

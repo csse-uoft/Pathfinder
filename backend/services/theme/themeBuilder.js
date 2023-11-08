@@ -4,10 +4,9 @@ const {Server400Error} = require("../../utils");
 const {assignValue, assignValues} = require("../helpers");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function themeBuilder(environment, trans, object, error, {themeDict}, {
+async function themeBuilder(environment, object, error, {themeDict}, {
   addMessage,
   addTrace,
-  transSave,
   getFullPropertyURI,
   getValue,
   getListOfValue
@@ -20,7 +19,7 @@ async function themeBuilder(environment, trans, object, error, {themeDict}, {
     // name: form.name
   }, {uri: form.uri});
   if (environment === 'interface') {
-    await transSave(trans, mainObject);
+    await mainObject.save();
     uri = mainObject._uri;
   }
   const config = baseLevelConfig['theme'];
@@ -41,7 +40,7 @@ async function themeBuilder(environment, trans, object, error, {themeDict}, {
 
 
     if (environment === 'interface') {
-      await transSave(trans, mainObject)
+      await mainObject.save();
     }
 
 

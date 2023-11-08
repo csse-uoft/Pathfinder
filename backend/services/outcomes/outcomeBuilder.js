@@ -1,18 +1,17 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {fullLevelConfig} = require("../fileUploading/configs");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {assignValue, assignValues} = require("../helpers");
+const {assignValue, assignValues, assignImpactNorms} = require("../helpers");
 const {Transaction} = require("graphdb-utils");
 
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function outcomeBuilder(environment, trans, object, organization, impactNorms, error, {outcomeDict, objectDict}, {
+async function outcomeBuilder(environment, object, organization, error, {outcomeDict, objectDict, impactNormsDict}, {
   addMessage,
   addTrace,
-  transSave,
   getFullPropertyURI,
   getValue,
   getListOfValue
@@ -20,22 +19,24 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
   let uri = object? object['@id'] : undefined;
   let ret;
   const mainModel = GDBOutcomeModel;
+  let impactNorms;
   const mainObject = environment === 'fileUploading' ? outcomeDict[uri] : mainModel({
   }, {uri: form.uri});
-  if (environment !== 'fileUploading') {
+  if (environment === 'interface') {
     await Transaction.beginTransaction();
     await mainObject.save();
     uri = mainObject._uri;
   }
 
-  if (environment !== 'fileUploading') {
+  if (environment === 'interface') {
     organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-    impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization})
+    impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})
+    if (!impactNorms.outcomes)
+      impactNorms.outcomes = [];
+    impactNorms.outcomes = [...impactNorms.outcomes, uri]
   }
+
   mainObject.forOrganization = organization._uri;
-  if (!impactNorms.outcomes)
-    impactNorms.outcomes = [];
-  impactNorms.outcomes = [...impactNorms.outcomes, uri]
   if (!organization.hasOutcomes)
     organization.hasOutcomes = [];
   organization.hasOutcomes = [...organization.hasOutcomes, uri]
@@ -45,13 +46,15 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     await impactNorms.save();
   }
 
-  const config = baseLevelConfig['outcome'];
+  const config = fullLevelConfig['outcome'];
   let hasError = false;
   if (mainObject) {
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
+
+    ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error, impactNormsDict)
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -70,6 +73,15 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     error = ret.error;
 
     // todo: handle the case when stakeholderOutcomes is in the database
+
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'canProduce', 'cids:canProduce', addMessage, form, uri, hasError, error, getListOfValue)
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'locatedIns', 'iso21972:located_in', addMessage, form, uri, hasError, error, getListOfValue)
+    hasError = ret.hasError;
+    error = ret.error;
 
 
     // add indicator to outcome

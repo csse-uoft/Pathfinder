@@ -14,37 +14,37 @@ const {indicatorBuilder} = require("./builders");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 
-async function newFileUploadingHandler(req, res, next) {
-  try {
-    if (await hasAccess(req, 'fileUploading')) {
-      const dicts = {
-        object: {},
-        outcome: {},
-        theme: {},
-        indicator: {},
-        indicatorReportDict: {},
-      };
-      const messageBuffer = {
-        begin: [], end: [], noURI: []
-      };
-
-      let errorCounter = 0;
-
-      const repo = await getRepository();
-      const trans = await repo.beginTransaction();
-      trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass);
-
-      const {objects, organizationUri, fileName} = req.body;
-
-
-      return await fileUploading(trans, {dicts, errorCounter, messageBuffer}, objects, {organizationUri, fileName}, {formatMessage, addMessage});
-    } else {
-      return res.status(400).json({message: 'Wrong Auth'});
-    }
-  } catch (e) {
-    next(e);
-  }
-}
+// async function newFileUploadingHandler(req, res, next) {
+//   try {
+//     if (await hasAccess(req, 'fileUploading')) {
+//       const dicts = {
+//         object: {},
+//         outcome: {},
+//         theme: {},
+//         indicator: {},
+//         indicatorReportDict: {},
+//       };
+//       const messageBuffer = {
+//         begin: [], end: [], noURI: []
+//       };
+//
+//       let errorCounter = 0;
+//
+//       const repo = await getRepository();
+//       const trans = await repo.beginTransaction();
+//       trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass);
+//
+//       const {objects, organizationUri, fileName} = req.body;
+//
+//
+//       return await fileUploading(trans, {dicts, errorCounter, messageBuffer}, objects, {organizationUri, fileName}, {formatMessage, addMessage});
+//     } else {
+//       return res.status(400).json({message: 'Wrong Auth'});
+//     }
+//   } catch (e) {
+//     next(e);
+//   }
+// }
 
 
 async function fileUploading(trans, holders, objects, fileInformation, helpers) {
@@ -139,5 +139,5 @@ async function fileUploading(trans, holders, objects, fileInformation, helpers) 
 }
 
 module.exports = {
-  newFileUploadingHandler
+
 }

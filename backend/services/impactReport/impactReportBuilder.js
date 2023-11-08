@@ -11,14 +11,13 @@ const {Transaction} = require("graphdb-utils");
 const {GDBImpactScaleModel, GDBImpactDepthModel} = require("../../models/howMuchImpact");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function impactReportBuilder(environment, trans, object, organization, impactNorms, error, {
+async function impactReportBuilder(environment, object, organization, impactNorms, error, {
   stakeholderOutcomeDict,
   impactReportDict,
   objectDict
 }, {
                                      addMessage,
                                      addTrace,
-                                     transSave,
                                      getFullPropertyURI,
                                      getValue,
                                      getListOfValue
@@ -121,11 +120,7 @@ async function impactReportBuilder(environment, trans, object, organization, imp
             stakeholderOutcome.impactReports = [];
           }
           stakeholderOutcome.impactReports = [...stakeholderOutcome.impactReports, uri];
-          if (environment === 'interface') {
-            await stakeholderOutcome.save();
-          } else {
-            await transSave(trans, stakeholderOutcome);
-          }
+          await stakeholderOutcome.save();
         }
       }
     }

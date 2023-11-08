@@ -8,14 +8,13 @@ const {Transaction} = require("graphdb-utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function stakeholderOutcomeBuilder(environment, trans, object, organization, impactNorms, error, {
+async function stakeholderOutcomeBuilder(environment, object, organization, impactNorms, error, {
   outcomeDict,
   stakeholderOutcomeDict,
   objectDict
 }, {
                                         addMessage,
                                         addTrace,
-                                        transSave,
                                         getFullPropertyURI,
                                         getValue,
                                         getListOfValue
@@ -116,11 +115,7 @@ async function stakeholderOutcomeBuilder(environment, trans, object, organizatio
           outcome.stakeholderOutcomes = [];
         }
         outcome.stakeholderOutcomes = [...outcome.stakeholderOutcomes, uri]
-        if(environment === 'interface'){
-          await outcome.save();
-        } else {
-          await transSave(trans, outcome);
-        }
+        await outcome.save();
       }
     }
 

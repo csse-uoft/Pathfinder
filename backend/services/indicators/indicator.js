@@ -157,7 +157,7 @@ const createIndicatorHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createIndicator')){
       const {form} = req.body;
-      if (await indicatorBuilder('interface', null, null, null, null, null, {}, {}, form)){
+      if (await indicatorBuilder('interface', null, null, null, null, {}, {}, form)){
         return res.status(200).json({success: true})
       }
     }

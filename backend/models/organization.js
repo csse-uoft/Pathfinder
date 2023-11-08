@@ -3,7 +3,6 @@ const {GDBUserAccountModel} = require("./userAccount");
 const {GDBIndicatorModel} = require("./indicator");
 const {GDBOutcomeModel} = require("./outcome");
 const {GDBPhoneNumberModel} = require("./phoneNumber");
-const {GDBCharacteristicModel} = require("./characteristic");
 
 const GDBOrganizationIdModel = createGraphDBModel({
   hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'},

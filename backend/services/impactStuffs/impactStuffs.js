@@ -1,13 +1,13 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {fullLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {getObjectValue} = require("../../helpers");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {assignValue} = require("../helpers");
+const {assignValue, assignValues} = require("../helpers");
 
-async function impactNormsBuilder(environment, trans, object, organization, error, {impactNormsDict}, {
+async function impactNormsBuilder(environment, object, organization, error, {impactNormsDict}, {
   addMessage,
   addTrace,
   transSave,
@@ -18,13 +18,14 @@ async function impactNormsBuilder(environment, trans, object, organization, erro
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBImpactNormsModel
   const mainObject = environment === 'fileUploading' ? impactNormsDict[uri] : mainModel({}, {uri: form.uri});
-  if (environment !== 'fileUploading') {
-    await transSave(trans, code);
-    uri = code._uri;
-  }
+
+  // if (environment !== 'fileUploading') {
+  //   await code;
+  //   uri = code._uri;
+  // }
 
 
-  const config = baseLevelConfig['impactNorms'];
+  const config = fullLevelConfig['impactNorms'];
   let hasError = false;
   let ret;
   if (mainObject) {
@@ -60,9 +61,32 @@ async function impactNormsBuilder(environment, trans, object, organization, erro
     hasError = ret.hasError;
     error = ret.error;
 
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'indicators', 'cids:hasIndicator', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'outcomes', 'cids:hasOutcome', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'impactReports', 'cids:hasImpactReport', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'indicatorReports', 'cids:hasIndicatorReport', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'stakeholderOutcomes', 'cids:hasStakeholderOutcome', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'stakeholders', 'cids:hasStakeholders', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
 
     if (environment === 'interface') {
-      await transSave(trans, mainObject);
+      await mainObject.save();
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);

@@ -10,10 +10,10 @@ const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBUnitOfMeasure, GDBMeasureModel} = require("../../models/measure");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {isValidURL} = require("../../helpers/validator");
-const {GraphDB} = require("graphdb-utils");
+const {GraphDB, Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
-const {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue} = require("../helpers")
+const {transSave, getFullPropertyURI, getValue, getObjectValue, getFullTypeURIList} = require("../helpers")
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {themeBuilder} = require("../theme/themeBuilder");
 const {GDBCodeModel} = require("../../models/code");
@@ -32,10 +32,14 @@ const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fileUploading'))
+    if (await hasAccess(req, 'fileUploading')) {
+      await Transaction.beginTransaction();
       return await fileUploading(req, res, next);
+    }
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    if (Transaction.isActive())
+    await Transaction.rollback();
     next(e);
   }
 };
@@ -43,12 +47,9 @@ const fileUploadingHandler = async (req, res, next) => {
 
 
 const fileUploading = async (req, res, next) => {
-
-  const repo = await getRepository();
-  const trans = await repo.beginTransaction();
-  trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass);
   try {
     const objectDict = {};
+    const impactNormsDict = {};
     const outcomeDict = {};
     const themeDict = {};
     const codeDict = {};
@@ -98,7 +99,8 @@ const fileUploading = async (req, res, next) => {
                           referenceURI,
                           subjectURI,
                           error,
-                          url
+                          url,
+                          impactNormsURI
                         }, {rejectFile, ignoreInstance, flag}) {
       let whiteSpaces = '';
       if (spaces)
@@ -160,6 +162,10 @@ const fileUploading = async (req, res, next) => {
           if (ignoreInstance)
             messageBuffer[uri].push(whiteSpaces + '    The object is ignored');
           break;
+        case 'NoSuchImpactNorms':
+          messageBuffer[uri].push(whiteSpaces + `Error: No Such ImpactNorms`);
+          messageBuffer[uri].push(whiteSpaces + `   In object with URI ${uri} of type ${type}, there is no such impactNorms ${impactNormsURI} under the organization`);
+
         case 'duplicatedURIInDataBase':
           messageBuffer[uri].push(whiteSpaces + `${title}: Duplicated URI`);
           messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} has been used as an URI already in another object in the sandbox`);
@@ -239,12 +245,12 @@ const fileUploading = async (req, res, next) => {
         } else {
           error += 1;
           addTrace('        Error: Invalid URI');
-          addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, property))}  contains invalid value(s): ${obj['@value']}`);
+          addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(graphdbModel, property))}  contains invalid value(s): ${obj['@value']}`);
           addMessage(8, 'invalidValue',
             {
               uri: object['@id'],
               type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, property)),
+              property: getPrefixedURI(getFullPropertyURI(graphdbModel, property)),
               value: obj['@value']
             }, {});
         }
@@ -303,7 +309,7 @@ const fileUploading = async (req, res, next) => {
 
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
-    const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}) || GDBImpactNormsModel({organization: organizationUri});
+    // const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}) || GDBImpactNormsModel({organization: organizationUri});
 
     if (!organization) {
       addTrace('        Error: Incorrect organization URI: No such Organization');
@@ -319,7 +325,7 @@ const fileUploading = async (req, res, next) => {
       if (!uri) {
         // in the case there is no URI
         // error += 1;
-        if (object['@type'].includes(getFullTypeURI(GDBOrganizationModel))) {
+        if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
           addMessage(8, 'noURI',
             {type: object['@type'][0]}, {rejectFile: true});
           error += 1
@@ -330,24 +336,23 @@ const fileUploading = async (req, res, next) => {
         continue;
       }
       if (!isValidURL(uri)) {
-        // error += 1;
         addTrace('        Error: Invalid URI');
         addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an invalid URI`);
         addMessage(8, 'invalidURI', {uri, type: getPrefixedURI(object['@type'][0])}, {ignoreInstance: true});
+        error += 1
         continue;
       }
       if (objectDict[uri]) {
         // duplicated uri in the file
-        // error += 1;
         addTrace('        Error: Duplicated URI');
         addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in this file`);
         addMessage(8, 'duplicatedURIInFile', {uri, type: getPrefixedURI(object['@type'][0])}, {ignoreInstance: true});
+        error += 1
         continue;
       }
-      if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURI(GDBOrganizationModel))) {
+      if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
         // check whether the uri belongs to other objects
         // duplicated uri in database
-        // error += 1;
         addTrace('        Error: Duplicated URI');
         addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in the sandbox`);
         addMessage(8, 'duplicatedURIInDataBase', {
@@ -362,44 +367,47 @@ const fileUploading = async (req, res, next) => {
       // assign the object an id and store them into specific dict
       let hasError = false;
       let hasName = null;
-      if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) { // todo: here don't have to be hardcoded
+      if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
         outcomeDict[uri] = {_uri: uri};
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
-
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) { // todo: may have to change the index
+        impactNormsDict[uri] = {_uri: uri};
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorDict[uri] = {_uri: uri};
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage',
           {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorReportDict[uri] = {_uri: uri};
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         themeDict[uri] = {_uri: uri};
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBCodeModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         codeDict[uri] = {_uri: uri};
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBCharacteristicModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         characteristicDict[uri] = {_uri: uri};
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBStakeholderOutcomeModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         stakeholderOutcomeDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURI(GDBImpactReportModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         impactReportDict[uri] = {_uri: uri};
@@ -409,7 +417,7 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         howMuchImpactDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBUnitOfMeasure)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
@@ -430,10 +438,10 @@ const fileUploading = async (req, res, next) => {
           const unitOfMeasure = GDBUnitOfMeasure({
             label: getValue(object, GDBUnitOfMeasure, 'label')
           }, {uri: uri});
-          await transSave(trans, unitOfMeasure);
+          await unitOfMeasure.save();
         }
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBMeasureModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBMeasureModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
@@ -454,10 +462,10 @@ const fileUploading = async (req, res, next) => {
           const measure = GDBMeasureModel({
             numericalValue: getValue(object, GDBMeasureModel, 'numericalValue')
           }, {uri: uri});
-          await transSave(trans, measure);
+          await measure.save();
         }
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBDateTimeIntervalModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBDateTimeIntervalModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
@@ -511,10 +519,10 @@ const fileUploading = async (req, res, next) => {
                 )
               })
           }, {uri: uri});
-          await transSave(trans, dateTimeInterval);
+          await dateTimeInterval.save();
         }
 
-      } else if (object['@type'].includes(getFullTypeURI(GDBOrganizationModel))) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
         if (object['@id'] !== organizationUri) {
           addTrace('        Error:');
           addTrace('             Organization in the file is different from the organization chosen in the interface');
@@ -537,74 +545,69 @@ const fileUploading = async (req, res, next) => {
 
 
     for (let [uri, object] of Object.entries(objectDict)) {
-      if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
-        error = await outcomeBuilder('fileUploading', trans, object, organization,impactNorms, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue}, null);
-      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
-        error = await indicatorBuilder('fileUploading', trans, object, organization, impactNorms, error, {
+      if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
+        error = await outcomeBuilder('fileUploading', object, organization, error, {objectDict, outcomeDict, impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue}, null);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
+        error = await impactNormsBuilder('fileUploading', object, organization, error, {impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue})
+      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
+        error = await indicatorBuilder('fileUploading', object, organization, error, {
           indicatorDict,
           objectDict
         }, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
         }, null);
-      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
-        error = await indicatorReportBuilder('fileUploading', trans, object, organization, impactNorms, error, {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
+        error = await indicatorReportBuilder('fileUploading', object, organization, error, {
           indicatorDict,
           indicatorReportDict,
           objectDict
         }, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
         }, null);
-      } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
-        error = await themeBuilder('fileUploading', trans, object, error, {themeDict}, {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
+        error = await themeBuilder('fileUploading', object, error, {themeDict}, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
         }, null);
-      } else if (object['@type'].includes(getFullTypeURI(GDBCodeModel))) {
-        error = await codeBuilder('fileUploading', trans, object,organization, error, {codeDict}, {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
+        error = await codeBuilder('fileUploading',object,organization, error, {codeDict}, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
         }, null);
-      } else if (object['@type'].includes(getFullTypeURI(GDBCharacteristicModel))) {
-        error = await characteristicBuilder('fileUploading', trans, object, error, {characteristicDict}, {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
+        error = await characteristicBuilder('fileUploading', object, error, {characteristicDict}, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
         }, null);
-      } else if (object['@type'].includes(getFullTypeURI(GDBStakeholderOutcomeModel))) {
-        error = await stakeholderOutcomeBuilder('fileUploading', trans, object, organization, impactNorms, error, {outcomeDict, stakeholderOutcomeDict, objectDict}, {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
+        error = await stakeholderOutcomeBuilder('fileUploading', object, organization, impactNorms, error, {outcomeDict, stakeholderOutcomeDict, objectDict}, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
         }, null);
-      } else if (object['@type'].includes(getFullTypeURI(GDBImpactReportModel))) {
-        error = await impactReportBuilder('fileUploading', trans, object, organization, impactNorms, error, {stakeholderOutcomeDict,impactReportDict, objectDict}, {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
+        error = await impactReportBuilder('fileUploading', object, organization, impactNorms, error, {stakeholderOutcomeDict,impactReportDict, objectDict}, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
@@ -613,19 +616,16 @@ const fileUploading = async (req, res, next) => {
         object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))
       ) {
         const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))? 'impactScale' : 'impactDepth'
-        error = await howMuchImpactBuilder('fileUploading', subType, trans, object, organization, impactNorms, error, {howMuchImpactDict, objectDict}, {
+        error = await howMuchImpactBuilder('fileUploading', subType, object, organization, impactNorms, error, {howMuchImpactDict, objectDict}, {
           addMessage,
           addTrace,
-          transSave,
           getFullPropertyURI,
           getValue,
           getListOfValue
         }, null);
       }
     }
-    await transSave(trans, organization);
-    await transSave(trans, impactNorms);
-    // await organization.save();
+
     if (!error) {
       addTrace('    Start to insert data...');
       addMessage(4, 'insertData', {}, {});
@@ -636,56 +636,64 @@ const fileUploading = async (req, res, next) => {
         );
       });
 
-      await Promise.all(indicators.map(indicator => transSave(trans, indicator)));
+      await Promise.all(indicators.map(indicator => indicator.save()));
 
       const codes = Object.entries(codeDict).map(([uri, code]) => {
         return GDBCodeModel(
           code, {_uri: code._uri}
         );
       })
-      await Promise.all(codes.map(code => transSave(trans, code)));
+      await Promise.all(codes.map(code => code.save()));
 
       const characteristics = Object.entries(characteristicDict).map(([uri, characteristic]) => {
         return GDBCharacteristicModel(
           characteristic, {_uri: characteristic._uri}
         );
       })
-      await Promise.all(characteristics.map(characteristic => transSave(trans, characteristic)));
+      await Promise.all(characteristics.map(characteristic => characteristic.save()));
 
       const outcomes = Object.entries(outcomeDict).map(([uri, outcome]) => {
         return GDBOutcomeModel(
           outcome, {_uri: outcome._uri}
         );
       });
-      await Promise.all(outcomes.map(outcome => transSave(trans, outcome)));
+      await Promise.all(outcomes.map(outcome => outcome.save()));
 
       const indicatorReports = Object.entries(indicatorReportDict).map(([uri, indicatorReport]) => {
         return GDBIndicatorReportModel(
           indicatorReport, {_uri: indicatorReport._uri}
         );
       });
-      await Promise.all(indicatorReports.map(indicatorReport => transSave(trans, indicatorReport)));
+      await Promise.all(indicatorReports.map(indicatorReport => indicatorReport.save()));
 
       const themes = Object.entries(themeDict).map(([uri, theme]) => {
         return GDBThemeModel(
           theme, {_uri: theme._uri}
         );
       });
-      await Promise.all(themes.map(theme => transSave(trans, theme)));
+      await Promise.all(themes.map(theme => theme.save()));
+
+      const impactNorms = Object.entries(impactNormsDict).map(([uri, impactNorms]) => {
+        return GDBImpactNormsModel(
+          impactNorms, {_uri: uri}
+        )
+      });
+
+      await Promise.all(impactNorms.map(impactNorms => impactNorms.save()))
 
       const impactReports = Object.entries(impactReportDict).map(([uri, impactReport]) => {
         return GDBImpactReportModel(
           impactReport, {_uri: impactReport._uri}
         );
       });
-      await Promise.all(impactReports.map(impactReport => transSave(trans, impactReport)));
+      await Promise.all(impactReports.map(impactReport => impactReport.save()));
 
       const stakeholderOutcomes = Object.entries(stakeholderOutcomeDict).map(([uri, stakeholderOutcome]) => {
         return GDBStakeholderOutcomeModel(
           stakeholderOutcome, {_uri: stakeholderOutcome._uri}
         );
       });
-      await Promise.all(stakeholderOutcomes.map(stakeholderOutcome => transSave(trans, stakeholderOutcome)));
+      await Promise.all(stakeholderOutcomes.map(stakeholderOutcome => stakeholderOutcome.save()));
 
       const howMuchImpacts = Object.entries(howMuchImpactDict).map(([uri, howMuchImpact]) => {
         if (howMuchImpact.subType === 'impactScale') {
@@ -701,10 +709,12 @@ const fileUploading = async (req, res, next) => {
         }
 
       });
-      await Promise.all(howMuchImpacts.map(howMuchImpact => transSave(trans, howMuchImpact)));
+      await Promise.all(howMuchImpacts.map(howMuchImpact => howMuchImpact.save()));
+
+      await organization.save();
 
 
-      await trans.commit();
+      await Transaction.commit();
       addTrace(`Completed loading ${fileName}`);
       addMessage(0, 'completedLoading', {fileName}, {});
     } else {
@@ -718,15 +728,15 @@ const fileUploading = async (req, res, next) => {
       return res.status(200).json({success: true, traceOfUploading: msg});
     } else {
       const msg = formatMessage();
-      await trans.rollback();
+      await Transaction.rollback();
       throw new Server400Error(msg);
     }
 
   } catch (e) {
-    if (trans.active)
-      await trans.rollback();
+    if (Transaction.isActive())
+      await Transaction.rollback();
     if (e.name === 'jsonld.InvalidUrl') {
-      addMessage(4, 'invalidURL', {url: e.details.url});
+      addMessage(4, 'invalidURL', {url: e.details.url}, {});
       e.message = formatMessage();
     }
     next(e);

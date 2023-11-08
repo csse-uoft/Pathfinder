@@ -1,6 +1,7 @@
 const {Server400Error} = require("../utils");
 const {GDBMeasureModel} = require("../models/measure");
 const {Transaction} = require("graphdb-utils");
+const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
@@ -13,7 +14,7 @@ const {QueryContentType} = require('graphdb').http;
  */
 const getValue = (object, graphdbModel, property) => {
   if (!object)
-    return undefined
+    return undefined;
   if (object[getFullURI(graphdbModel.schema[property].internalKey)]) {
     return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
   } else {
@@ -33,8 +34,9 @@ const getObjectValue = (object, graphdbModel, property) => {
   }
 };
 
-const getFullTypeURI = (graphdbModel) => {
-  return getFullURI(graphdbModel.schemaOptions.rdfTypes[1] || graphdbModel.schemaOptions.rdfTypes[0]);
+const getFullTypeURIList = (graphdbModel) => {
+  return graphdbModel.schemaOptions.rdfTypes.map(uri => getFullURI(uri));
+  // return getFullURI(graphdbModel.schemaOptions.rdfTypes[1] || graphdbModel.schemaOptions.rdfTypes[0]);
 };
 
 const getFullPropertyURI = (graphdbModel, propertyName) => {
@@ -51,8 +53,45 @@ async function transSave(trans, object) {
     .setTimeout(5));
 }
 
+async function assignImpactNorms(config, object, mainModel, mainObject, propertyName, internalKey, addMessage, organizationUri, uri, hasError, error, impactNormsDict) {
+  let ignore;
+  if (object && object[getFullPropertyURI(mainModel, propertyName)]) {
+    mainObject[propertyName] = getValue(object, mainModel, propertyName)
+  }
+  if (!mainObject[propertyName]) {
+    error += 1;
+    addMessage(8, 'propertyMissing',
+      {
+        uri,
+        type: getPrefixedURI(object['@type'][0]),
+        property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+      },
+      config[internalKey]
+    )
+    ignore = true;
+  }
+  const impactNorms = await GDBImpactNormsModel.findOne({_uri: mainObject[propertyName], organization: organizationUri}) || impactNormsDict[mainObject[propertyName]];
+  if (!impactNorms) {
+    error += 1;
+    addMessage(8, 'NoSuchImpactNorms',
+      {
+        uri,
+        type: getPrefixedURI(object['@type'][0]),
+        property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName)),
+        impactNormsURI: mainObject[propertyName]
+      },
+      config[internalKey]
+    )
+    ignore = true;
+  }
 
-function assignValue(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error){
+  return {hasError, error, ignore};
+
+
+}
+
+
+function assignValue(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error) {
   let ignore;
   if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
     mainObject[propertyName] = environment === 'fileUploading' ? getValue(object, mainModel, propertyName) : form[propertyName];
@@ -81,10 +120,10 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
         config[internalKey]
       );
   }
-  return {hasError, error, ignore}
+  return {hasError, error, ignore};
 }
 
-function assignValues(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error, getListOfValue){
+function assignValues(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error, getListOfValue) {
   if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
     mainObject[propertyName] = environment === 'fileUploading' ? getListOfValue(object, mainModel, propertyName) : form[propertyName];
   }
@@ -107,18 +146,18 @@ function assignValues(environment, config, object, mainModel, mainObject, proper
         config[internalKey]
       );
   }
-  return {hasError, error}
+  return {hasError, error};
 }
 
 function assignMeasure(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, uri, hasError, error, form) {
-  let measureURI = environment === 'interface'? null : getValue(object, mainModel, propertyName);
-  let measureObject = environment === 'interface'? null : getObjectValue(object, mainModel, propertyName);
+  let measureURI = environment === 'interface' ? null : getValue(object, mainModel, propertyName);
+  let measureObject = environment === 'interface' ? null : getObjectValue(object, mainModel, propertyName);
 
   let numericalValue;
   if (measureObject) {
     numericalValue = getValue(measureObject, GDBMeasureModel, 'numericalValue');
   } else if (environment === 'interface' && form && propertyName) {
-    numericalValue = form[propertyName]
+    numericalValue = form[propertyName];
   }
 
   if (!measureURI && !numericalValue && config[internalKey] && !form[propertyName]) {
@@ -139,15 +178,26 @@ function assignMeasure(environment, config, object, mainModel, mainObject, prope
         },
         config[internalKey]
       );
-  } else if (measureURI || numericalValue){
+  } else if (measureURI || numericalValue) {
     mainObject[propertyName] = measureURI ||
       GDBMeasureModel({
           numericalValue
         },
-        {uri: measureObject? measureObject['@id'] : null});
+        {uri: measureObject ? measureObject['@id'] : null});
   }
-  return {hasError, error}
+  return {hasError, error};
 }
 
 
-module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues, assignMeasure, getFullObjectURI}
+module.exports = {
+  transSave,
+  getFullPropertyURI,
+  getFullTypeURIList,
+  getValue,
+  getObjectValue,
+  assignValue,
+  assignValues,
+  assignMeasure,
+  getFullObjectURI,
+  assignImpactNorms
+};

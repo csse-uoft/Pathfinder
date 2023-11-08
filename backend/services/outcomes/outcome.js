@@ -191,7 +191,7 @@ const createOutcomeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createOutcome')) {
       const {form} = req.body;
-      await outcomeBuilder('interface', null, null, null, null, null, {}, {}, form);
+      await outcomeBuilder('interface', null, null, null, null, {}, {}, form);
       return res.status(200).json({success: true});
     }
     return res.status(400).json({success: false, message: 'Wrong auth'});
