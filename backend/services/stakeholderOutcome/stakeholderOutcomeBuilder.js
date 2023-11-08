@@ -68,6 +68,14 @@ async function stakeholderOutcomeBuilder(environment, object, organization, impa
     hasError = ret.hasError;
     error = ret.error;
 
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'intendedImpact', 'cids:intendedImpact', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'fromPerspectiveOf', 'cids:fromPerspectiveOf', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
     ret = assignValues(environment, config, object, mainModel, mainObject, 'indicators', 'cids:hasIndicator', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;

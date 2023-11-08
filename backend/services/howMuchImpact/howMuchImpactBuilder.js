@@ -1,6 +1,6 @@
 const {baseLevelConfig} = require("../fileUploading/configs");
 const {GDBImpactScaleModel, GDBImpactDepthModel} = require("../../models/howMuchImpact");
-const {assignValue, getObjectValue} = require("../helpers");
+const {assignValue, getObjectValue, assignValues} = require("../helpers");
 const {GDBMeasureModel} = require("../../models/measure");
 const {Server400Error} = require("../../utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
@@ -25,14 +25,23 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
   const mainObject = environment === 'fileUploading' ? howMuchImpactDict[uri] : mainModel({}, {uri: form.uri});
   mainObject.subType = subType
 
-  if (environment !== 'fileUploading') {
+  if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
   }
   const config = baseLevelConfig[subType];
 
   if (mainObject) {
+
     ret = assignValue(environment, config, object, mainModel, mainObject, 'indicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'counterfactuals', 'cids:hasCounterfactual', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 

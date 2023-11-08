@@ -3,7 +3,7 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {baseLevelConfig} = require("../fileUploading/configs");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {assignValue, getFullObjectURI} = require("../helpers");
+const {assignValue, getFullObjectURI, assignValues} = require("../helpers");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
@@ -81,6 +81,21 @@ async function impactReportBuilder(environment, object, organization, impactNorm
     hasError = ret.hasError;
     error = ret.error;
 
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'impactDuration', 'cids:hasImpactDuration', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'impactRisks', 'cids:hasImpactRisk', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'expectation', 'cids:hasExpectation', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'reportedImpact', 'cids:hasReportedImpact', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'forStakeholderOutcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
