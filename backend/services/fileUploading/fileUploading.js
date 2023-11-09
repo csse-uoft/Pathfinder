@@ -61,7 +61,32 @@ const fileUploading = async (req, res, next) => {
     const impactReportDict = {};
     const stakeholderOutcomeDict = {};
     const howMuchImpactDict = {};
-    const counterfactualDict = {}
+    const counterfactualDict = {};
+    const dicts = {
+      'impactNorms': impactNormsDict,
+      'outcome': outcomeDict,
+      'theme': themeDict,
+      'code': codeDict,
+      'characteristic': characteristicDict,
+      'indicator': indicatorDict,
+      'indicatorReport': indicatorReportDict,
+      'impactReport': impactReportDict,
+      'stakeholderOutcome': stakeholderOutcomeDict,
+      'howMuchImpact': howMuchImpactDict,
+      'counterfactual': counterfactualDict
+    }
+    const GDBModels = {
+      'impactNorms': GDBImpactNormsModel,
+      'outcome': GDBOutcomeModel,
+      'theme': GDBThemeModel,
+      'code': GDBCodeModel,
+      'characteristic': GDBCharacteristicModel,
+      'indicator': GDBIndicatorModel,
+      'indicatorReport': GDBImpactReportModel,
+      'stakeholderOutcome': GDBStakeholderOutcomeModel,
+      'howMuchImpact': GDBHowMuchImpactModel,
+      'counterfactual': GDBCounterfactualModel
+    }
 
     let messageBuffer = {
       begin: [], end: [], noURI: []
@@ -639,88 +664,98 @@ const fileUploading = async (req, res, next) => {
       addTrace('    Start to insert data...');
       addMessage(4, 'insertData', {}, {});
 
-      const indicators = Object.entries(indicatorDict).map(([uri, indicator]) => {
-        return GDBIndicatorModel(
-          indicator, {_uri: indicator._uri}
-        );
-      });
-
-      await Promise.all(indicators.map(indicator => indicator.save()));
-
-      const codes = Object.entries(codeDict).map(([uri, code]) => {
-        return GDBCodeModel(
-          code, {_uri: code._uri}
-        );
-      })
-      await Promise.all(codes.map(code => code.save()));
-
-      const characteristics = Object.entries(characteristicDict).map(([uri, characteristic]) => {
-        return GDBCharacteristicModel(
-          characteristic, {_uri: characteristic._uri}
-        );
-      })
-      await Promise.all(characteristics.map(characteristic => characteristic.save()));
-
-      const outcomes = Object.entries(outcomeDict).map(([uri, outcome]) => {
-        return GDBOutcomeModel(
-          outcome, {_uri: outcome._uri}
-        );
-      });
-      await Promise.all(outcomes.map(outcome => outcome.save()));
-
-      const indicatorReports = Object.entries(indicatorReportDict).map(([uri, indicatorReport]) => {
-        return GDBIndicatorReportModel(
-          indicatorReport, {_uri: indicatorReport._uri}
-        );
-      });
-      await Promise.all(indicatorReports.map(indicatorReport => indicatorReport.save()));
-
-      const themes = Object.entries(themeDict).map(([uri, theme]) => {
-        return GDBThemeModel(
-          theme, {_uri: theme._uri}
-        );
-      });
-      await Promise.all(themes.map(theme => theme.save()));
-
-      const impactNorms = Object.entries(impactNormsDict).map(([uri, impactNorms]) => {
-        return GDBImpactNormsModel(
-          impactNorms, {_uri: uri}
-        )
-      });
-
-      // todo: have an auto saving function
-
-      await Promise.all(impactNorms.map(impactNorms => impactNorms.save()))
-
-      const impactReports = Object.entries(impactReportDict).map(([uri, impactReport]) => {
-        return GDBImpactReportModel(
-          impactReport, {_uri: impactReport._uri}
-        );
-      });
-      await Promise.all(impactReports.map(impactReport => impactReport.save()));
-
-      const stakeholderOutcomes = Object.entries(stakeholderOutcomeDict).map(([uri, stakeholderOutcome]) => {
-        return GDBStakeholderOutcomeModel(
-          stakeholderOutcome, {_uri: stakeholderOutcome._uri}
-        );
-      });
-      await Promise.all(stakeholderOutcomes.map(stakeholderOutcome => stakeholderOutcome.save()));
-
-      const howMuchImpacts = Object.entries(howMuchImpactDict).map(([uri, howMuchImpact]) => {
-        if (howMuchImpact.subType === 'impactScale') {
-          delete howMuchImpact.subType
-          return GDBImpactScaleModel(
-            howMuchImpact, {_uri: howMuchImpact._uri}
-          );
-        } else {
-          delete howMuchImpact.subType
-          return GDBImpactDepthModel(
-            howMuchImpact, {_uri: howMuchImpact._uri}
-          );
+      async function autoSaving() {
+        for (let key in dicts) {
+          const dict = dicts[key];
+          const GDBObjects = Object.entries(dict).map(([uri, object]) => {
+            return GDBModels[key](
+              object, {_uri: object._uri}
+            );
+          });
+          await Promise.all(GDBObjects.map(object => object.save()));
         }
-
-      });
-      await Promise.all(howMuchImpacts.map(howMuchImpact => howMuchImpact.save()));
+      }
+      await autoSaving();
+      // const indicators = Object.entries(indicatorDict).map(([uri, indicator]) => {
+      //   return GDBIndicatorModel(
+      //     indicator, {_uri: indicator._uri}
+      //   );
+      // });
+      //
+      // await Promise.all(indicators.map(indicator => indicator.save()));
+      //
+      // const codes = Object.entries(codeDict).map(([uri, code]) => {
+      //   return GDBCodeModel(
+      //     code, {_uri: code._uri}
+      //   );
+      // })
+      // await Promise.all(codes.map(code => code.save()));
+      //
+      // const characteristics = Object.entries(characteristicDict).map(([uri, characteristic]) => {
+      //   return GDBCharacteristicModel(
+      //     characteristic, {_uri: characteristic._uri}
+      //   );
+      // })
+      // await Promise.all(characteristics.map(characteristic => characteristic.save()));
+      //
+      // const outcomes = Object.entries(outcomeDict).map(([uri, outcome]) => {
+      //   return GDBOutcomeModel(
+      //     outcome, {_uri: outcome._uri}
+      //   );
+      // });
+      // await Promise.all(outcomes.map(outcome => outcome.save()));
+      //
+      // const indicatorReports = Object.entries(indicatorReportDict).map(([uri, indicatorReport]) => {
+      //   return GDBIndicatorReportModel(
+      //     indicatorReport, {_uri: indicatorReport._uri}
+      //   );
+      // });
+      // await Promise.all(indicatorReports.map(indicatorReport => indicatorReport.save()));
+      //
+      // const themes = Object.entries(themeDict).map(([uri, theme]) => {
+      //   return GDBThemeModel(
+      //     theme, {_uri: theme._uri}
+      //   );
+      // });
+      // await Promise.all(themes.map(theme => theme.save()));
+      //
+      // const impactNorms = Object.entries(impactNormsDict).map(([uri, impactNorms]) => {
+      //   return GDBImpactNormsModel(
+      //     impactNorms, {_uri: uri}
+      //   )
+      // });
+      //
+      // await Promise.all(impactNorms.map(impactNorms => impactNorms.save()))
+      //
+      // const impactReports = Object.entries(impactReportDict).map(([uri, impactReport]) => {
+      //   return GDBImpactReportModel(
+      //     impactReport, {_uri: impactReport._uri}
+      //   );
+      // });
+      // await Promise.all(impactReports.map(impactReport => impactReport.save()));
+      //
+      // const stakeholderOutcomes = Object.entries(stakeholderOutcomeDict).map(([uri, stakeholderOutcome]) => {
+      //   return GDBStakeholderOutcomeModel(
+      //     stakeholderOutcome, {_uri: stakeholderOutcome._uri}
+      //   );
+      // });
+      // await Promise.all(stakeholderOutcomes.map(stakeholderOutcome => stakeholderOutcome.save()));
+      //
+      // const howMuchImpacts = Object.entries(howMuchImpactDict).map(([uri, howMuchImpact]) => {
+      //   if (howMuchImpact.subType === 'impactScale') {
+      //     delete howMuchImpact.subType
+      //     return GDBImpactScaleModel(
+      //       howMuchImpact, {_uri: howMuchImpact._uri}
+      //     );
+      //   } else {
+      //     delete howMuchImpact.subType
+      //     return GDBImpactDepthModel(
+      //       howMuchImpact, {_uri: howMuchImpact._uri}
+      //     );
+      //   }
+      //
+      // });
+      // await Promise.all(howMuchImpacts.map(howMuchImpact => howMuchImpact.save()));
 
       await organization.save();
 
