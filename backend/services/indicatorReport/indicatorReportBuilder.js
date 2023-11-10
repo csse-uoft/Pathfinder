@@ -13,7 +13,7 @@ const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function indicatorReportBuilder(environment, object, organization, impactNorms, error, {
+async function indicatorReportBuilder(environment, object, organization, error, {
   indicatorDict,
   indicatorReportDict,
   objectDict
@@ -43,24 +43,32 @@ async function indicatorReportBuilder(environment, object, organization, impactN
 
     if (environment !== 'fileUploading') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-      impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
+      // impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
     }
 
     mainObject.forOrganization = organization._uri;
 
-    if (!impactNorms.indicatorReports)
-      impactNorms.indicatorReports = [];
-    impactNorms.indicatorReports = [...impactNorms.indicatorReports, uri];
+    // if (!impactNorms.indicatorReports)
+    //   impactNorms.indicatorReports = [];
+    // impactNorms.indicatorReports = [...impactNorms.indicatorReports, uri];
 
-    if (environment === 'interface') {
-      await impactNorms.save();
-    }
+    // if (environment === 'interface') {
+    //   await impactNorms.save();
+    // }
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'comment', 'cids:hasComment', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -71,6 +79,11 @@ async function indicatorReportBuilder(environment, object, organization, impactN
     // add indicator to the indicatorReport
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
+    error = ret.error;
+    hasError = ret.hasError;
+    ignore = ret.ignore;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
     error = ret.error;
     hasError = ret.hasError;
     ignore = ret.ignore;

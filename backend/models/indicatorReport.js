@@ -11,7 +11,7 @@ const GDBIndicatorReportModel = createGraphDBModel({
   dateCreated: {type: Date, internalKey: 'schema:dateCreated'},
   hasTime: {type: GDBDateTimeIntervalModel, internalKey: 'time:hasTime'},
   value: {type: GDBMeasureModel, internalKey: 'iso21972:value'},
-  hasAccess: {type: () => require('./organization').GDBOrganizationModel, internalKey: 'cids:hasAccess'},
+  hasAccesss: {type: [() => require('./organization').GDBOrganizationModel], internalKey: 'cids:hasAccess'},
   datasets: {type: [() => require('./dataset').GDBDataSetModel], internalKey: 'dcat:dataset'}
 }, {
   rdfTypes: ['cids:IndicatorReport'], name: 'indicatorReport'
