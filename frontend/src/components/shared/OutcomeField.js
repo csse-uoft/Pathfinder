@@ -2,12 +2,14 @@ import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
 import {fetchThemes} from "../../api/themeApi";
+import {fetchOutcomes} from "../../api/outcomeApi";
 import {fetchOrganizations, fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
+import GeneralField from "./fields/GeneralField";
 
 
 const filterOptions = createFilterOptions({
@@ -65,7 +67,7 @@ export default function OutcomeField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}});
+  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}, outcomes: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -117,8 +119,20 @@ export default function OutcomeField({
         }
       });
     }
-  }, [state.organization]);
 
+      if (state.organization) {
+          fetchOutcomes(encodeURIComponent(state.organization)).then(({success, outcomes}) => {
+              if (success) {
+                  const outs = {};
+                  outcomes.map(outcome => {
+                      outs[outcome._uri] = outcome.name;
+                  });
+                  setOptions(ops => ({...ops, outcomes: outs}));
+              }
+          });
+      }
+  }, [state.organization]);
+ //   console.log(options)
   useEffect(() => {
     setErrors({...importErrors});
   }, [importErrors]);
@@ -184,6 +198,28 @@ export default function OutcomeField({
                 }
               />
             </Grid>
+              <Grid item xs={12}>
+                  <GeneralField
+                      fullWidth
+                      type={'date'}
+                      value={state.dateCreated}
+                      label={'Date Created'}
+                      onChange={handleChange('dateCreated')}
+                      required={required}
+                      disabled={disabled}
+                      error={!!errors.dateCreated}
+                      helperText={errors.dateCreated}
+                      minWidth={187}
+                      onBlur={() => {
+                          if (!state.dateCreated) {
+                              setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
+                          } else {
+                              setErrors(errors => ({...errors, dateCreated: null}));
+                          }
+                      }
+                      }
+                  />
+              </Grid>
 
             <Grid item xs={6}>
               <Dropdown
@@ -276,10 +312,35 @@ export default function OutcomeField({
                 }
                 }
               />
-
-
-
             </Grid>
+              <Grid item xs={12}>
+                  <Dropdown
+                      label="Outcomes"
+                      key={'outcomes'}
+                      options={options.outcomes}
+                      onChange={(e) => {
+                          setState(state => ({...state, outcomes: e.target.value}));
+                          const st = state;
+                          st.outcomes = e.target.value;
+                          onChange(st);
+                      }
+                      }
+                      fullWidth
+                      value={state.outcomes}
+                      error={!!errors.outcomes}
+                      helperText={errors.outcomes}
+                      required={required}
+                      disabled={disabled || !state.organization}
+                      onBlur={() => {
+                          if (!state.outcomes) {
+                              setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
+                          } else {
+                              setErrors(errors => ({...errors, outcomes: null}));
+                          }
+                      }
+                      }
+                  />
+              </Grid>
             <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}

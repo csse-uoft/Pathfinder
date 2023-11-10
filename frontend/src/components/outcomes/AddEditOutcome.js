@@ -48,7 +48,9 @@ export default function AddEditOutcome() {
     indicators:[],
     uri: '',
     themes: [],
-    codes: []
+    codes: [],
+    dateCreated: '',
+    outcomes: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -84,6 +86,7 @@ export default function AddEditOutcome() {
   }, [mode, uri]);
 
   const handleSubmit = () => {
+    console.log(form)
     if (validate()) {
       console.log(form)
       setState(state => ({...state, submitDialog: true}));
@@ -131,6 +134,10 @@ export default function AddEditOutcome() {
       error.name = 'The field cannot be empty';
     if (!form.indicators.length)
       error.indicators = 'The field cannot be empty';
+    console.log(form)
+    if (!form.outcomes.length)
+      error.outcomes = 'The field cannot be empty';
+
     // if (!form.themes.length)
     //   error.themes = 'The field cannot be empty';
     // if (!form.description)
@@ -139,6 +146,8 @@ export default function AddEditOutcome() {
       error.organization = 'The field cannot be empty'
     if(form.uri && !isValidURL(form.uri))
       error.uri = 'Not a valid URI';
+    if (!form.dateCreated)
+      error.dateCreated = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -158,6 +167,9 @@ export default function AddEditOutcome() {
             <Typography variant={'body1'}> {`${form.uri}`} </Typography>
             <Typography variant={'h6'}> {`Organization:`} </Typography>
             <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
+            <Typography variant={'h6'}> {`Date Created:`} </Typography>
+            <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
+
             {<Typography variant={'h6'}> {`Themes:`} </Typography>}
              {form.themes?.length? form.themes.map(themeURI => {
               return (
@@ -167,6 +179,7 @@ export default function AddEditOutcome() {
                 </Typography>
                 );
             }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
             <Typography variant={'h6'}> {`Indicators:`} </Typography>
             {form.indicators?.length? form.indicators.map(indicatorURI => {
               return (
@@ -174,6 +187,15 @@ export default function AddEditOutcome() {
                   <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover
                         color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>
                 </Typography>
+              );
+            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
+            <Typography variant={'h6'}> {`Outcomes:`} </Typography>
+            {form.outcomes?.length? form.outcomes.map(outcomeURI => {
+              return (
+                  <Typography variant={'body1'}>
+                    <Link to={`/outcome/${encodeURIComponent(outcomeURI)}/view`} colorWithHover
+                          color={'#2f5ac7'}>{form.outcomes[outcomeURI]}</Link>
+                  </Typography>
               );
             }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
             <Typography variant={'h6'}> {`Description:`} </Typography>
