@@ -3,11 +3,8 @@ const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, ass
   assignMeasure
 } = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
-const {GDBMeasureModel} = require("../../models/measure");
 const {GDBIndicatorModel} = require("../../models/indicator");
-const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {Transaction} = require("graphdb-utils");

@@ -1,7 +1,6 @@
 const {Transaction} = require("graphdb-utils");
 const {fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
-const {Server400Error} = require("../../utils");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
