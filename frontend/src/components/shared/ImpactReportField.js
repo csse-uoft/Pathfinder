@@ -61,7 +61,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
     {});
 
   const [options, setOptions] = useState({
-    organizations : {},stakeholderOutcomes: {}, indicators: {}
+    organizations : {},stakeholderOutcomes: {}, indicators: {}, 
   });
 
   const {enqueueSnackbar} = useSnackbar();
@@ -229,7 +229,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
             <Grid item xs={4}>
               <LoadingAutoComplete
                 label={"Stakeholder Outcome"}
-                disabled={!state.organization}
+                disabled={disabled}
                 options={options.stakeholderOutcomes}
                 state={state.forStakeholderOutcome}
                 onChange={
@@ -247,15 +247,16 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
               />
             </Grid>
 
-            <Grid item xs={4}>
+            {/* <Grid item xs={4}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
                 label="Impact Scale"
-                type="text"
-                defaultValue={state.impactScale}
-                onChange={handleChange('impactScale')}
                 disabled={disabled}
+                options = {options.impactScale}
+                state={state.impactScale}
+                onChange={handleChange('impactScale')}
+                
                 required={required}
                 error={!!errors.impactScale}
                 helperText={errors.impactScale}
@@ -270,7 +271,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 }
                 }
               />
-            </Grid>
+            </Grid> */}
 
             <Grid item xs={4}>
               <LoadingAutoComplete
@@ -293,12 +294,11 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
               />
             </Grid>
             
-            <Grid item xs={4}>
+            {/* <Grid item xs={4}>
             <TextField
               sx={{mt: 2}}
               fullWidth
               label="Impact Depth"
-              type="text"
               defaultValue={state.impactDepth}
               onChange={handleChange('impactDepth')}
               disabled={disabled}
@@ -316,7 +316,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
               }
               }
             />
-            </Grid>
+            </Grid> */}
 
             <Grid item xs={4}>
               <LoadingAutoComplete
@@ -346,24 +346,31 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 onChange={handleChange('Report Impact')}
                 value={state.ReportImpact}
                 required={required}
-                disabled={true}
+                disabled={disabled}
               />
             </Grid>
+            
 
-            <Grid item xs={8}>
-            <TextField
+            <Grid item xs={4}>
+            <LoadingAutoComplete
               sx={{mt: 2}}
-              fullWidth
-              label="Impact Duration"
-              type="text"
-              defaultValue={state.ImpactDuration}
-              onChange={handleChange('ImpactDuration')}
-              disabled={true}
+              label={"Impact Duration Indicator"}
+              disabled={!state.organization}
+              options={options.indicators}
+              state={state.ImpactDurationIndicator}
+              onChange={handleChange('ImpactDurationIndicator')}
               required={required}
-              error={!!errors.ImpactDuration}
-              helperText={errors.ImpactDuration}
+              error={!!errors.ImpactDurationIndicator}
+              helperText={errors.ImpactDurationIndicator}
+              onBlur={() => {
+                if (state.ImpactDurationIndicator) {
+                  setErrors(errors => ({...errors, ImpactDurationIndicator: null}));
+                }
+              }
+              }
             />
             </Grid>
+
         
             <Grid item xs={3}>
               <GeneralField
@@ -411,27 +418,56 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
               />
             </Grid>
             <Grid item xs={6}>
-              <GeneralField
-                fullWidth
-                label="Impact Risk"
-                type="text"
-                defaultValue={state.impactRisk}
-                onChange={handleChange('impactRisk')}
+              <LoadingAutoComplete
+                sx={{mt: 2}}
+                label={"Impact Risk Indicator"}
+                disabled={!state.organization}
+                options={options.indicators}
+                state={state.ImpactRiskIndicator}
+                onChange={handleChange('ImpactRiskIndicator')}
                 required={required}
-                disabled
-                error={!!errors.impactRisk}
-                helperText={errors.impactRisk}
+                error={!!errors.ImpactRiskIndicator}
+                helperText={errors.ImpactRiskIndicator}
+                onBlur={() => {
+                  if (state.ImpactRiskIndicator) {
+                    setErrors(errors => ({...errors, ImpactDurationIndicator: null}));
+                  }
+                }
+                }
               />
+
+              
             </Grid>
-            <Grid item xs={12}>
+
+            <Grid item xs={4}>
+            <LoadingAutoComplete
+              sx={{mt: 2}}
+              label={"Impact Duration Indicator"}
+              disabled={!state.organization}
+              options={options.indicators}
+              state={state.impactDurationIndicator}
+              onChange={handleChange('impactDurationIndicator')}
+              required={required}
+              error={!!errors.impactDurationIndicator}
+              helperText={errors.impactDurationIndicator}
+              onBlur={() => {
+                if (state.impactDurationIndicator) {
+                  setErrors(errors => ({...errors, impactDurationIndicator: null}));
+                }
+              }
+              }
+            />
+            </Grid>
+            <Grid item xs={8}>
               <TextField
                 fullWidth
+                sx={{mt: 2}}
                 label="Expectation"
                 type="text"
                 defaultValue={state.expectation}
                 onChange={handleChange('expectation')}
                 required={required}
-                disabled
+                disabled={disabled}
                 error={!!errors.expectation}
                 helperText={errors.expectation}
                 multiline
