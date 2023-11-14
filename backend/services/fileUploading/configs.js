@@ -30,6 +30,28 @@ const fullLevelConfig = {
     'cids:forOutcome': {flag: true},
     'oep:partOf': {ignoreInstance: true}
   },
+  stakeholderOutcome: {},
+  characteristic: {},
+  impactScale:{},
+  impactDepth: {},
+  code: {},
+  theme: {},
+  indicatorReport: {
+    'cids:hasName': {flag: true},
+    'cids:forIndicator': {ignoreInstance: true},
+    'iso21972:value': {flag: true}
+  },
+  counterfactual: {},
+  impactRisk: {},
+  evidenceRisk: {},
+  externalRisk: {},
+  stakeholderParticipationRisk: {},
+  dropOffRisk: {},
+  efficiencyRisk: {},
+  executionRisk: {},
+  alignmentRisk: {},
+  enduranceRisk: {},
+  unexpectedImpactRisk: {}
 }
 
 module.exports = {

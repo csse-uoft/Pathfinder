@@ -7,7 +7,7 @@ const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function howMuchImpactBuilder(environment, subType, object, organization, impactNorms, error, {
+async function howMuchImpactBuilder(environment, subType, object, organization, error, {
   howMuchImpactDict,
   objectDict
 }, {
@@ -39,9 +39,6 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
-    hasError = ret.hasError;
-    error = ret.error;
 
     ret = assignValues(environment, config, object, mainModel, mainObject, 'counterfactuals', 'cids:hasCounterfactual', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
@@ -79,7 +76,7 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
           },
           config['iso21972:value']
         );
-    } else {
+    } else if (measureURI || value || form?.value) {
       mainObject.value = measureURI ||
         GDBMeasureModel({
             numericalValue: value

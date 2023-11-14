@@ -8,7 +8,7 @@ const {Transaction} = require("graphdb-utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function stakeholderOutcomeBuilder(environment, object, organization, impactNorms, error, {
+async function stakeholderOutcomeBuilder(environment, object, organization, error, {
   outcomeDict,
   stakeholderOutcomeDict,
   objectDict
@@ -37,15 +37,15 @@ async function stakeholderOutcomeBuilder(environment, object, organization, impa
   if (mainObject) {
     if (environment !== 'fileUploading') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-      impactNorms = await GDBImpactNormsModel.findOne({organization: organization._uri}) || GDBImpactNormsModel({organization});
+      // impactNorms = await GDBImpactNormsModel.findOne({organization: organization._uri}) || GDBImpactNormsModel({organization});
     }
 
-    if (!impactNorms.stakeholderOutcomes)
-      impactNorms.stakeholderOutcomes = [];
-    impactNorms.stakeholderOutcomes = [...impactNorms.stakeholderOutcomes, uri];
+    // if (!impactNorms.stakeholderOutcomes)
+    //   impactNorms.stakeholderOutcomes = [];
+    // impactNorms.stakeholderOutcomes = [...impactNorms.stakeholderOutcomes, uri];
 
     if (environment === 'interface') {
-      await impactNorms.save();
+      // await impactNorms.save();
     }
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);

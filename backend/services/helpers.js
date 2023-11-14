@@ -101,7 +101,7 @@ async function assignImpactNorms(config, object, mainModel, mainObject, property
 
 function assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error) {
   let ignore;
-  if (environment === 'fileUploading') {
+  if (environment === 'fileUploading' && object[getFullURI('time:hasTime')]) {
     mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
       GDBDateTimeIntervalModel({
         hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
@@ -138,7 +138,7 @@ function assignTimeInterval(environment, config, object, mainModel, mainObject, 
       })
   }
 
-  if (!mainObject.hasTime && config[internalKey]) {
+  if (!mainObject.hasTime && config[getFullURI('time:hasTime')]) {
     if (config['time:hasTime'].rejectFile) {
       if (environment === 'fileUploading') {
         error += 1;

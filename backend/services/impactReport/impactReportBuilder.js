@@ -11,7 +11,7 @@ const {Transaction} = require("graphdb-utils");
 const {GDBImpactScaleModel, GDBImpactDepthModel} = require("../../models/howMuchImpact");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function impactReportBuilder(environment, object, organization, impactNorms, error, {
+async function impactReportBuilder(environment, object, organization, error, {
   stakeholderOutcomeDict,
   impactReportDict,
   objectDict
@@ -37,13 +37,13 @@ async function impactReportBuilder(environment, object, organization, impactNorm
   if (mainObject) {
     if (environment !== 'fileUploading') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-      impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
+      // impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
     }
     mainObject.forOrganization = organization._uri;
-    if (!impactNorms.impactReports) {
-      impactNorms.impactReports = [];
-    }
-    impactNorms.impactReports = [...impactNorms.impactReports, uri];
+    // if (!impactNorms.impactReports) {
+    //   impactNorms.impactReports = [];
+    // }
+    // impactNorms.impactReports = [...impactNorms.impactReports, uri];
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -140,7 +140,7 @@ async function impactReportBuilder(environment, object, organization, impactNorm
       }
     }
 
-    if (environment === 'fileUploading') {
+    if (environment === 'fileUploading' && object[getFullURI("time:hasTime")]) {
       mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
         GDBDateTimeIntervalModel({
           hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
