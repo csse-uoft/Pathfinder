@@ -336,23 +336,25 @@ export default function OutcomeField({
               />
             </Grid>
             <Grid item xs={12}>
-              <Dropdown
-                label="impactModels"
-                key={'Part Of'}
-                options={options.impactModels}
-                onChange={(e) => {
-                  setState(state => ({...state, partOf: e.target.value}));
-                  const st = state;
-                  st.partOf = e.target.value;
-                  onChange(st);
-                }
-                }
-                fullWidth
-                value={state.partOf}
+              <LoadingAutoComplete
+                key={'partOf'}
+                label={"Part Of"}
+                options={options}
+                property={'impactModels'}
+                state={state}
+                onChange={handleChange}
                 error={!!errors.partOf}
                 helperText={errors.partOf}
                 required={required}
                 disabled={!state.organization}
+                // onBlur={() => {
+                //   if (!state.organization) {
+                //     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, organization: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
               <Grid item xs={12}>

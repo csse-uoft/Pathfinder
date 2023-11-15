@@ -52,7 +52,7 @@ export default function AddEditOutcome() {
     dateCreated: '',
     canProduce: [],
     locatedIn: '',
-    partOf: [],
+    partOf: '',
   });
   const [loading, setLoading] = useState(true);
 
