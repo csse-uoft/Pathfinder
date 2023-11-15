@@ -27,7 +27,7 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {stakeholderOutcomeBuilder} = require("../stakeholderOutcome/stakeholderOutcomeBuilder");
 const {impactNormsBuilder} = require("../impactStuffs/impactStuffs");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
-const {GDBHowMuchImpactModel, GDBImpactDepthModel, GDBImpactScaleModel} = require("../../models/howMuchImpact");
+const {GDBHowMuchImpactModel, GDBImpactDepthModel, GDBImpactScaleModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
 const {counterfactualBuilder} = require("../counterfactual/counterfactualBuilder");
@@ -65,7 +65,9 @@ const fileUploading = async (req, res, next) => {
     const indicatorReportDict = {};
     const impactReportDict = {};
     const stakeholderOutcomeDict = {};
-    const howMuchImpactDict = {};
+    const impactScaleDict = {};
+    const impactDepthDict = {};
+    const impactDurationDict = {};
     const counterfactualDict = {};
     const impactRiskDict = {};
     const evidenceRiskDict = {};
@@ -89,7 +91,9 @@ const fileUploading = async (req, res, next) => {
       'indicatorReport': indicatorReportDict,
       'impactReport': impactReportDict,
       'stakeholderOutcome': stakeholderOutcomeDict,
-      'howMuchImpact': howMuchImpactDict,
+      'impactScale': impactScaleDict,
+      'impactDepth': impactDepthDict,
+      'impactDuration': impactDurationDict,
       'counterfactual': counterfactualDict,
       'impactRisk': impactRiskDict,
       'evidenceRisk': evidenceRiskDict,
@@ -111,7 +115,6 @@ const fileUploading = async (req, res, next) => {
       'indicator': GDBIndicatorModel,
       'indicatorReport': GDBImpactReportModel,
       'stakeholderOutcome': GDBStakeholderOutcomeModel,
-      'howMuchImpact': GDBHowMuchImpactModel,
       'counterfactual': GDBCounterfactualModel,
       'impactRisk': GDBImpactRiskModel,
       'evidenceRisk': GDBEvidenceRiskModel,
@@ -122,7 +125,10 @@ const fileUploading = async (req, res, next) => {
       'executionRisk': GDBExecutionRiskModel,
       'alignmentRisk': GDBAlignmentRiskModel,
       'enduranceRisk': GDBEnduranceRiskModel,
-      'unexpectedImpactRisk': GDBUnexpectedImpactRiskModel
+      'unexpectedImpactRisk': GDBUnexpectedImpactRiskModel,
+      'impactScale': GDBImpactScaleModel,
+      'impactDepth': GDBImpactDepthModel,
+      'impactDuration': GDBImpactDurationModel,
     }
 
     let messageBuffer = {
@@ -519,13 +525,19 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         impactReportDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
-        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))
-      ) {
+      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        howMuchImpactDict[uri] = {_uri: uri}; // todo: to be fixed, should be in separate dicts
-      } else if (object['@type'].includes(getFullTypeURIList(GDBUnitOfMeasure)[1])) {
+        impactScaleDict[uri] = {_uri: uri}; // todo: to be fixed, should be in separate dicts
+      } else if (object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        impactDepthDict[uri] = {_uri: uri};
+      } else if (object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        impactDurationDict[uri] = {_uri: uri};
+      }else if (object['@type'].includes(getFullTypeURIList(GDBUnitOfMeasure)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
@@ -753,10 +765,10 @@ const fileUploading = async (req, res, next) => {
           getListOfValue
         }, null);
       } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
-        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))
-      ) {
-        const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))? 'impactScale' : 'impactDepth'
-        error = await howMuchImpactBuilder('fileUploading', subType, object, organization, error, {howMuchImpactDict, objectDict}, {
+        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ||
+          object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
+        const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))? 'impactScale' : (object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))? 'impactDepth':'impactDuration')
+        error = await howMuchImpactBuilder('fileUploading', subType, object, organization, error, {impactDepthDict, impactDurationDict, impactScaleDict, objectDict}, {
           addMessage,
           addTrace,
           getFullPropertyURI,

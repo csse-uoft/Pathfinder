@@ -1,4 +1,4 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval} = require("../helpers");
 const {GDBMeasureModel} = require("../../models/measure");
@@ -8,7 +8,9 @@ const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function howMuchImpactBuilder(environment, subType, object, organization, error, {
-  howMuchImpactDict,
+  impactScaleDict,
+  impactDepthDict,
+  impactDurationDict,
   objectDict
 }, {
                                            addMessage,
@@ -24,14 +26,17 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
   let ignore;
   const GDBDict = {impactScale: GDBImpactScaleModel, impactDepth: GDBImpactDepthModel, impactDuration: GDBImpactDurationModel}
   const mainModel = GDBDict[subType];
-  const mainObject = environment === 'fileUploading' ? howMuchImpactDict[uri] : mainModel({}, {uri: form.uri});
+  const objectDicts = {
+  impactScale: impactScaleDict, impactDepth: impactDepthDict, impactDuration: impactDurationDict
+  }
+  const mainObject = environment === 'fileUploading' ? objectDicts[subType][uri] : mainModel({}, {uri: form.uri});
   mainObject.subType = subType
 
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = baseLevelConfig[subType];
+  const config = fullLevelConfig[subType];
 
   if (mainObject) {
 

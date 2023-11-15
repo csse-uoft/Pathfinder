@@ -51,7 +51,8 @@ const fullLevelConfig = {
   executionRisk: {},
   alignmentRisk: {},
   enduranceRisk: {},
-  unexpectedImpactRisk: {}
+  unexpectedImpactRisk: {},
+  impactDuration: {},
 }
 
 module.exports = {
