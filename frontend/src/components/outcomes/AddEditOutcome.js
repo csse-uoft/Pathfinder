@@ -51,6 +51,7 @@ export default function AddEditOutcome() {
     codes: [],
     dateCreated: '',
     outcomes: [],
+    locatedIn: '',
   });
   const [loading, setLoading] = useState(true);
 
@@ -129,14 +130,16 @@ export default function AddEditOutcome() {
   };
 
   const validate = () => {
+    console.log(form)
     const error = {};
     if (!form.name)
       error.name = 'The field cannot be empty';
     if (!form.indicators.length)
       error.indicators = 'The field cannot be empty';
-    console.log(form)
-    if (!form.outcomes.length)
-      error.outcomes = 'The field cannot be empty';
+    // if (!form.outcomes.length)
+    //   error.outcomes = 'The field cannot be empty';
+    if (!form.locatedIn)
+      error.locatedIn = 'The field cannot be empty';
 
     // if (!form.themes.length)
     //   error.themes = 'The field cannot be empty';
@@ -169,7 +172,8 @@ export default function AddEditOutcome() {
             <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
             <Typography variant={'h6'}> {`Date Created:`} </Typography>
             <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
-
+            <Typography variant={'h6'}> {`Located In:`} </Typography>
+            <Typography variant={'body1'}> {`${form.locatedIn}`} </Typography>
             {<Typography variant={'h6'}> {`Themes:`} </Typography>}
              {form.themes?.length? form.themes.map(themeURI => {
               return (

@@ -198,7 +198,7 @@ export default function OutcomeField({
                 }
               />
             </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={4}>
                   <GeneralField
                       fullWidth
                       type={'date'}
@@ -220,7 +220,28 @@ export default function OutcomeField({
                       }
                   />
               </Grid>
-
+              <Grid item xs={8}>
+                  <TextField
+                      sx={{mt: 2}}
+                      fullWidth
+                      label="Located In"
+                      type="text"
+                      defaultValue={state.locatedIn}
+                      onChange={handleChange('locatedIn')}
+                      disabled={disabled}
+                      required={required}
+                      error={!!errors.locatedIn}
+                      helperText={errors.locatedIn}
+                      onBlur={() => {
+                          if (!state.locatedIn) {
+                              setErrors(errors => ({...errors, locatedIn: 'This field cannot be empty'}));
+                          } else {
+                              setErrors(errors => ({...errors, locatedIn: null}));
+                          }
+                      }
+                      }
+                  />
+              </Grid>
             <Grid item xs={6}>
               <Dropdown
                 label="Themes"
@@ -330,7 +351,7 @@ export default function OutcomeField({
                       error={!!errors.outcomes}
                       helperText={errors.outcomes}
                       required={required}
-                      disabled={disabled || !state.organization}
+                      disabled={disabled || !state.outcomes}
                       onBlur={() => {
                           if (!state.outcomes) {
                               setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
