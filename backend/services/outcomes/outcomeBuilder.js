@@ -23,14 +23,13 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
   const mainObject = environment === 'fileUploading' ? outcomeDict[uri] : mainModel({
   }, {uri: form.uri});
   if (environment === 'interface') {
-    await Transaction.beginTransaction();
     await mainObject.save();
     uri = mainObject._uri;
   }
 
   if (environment === 'interface') {
     organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-    impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})
+    impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactModel, organization: organization._uri})
     if (!impactNorms.outcomes)
       impactNorms.outcomes = [];
     impactNorms.outcomes = [...impactNorms.outcomes, uri]
@@ -75,7 +74,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     // todo: handle the case when stakeholderOutcomes is in the database
 
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'canProduce', 'cids:canProduce', addMessage, form, uri, hasError, error, getListOfValue)
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'canProduces', 'cids:canProduce', addMessage, form, uri, hasError, error, getListOfValue)
     hasError = ret.hasError;
     error = ret.error;
 

@@ -30,7 +30,6 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
   impactScale: impactScaleDict, impactDepth: impactDepthDict, impactDuration: impactDurationDict
   }
   const mainObject = environment === 'fileUploading' ? objectDicts[subType][uri] : mainModel({}, {uri: form.uri});
-  mainObject.subType = subType
 
   if (environment === 'interface') {
     await mainObject.save();

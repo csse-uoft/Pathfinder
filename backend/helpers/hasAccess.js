@@ -48,6 +48,16 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    // impactModels
+    case 'fetchImpactModels':
+      if (userAccount.isSuperuser)
+        return true
+      break
+    case 'fetchImpactModelInterfaces':
+      if (userAccount.isSuperuser)
+        return true
+      break
+
     // impactReport
     case 'createImpactReport':
       if (userAccount.isSuperuser)

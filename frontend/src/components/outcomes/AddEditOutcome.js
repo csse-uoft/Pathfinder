@@ -43,15 +43,16 @@ export default function AddEditOutcome() {
 
   const [form, setForm] = useState({
     name: '',
-    comment: '',
+    description: '',
     organization: null,
     indicators:[],
     uri: '',
     themes: [],
     codes: [],
     dateCreated: '',
-    outcomes: [],
+    canProduce: [],
     locatedIn: '',
+    partOf: [],
   });
   const [loading, setLoading] = useState(true);
 

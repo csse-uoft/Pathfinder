@@ -3,7 +3,7 @@ const {GDBFeatureModel} = require("./feature");
 
 
 const GDBOutcomeModel = createGraphDBModel({
-  canProduce: {type: () => GDBOutcomeModel, internalKey:'cids:canProduce'},
+  canProduces: {type: [() => GDBOutcomeModel], internalKey:'cids:canProduce'},
   partOf: {type: () => require('./impactStuffs').GDBImpactModelModel, internalKey: 'oep:partOf'},
   name: {type: String, internalKey: 'cids:hasName'}, // todo: here is issue, on protege, it should be tov_org:hasName
   description: {type: String, internalKey: 'cids:hasDescription'},

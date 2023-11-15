@@ -1,15 +1,12 @@
-const {json} = require("express");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {GDBOwnershipModel} = require("../../models/ownership");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
-const {GDBOutcomeModel} = require("../../models/outcome");
 
 
 const fetchIndicators = async (req, res) => {

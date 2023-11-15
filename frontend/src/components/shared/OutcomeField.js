@@ -10,6 +10,7 @@ import {fetchIndicators} from "../../api/indicatorApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import GeneralField from "./fields/GeneralField";
+import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -67,7 +68,7 @@ export default function OutcomeField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}, outcomes: {}});
+  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}, outcomes: {}, impactModels: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -109,15 +110,14 @@ export default function OutcomeField({
 
   useEffect(() => {
     if (state.organization) {
-      fetchIndicators(encodeURIComponent(state.organization)).then(({success, indicators}) => {
-        if (success) {
-          const inds = {};
-          indicators.map(indicator => {
-            inds[indicator._uri] = indicator.name;
-          });
-          setOptions(ops => ({...ops, indicators: inds}));
-        }
-      });
+      Promise.all([fetchIndicators(encodeURIComponent(state.organization)), fetchImpactModelInterfaces(encodeURIComponent(state.organization))]).
+      then(([{indicators}, {impactModelInterfaces}]) => {
+        const inds = {};
+        indicators.map(indicator => {
+          inds[indicator._uri] = indicator.name;
+        });
+        setOptions(ops => ({...ops, indicators: inds, impactModels: impactModelInterfaces}));
+      })
     }
 
       if (state.organization) {
@@ -146,6 +146,7 @@ export default function OutcomeField({
     onChange(state);
   };
 
+  console.log(options)
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
       <Typography variant="h5">
@@ -232,14 +233,14 @@ export default function OutcomeField({
                       required={required}
                       error={!!errors.locatedIn}
                       helperText={errors.locatedIn}
-                      onBlur={() => {
-                          if (!state.locatedIn) {
-                              setErrors(errors => ({...errors, locatedIn: 'This field cannot be empty'}));
-                          } else {
-                              setErrors(errors => ({...errors, locatedIn: null}));
-                          }
-                      }
-                      }
+                      // onBlur={() => {
+                      //     if (!state.locatedIn) {
+                      //         setErrors(errors => ({...errors, locatedIn: 'This field cannot be empty'}));
+                      //     } else {
+                      //         setErrors(errors => ({...errors, locatedIn: null}));
+                      //     }
+                      // }
+                      // }
                   />
               </Grid>
             <Grid item xs={6}>
@@ -334,10 +335,30 @@ export default function OutcomeField({
                 }
               />
             </Grid>
+            <Grid item xs={12}>
+              <Dropdown
+                label="impactModels"
+                key={'Part Of'}
+                options={options.impactModels}
+                onChange={(e) => {
+                  setState(state => ({...state, partOf: e.target.value}));
+                  const st = state;
+                  st.partOf = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.partOf}
+                error={!!errors.partOf}
+                helperText={errors.partOf}
+                required={required}
+                disabled={!state.organization}
+              />
+            </Grid>
               <Grid item xs={12}>
                   <Dropdown
-                      label="Outcomes"
-                      key={'outcomes'}
+                      label="canProduce"
+                      key={'Can Produce'}
                       options={options.outcomes}
                       onChange={(e) => {
                           setState(state => ({...state, outcomes: e.target.value}));
@@ -351,7 +372,7 @@ export default function OutcomeField({
                       error={!!errors.outcomes}
                       helperText={errors.outcomes}
                       required={required}
-                      disabled={disabled || !state.outcomes}
+                      disabled={disabled || !state.organization}
                       onBlur={() => {
                           if (!state.outcomes) {
                               setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));

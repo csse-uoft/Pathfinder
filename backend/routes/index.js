@@ -24,5 +24,6 @@ module.exports = {
   stakeholderOutcomeRoute: require('./stakeholderOutcome'),
   stakeholderOutcomesRoute: require('./stakeholderOutcomes'),
   impactReportRoute: require('./impactReport'),
-  impactReportsRoute: require('./impactReports')
+  impactReportsRoute: require('./impactReports'),
+  impactModelsRoute: require('./impactModels')
 }

@@ -18,7 +18,7 @@ const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRout
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
   errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute, codeRoute, codesRoute, characteristicRoute,
   characteristicsRoute, stakeholderOutcomeRoute, impactReportsRoute, impactReportRoute,
-  stakeholderOutcomesRoute
+  stakeholderOutcomesRoute, impactModelsRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -72,6 +72,7 @@ app.use('/api/stakeholders', stakeholdersRoute)
 app.use('/api/theme', themeRoute);
 app.use('/api/themes', themesRoute);
 app.use('/api/indicator', indicatorRoute);
+app.use('/api/impactModels', impactModelsRoute);
 app.use('/api/fileUploading', fileUploadingRoute);
 app.use('/api/indicators', indicatorsRoute);
 app.use('/api/outcome', outcomeRoute);
