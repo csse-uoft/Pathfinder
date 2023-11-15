@@ -25,7 +25,7 @@ const {indicatorBuilder} = require("../indicators/indicatorBuilder");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
 const {GDBImpactReportModel} = require("../../models/impactReport");
 const {stakeholderOutcomeBuilder} = require("../stakeholderOutcome/stakeholderOutcomeBuilder");
-const {impactNormsBuilder} = require("../impactStuffs/impactStuffs");
+const {impactNormsBuilder} = require("../impactStuffs/impactNormsBuilder");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {GDBHowMuchImpactModel, GDBImpactDepthModel, GDBImpactScaleModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
@@ -107,13 +107,14 @@ const fileUploading = async (req, res, next) => {
       'unexpectedImpactRisk': unexpectedImpactRiskDict
     }
     const GDBModels = {
+      'impactReport': GDBImpactReportModel,
       'impactNorms': GDBImpactNormsModel,
       'outcome': GDBOutcomeModel,
       'theme': GDBThemeModel,
       'code': GDBCodeModel,
       'characteristic': GDBCharacteristicModel,
       'indicator': GDBIndicatorModel,
-      'indicatorReport': GDBImpactReportModel,
+      'indicatorReport': GDBIndicatorReportModel,
       'stakeholderOutcome': GDBStakeholderOutcomeModel,
       'counterfactual': GDBCounterfactualModel,
       'impactRisk': GDBImpactRiskModel,
