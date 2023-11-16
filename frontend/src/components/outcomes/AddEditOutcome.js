@@ -50,9 +50,9 @@ export default function AddEditOutcome() {
     themes: [],
     codes: [],
     dateCreated: '',
-    canProduce: [],
+    canProduces: [],
     locatedIn: '',
-    partOf: '',
+    partOf: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -90,7 +90,6 @@ export default function AddEditOutcome() {
   const handleSubmit = () => {
     console.log(form)
     if (validate()) {
-      console.log(form)
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -135,12 +134,12 @@ export default function AddEditOutcome() {
     const error = {};
     if (!form.name)
       error.name = 'The field cannot be empty';
-    if (!form.indicators.length)
-      error.indicators = 'The field cannot be empty';
+    // if (!form.indicators.length)
+    //   error.indicators = 'The field cannot be empty';
     // if (!form.outcomes.length)
     //   error.outcomes = 'The field cannot be empty';
-    if (!form.locatedIn)
-      error.locatedIn = 'The field cannot be empty';
+    // if (!form.locatedIn)
+    //   error.locatedIn = 'The field cannot be empty';
 
     // if (!form.themes.length)
     //   error.themes = 'The field cannot be empty';
@@ -148,10 +147,12 @@ export default function AddEditOutcome() {
     //   error.description = 'The field cannot be empty'
     if(!form.organization)
       error.organization = 'The field cannot be empty'
-    if(form.uri && !isValidURL(form.uri))
-      error.uri = 'Not a valid URI';
-    if (!form.dateCreated)
-      error.dateCreated = 'The field cannot be empty';
+    // if(form.uri && !isValidURL(form.uri))
+    //   error.uri = 'Not a valid URI';
+    // if (!form.dateCreated)
+    //   error.dateCreated = 'The field cannot be empty';
+    if (!form.partOf)
+      error.partOf = 'The field cannot be empty'
     setErrors(error);
     return Object.keys(error).length === 0;
   };

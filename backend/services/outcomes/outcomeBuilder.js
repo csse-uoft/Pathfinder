@@ -29,10 +29,12 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
 
   if (environment === 'interface') {
     organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-    impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactModel, organization: organization._uri})
+    impactNorms = await GDBImpactNormsModel.findOne({_uri: form.partOf, organization: organization._uri})
     if (!impactNorms.outcomes)
       impactNorms.outcomes = [];
     impactNorms.outcomes = [...impactNorms.outcomes, uri]
+    await impactNorms.save();
+    mainObject.partOf = impactNorms._uri
   }
 
   mainObject.forOrganization = organization._uri;
@@ -42,7 +44,6 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
 
   if (environment === 'interface') {
     await organization.save();
-    await impactNorms.save();
   }
 
   const config = fullLevelConfig['outcome'];
@@ -53,7 +54,8 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error, impactNormsDict, 'outcomes')
+    if (environment === 'fileUploading')
+      ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error, impactNormsDict, 'outcomes')
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -77,6 +79,11 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     ret = assignValues(environment, config, object, mainModel, mainObject, 'canProduces', 'cids:canProduce', addMessage, form, uri, hasError, error, getListOfValue)
     hasError = ret.hasError;
     error = ret.error;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error)
+    hasError = ret.hasError;
+    error = ret.error;
+    mainObject.dateCreated = new Date(mainObject.dateCreated)
 
     ret = assignValues(environment, config, object, mainModel, mainObject, 'locatedIns', 'iso21972:located_in', addMessage, form, uri, hasError, error, getListOfValue)
     hasError = ret.hasError;
@@ -149,7 +156,6 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     }
     if (environment === 'interface') {
       await mainObject.save();
-      await Transaction.commit();
       return true
     }
     if (hasError) {

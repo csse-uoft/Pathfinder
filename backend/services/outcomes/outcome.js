@@ -115,13 +115,13 @@ const fetchOutcomeInterfaceHandler = async (req, res, next) => {
 
 async function fetchOutcomeInterface(req, res) {
   const {organizationUri} = req.params;
-  let outcomes
+  let outcomes;
   if (organizationUri === 'undefined' || !organizationUri) {
     // return all outcome Interfaces
     outcomes = await GDBOutcomeModel.find({});
   } else {
     // return outcomes based on their organization
-    outcomes = await GDBOutcomeModel.find({forOrganization: organizationUri})
+    outcomes = await GDBOutcomeModel.find({forOrganization: organizationUri});
   }
 
   const outcomeInterfaces = {};
@@ -192,8 +192,10 @@ const createOutcomeHandler = async (req, res, next) => {
     if (await hasAccess(req, 'createOutcome')) {
       const {form} = req.body;
       await Transaction.beginTransaction();
-      await outcomeBuilder('interface', null, null, null, {}, {}, form);
-      return res.status(200).json({success: true});
+      if (await outcomeBuilder('interface', null, null, null, {}, {}, form)){
+        await Transaction.commit();
+        return res.status(200).json({success: true});
+      }
     }
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {

@@ -68,7 +68,7 @@ export default function OutcomeField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}, outcomes: {}, impactModels: {}});
+  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}, outcomes: {}, partOf: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -116,7 +116,7 @@ export default function OutcomeField({
         indicators.map(indicator => {
           inds[indicator._uri] = indicator.name;
         });
-        setOptions(ops => ({...ops, indicators: inds, impactModels: impactModelInterfaces}));
+        setOptions(ops => ({...ops, indicators: inds, partOf: impactModelInterfaces}));
       })
     }
 
@@ -146,7 +146,6 @@ export default function OutcomeField({
     onChange(state);
   };
 
-  console.log(options)
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
       <Typography variant="h5">
@@ -340,7 +339,7 @@ export default function OutcomeField({
                 key={'partOf'}
                 label={"Part Of"}
                 options={options}
-                property={'impactModels'}
+                property={'partOf'}
                 state={state}
                 onChange={handleChange}
                 error={!!errors.partOf}
@@ -359,30 +358,30 @@ export default function OutcomeField({
             </Grid>
               <Grid item xs={12}>
                   <Dropdown
-                      label="canProduce"
-                      key={'Can Produce'}
+                      label="Can Produce"
+                      key={'CanProduce'}
                       options={options.outcomes}
                       onChange={(e) => {
-                          setState(state => ({...state, outcomes: e.target.value}));
+                          setState(state => ({...state, canProduces: e.target.value}));
                           const st = state;
-                          st.outcomes = e.target.value;
+                          st.canProduces = e.target.value;
                           onChange(st);
                       }
                       }
                       fullWidth
-                      value={state.outcomes}
-                      error={!!errors.outcomes}
-                      helperText={errors.outcomes}
+                      value={state.canProduces}
+                      error={!!errors.canProduces}
+                      helperText={errors.canProduces}
                       required={required}
                       disabled={disabled || !state.organization}
-                      onBlur={() => {
-                          if (!state.outcomes) {
-                              setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
-                          } else {
-                              setErrors(errors => ({...errors, outcomes: null}));
-                          }
-                      }
-                      }
+                      // onBlur={() => {
+                      //     if (!state.outcomes) {
+                      //         setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
+                      //     } else {
+                      //         setErrors(errors => ({...errors, outcomes: null}));
+                      //     }
+                      // }
+                      // }
                   />
               </Grid>
             <Grid item xs={12}>
