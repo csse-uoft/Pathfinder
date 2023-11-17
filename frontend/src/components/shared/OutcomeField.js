@@ -11,6 +11,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import GeneralField from "./fields/GeneralField";
 import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
+import {fetchFeatureInterfaces} from "../../api/featureAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -102,6 +103,11 @@ export default function OutcomeField({
       fetchCodesInterfaces().then(({success, codesInterfaces}) => {
         if (success) {
           setOptions(op => ({...op, codes: codesInterfaces}));
+        }
+      }),
+      fetchFeatureInterfaces().then(({success, featuresInterfaces}) => {
+        if (success) {
+          setOptions(op => ({...op, features: featuresInterfaces}))
         }
       })
     ]).then(() => setLoading(false));
@@ -220,28 +226,25 @@ export default function OutcomeField({
                       }
                   />
               </Grid>
-              <Grid item xs={8}>
-                  <TextField
-                      sx={{mt: 2}}
-                      fullWidth
-                      label="Located In"
-                      type="text"
-                      defaultValue={state.locatedIn}
-                      onChange={handleChange('locatedIn')}
-                      disabled={disabled}
-                      required={required}
-                      error={!!errors.locatedIn}
-                      helperText={errors.locatedIn}
-                      // onBlur={() => {
-                      //     if (!state.locatedIn) {
-                      //         setErrors(errors => ({...errors, locatedIn: 'This field cannot be empty'}));
-                      //     } else {
-                      //         setErrors(errors => ({...errors, locatedIn: null}));
-                      //     }
-                      // }
-                      // }
-                  />
-              </Grid>
+            <Grid item xs={8}>
+              <Dropdown
+                label="Located In"
+                key={'locatedIn'}
+                options={options.features}
+                onChange={(e) => {
+                  setState(state => ({...state, locatedIns: e.target.value}));
+                  const st = state;
+                  st.locatedIns = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.locatedIns}
+                error={!!errors.locatedIns}
+                helperText={errors.locatedIns}
+                required={required}
+              />
+            </Grid>
             <Grid item xs={6}>
               <Dropdown
                 label="Themes"
