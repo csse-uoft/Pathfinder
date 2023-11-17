@@ -1,4 +1,4 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues, getFullObjectURI,
   assignMeasure
 } = require("../helpers");
@@ -7,7 +7,6 @@ const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
-const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorReportBuilder(environment, object, organization, error, {
@@ -29,11 +28,10 @@ async function indicatorReportBuilder(environment, object, organization, error, 
   const mainModel = GDBIndicatorReportModel;
   const mainObject = environment === 'fileUploading' ? indicatorReportDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await Transaction.beginTransaction();
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = baseLevelConfig.indicatorReport;
+  const config = fullLevelConfig.indicatorReport;
 
 
   if (mainObject) {
@@ -159,7 +157,6 @@ async function indicatorReportBuilder(environment, object, organization, error, 
           hasEnd: {date: new Date(form.endTime)}
         })
       await mainObject.save();
-      await Transaction.commit();
       return true
     }
 

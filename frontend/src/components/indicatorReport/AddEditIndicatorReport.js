@@ -52,7 +52,8 @@ export default function AddEditIndicatorReport() {
     startTime: '',
     endTime: '',
     dateCreated: '',
-    uri: ''
+    uri: '',
+    hasAccesss: []
   });
   const [loading, setLoading] = useState(true);
 

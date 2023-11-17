@@ -154,14 +154,17 @@ const createIndicatorHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createIndicator')){
       const {form} = req.body;
-      if (await indicatorBuilder('interface', null, null, null, null, {}, {}, form)){
+      await Transaction.beginTransaction();
+      if (await indicatorBuilder('interface',  null, null, null, {}, {}, form)){
+        await Transaction.commit();
         return res.status(200).json({success: true})
       }
     }
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {
-    Transaction.rollback();
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };

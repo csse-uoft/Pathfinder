@@ -18,12 +18,15 @@ const createIndicatorReportHandler = async (req, res, next) => {
       const {form} = req.body;
       form.value = form.numericalValue
       form.forIndicator = form.indicator
-      if (await indicatorReportBuilder('interface', null, null, null, null, null, {}, {}, form))
+      await Transaction.beginTransaction();
+      if (await indicatorReportBuilder('interface', null, null, null, null, {}, {}, form))
+        await Transaction.commit();
         return res.status(200).json({success: true})
         }
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
-    Transaction.rollback();
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };

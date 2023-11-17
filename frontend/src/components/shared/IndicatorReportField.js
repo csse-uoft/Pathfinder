@@ -8,6 +8,7 @@ import {fetchIndicators} from "../../api/indicatorApi";
 import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import Dropdown from "./fields/MultiSelectField";
 
 
 const filterOptions = createFilterOptions({
@@ -366,6 +367,25 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                   }
                 }
                 }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Dropdown
+                label="Has Access"
+                key={'hasAccesss'}
+                options={options.organization}
+                onChange={(e) => {
+                  setState(state => ({...state, hasAccesss: e.target.value}));
+                  const st = state;
+                  st.hasAccesss = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.hasAccesss}
+                error={!!errors.hasAccesss}
+                helperText={errors.hasAccesss}
+                required={required}
               />
             </Grid>
             <Grid item xs={12}>
