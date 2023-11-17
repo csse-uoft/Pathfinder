@@ -169,11 +169,11 @@ export default function AddEditCode() {
 
   const validate = () => {
     const error = {};
-    Object.keys(form).map(key => {
-      if (key !== 'uri' && !form[key]) {
-        error[key] = 'This field cannot be empty';
-      }
-    });
+    // Object.keys(form).map(key => {
+    //   if (key !== 'uri' && !form[key]) {
+    //     error[key] = 'This field cannot be empty';
+    //   }
+    // });
     if (form.uri && !isValidURL(form.uri)) {
       error.uri = 'The field should be a valid URI';
     }
@@ -263,13 +263,13 @@ export default function AddEditCode() {
             helperText={
               errors.definedBy
             }
-            onBlur={() => {
-              if (!form.definedBy) {
-                setErrors(errors => ({...errors, definedBy: 'This field cannot be empty' }))
-              } else {
-                setErrors(errors => ({...errors, definedBy: '' }))
-              }
-            }}
+            // onBlur={() => {
+            //   if (!form.definedBy) {
+            //     setErrors(errors => ({...errors, definedBy: 'This field cannot be empty' }))
+            //   } else {
+            //     setErrors(errors => ({...errors, definedBy: '' }))
+            //   }
+            // }}
             onChange={e => {
               setForm(form => ({
                   ...form, definedBy: e.target.value
@@ -305,13 +305,13 @@ export default function AddEditCode() {
             onChange={e => form.specification = e.target.value}
             error={!!errors.specification}
             helperText={errors.specification}
-            onBlur={() => {
-              if (form.specification === '') {
-                setErrors(errors => ({...errors, specification: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, specification: ''}));
-              }
-            }}
+            // onBlur={() => {
+            //   if (form.specification === '') {
+            //     setErrors(errors => ({...errors, specification: 'This field cannot be empty'}));
+            //   } else {
+            //     setErrors(errors => ({...errors, specification: ''}));
+            //   }
+            // }}
           />
 
           <GeneralField
@@ -323,13 +323,13 @@ export default function AddEditCode() {
             onChange={e => form.codeValue = e.target.value}
             error={!!errors.codeValue}
             helperText={errors.codeValue}
-            onBlur={() => {
-              if (form.codeValue === '') {
-                setErrors(errors => ({...errors, codeValue: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, codeValue: ''}));
-              }
-            }}
+            // onBlur={() => {
+            //   if (form.codeValue === '') {
+            //     setErrors(errors => ({...errors, codeValue: 'This field cannot be empty'}));
+            //   } else {
+            //     setErrors(errors => ({...errors, codeValue: ''}));
+            //   }
+            // }}
           />
 
           <GeneralField
@@ -341,13 +341,13 @@ export default function AddEditCode() {
             onChange={e => form.iso72Value = e.target.value}
             error={!!errors.iso72Value}
             helperText={errors.iso72Value}
-            onBlur={() => {
-              if (form.iso72Value === '') {
-                setErrors(errors => ({...errors, iso72Value: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, iso72Value: ''}));
-              }
-            }}
+            // onBlur={() => {
+            //   if (form.iso72Value === '') {
+            //     setErrors(errors => ({...errors, iso72Value: 'This field cannot be empty'}));
+            //   } else {
+            //     setErrors(errors => ({...errors, iso72Value: ''}));
+            //   }
+            // }}
           />
 
           <GeneralField

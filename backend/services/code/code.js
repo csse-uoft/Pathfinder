@@ -31,14 +31,17 @@ const createCodeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createCode')){
       const {form} = req.body;
-      if(await codeBuilder('interface', null, null,
+      await Transaction.beginTransaction();
+      if(await codeBuilder('interface', null,
         null, null, {}, {}, form)) {
+        await Transaction.commit();
         return res.status(200).json({success: true})
       }
     }
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
-    Transaction.rollback();
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };
