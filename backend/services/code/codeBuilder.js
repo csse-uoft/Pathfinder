@@ -1,9 +1,8 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
-const {Transaction} = require('graphdb-utils')
 const {getObjectValue, assignValue, assignMeasure} = require("../helpers");
 
 async function codeBuilder(environment, object, organization, error, {codeDict}, {
@@ -22,7 +21,7 @@ async function codeBuilder(environment, object, organization, error, {codeDict},
     uri = mainObject._uri;
   }
 
-  const config = baseLevelConfig['code'];
+  const config = fullLevelConfig['code'];
   let hasError = false;
   if (mainObject) {
 

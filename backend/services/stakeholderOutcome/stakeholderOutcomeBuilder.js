@@ -1,10 +1,9 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues} = require("../helpers");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
-const {Transaction} = require("graphdb-utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
@@ -31,7 +30,7 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = baseLevelConfig['stakeholderOutcome'];
+  const config = fullLevelConfig['stakeholderOutcome'];
 
 
   if (mainObject) {
@@ -129,7 +128,6 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
 
     if (environment === 'interface') {
       await mainObject.save();
-      await Transaction.commit();
       return true;
     }
 

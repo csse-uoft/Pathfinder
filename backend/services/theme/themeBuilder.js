@@ -1,4 +1,4 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {GDBThemeModel} = require("../../models/theme");
 const {Server400Error} = require("../../utils");
 const {assignValue, assignValues} = require("../helpers");
@@ -22,7 +22,7 @@ async function themeBuilder(environment, object, error, {themeDict}, {
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = baseLevelConfig['theme'];
+  const config = fullLevelConfig['theme'];
 
   if (mainObject) {
 
@@ -41,6 +41,7 @@ async function themeBuilder(environment, object, error, {themeDict}, {
 
     if (environment === 'interface') {
       await mainObject.save();
+      return true
     }
 
 

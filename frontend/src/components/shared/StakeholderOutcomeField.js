@@ -217,6 +217,25 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 }
               />
             </Grid>
+            <Grid item xs={4}>
+              <LoadingAutoComplete
+                label="From Perspective Of"
+                options={options.stakeholders}
+                state={state.fromPerspectiveOf}
+                onChange={handleChange('fromPerspectiveOf')}
+                error={!!errors.fromPerspectiveOf}
+                helperText={errors.fromPerspectiveOf}
+                required={required}
+                // onBlur={() => {
+                //   if (!state.stakeholder) {
+                //     setErrors(errors => ({...errors, stakeholder: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, stakeholder: null}));
+                //   }
+                // }
+                // }
+              />
+            </Grid>
             <Grid item xs={12}>
               <LoadingAutoComplete
                 label={"Outcome"}
@@ -249,6 +268,26 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                   onChange(st);
                 }
                 }
+              />
+            </Grid>
+
+            <Grid item xs={3}>
+              <LoadingAutoComplete
+                label="Intended Impact"
+                options={{'Positive': 'positive', 'negative': 'negative', 'neutral': 'neutral'}}
+                state={state.intendedImpact}
+                onChange={handleChange('intendedImpact')}
+                error={!!errors.intendedImpact}
+                helperText={errors.intendedImpact}
+                required={required}
+                // onBlur={() => {
+                //   if (!state.stakeholder) {
+                //     setErrors(errors => ({...errors, stakeholder: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, stakeholder: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
             <Grid item xs={3}>

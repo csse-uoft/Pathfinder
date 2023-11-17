@@ -59,7 +59,9 @@ export default function AddEditStakeholderOutcome() {
     inUnderserved: '',
     indicators: [],
     impactReports: [],
-    organization: ''
+    organization: '',
+    intendedImpact: '',
+    fromPerspectiveOf: ''
   });
   const [dict, setDict] = useState({
     outcome: {},

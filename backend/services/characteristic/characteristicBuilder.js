@@ -17,7 +17,6 @@ async function characteristicBuilder(environment, object, error, {characteristic
   let ret;
   const mainObject = environment === 'fileUploading' ? characteristicDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await Transaction.beginTransaction();
     await mainObject.save();
     uri = mainObject._uri;
   }
@@ -45,7 +44,6 @@ async function characteristicBuilder(environment, object, error, {characteristic
 
     if (environment === 'interface') {
       await mainObject.save();
-      await Transaction.commit();
       return true
     }
     if (hasError) {

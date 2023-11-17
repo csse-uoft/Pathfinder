@@ -9,13 +9,19 @@ const createCharacteristicHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createCharacteristic')) {
       const {form} = req.body;
-      if (await characteristicBuilder('interface', null, null, {}, {}, form))
+      await Transaction.beginTransaction();
+      if (await characteristicBuilder('interface', null, null, {}, {}, form)){
+        await Transaction.commit();
         return res.status(200).json({success: true});
+      }
     } else {
       return res.status(400).json({message: 'Wrong Auth'});
     }
   } catch (e) {
-    Transaction.rollback();
+    if (Transaction.isActive()){
+      Transaction.rollback();
+    }
+
     next(e);
   }
 };
