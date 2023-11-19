@@ -46,6 +46,9 @@ function Dashboard() {
                    text="Manage Stakeholders"/>:
         null}
 
+      <NavButton to={`/organization-impactModels`} icon={<Edit/>} key={'impactModels'}
+                 text="Manage Impact Models"/>
+
       {userContext.isSuperuser?
         <NavButton to={`/codes`} icon={<People/>} key={'codes'}
                    text="Manage Codes"/>:

@@ -61,6 +61,9 @@ import Organization_impactReports from "./components/impactReport/Organization-i
 import ImpactReports from "./components/impactReport/ImpactReports";
 import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
 import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutcomes";
+import Organization_impactModels from "./components/impactModels/organization-impactModels";
+import ImpactModels from "./components/impactModels/impactModels";
+import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
 
 const routes = (
   <Routes>
@@ -148,7 +151,8 @@ const routes = (
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcomes/:uri`} element={<PrivateRoute element={StakeholderOutcomes}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcomes/:uri`}
+           element={<PrivateRoute element={StakeholderOutcomes}/>}/>
 
     {/*impactReport*/}
     <Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}
@@ -159,6 +163,15 @@ const routes = (
            element={<PrivateRoute element={AddEditImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditImpactReport}/>}/>
+
+    {/*impactModel*/}
+    <Route path={`${process.env.PUBLIC_URL}/organization-impactModels`}
+           element={<PrivateRoute element={Organization_impactModels}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactModel/new`}
+           element={<PrivateRoute element={AddEditImpactModel}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactModel/:orgUri/:operationMode`}
+           element={<PrivateRoute element={AddEditImpactModel}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactModels/:uri`} element={<PrivateRoute element={ImpactModels}/>}/>
 
     {/*file uploading page*/}
     <Route path={`${process.env.PUBLIC_URL}/fileUploading`} element={<PrivateRoute element={FileUploadingPage}/>}/>

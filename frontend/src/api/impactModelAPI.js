@@ -1,4 +1,4 @@
-import {getJson} from "./index";
+import {getJson, postJson} from "./index";
 
 
 export async function fetchImpactModels(organizationURI) {
@@ -7,4 +7,8 @@ export async function fetchImpactModels(organizationURI) {
 
 export async function fetchImpactModelInterfaces(organizationURI) {
   return getJson('/api/impactModels/interface/' + organizationURI);
+}
+
+export async function createImpactModel(params) {
+  return postJson(`/api/impactModel/`, params);
 }

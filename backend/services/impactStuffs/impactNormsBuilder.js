@@ -20,10 +20,10 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
   const mainModel = GDBImpactNormsModel
   const mainObject = environment === 'fileUploading' ? impactNormsDict[uri] : mainModel({}, {uri: form.uri});
 
-  // if (environment !== 'fileUploading') {
-  //   await code;
-  //   uri = code._uri;
-  // }
+  if (environment !== 'fileUploading') {
+    await mainObject.save();
+    uri = mainObject._uri;
+  }
 
 
   const config = fullLevelConfig['impactNorms'];
@@ -34,7 +34,7 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
     if (organization || form.organization) {
       mainObject.organization = organization?._uri || form.organization;
 
-      organization = organization || await GDBOrganizationModel.findOne({_uri: form.organization});
+      organization = environment === 'fileUploading'? organization : await GDBOrganizationModel.findOne({_uri: form.organization});
       if (!organization)
         throw new Server400Error('For ImpactNorms, Organization is Mandatory');
       if (!organization.impactModels)
@@ -100,6 +100,7 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
 
     if (environment === 'interface') {
       await mainObject.save();
+      return true;
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
