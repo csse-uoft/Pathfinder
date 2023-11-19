@@ -47,13 +47,15 @@ export default function AddEditIndicator() {
 
   const [form, setForm] = useState({
     name: '',
-    // hasIdentifier: '',
+    identifier: '',
     description: '',
     unitOfMeasure: '',
     uri: '',
     organization: '',
     baseline: '',
-    codes: []
+    codes: [],
+    dateCreated: '',
+
   });
   const [loading, setLoading] = useState(true);
 
@@ -147,10 +149,12 @@ export default function AddEditIndicator() {
   };
 
   const validate = () => {
+    console.log(form);
     const error = {};
     if (form.name === '')
       error.name = 'The field cannot be empty';
-
+    if (form.identifier === '')
+        error.identifier = 'The field cannot be empty';
     if (!form.description)
       error.description = 'The field cannot be empty';
     if (!form.organization)
@@ -176,6 +180,10 @@ export default function AddEditIndicator() {
           <Typography variant={'h6'}> {`Organization:`} </Typography>
           <Typography variant={'body1'}> {<Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover
                                                 color={'#2f5ac7'}>{form.organizationName}</Link>} </Typography>
+          <Typography variant={'h6'}> {`Identifier:`} </Typography>
+          <Typography variant={'body1'}> {`${form.identifier}`} </Typography>
+          <Typography variant={'h6'}> {`Date Created:`} </Typography>
+          <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
           <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
           <Typography variant={'body1'}> {`${form.unitOfMeasure || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Baseline:`} </Typography>

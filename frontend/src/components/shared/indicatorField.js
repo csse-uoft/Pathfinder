@@ -5,6 +5,7 @@ import Dropdown from "./fields/MultiSelectField";
 import {fetchOrganizationsInterfaces, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {isValidURL} from "../../helpers/validation_helpers";
+import GeneralField from "./fields/GeneralField";
 
 
 const filterOptions = createFilterOptions({
@@ -138,6 +139,50 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 }
               />
             </Grid>
+              <Grid item xs={4}>
+                  <GeneralField
+                      fullWidth
+                      type={'date'}
+                      value={state.dateCreated}
+                      label={'Date Created'}
+                      onChange={handleChange('dateCreated')}
+                      required={required}
+                      disabled={disabled}
+                      error={!!errors.dateCreated}
+                      helperText={errors.dateCreated}
+                      minWidth={187}
+                      onBlur={() => {
+                          if (!state.dateCreated) {
+                              setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
+                          } else {
+                              setErrors(errors => ({...errors, dateCreated: null}));
+                          }
+                      }
+                      }
+                  />
+              </Grid>
+              <Grid item xs={4}>
+                  <TextField
+                      sx={{mt: 2}}
+                      fullWidth
+                      label="Identifier"
+                      type="text"
+                      defaultValue={state.identifier}
+                      onChange={handleChange('identifier')}
+                      disabled={disabled}
+                      required={required}
+                      error={!!errors.identifier}
+                      helperText={errors.identifier}
+                      onBlur={() => {
+                          if (!state.identifier) {
+                              setErrors(errors => ({...errors, identifier: 'This field cannot be empty'}));
+                          } else {
+                              setErrors(errors => ({...errors, identifier: null}));
+                          }
+                      }
+                      }
+                  />
+              </Grid>
 
             <Grid item xs={12}>
               <LoadingAutoComplete

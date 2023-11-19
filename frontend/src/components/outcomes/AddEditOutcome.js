@@ -88,7 +88,7 @@ export default function AddEditOutcome() {
   }, [mode, uri]);
 
   const handleSubmit = () => {
-    console.log(form)
+
     if (validate()) {
       setState(state => ({...state, submitDialog: true}));
     }
@@ -134,6 +134,7 @@ export default function AddEditOutcome() {
     const error = {};
     if (!form.name)
       error.name = 'The field cannot be empty';
+
     // if (!form.indicators.length)
     //   error.indicators = 'The field cannot be empty';
     // if (!form.outcomes.length)
