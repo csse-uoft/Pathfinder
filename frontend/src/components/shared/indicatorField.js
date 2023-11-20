@@ -3,6 +3,7 @@ import {Autocomplete, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
 import Dropdown from "./fields/MultiSelectField";
 import {fetchOrganizationsInterfaces, fetchOrganizations} from "../../api/organizationApi";
+import {fetchStakeholderInterfaces, fetchStakeholders} from "../../api/stakeholderAPI";
 import {UserContext} from "../../context";
 import {isValidURL} from "../../helpers/validation_helpers";
 import GeneralField from "./fields/GeneralField";
@@ -54,7 +55,8 @@ function LoadingAutoComplete({
 export default function IndicatorField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, disabledURI}) {
 
   const [state, setState] = useState(defaultValue || {});
-  const [options, setOptions] = useState({})
+  const [options, setOptions] = useState({});
+  const [stakeholderOptions, setStakeholderOptions] = useState({});
   const userContext = useContext(UserContext);
 
   const [errors, setErrors] = useState({...importErrors});
@@ -73,9 +75,25 @@ export default function IndicatorField({defaultValue, required, onChange, label,
           options[organization._uri] = organization.legalName;
         })
         setOptions(options)
+
       }
     })
-  }, [])
+  }, []);
+
+
+  useEffect(() => {
+        fetchStakeholders().then(({success, stakeholders}) => {
+            if(success) {
+                //console.log("stakeholders")
+                //console.log(stakeholders);
+                const options = {};
+                stakeholders.map(stakeholder => {
+                    options[stakeholder._uri] = stakeholder.name;
+                })
+                setStakeholderOptions(options);
+            }
+        })
+    }, [])
 
   const handleChange = name => (e, value) => {
     setState(state => {
@@ -161,7 +179,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                       }
                   />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={8}>
                   <TextField
                       sx={{mt: 2}}
                       fullWidth
@@ -206,6 +224,35 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 }
               />
             </Grid>
+
+              <Grid item xs={12}>
+                  <Dropdown
+                      label="Access"
+                      key={'Access'}
+                      options={options}
+                      onChange={(e) => {
+                          setState(state => ({...state, access: e.target.value}));
+                          const st = state;
+                          st.access = e.target.value;
+                          onChange(st);
+                      }
+                      }
+                      fullWidth
+                      value={state.access}
+                      error={!!errors.access}
+                      helperText={errors.access}
+                      required={required}
+                      disabled={disabled}
+                      // onBlur={() => {
+                      //     if (!state.outcomes) {
+                      //         setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
+                      //     } else {
+                      //         setErrors(errors => ({...errors, outcomes: null}));
+                      //     }
+                      // }
+                      // }
+                  />
+              </Grid>
 
             <Grid item xs={12}>
               <TextField
@@ -252,6 +299,28 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 }
               />
             </Grid>
+              <Grid item xs={12}>
+                  <TextField
+                      sx={{mt: 2}}
+                      fullWidth
+                      label="Threshold"
+                      type="text"
+                      defaultValue={state.threshold}
+                      onChange={handleChange('threshold')}
+                      disabled={disabled}
+                      required={required}
+                      error={!!errors.threshold}
+                      helperText={errors.threshold}
+                      onBlur={() => {
+                          if (!state.threshold) {
+                              setErrors(errors => ({...errors, threshold: 'This field cannot be empty'}));
+                          }else {
+                              setErrors(errors => ({...errors, threshold: null}));
+                          }
+                      }
+                      }
+                  />
+              </Grid>
 
             <Grid item xs={12}>
               <TextField

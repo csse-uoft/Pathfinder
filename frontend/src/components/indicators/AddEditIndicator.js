@@ -53,8 +53,10 @@ export default function AddEditIndicator() {
     uri: '',
     organization: '',
     baseline: '',
+    threshold: '',
     codes: [],
     dateCreated: '',
+    access: [],
 
   });
   const [loading, setLoading] = useState(true);
@@ -159,6 +161,11 @@ export default function AddEditIndicator() {
       error.description = 'The field cannot be empty';
     if (!form.organization)
       error.organization = 'The field cannot be empty';
+    if (!form.dateCreated)
+      error.dateCreated = 'The field cannot be empty';
+    if (!form.uri)
+      error.uri = 'The field cannot be empty';
+
     // if (!form.hasIdentifier)
     //   error.hasIdentifier = 'The field cannot be empty';
     setErrors(error);
@@ -188,6 +195,8 @@ export default function AddEditIndicator() {
           <Typography variant={'body1'}> {`${form.unitOfMeasure || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Baseline:`} </Typography>
           <Typography variant={'body1'}> {`${form.baseline || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Threshold:`} </Typography>
+          <Typography variant={'body1'}> {`${form.threshold || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Codes:`} </Typography>
           {form.codes?.length?
             form.codes.map(code => <Typography variant={'body1'}> {<Link to={`/code/${encodeURIComponent(code)}/view`} colorWithHover

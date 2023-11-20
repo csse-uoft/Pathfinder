@@ -61,6 +61,7 @@ import Organization_impactReports from "./components/impactReport/Organization-i
 import ImpactReports from "./components/impactReport/ImpactReports";
 import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
 import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutcomes";
+import AddEditDataset from "./components/datasets/AddEditDataset"
 
 const routes = (
   <Routes>
@@ -97,6 +98,10 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/codes`} element={<PrivateRoute element={Codes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/new`} element={<PrivateRoute element={AddEditCode}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/:uri/:viewMode`} element={<PrivateRoute element={AddEditCode}/>}/>
+
+    {/*Datasets*/}
+    <Route path={`${process.env.PUBLIC_URL}/dataset/new`} element={<PrivateRoute element={AddEditDataset}/>}/>
+
 
     {/*Characteristic*/}
     {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
