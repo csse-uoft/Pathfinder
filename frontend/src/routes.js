@@ -64,6 +64,8 @@ import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutc
 import Organization_impactModels from "./components/impactModels/organization-impactModels";
 import ImpactModels from "./components/impactModels/impactModels";
 import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
+import CounterFacutal from "./components/counterfactual/Counterfactual";
+import AddCounterfactual from "./components/counterfactual/AddEditCounterfactual"
 
 const routes = (
   <Routes>
@@ -225,6 +227,11 @@ const routes = (
            element={<PrivateRoute element={StakeholderOutcomeReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/reportGenerate/impactReports-reports`}
            element={<PrivateRoute element={ImpactReports_ReportGenerate}/>}/>
+
+
+    {/*CounterFactual*/}
+    <Route path={`${process.env.PUBLIC_URL}/counterfactual`} element={<PrivateRoute element={CounterFacutal}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/counterfactual/new`} element={<PrivateRoute element={AddCounterfactual}/>}/>
 
   </Routes>
 );
