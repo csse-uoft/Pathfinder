@@ -5,6 +5,11 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBImpactModelModel} = require("../../models/impactStuffs");
+const {Transaction} = require("graphdb-utils");
+const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
+const {impactNormsBuilder} = require("./impactNormsBuilder");
+
+const RESOURCE = 'ImpactModel'
 
 const fetchImpactModels = async (req, res) => {
 
@@ -50,8 +55,8 @@ const fetchImpactModels = async (req, res) => {
   } else {
     // the organizationUri is given, return all indicators belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
-      {populates: ['impactModels']}
     );
+    const impactModels = await GDBImpactModelModel.find({organization: organizationUri});
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.impactModels)
@@ -59,11 +64,11 @@ const fetchImpactModels = async (req, res) => {
     let editable;
     if (userAccount.isSuperuser || organization.editors?.includes(userAccount._uri)) {
       editable = true;
-      organization.impactModels.map(indicator => {
-        indicator.editable = true;
+      impactModels.map(impactModel => {
+        impactModel.editable = true;
       });
     }
-    return res.status(200).json({success: true, impactModels: organization.impactModels, editable});
+    return res.status(200).json({success: true, impactModels: impactModels, editable});
   }
 
 
@@ -79,6 +84,24 @@ const fetchImpactModelsHandler = async (req, res, next) => {
     next(e);
   }
 };
+
+const createImpactModelHandler = async (req, res, next) => {
+  try {
+    const {form} = req.body;
+    await Transaction.beginTransaction();
+    if (await hasAccess(req, 'create' + RESOURCE)) {
+      if (await impactNormsBuilder('interface', null, null, null, {}, {}, form)){
+        await Transaction.commit();
+        return res.status(200).json({success: true})
+      }
+    }
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+  } catch (e) {
+    if (Transaction.isActive())
+      await Transaction.rollback();
+    next(e);
+  }
+}
 
 
 const fetchImpactModelInterfacesHandler = async (req, res, next) => {
@@ -112,5 +135,6 @@ const fetchImpactModelInterfaces = async (req, res) => {
 
 module.exports = {
   fetchImpactModelsHandler,
-  fetchImpactModelInterfacesHandler
+  fetchImpactModelInterfacesHandler,
+  createImpactModelHandler
 }

@@ -38,7 +38,7 @@ export default function Codes() {
   const showDeleteDialog = (uri) => {
     setState(state => ({
       ...state, selectedUri: uri, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete codes ' + uri + ' ?'
+      deleteDialogTitle: 'Delete theme ' + uri + ' ?'
     }));
   };
 
@@ -67,7 +67,7 @@ export default function Codes() {
     {
       label: 'Name',
       body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/code/${encodeURIComponent(_uri)}/view`}>
+        return <Link colorWithHover to={`/counterfactual/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>
       },
@@ -83,28 +83,28 @@ export default function Codes() {
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'counterfactual'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading codes...`}/>;
+    return <Loading message={`Loading counterfactuals...`}/>;
 
   return (
     <Container>
       <DataTable
-        title={"Codes"}
+        title={"Counterfactuals"}
         data={state.data}
         columns={columns}
         uriField="uriField"
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/code/new')}
+            onClick={() => navigate('/counterfactual/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Codes"
+            label="Add new Counterfactual"
             variant="outlined"/>
         }
 

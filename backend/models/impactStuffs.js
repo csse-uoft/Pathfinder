@@ -17,7 +17,7 @@ const GDBImpactModelModel = createGraphDBModel({
 
 const GDBImpactNormsModel = createGraphDBModel({
   name: {type: String, internalKey: 'cids:hasName'},
-  description: {type: String, internalKey: 'cids:hasName'},
+  description: {type: String, internalKey: 'cids:hasDescription'},
   organization: {type: GDBOrganizationModel, internalKey: 'cids:forOrganization'},
   dateCreated: {type: Date, internalKey: "schema:dateCreated"},
   stakeholders: {type: [GDBStakeholderModel], internalKey: 'cids:hasStakeholder'},

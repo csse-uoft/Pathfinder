@@ -4,12 +4,11 @@ import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
+import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
-import {deleteTheme, fetchThemes} from "../../api/themeApi";
-import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCodes} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-export default function Codes() {
+import {navigateHelper} from "../../helpers/navigatorHelper";
+
+export default function Organization_impactModels() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
@@ -25,9 +24,9 @@ export default function Codes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchCodes().then(res => {
+    fetchOrganizations().then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.codes}));
+        setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
@@ -38,13 +37,13 @@ export default function Codes() {
   const showDeleteDialog = (uri) => {
     setState(state => ({
       ...state, selectedUri: uri, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete codes ' + uri + ' ?'
+      deleteDialogTitle: 'Delete organization ' + uri + ' ?'
     }));
   };
 
   const handleDelete = async (uri, form) => {
 
-    deleteTheme(uri).then(({success, message})=>{
+    deleteOrganization(encodeURIComponent(uri)).then(({success, message})=>{
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -56,7 +55,6 @@ export default function Codes() {
       setState(state => ({
         ...state, showDeleteDialog: false,
       }));
-      reportErrorToBackend(e)
       setTrigger(!trigger);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
@@ -65,46 +63,63 @@ export default function Codes() {
 
   const columns = [
     {
-      label: 'Name',
-      body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/code/${encodeURIComponent(_uri)}/view`}>
-          {name}
+      label: 'Legal Name',
+      body: ({_uri, legalName}) => {
+        return <Link colorWithHover to={`/impactModels/${encodeURIComponent(_uri)}`}>
+          {legalName}
         </Link>
       },
       sortBy: ({legalName}) => legalName
     },
     {
-      label: 'Description',
-      body: ({description}) => {
-        return description;
+      label: 'Administrator',
+      body: ({administrator}) => {
+        return administrator;
       }
     },
+    // {
+    //   label: 'Last name',
+    //   body: ({person}) => {
+    //     if(person && person.familyName)
+    //       return person.familyName
+    //     return 'Not Provided'
+    //   }
+    // },
+    // {
+    //   label: 'Phone Number',
+    //   body: ({primaryContact}) => {
+    //     if (primaryContact && primaryContact.telephone)
+    //       return formatPhoneNumber(primaryContact.telephone);
+    //     return 'Not Provided';
+    //   },
+    // },
 
-    {
-      label: ' ',
-      body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
-                      hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
-    }
+    // {
+    //   label: ' ',
+    //   body: ({_id}) =>
+    //     <DropdownMenu urlPrefix={'organizations'} objectId={_id}
+    //                   hideViewOption hideEditOption hideDeleteOption
+    //                   handleDelete={() => showDeleteDialog(_id)}/>
+    // }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading codes...`}/>;
+    return <Loading message={`Loading organizations...`}/>;
 
   return (
     <Container>
       <DataTable
-        title={"Codes"}
+        title={"Organizations"}
         data={state.data}
         columns={columns}
-        uriField="uriField"
+        uriField="uri"
         customToolbar={
           <Chip
-            disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/code/new')}
+            disabled={!userContext.isSuperuser && !userContext.editorOfs.length}
+            onClick={() => navigate('/impactModel/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Codes"
+            label="Add a new Impact Model"
             variant="outlined"/>
         }
 
