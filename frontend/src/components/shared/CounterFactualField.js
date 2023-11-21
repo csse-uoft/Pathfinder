@@ -1,16 +1,9 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchThemes} from "../../api/themeApi";
-import {fetchOutcomes} from "../../api/outcomeApi";
-import {fetchOrganizations, fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
-import {fetchIndicators} from "../../api/indicatorApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchCodesInterfaces} from "../../api/codeAPI";
 import GeneralField from "./fields/GeneralField";
-import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
 import {fetchFeatureInterfaces} from "../../api/featureAPI";
 
 
@@ -57,7 +50,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function CounterFacutalField({
+export default function CounterFactualField({
                                        defaultValue,
                                        required,
                                        onChange,
@@ -80,30 +73,6 @@ export default function CounterFacutalField({
 
   useEffect(() => {
     Promise.all([
-      fetchThemes()
-        .then(res => {
-          if (res.success)
-            res.themes.map(
-              theme => {
-                options.themes[theme._uri] = theme.name;
-              }
-            );
-        }),
-      fetchOrganizationsInterfaces().then(({success, organizations}) => {
-        if (success) {
-          const options = {};
-          organizations.map(organization => {
-            // only organization which the user serves as an editor should be able to add
-            options[organization._uri] = organization.legalName;
-          });
-          setOptions(op => ({...op, organization: options}));
-        }
-      }),
-      fetchCodesInterfaces().then(({success, codesInterfaces}) => {
-        if (success) {
-          setOptions(op => ({...op, codes: codesInterfaces}));
-        }
-      }),
       fetchFeatureInterfaces().then(({success, featuresInterfaces}) => {
         if (success) {
           setOptions(op => ({...op, features: featuresInterfaces}))
@@ -112,31 +81,6 @@ export default function CounterFacutalField({
     ]).then(() => setLoading(false));
 
   }, []);
-
-  useEffect(() => {
-    if (state.organization) {
-      Promise.all([fetchIndicators(encodeURIComponent(state.organization)), fetchImpactModelInterfaces(encodeURIComponent(state.organization))]).
-      then(([{indicators}, {impactModelInterfaces}]) => {
-        const inds = {};
-        indicators.map(indicator => {
-          inds[indicator._uri] = indicator.name;
-        });
-        setOptions(ops => ({...ops, indicators: inds, partOf: impactModelInterfaces}));
-      })
-    }
-
-      if (state.organization) {
-          fetchOutcomes(encodeURIComponent(state.organization)).then(({success, outcomes}) => {
-              if (success) {
-                  const outs = {};
-                  outcomes.map(outcome => {
-                      outs[outcome._uri] = outcome.name;
-                  });
-                  setOptions(ops => ({...ops, outcomes: outs}));
-              }
-          });
-      }
-  }, [state.organization]);
  //   console.log(options)
   useEffect(() => {
     setErrors({...importErrors});
@@ -160,7 +104,7 @@ export default function CounterFacutalField({
         <>
           <Grid container columnSpacing={2}>
           
-            <Grid item xs={8}>
+            <Grid item xs={12}>
               <Dropdown
                 label="Located In"
                 key={'locatedIn'}
@@ -180,7 +124,7 @@ export default function CounterFacutalField({
               />
             </Grid>
               
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
@@ -203,7 +147,7 @@ export default function CounterFacutalField({
               />
             </Grid>
 
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
@@ -226,18 +170,30 @@ export default function CounterFacutalField({
               />
             </Grid>
 
-            <Dropdown
-            label="Stakeholders"
-            key={'stakeholders'}
-            value={form.stakeholders}
+            <Grid item xs={4}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="Value"
+                type="text"
+                value={state.Value}
+                disabled={disabled}
+                required={required}
+              />
+            </Grid>
+
+            {/* <Dropdown
+            label="wasGeneratedBy"
+            key={'wasGeneratedBy'}
+            value={form.wasGeneratedBy}
             onChange={e => {
-              form.stakeholders = e.target.value;
+              form.wasGeneratedBy = e.target.value;
             }}
-            options={options.stakeholders}
-            error={!!errors.stakeholders}
-            helperText={errors.stakeholders}
+            options={options.wasGeneratedBy}
+            error={!!errors.wasGeneratedBy}
+            helperText={errors.wasGeneratedBy}
             // sx={{mb: 2}}
-          />
+          /> */}
           
             <Grid item xs={12}>
               <TextField
@@ -264,18 +220,7 @@ export default function CounterFacutalField({
               />
             </Grid>
 
-
-            <GeneralField
-            disabled={!userContext.isSuperuser}
-            key={'Value'}
-            label={'Value'}
-            value={form.Value}
-            sx={{mt: '16px', minWidth: 350}}
-            onChange={e => form.Value = e.target.value}
-            error={!!errors.Value}
-            helperText={errors.Value}
-          />
-
+            
 
           </Grid>
         </>

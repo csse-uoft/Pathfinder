@@ -64,10 +64,11 @@ import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutc
 import Organization_impactModels from "./components/impactModels/organization-impactModels";
 import ImpactModels from "./components/impactModels/impactModels";
 import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
-import CounterFacutal from "./components/counterfactual/Counterfactual";
-import AddCounterfactual from "./components/counterfactual/AddEditCounterfactual";
+import CounterFactuals from "./components/counterfactual/Counterfactuals";
+import AddEditCounterfactual from "./components/counterfactual/AddEditCounterfactual"
 import AddEditImpactRisk from "./components/impactRisk/AddEditImpactRisk";
 import ImpactRisks from "./components/impactRisk/ImpactRisks";
+
 
 const routes = (
   <Routes>
@@ -238,8 +239,14 @@ const routes = (
 
 
     {/*CounterFactual*/}
-    <Route path={`${process.env.PUBLIC_URL}/counterfactual`} element={<PrivateRoute element={CounterFacutal}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/counterfactual/new`} element={<PrivateRoute element={AddCounterfactual}/>}/>
+    <Route 
+          path={`${process.env.PUBLIC_URL}/counterfactual`} 
+          element={<PrivateRoute element={CounterFactuals}/>}/>
+    <Route                                
+          path={`${process.env.PUBLIC_URL}/counterfactual/new`} 
+          element={<PrivateRoute element={AddEditCounterfactual}/>}/>
+
+    <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:viewMode`} element={<PrivateRoute element={AddEditCounterfactual}/>}/>
 
   </Routes>
 );

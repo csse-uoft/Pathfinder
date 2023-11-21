@@ -7,7 +7,7 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import CounterFacutalField from "../shared/CounterFacutalField";
+import CounterFactualField from "../shared/CounterFactualField";
 import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
@@ -24,7 +24,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-export default function AddEditOutcome() {
+export default function AddEditCounterfactual() {
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -47,6 +47,7 @@ export default function AddEditOutcome() {
     endTime: '',
     description: '',
     locatedIns: [],
+    Value:'',
   });
   const [loading, setLoading] = useState(true);
 
@@ -126,8 +127,8 @@ export default function AddEditOutcome() {
   const validate = () => {
     console.log(form)
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
+    if (!form.locatedIns)
+      error.locatedIns = 'The field cannot be empty';
     // if (!form.indicators.length)
     //   error.indicators = 'The field cannot be empty';
     // if (!form.outcomes.length)
@@ -139,15 +140,11 @@ export default function AddEditOutcome() {
     //   error.themes = 'The field cannot be empty';
     // if (!form.description)
     //   error.description = 'The field cannot be empty'
-    if(!form.organization)
-      error.organization = 'The field cannot be empty'
     // if(form.uri && !isValidURL(form.uri))
     //   error.uri = 'Not a valid URI';
     // if (!form.dateCreated)
     //   error.dateCreated = 'The field cannot be empty';
-    if (!form.partOf)
-      error.partOf = 'The field cannot be empty'
-    setErrors(error);
+
     return Object.keys(error).length === 0;
   };
 
@@ -159,15 +156,6 @@ export default function AddEditOutcome() {
       {mode === 'view'?
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
-
-            <Typography variant={'h6'}> {`Name:`} </Typography>
-            <Typography variant={'body1'}> {`${form.name}`} </Typography>
-            <Typography variant={'h6'}> {`URI:`} </Typography>
-            <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-            <Typography variant={'h6'}> {`Organization:`} </Typography>
-            <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
-            <Typography variant={'h6'}> {`Date Created:`} </Typography>
-            <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
             <Typography variant={'h6'}> {`Located In:`} </Typography>
             <Typography variant={'body1'}> {`${form.locatedIn}`} </Typography>
             {<Typography variant={'h6'}> {`Themes:`} </Typography>}
@@ -178,26 +166,7 @@ export default function AddEditOutcome() {
                             color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
                 </Typography>
                 );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
-
-            <Typography variant={'h6'}> {`Indicators:`} </Typography>
-            {form.indicators?.length? form.indicators.map(indicatorURI => {
-              return (
-                <Typography variant={'body1'}>
-                  <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover
-                        color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>
-                </Typography>
-              );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
-            <Typography variant={'h6'}> {`Outcomes:`} </Typography>
-            {form.outcomes?.length? form.outcomes.map(outcomeURI => {
-              return (
-                  <Typography variant={'body1'}>
-                    <Link to={`/outcome/${encodeURIComponent(outcomeURI)}/view`} colorWithHover
-                          color={'#2f5ac7'}>{form.outcomes[outcomeURI]}</Link>
-                  </Typography>
-              );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
+            }):<Typography variant={'body1'}> {`Not Given`} </Typography>}
             <Typography variant={'h6'}> {`Description:`} </Typography>
             <Typography variant={'body1'}> {`${form.description}`} </Typography>
 
@@ -211,8 +180,8 @@ export default function AddEditOutcome() {
           </Paper>
         )
         : (<Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Outcome </Typography>
-        <CounterFacutalField
+        <Typography variant={'h4'}> Counterfactual </Typography>
+        <CounterFactualField
           disabled={mode === 'view'}
           disabledOrganization={!!orgUri}
           disableURI={mode !== 'new'}
