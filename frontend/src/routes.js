@@ -66,6 +66,9 @@ import ImpactModels from "./components/impactModels/impactModels";
 import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
 import CounterFactuals from "./components/counterfactual/Counterfactuals";
 import AddEditCounterfactual from "./components/counterfactual/AddEditCounterfactual"
+import AddEditImpactRisk from "./components/impactRisk/AddEditImpactRisk";
+import ImpactRisks from "./components/impactRisk/ImpactRisks";
+
 
 const routes = (
   <Routes>
@@ -102,6 +105,12 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/codes`} element={<PrivateRoute element={Codes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/new`} element={<PrivateRoute element={AddEditCode}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/:uri/:viewMode`} element={<PrivateRoute element={AddEditCode}/>}/>
+
+    {/*ImpactRisk*/}
+    <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactRisk/new`} element={<PrivateRoute element={AddEditImpactRisk}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactRisk/:uri/:viewMode`}
+           element={<PrivateRoute element={AddEditImpactRisk}/>}/>
 
     {/*Characteristic*/}
     {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
