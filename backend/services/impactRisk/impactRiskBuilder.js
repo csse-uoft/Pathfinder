@@ -78,7 +78,7 @@ async function impactRiskBuilder(environment, subType, object, organization, err
 
   if (mainObject) {
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'cids:hasIdentifier', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'hasIdentifier', 'cids:hasIdentifier', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -90,7 +90,6 @@ async function impactRiskBuilder(environment, subType, object, organization, err
 
     if (environment === 'interface') {
       await mainObject.save();
-      await Transaction.commit();
       return true;
     }
 

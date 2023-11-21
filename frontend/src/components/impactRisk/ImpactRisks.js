@@ -7,9 +7,11 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCodes} from "../../api/codeAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-export default function Codes() {
+import {fetchImpactRisks} from "../../api/impactRiskApi";
+
+
+export default function ImpactRisks() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
@@ -25,9 +27,9 @@ export default function Codes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchCodes().then(res => {
+    fetchImpactRisks().then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.codes}));
+        setState(state => ({...state, loading: false, data: res.impactRisks}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
@@ -38,7 +40,7 @@ export default function Codes() {
   const showDeleteDialog = (uri) => {
     setState(state => ({
       ...state, selectedUri: uri, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete codes ' + uri + ' ?'
+      deleteDialogTitle: 'Delete ImpactRisk ' + uri + ' ?'
     }));
   };
 
@@ -65,46 +67,40 @@ export default function Codes() {
 
   const columns = [
     {
-      label: 'Name',
-      body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/code/${encodeURIComponent(_uri)}/view`}>
-          {name}
+      label: 'Identifier',
+      body: ({_uri, hasIdentifier}) => {
+        return <Link colorWithHover to={`/impactRisk/${encodeURIComponent(_uri)}/view`}>
+          {hasIdentifier}
         </Link>
       },
-      sortBy: ({legalName}) => legalName
-    },
-    {
-      label: 'Description',
-      body: ({description}) => {
-        return description;
-      }
+      sortBy: ({_uri}) => _uri
     },
 
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'impactRisk'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading codes...`}/>;
+    return <Loading message={`Loading Impact Risks...`}/>;
 
   return (
     <Container>
       <DataTable
-        title={"Codes"}
+        title={"Impact Risks"}
         data={state.data}
         columns={columns}
         uriField="uriField"
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/code/new')}
+            onClick={() => navigate('/impactRisk/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Codes"
+            label="Add new ImpactRisk"
             variant="outlined"/>
         }
 

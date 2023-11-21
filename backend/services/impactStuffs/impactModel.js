@@ -95,6 +95,7 @@ const createImpactModelHandler = async (req, res, next) => {
         return res.status(200).json({success: true})
       }
     }
+    return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     if (Transaction.isActive())
       await Transaction.rollback();
