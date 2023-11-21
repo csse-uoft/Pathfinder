@@ -139,7 +139,7 @@ export default function AddEditImpactRisk() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating outcome', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating ImpactRisk', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -188,7 +188,7 @@ export default function AddEditImpactRisk() {
 
         </Paper>
       ) : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
-        <Typography variant={'h4'}> Impact Model </Typography>
+        <Typography variant={'h4'}> Impact Risk </Typography>
 
         <SelectField
           key={'hasIdentifier'}
