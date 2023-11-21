@@ -7,6 +7,7 @@ import {useSnackbar} from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchStakeholders} from "../../api/stakeholderAPI";
 export default function Organization_indicators() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -25,6 +26,17 @@ export default function Organization_indicators() {
     fetchOrganizations(userContext).then(res => {
       if (res.success)
         setState(state => ({...state, loading: false, data: res.organizations}));
+    }).catch(e => {
+      setState(state => ({...state, loading: false}));
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    });
+  }, [trigger]);
+
+  useEffect(() => {
+    fetchStakeholders().then(res => {
+      if (res.success)
+        setState(state => ({...state, loading: false, data: res.stakeholders}));
     }).catch(e => {
       setState(state => ({...state, loading: false}));
       navigate('/dashboard');

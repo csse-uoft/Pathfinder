@@ -31,7 +31,7 @@ import Themes from "./components/theme/Themes";
 import AddEditTheme from "./components/theme/addEditTheme";
 import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
-import AddEditIndicator from "./components/indicators/addEditIndicator";
+import AddEditIndicator from "./components/indicators/AddEditIndicator";
 import Organization_outcomes from "./components/outcomes/Organization-outcomes";
 import Outcomes from "./components/outcomes/outcomes";
 import AddEditOutcome from "./components/outcomes/AddEditOutcome";
@@ -61,6 +61,7 @@ import Organization_impactReports from "./components/impactReport/Organization-i
 import ImpactReports from "./components/impactReport/ImpactReports";
 import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
 import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutcomes";
+import AddEditDataset from "./components/datasets/AddEditDataset"
 import Organization_impactModels from "./components/impactModels/organization-impactModels";
 import ImpactModels from "./components/impactModels/impactModels";
 import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
@@ -106,11 +107,16 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/code/new`} element={<PrivateRoute element={AddEditCode}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/:uri/:viewMode`} element={<PrivateRoute element={AddEditCode}/>}/>
 
+
+    {/*Datasets*/}
+    <Route path={`${process.env.PUBLIC_URL}/dataset/new`} element={<PrivateRoute element={AddEditDataset}/>}/>
+
     {/*ImpactRisk*/}
     <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactRisk/new`} element={<PrivateRoute element={AddEditImpactRisk}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactRisk/:uri/:viewMode`}
            element={<PrivateRoute element={AddEditImpactRisk}/>}/>
+
 
     {/*Characteristic*/}
     {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
