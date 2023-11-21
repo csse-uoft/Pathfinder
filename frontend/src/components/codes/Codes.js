@@ -71,7 +71,7 @@ export default function Codes() {
           {name}
         </Link>
       },
-      sortBy: ({legalName}) => legalName
+      sortBy: ({name}) => name
     },
     {
       label: 'Description',

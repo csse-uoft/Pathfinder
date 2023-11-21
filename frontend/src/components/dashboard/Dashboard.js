@@ -81,8 +81,8 @@ function Dashboard() {
       <NavButton to={`/organization-stakeholderOutcomes`} icon={<Edit/>} key={'stakeholderOutcomes'}
                  text="Manage Stakeholder Outcomes"/>
 
-      <NavButton to={'/dataset/new'} icon={<Download/>} key={`createDataset`}
-                 text="Create Dataset"/>
+      <NavButton to={'/datasets'} icon={<Edit/>} key={`dataset`}
+                 text="Manage Datasets"/>
 
       <NavButton to={'/impactRisks'} icon={<Edit/>} key={`impactRisk`}
                  text="Manage ImpactRisk"/>

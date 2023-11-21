@@ -1,6 +1,5 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Transaction} = require("graphdb-utils");
-const {codeBuilder} = require("../code/codeBuilder");
 const {counterfactualBuilder} = require("./counterfactualBuilder");
 
 

@@ -59,6 +59,18 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    // dataset
+    case 'createDataset':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+    case 'fetchDatasets':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+
 
     // howMuchImpact
     case 'fetchHowMuchImpacts':

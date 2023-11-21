@@ -9,14 +9,12 @@ import {AlertDialog} from "../shared/Dialogs";
 
 import {useSnackbar} from "notistack";
 
-import Dropdown from "../shared/fields/MultiSelectField";
-import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 import {createCode, fetchCode, updateCode} from "../../api/codeAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataset} from "../../api/datasetApi";
 const useStyles = makeStyles(() => ({
     root: {
         width: '80%'
@@ -74,6 +72,7 @@ export default function AddEditDataset() {
 
 
     const handleSubmit = () => {
+        console.log(form)
         if (validate()) {
             setState(state => ({...state, submitDialog: true}));
         }
@@ -82,7 +81,7 @@ export default function AddEditDataset() {
     const handleConfirm = () => {
         setState(state => ({...state, loadingButton: true}));
         if (mode === 'new') {
-            createCode({form}).then((ret) => {
+            createDataset({form}).then((ret) => {
                 if (ret.success) {
                     setState({loadingButton: false, submitDialog: false,});
                     navigate('/Datasets');
@@ -131,12 +130,12 @@ export default function AddEditDataset() {
         }
         if (form.name === '')
             error.name = 'The field cannot be empty';
-        if (form.identifier === '')
-            error.identifier = 'The field cannot be empty';
-        if (!form.description)
-            error.description = 'The field cannot be empty';
-        if (!form.dateCreated)
-            error.dateCreated = 'The field cannot be empty';
+        // if (form.identifier === '')
+        //     error.identifier = 'The field cannot be empty';
+        // if (!form.description)
+        //     error.description = 'The field cannot be empty';
+        // if (!form.dateCreated)
+        //     error.dateCreated = 'The field cannot be empty';
 
         setErrors(error);
 
@@ -214,14 +213,14 @@ export default function AddEditDataset() {
                         error={!!errors.dateCreated}
                         helperText={errors.dateCreated}
 
-                        onBlur={() => {
-                            if (!form.dateCreated) {
-                                setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
-                            } else {
-                                setErrors(errors => ({...errors, dateCreated: null}));
-                            }
-                        }
-                        }
+                        // onBlur={() => {
+                        //     if (!form.dateCreated) {
+                        //         setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
+                        //     } else {
+                        //         setErrors(errors => ({...errors, dateCreated: null}));
+                        //     }
+                        // }
+                        // }
                     />
 
 
@@ -234,13 +233,13 @@ export default function AddEditDataset() {
                         error={!!errors.identifier}
                         helperText={errors.identifier}
                         required
-                        onBlur={() => {
-                            if (!form.identifier || !isValidURL(form.identifier)) {
-                                setErrors(errors => ({...errors, identifier: 'Please input an valid URI'}));
-                            } else {
-                                setErrors(errors => ({...errors, identifier: ''}));
-                            }
-                        }}
+                        // onBlur={() => {
+                        //     if (!form.identifier || !isValidURL(form.identifier)) {
+                        //         setErrors(errors => ({...errors, identifier: 'Please input an valid URI'}));
+                        //     } else {
+                        //         setErrors(errors => ({...errors, identifier: ''}));
+                        //     }
+                        // }}
                     />
 
 

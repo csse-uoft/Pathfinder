@@ -61,14 +61,15 @@ import Organization_impactReports from "./components/impactReport/Organization-i
 import ImpactReports from "./components/impactReport/ImpactReports";
 import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
 import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutcomes";
-import AddEditDataset from "./components/datasets/AddEditDataset"
+import AddEditDataset from "./components/datasets/AddEditDataset";
 import Organization_impactModels from "./components/impactModels/organization-impactModels";
 import ImpactModels from "./components/impactModels/impactModels";
 import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
-import AddEditCounterfactual from "./components/counterfactual/AddEditCounterfactual"
+import AddEditCounterfactual from "./components/counterfactual/AddEditCounterfactual";
 import AddEditImpactRisk from "./components/impactRisk/AddEditImpactRisk";
 import ImpactRisks from "./components/impactRisk/ImpactRisks";
 import Counterfactuals from "./components/counterfactual/Counterfactuals";
+import Datasets from "./components/datasets/Datasets";
 
 
 const routes = (
@@ -110,6 +111,7 @@ const routes = (
 
     {/*Datasets*/}
     <Route path={`${process.env.PUBLIC_URL}/dataset/new`} element={<PrivateRoute element={AddEditDataset}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/datasets`} element={<PrivateRoute element={Datasets}/>}/>
 
     {/*ImpactRisk*/}
     <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>
@@ -245,14 +247,15 @@ const routes = (
 
 
     {/*CounterFactual*/}
-    <Route 
-          path={`${process.env.PUBLIC_URL}/counterfactuals`}
-          element={<PrivateRoute element={Counterfactuals}/>}/>
-    <Route                                
-          path={`${process.env.PUBLIC_URL}/counterfactual/new`} 
-          element={<PrivateRoute element={AddEditCounterfactual}/>}/>
+    <Route
+      path={`${process.env.PUBLIC_URL}/counterfactuals`}
+      element={<PrivateRoute element={Counterfactuals}/>}/>
+    <Route
+      path={`${process.env.PUBLIC_URL}/counterfactual/new`}
+      element={<PrivateRoute element={AddEditCounterfactual}/>}/>
 
-    <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:viewMode`} element={<PrivateRoute element={AddEditCounterfactual}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:viewMode`}
+           element={<PrivateRoute element={AddEditCounterfactual}/>}/>
 
   </Routes>
 );
