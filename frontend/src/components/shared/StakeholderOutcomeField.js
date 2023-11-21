@@ -178,7 +178,6 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 }
               />
             </Grid>
-            {console.log(options.organizations)}
             <Grid item xs={4}>
               <LoadingAutoComplete
                 label="Organization"

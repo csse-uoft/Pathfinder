@@ -99,7 +99,7 @@ app.use('/api/impactReport', impactReportRoute);
 app.use('/api/impactRisks', impactRisksRoute);
 app.use('/api/impactRisk', impactRiskRoute);
 app.use('/api/features', featuresRoute);
-app.use('/api/howMuchImpact', howMuchImpactsRoute);
+app.use('/api/howMuchImpacts', howMuchImpactsRoute);
 
 
 

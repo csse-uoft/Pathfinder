@@ -53,15 +53,16 @@ export default function AddEditImpactReport() {
   const [form, setForm] = useState({
     name: '',
     comment: '',
-    impactScale: '',
-    impactDepth: '',
-    forStakeholderOutcome: '',
+    impactScale: null,
+    impactDepth: null,
+    impactDuration: null,
+    forStakeholderOutcome: null,
+    reportedImpact: null,
     organization: null,
+    impactRisks: null,
     startTime: '',
     endTime: '',
     uri: '',
-    impactScaleIndicator: '',
-    impactDepthIndicator: ''
   });
   const [loading, setLoading] = useState(true);
 

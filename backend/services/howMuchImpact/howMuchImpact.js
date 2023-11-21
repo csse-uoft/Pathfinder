@@ -25,9 +25,9 @@ const fetchHowMuchImpacts = async (req, res) => {
   const {subType} = req.params;
   let howMuchImpacts = [];
   if (!subType) {
-    howMuchImpacts = GDBHowMuchImpactModel.find({});
+    howMuchImpacts = await GDBHowMuchImpactModel.find({});
   } else if (HowMuchImpactModelDict[subType]){
-    howMuchImpacts = HowMuchImpactModelDict[subType].find({});
+    howMuchImpacts = await HowMuchImpactModelDict[subType].find({});
   } else {
     throw new Server400Error('No Such subType');
   }
