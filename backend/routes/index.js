@@ -29,5 +29,6 @@ module.exports = {
   impactModelRoute: require('./impactModel'),
   featuresRoute: require('./features'),
   impactRiskRoute: require('./impactRisk'),
-  impactRisksRoute: require('./impactRisks')
+  impactRisksRoute: require('./impactRisks'),
+  howMuchImpactsRoute: require('./howMuchImpacts')
 }
