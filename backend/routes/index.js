@@ -31,6 +31,7 @@ module.exports = {
   impactRiskRoute: require('./impactRisk'),
   impactRisksRoute: require('./impactRisks'),
   howMuchImpactsRoute: require('./howMuchImpacts'),
+  howMuchImpactRoute: require('./howMuchImpact'),
   counterfactualRoute: require('./counterfactual'),
   counterfactualsRoute: require('./counterfactuals'),
   datasetRoute: require('./dataset'),

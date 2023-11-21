@@ -550,19 +550,6 @@ export default function AddEditOrganization() {
                 label={'Number Issued By'}
                 value={issuedBy}
                 options={options.issuedBy}
-                // error={!!errors.organizationIds[index].issuedBy}
-                // helperText={
-                //   errors.organizationIds[index].issuedBy
-                // }
-                // onBlur={() => {
-                //   const organizationIdErrors = errors.organizationIds;
-                //   if (form.organizationIds[index].issuedBy === '') {
-                //     organizationIdErrors[index].issuedBy = 'This field cannot be empty'
-                //   } else {
-                //     organizationIdErrors[index].issuedBy = ''
-                //   }
-                //   setErrors(errors => ({...errors, organizationIds: organizationIdErrors}));
-                // }}
                 onChange={e => {
                   const ids = form.organizationIds;
                   ids[index].issuedBy = e.target.value

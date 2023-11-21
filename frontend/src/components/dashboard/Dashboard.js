@@ -90,6 +90,9 @@ function Dashboard() {
       <NavButton to={'/counterfactuals'} icon={<Edit/>} key={`counterfactual`}
                  text="Manage Counterfactuals"/>
 
+      <NavButton to={'/howMuchImpacts'} icon={<Edit/>} key={`howMuchImpacts`}
+                 text="Manage HowMuchImpacts"/>
+
 
       {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={`/fileUploading`} icon={<FileUpload/>} key={'fileUploading'}
                                                                            text="File Upload"/>:null}

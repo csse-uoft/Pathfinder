@@ -35,33 +35,6 @@ export default function Outcomes() {
     });
   }, [trigger]);
 
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
-
   const columns = [
     {
       label: 'Name',
@@ -80,22 +53,7 @@ export default function Outcomes() {
         // return indicators.join(", ");
       }
     },
-    // {
-    //   label: 'Last name',
-    //   body: ({person}) => {
-    //     if(person && person.familyName)
-    //       return person.familyName
-    //     return 'Not Provided'
-    //   }
-    // },
-    // {
-    //   label: 'Phone Number',
-    //   body: ({primaryContact}) => {
-    //     if (primaryContact && primaryContact.telephone)
-    //       return formatPhoneNumber(primaryContact.telephone);
-    //     return 'Not Provided';
-    //   },
-    // },
+
 
     {
       label: ' ',

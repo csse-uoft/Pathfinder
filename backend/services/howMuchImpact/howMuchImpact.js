@@ -1,6 +1,9 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBHowMuchImpactModel, GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {Server400Error} = require("../../utils");
+const {Transaction} = require("graphdb-utils");
+const {impactRiskBuilder} = require("../impactRisk/impactRiskBuilder");
+const {howMuchImpactBuilder} = require("./howMuchImpactBuilder");
 
 const HowMuchImpactModelDict = {
   HowMuchImpact: GDBHowMuchImpactModel,
@@ -10,6 +13,27 @@ const HowMuchImpactModelDict = {
 }
 
 const RESOURCE = 'HowMuchImpact';
+
+
+const createHowMuchImpactHandler = async (req, res, next) => {
+  try {
+    const {form} = req.body;
+    await Transaction.beginTransaction();
+    if (await hasAccess(req, 'create' + RESOURCE)) {
+      if (await howMuchImpactBuilder('interface', form.subtype
+        , null, null, null,{}, {}, form)){
+        await Transaction.commit();
+        return res.status(200).json({success: true})
+      }
+    } else {
+      throw new Server400Error('Wrong Auth')
+    }
+  } catch (e) {
+    if (Transaction.isActive())
+      await Transaction.rollback();
+    next(e);
+  }
+}
 
 const fetchHowMuchImpactsHandler = async (req, res, next) => {
   try {
@@ -24,7 +48,7 @@ const fetchHowMuchImpactsHandler = async (req, res, next) => {
 const fetchHowMuchImpacts = async (req, res) => {
   const {subType} = req.params;
   let howMuchImpacts = [];
-  if (!subType) {
+  if (!subType || subType === 'undefined') {
     howMuchImpacts = await GDBHowMuchImpactModel.find({});
   } else if (HowMuchImpactModelDict[subType]){
     howMuchImpacts = await HowMuchImpactModelDict[subType].find({});
@@ -36,5 +60,5 @@ const fetchHowMuchImpacts = async (req, res) => {
 
 
 module.exports = {
-  fetchHowMuchImpactsHandler
+  fetchHowMuchImpactsHandler, createHowMuchImpactHandler
 }

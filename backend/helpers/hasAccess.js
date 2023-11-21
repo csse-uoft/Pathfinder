@@ -73,6 +73,11 @@ async function hasAccess(req, operationType) {
 
 
     // howMuchImpact
+    case 'createHowMuchImpact':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     case 'fetchHowMuchImpacts':
       if (userAccount.isSuperuser)
         return true;

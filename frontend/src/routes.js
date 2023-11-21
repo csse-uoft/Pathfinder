@@ -70,6 +70,8 @@ import AddEditImpactRisk from "./components/impactRisk/AddEditImpactRisk";
 import ImpactRisks from "./components/impactRisk/ImpactRisks";
 import Counterfactuals from "./components/counterfactual/Counterfactuals";
 import Datasets from "./components/datasets/Datasets";
+import AddEditHowMuchImpact from "./components/howMuchImpact/AddEditHowMuchImpact";
+import HowMuchImpacts from "./components/howMuchImpact/HowMuchImpacts";
 
 
 const routes = (
@@ -112,6 +114,10 @@ const routes = (
     {/*Datasets*/}
     <Route path={`${process.env.PUBLIC_URL}/dataset/new`} element={<PrivateRoute element={AddEditDataset}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/datasets`} element={<PrivateRoute element={Datasets}/>}/>
+
+    {/*Datasets*/}
+    <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/new`} element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/howMuchImpacts`} element={<PrivateRoute element={HowMuchImpacts}/>}/>
 
     {/*ImpactRisk*/}
     <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>
