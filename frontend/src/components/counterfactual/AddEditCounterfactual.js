@@ -9,9 +9,9 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import CounterFactualField from "../shared/CounterFactualField";
 import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
+import {createCounterfactual} from "../../api/counterfactualApi";
+
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -47,7 +47,7 @@ export default function AddEditCounterfactual() {
     endTime: '',
     description: '',
     locatedIns: [],
-    Value:'',
+    value:'',
   });
   const [loading, setLoading] = useState(true);
 
@@ -72,7 +72,7 @@ export default function AddEditCounterfactual() {
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new' && orgUri) {
+    } else if (mode === 'new' && orgUri) {
       setForm(form => ({...form, organizations: [orgUri]}))
       setLoading(false);
     } else {
@@ -92,7 +92,7 @@ export default function AddEditCounterfactual() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOutcome({form}).then((ret) => {
+      createCounterfactual({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -103,7 +103,7 @@ export default function AddEditCounterfactual() {
           setErrors(e.json);
         }
         console.log(e)
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating counterfactual', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
@@ -125,10 +125,9 @@ export default function AddEditCounterfactual() {
   };
 
   const validate = () => {
-    console.log(form)
     const error = {};
-    if (!form.locatedIns)
-      error.locatedIns = 'The field cannot be empty';
+    // if (!form.locatedIns)
+    //   error.locatedIns = 'The field cannot be empty';
     // if (!form.indicators.length)
     //   error.indicators = 'The field cannot be empty';
     // if (!form.outcomes.length)
@@ -200,7 +199,7 @@ export default function AddEditCounterfactual() {
           </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Counterfactual?' :
                        'Are you sure you want to update this outcome?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,

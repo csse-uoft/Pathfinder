@@ -51,7 +51,7 @@ export default function AddEditIndicator() {
     description: '',
     unitOfMeasure: '',
     uri: '',
-    organization: '',
+    organization: null,
     baseline: '',
     threshold: '',
     codes: [],

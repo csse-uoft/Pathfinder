@@ -65,10 +65,10 @@ import AddEditDataset from "./components/datasets/AddEditDataset"
 import Organization_impactModels from "./components/impactModels/organization-impactModels";
 import ImpactModels from "./components/impactModels/impactModels";
 import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
-import CounterFactuals from "./components/counterfactual/Counterfactuals";
 import AddEditCounterfactual from "./components/counterfactual/AddEditCounterfactual"
 import AddEditImpactRisk from "./components/impactRisk/AddEditImpactRisk";
 import ImpactRisks from "./components/impactRisk/ImpactRisks";
+import Counterfactuals from "./components/counterfactual/Counterfactuals";
 
 
 const routes = (
@@ -246,8 +246,8 @@ const routes = (
 
     {/*CounterFactual*/}
     <Route 
-          path={`${process.env.PUBLIC_URL}/counterfactual`} 
-          element={<PrivateRoute element={CounterFactuals}/>}/>
+          path={`${process.env.PUBLIC_URL}/counterfactuals`}
+          element={<PrivateRoute element={Counterfactuals}/>}/>
     <Route                                
           path={`${process.env.PUBLIC_URL}/counterfactual/new`} 
           element={<PrivateRoute element={AddEditCounterfactual}/>}/>

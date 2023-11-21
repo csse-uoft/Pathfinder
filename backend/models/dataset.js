@@ -1,5 +1,4 @@
 const {createGraphDBModel, Types} = require("graphdb-utils");
-const {GDBMeasureModel} = require("./measure");
 
 const GDBDataSetModel = createGraphDBModel({
   identifier: {type: String, internalKey: 'schema:identifier'},

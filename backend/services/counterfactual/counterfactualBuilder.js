@@ -2,6 +2,7 @@ const {Transaction} = require("graphdb-utils");
 const {fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
+const {GDBDateTimeIntervalModel} = require("../../models/time");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function counterfactualBuilder(environment, object, organization, error, {
@@ -20,7 +21,6 @@ async function counterfactualBuilder(environment, object, organization, error, {
   let ret;
   const mainObject = environment === 'fileUploading' ? counterfactualDict[uri] : mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
-    await Transaction.beginTransaction();
     await mainObject.save();
     uri = mainObject._uri;
   }
@@ -50,9 +50,13 @@ async function counterfactualBuilder(environment, object, organization, error, {
     error = ret.error;
 
 
-    if (environment === 'interface'){
+    if (environment === 'interface') {
+      // if (form.startTime && form.endTime)
+      //   mainObject.hasTime = GDBDateTimeIntervalModel({
+      //     hasBeginning: {date: new Date(form.startTime)},
+      //     hasEnd: {date: new Date(form.endTime)}
+      //   });
       await mainObject.save();
-      await Transaction.commit();
       return true
     }
 

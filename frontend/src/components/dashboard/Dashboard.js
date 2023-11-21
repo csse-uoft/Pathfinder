@@ -85,7 +85,10 @@ function Dashboard() {
                  text="Create Dataset"/>
 
       <NavButton to={'/impactRisks'} icon={<Edit/>} key={`impactRisk`}
-                 text="ImpactRisk Management"/>
+                 text="Manage ImpactRisk"/>
+
+      <NavButton to={'/counterfactuals'} icon={<Edit/>} key={`counterfactual`}
+                 text="Manage Counterfactuals"/>
 
 
       {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={`/fileUploading`} icon={<FileUpload/>} key={'fileUploading'}

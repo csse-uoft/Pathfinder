@@ -266,14 +266,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 required={required}
                 error={!!errors.unitOfMeasure}
                 helperText={errors.unitOfMeasure}
-                onBlur={() => {
-                  if (!state.unitOfMeasure) {
-                    setErrors(errors => ({...errors, unitOfMeasure: 'This field cannot be empty'}));
-                  }else {
-                    setErrors(errors => ({...errors, unitOfMeasure: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.unitOfMeasure) {
+                //     setErrors(errors => ({...errors, unitOfMeasure: 'This field cannot be empty'}));
+                //   }else {
+                //     setErrors(errors => ({...errors, unitOfMeasure: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
@@ -289,14 +289,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 required={required}
                 error={!!errors.baseline}
                 helperText={errors.baseline}
-                onBlur={() => {
-                  if (!state.baseline) {
-                    setErrors(errors => ({...errors, baseline: 'This field cannot be empty'}));
-                  }else {
-                    setErrors(errors => ({...errors, baseline: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.baseline) {
+                //     setErrors(errors => ({...errors, baseline: 'This field cannot be empty'}));
+                //   }else {
+                //     setErrors(errors => ({...errors, baseline: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
               <Grid item xs={12}>
@@ -311,14 +311,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                       required={required}
                       error={!!errors.threshold}
                       helperText={errors.threshold}
-                      onBlur={() => {
-                          if (!state.threshold) {
-                              setErrors(errors => ({...errors, threshold: 'This field cannot be empty'}));
-                          }else {
-                              setErrors(errors => ({...errors, threshold: null}));
-                          }
-                      }
-                      }
+                      // onBlur={() => {
+                      //     if (!state.threshold) {
+                      //         setErrors(errors => ({...errors, threshold: 'This field cannot be empty'}));
+                      //     }else {
+                      //         setErrors(errors => ({...errors, threshold: null}));
+                      //     }
+                      // }
+                      // }
                   />
               </Grid>
 
@@ -336,14 +336,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 helperText={errors.description}
                 multiline
                 minRows={4}
-                onBlur={() => {
-                  if (!state.description) {
-                    setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
-                  }else {
-                    setErrors(errors => ({...errors, description: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.description) {
+                //     setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
+                //   }else {
+                //     setErrors(errors => ({...errors, description: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
           </Grid>

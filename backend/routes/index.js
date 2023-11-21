@@ -30,5 +30,7 @@ module.exports = {
   featuresRoute: require('./features'),
   impactRiskRoute: require('./impactRisk'),
   impactRisksRoute: require('./impactRisks'),
-  howMuchImpactsRoute: require('./howMuchImpacts')
+  howMuchImpactsRoute: require('./howMuchImpacts'),
+  counterfactualRoute: require('./counterfactual'),
+  counterfactualsRoute: require('./counterfactuals')
 }

@@ -7,9 +7,9 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCodes} from "../../api/codeAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-export default function Codes() {
+import {fetchCounterfactuals} from "../../api/counterfactualApi";
+export default function Counterfactuals() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
@@ -25,9 +25,9 @@ export default function Codes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchCodes().then(res => {
+    fetchCounterfactuals().then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.codes}));
+        setState(state => ({...state, loading: false, data: res.counterfactuals}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
@@ -65,10 +65,10 @@ export default function Codes() {
 
   const columns = [
     {
-      label: 'Name',
-      body: ({_uri, name}) => {
+      label: 'URI',
+      body: ({_uri,}) => {
         return <Link colorWithHover to={`/counterfactual/${encodeURIComponent(_uri)}/view`}>
-          {name}
+          {_uri}
         </Link>
       },
       sortBy: ({legalName}) => legalName

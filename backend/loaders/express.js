@@ -19,7 +19,7 @@ const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRout
   errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute, codeRoute, codesRoute, characteristicRoute,
   characteristicsRoute, stakeholderOutcomeRoute, impactReportsRoute, impactReportRoute,
   stakeholderOutcomesRoute, impactModelsRoute, featuresRoute, impactModelRoute, impactRiskRoute, impactRisksRoute,
-  howMuchImpactsRoute
+  howMuchImpactsRoute, counterfactualRoute, counterfactualsRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -100,6 +100,8 @@ app.use('/api/impactRisks', impactRisksRoute);
 app.use('/api/impactRisk', impactRiskRoute);
 app.use('/api/features', featuresRoute);
 app.use('/api/howMuchImpacts', howMuchImpactsRoute);
+app.use('/api/counterfactuals', counterfactualsRoute);
+app.use('/api/counterfactual', counterfactualRoute);
 
 
 

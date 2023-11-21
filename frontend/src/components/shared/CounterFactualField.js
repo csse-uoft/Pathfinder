@@ -176,24 +176,12 @@ export default function CounterFactualField({
                 fullWidth
                 label="Value"
                 type="text"
-                value={state.Value}
+                value={state.value}
                 disabled={disabled}
                 required={required}
+                onChange={handleChange('value')}
               />
             </Grid>
-
-            {/* <Dropdown
-            label="wasGeneratedBy"
-            key={'wasGeneratedBy'}
-            value={form.wasGeneratedBy}
-            onChange={e => {
-              form.wasGeneratedBy = e.target.value;
-            }}
-            options={options.wasGeneratedBy}
-            error={!!errors.wasGeneratedBy}
-            helperText={errors.wasGeneratedBy}
-            // sx={{mb: 2}}
-          /> */}
           
             <Grid item xs={12}>
               <TextField
@@ -209,14 +197,14 @@ export default function CounterFactualField({
                 helperText={errors.description}
                 multiline
                 minRows={4}
-                onBlur={() => {
-                  if (!state.description) {
-                    setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, description: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.description) {
+                //     setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, description: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 

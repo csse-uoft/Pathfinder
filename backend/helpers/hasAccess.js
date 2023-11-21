@@ -48,11 +48,25 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    // counterfactual
+    case 'createCounterfactual':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+    case 'fetchCounterfactuals':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+
+    // howMuchImpact
     case 'fetchHowMuchImpacts':
       if (userAccount.isSuperuser)
         return true;
       break;
 
+    // ImpactRisk
     case 'createImpactRisk':
       if (userAccount.isSuperuser)
         return true;
@@ -60,64 +74,64 @@ async function hasAccess(req, operationType) {
     case 'fetchImpactRisks':
       if (userAccount.isSuperuser)
         return true;
-      break
+      break;
 
     // impactModels
     case 'fetchImpactModels':
       if (userAccount.isSuperuser)
-        return true
-      break
+        return true;
+      break;
     case 'fetchImpactModelInterfaces':
       if (userAccount.isSuperuser)
-        return true
-      break
+        return true;
+      break;
     case 'createImpactModel':
       if (userAccount.isSuperuser)
-        return true
-      break
+        return true;
+      break;
 
 
     // impactReport
     case 'createImpactReport':
       if (userAccount.isSuperuser)
-        return true
-      break
+        return true;
+      break;
 
     case 'fetchImpactReport':
       if (userAccount.isSuperuser)
-        return true
-      break
+        return true;
+      break;
 
     case 'fetchImpactReports':
       if (userAccount.isSuperuser)
-        return true
-      break
+        return true;
+      break;
 
     // characteristic
     case 'createCharacteristic':
       if (userAccount.isSuperuser)
         return true;
-      break
+      break;
 
     // characteristic
     case 'fetchCharacteristics':
       return true;
-      break
+      break;
 
     case 'fetchCharacteristic':
       return true;
-      break
+      break;
 
     // stakeholderOutcomes
     case 'createStakeholderOutcome':
       if (userAccount.isSuperuser)
         return true;
-      break
+      break;
 
     case 'fetchStakeholderOutcomes':
       if (userAccount.isSuperuser)
         return true;
-      break
+      break;
 
 
     // code
@@ -175,7 +189,7 @@ async function hasAccess(req, operationType) {
           // then check is the user updating the restricted properties
           const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasId']});
           if (organization.administrator === form.administrator && organization.legalName === form.legalName
-          && organization.hasId.hasIdentifier === form.organizationNumber)
+            && organization.hasId.hasIdentifier === form.organizationNumber)
             return true;
         }
       }
@@ -223,17 +237,17 @@ async function hasAccess(req, operationType) {
         const {uri} = req.params;
         const form = req.body;
         if (!uri || !form)
-          throw new Server400Error('Invalid input')
-        const group = await GDBGroupModel.findOne({_uri:uri})
+          throw new Server400Error('Invalid input');
+        const group = await GDBGroupModel.findOne({_uri: uri});
         if (!group)
-          throw new Server400Error('No such group')
-        if (form.label === group.label && form.administrator === group.administrator){
+          throw new Server400Error('No such group');
+        if (form.label === group.label && form.administrator === group.administrator) {
           // label and administrator cannot be changed
-          const previousOrganizationUris = group.organizations
+          const previousOrganizationUris = group.organizations;
           const checkerList = form.organizations.map(organizationUri => {
-            return previousOrganizationUris.includes(organizationUri)
-          })
-          if(!checkerList.includes(false))
+            return previousOrganizationUris.includes(organizationUri);
+          });
+          if (!checkerList.includes(false))
             return true;
         }
       }
@@ -382,7 +396,7 @@ async function hasAccess(req, operationType) {
       }
       break;
     case 'createIndicator':
-      if (userAccount.isSuperuser){
+      if (userAccount.isSuperuser) {
         return true;
       }
 
@@ -441,7 +455,7 @@ async function hasAccess(req, operationType) {
     // outcomes
 
     case 'fetchOutcomeInterface':
-      return true
+      return true;
     case 'fetchOutcomes':
       if (userAccount.isSuperuser)
         return true;
@@ -489,7 +503,7 @@ async function hasAccess(req, operationType) {
       }
       break;
     case 'fetchOutcomesThroughTheme':
-      return true
+      return true;
       break;
     case 'createOutcome':
       if (userAccount.isSuperuser)
@@ -633,8 +647,8 @@ async function hasAccess(req, operationType) {
           || !form.numericalValue || !form.startTime || !form.endTime || !form.dateCreated)
           throw new Server400Error('Invalid input');
         // the organization must be in userAccount.editorOfs
-        if(organizationBelongsToUser(userAccount, form.organization, 'editorOfs'))
-          return true
+        if (organizationBelongsToUser(userAccount, form.organization, 'editorOfs'))
+          return true;
 
         // const checkerList = form.organizations.map(organizationId => {
         //   return organizationBelongsToUser(userAccount, organizationId, 'editorOfs');
@@ -668,7 +682,7 @@ async function hasAccess(req, operationType) {
           // }));
           // check is there any organization contains the indicatorReport
           for (let organization of group.organizations) {
-            if(organization.hasIndicators) {
+            if (organization.hasIndicators) {
               organization.hasIndicators = await Promise.all(organization.hasIndicators.map(
                 indicatorURI => {
                   return GDBIndicatorModel.findOne({_uri: indicatorURI});
@@ -739,8 +753,8 @@ async function hasAccess(req, operationType) {
         if (!form || !form.name || !form.comment || !form.organization || !form.indicator
           || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
           throw new Server400Error('Invalid input');
-        if(organizationBelongsToUser(userAccount, form.organization, 'editorOfs'))
-          return true
+        if (organizationBelongsToUser(userAccount, form.organization, 'editorOfs'))
+          return true;
         // all organizations must be in userAccount.editorOfs
         // const checkerList = form.organizations.map(organizationId => {
         //   return organizationBelongsToUser(userAccount, organizationId, 'editorOfs');
