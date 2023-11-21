@@ -64,7 +64,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
     {});
 
   const [options, setOptions] = useState({
-    organizations : {},stakeholderOutcomes: {}, indicators: {}, impactScales: {}, impactDepths: {}, impactDurations: {}
+    organizations : {},stakeholderOutcomes: {}, indicators: {}, impactScales: {}, impactDepths: {}, impactDurations: {}, impactRisks: {}
   });
 
   const {enqueueSnackbar} = useSnackbar();

@@ -33,16 +33,16 @@ export default function Organization_indicators() {
     });
   }, [trigger]);
 
-  useEffect(() => {
-    fetchStakeholders().then(res => {
-      if (res.success)
-        setState(state => ({...state, loading: false, data: res.stakeholders}));
-    }).catch(e => {
-      setState(state => ({...state, loading: false}));
-      navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    });
-  }, [trigger]);
+  // useEffect(() => {
+  //   fetchStakeholders().then(res => {
+  //     if (res.success)
+  //       setState(state => ({...state, loading: false, data: res.stakeholders}));
+  //   }).catch(e => {
+  //     setState(state => ({...state, loading: false}));
+  //     navigate('/dashboard');
+  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+  //   });
+  // }, [trigger]);
 
   const showDeleteDialog = (id) => {
     setState(state => ({
