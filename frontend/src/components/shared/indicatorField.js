@@ -124,14 +124,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 required={required}
                 error={!!errors.name}
                 helperText={errors.name}
-                onBlur={() => {
-                  if (!state.name) {
-                    setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-                  }else {
-                    setErrors(errors => ({...errors, name: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.name) {
+                //     setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
+                //   }else {
+                //     setErrors(errors => ({...errors, name: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
@@ -147,14 +147,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 required={required}
                 error={!!errors.uri}
                 helperText={errors.uri}
-                onBlur={() => {
-                  if (state.uri && !isValidURL(state.uri)) {
-                    setErrors(errors => ({...errors, uri: 'Invalid URI'}));
-                  }else {
-                    setErrors(errors => ({...errors, uri: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (state.uri && !isValidURL(state.uri)) {
+                //     setErrors(errors => ({...errors, uri: 'Invalid URI'}));
+                //   }else {
+                //     setErrors(errors => ({...errors, uri: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
               <Grid item xs={4}>
@@ -169,14 +169,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                       error={!!errors.dateCreated}
                       helperText={errors.dateCreated}
                       minWidth={187}
-                      onBlur={() => {
-                          if (!state.dateCreated) {
-                              setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
-                          } else {
-                              setErrors(errors => ({...errors, dateCreated: null}));
-                          }
-                      }
-                      }
+                      // onBlur={() => {
+                      //     if (!state.dateCreated) {
+                      //         setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
+                      //     } else {
+                      //         setErrors(errors => ({...errors, dateCreated: null}));
+                      //     }
+                      // }
+                      // }
                   />
               </Grid>
               <Grid item xs={8}>
@@ -191,14 +191,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                       required={required}
                       error={!!errors.identifier}
                       helperText={errors.identifier}
-                      onBlur={() => {
-                          if (!state.identifier) {
-                              setErrors(errors => ({...errors, identifier: 'This field cannot be empty'}));
-                          } else {
-                              setErrors(errors => ({...errors, identifier: null}));
-                          }
-                      }
-                      }
+                      // onBlur={() => {
+                      //     if (!state.identifier) {
+                      //         setErrors(errors => ({...errors, identifier: 'This field cannot be empty'}));
+                      //     } else {
+                      //         setErrors(errors => ({...errors, identifier: null}));
+                      //     }
+                      // }
+                      // }
                   />
               </Grid>
 
@@ -214,14 +214,14 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 helperText={errors.organization}
                 required={required}
                 disabled={disabled}
-                onBlur={() => {
-                  if (!state.organization) {
-                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, organization: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.organization) {
+                //     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, organization: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 

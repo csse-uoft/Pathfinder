@@ -64,7 +64,6 @@ export default function AddEditIndicator() {
   useEffect(() => {
     fetchCodesInterfaces().then(({success, codesInterfaces}) => {
       if (success){
-        console.log(codesInterfaces)
         setCodesInterfaces(codesInterfaces)
       }
     }).catch(e => {
@@ -155,16 +154,16 @@ export default function AddEditIndicator() {
     const error = {};
     if (form.name === '')
       error.name = 'The field cannot be empty';
-    if (form.identifier === '')
-        error.identifier = 'The field cannot be empty';
-    if (!form.description)
-      error.description = 'The field cannot be empty';
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
-    if (!form.dateCreated)
-      error.dateCreated = 'The field cannot be empty';
-    if (!form.uri)
-      error.uri = 'The field cannot be empty';
+    // if (form.identifier === '')
+    //     error.identifier = 'The field cannot be empty';
+    // if (!form.description)
+    //   error.description = 'The field cannot be empty';
+    // if (!form.organization)
+    //   error.organization = 'The field cannot be empty';
+    // if (!form.dateCreated)
+    //   error.dateCreated = 'The field cannot be empty';
+    // if (!form.uri)
+    //   error.uri = 'The field cannot be empty';
 
     // if (!form.hasIdentifier)
     //   error.hasIdentifier = 'The field cannot be empty';
