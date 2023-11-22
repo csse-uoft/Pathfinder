@@ -41,10 +41,6 @@ export default function AddEditIndicator() {
     {}
   );
 
-  const [codesInterfaces, setCodesInterfaces] = useState({
-
-  })
-
   const [form, setForm] = useState({
     name: '',
     identifier: '',
@@ -57,22 +53,10 @@ export default function AddEditIndicator() {
     codes: [],
     dateCreated: '',
     access: [],
-
+    datasets: []
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCodesInterfaces().then(({success, codesInterfaces}) => {
-      if (success){
-        setCodesInterfaces(codesInterfaces)
-      }
-    }).catch(e => {
-      if (e.json)
-        setErrors(e.json)
-      reportErrorToBackend(e)
-      enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
-    })
-  }, [])
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
@@ -107,6 +91,7 @@ export default function AddEditIndicator() {
   }, [mode, uri]);
 
   const handleSubmit = () => {
+    console.log(form)
     if (validate()) {
       setState(state => ({...state, submitDialog: true}));
     }

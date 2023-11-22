@@ -7,6 +7,9 @@ import {fetchStakeholderInterfaces, fetchStakeholders} from "../../api/stakehold
 import {UserContext} from "../../context";
 import {isValidURL} from "../../helpers/validation_helpers";
 import GeneralField from "./fields/GeneralField";
+import {fetchDatasetInterfaces} from "../../api/datasetApi";
+import {fetchCodesInterfaces} from "../../api/codeAPI";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 
 const filterOptions = createFilterOptions({
@@ -57,10 +60,25 @@ export default function IndicatorField({defaultValue, required, onChange, label,
   const [state, setState] = useState(defaultValue || {});
   const [options, setOptions] = useState({});
   const [stakeholderOptions, setStakeholderOptions] = useState({});
+  const [datasetOptions, setDatasetOptions] = useState({})
   const userContext = useContext(UserContext);
+  const [codesInterfaces, setCodesInterfaces] = useState({})
 
   const [errors, setErrors] = useState({...importErrors});
 
+
+  useEffect(() => {
+    fetchCodesInterfaces().then(({success, codesInterfaces}) => {
+      if (success){
+        setCodesInterfaces(codesInterfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
+    })
+  }, [])
 
   useEffect(() => {
     setErrors({...importErrors});
@@ -80,12 +98,18 @@ export default function IndicatorField({defaultValue, required, onChange, label,
     })
   }, []);
 
+  useEffect(() => {
+    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
+      if(success) {
+        setDatasetOptions(datasetInterfaces);
+      }
+    })
+  }, []);
+
 
   useEffect(() => {
         fetchStakeholders().then(({success, stakeholders}) => {
             if(success) {
-                //console.log("stakeholders")
-                //console.log(stakeholders);
                 const options = {};
                 stakeholders.map(stakeholder => {
                     options[stakeholder._uri] = stakeholder.name;
@@ -214,14 +238,6 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 helperText={errors.organization}
                 required={required}
                 disabled={disabled}
-                // onBlur={() => {
-                //   if (!state.organization) {
-                //     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, organization: null}));
-                //   }
-                // }
-                // }
               />
             </Grid>
 
@@ -253,6 +269,64 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                       // }
                   />
               </Grid>
+
+            <Grid item xs={12}>
+              <Dropdown
+                label="Codes"
+                key={'codes'}
+                options={codesInterfaces}
+                onChange={(e) => {
+                  setState(state => ({...state, codes: e.target.value}));
+                  const st = state;
+                  st.codes = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.codes}
+                error={!!errors.codes}
+                helperText={errors.codes}
+                required={required}
+                disabled={disabled}
+                // onBlur={() => {
+                //     if (!state.outcomes) {
+                //         setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
+                //     } else {
+                //         setErrors(errors => ({...errors, outcomes: null}));
+                //     }
+                // }
+                // }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Dropdown
+                label="Datasets"
+                key={'datasets'}
+                options={datasetOptions}
+                onChange={(e) => {
+                  setState(state => ({...state, datasets: e.target.value}));
+                  const st = state;
+                  st.datasets = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.datasets}
+                error={!!errors.datasets}
+                helperText={errors.datasets}
+                required={required}
+                disabled={disabled}
+                // onBlur={() => {
+                //     if (!state.outcomes) {
+                //         setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
+                //     } else {
+                //         setErrors(errors => ({...errors, outcomes: null}));
+                //     }
+                // }
+                // }
+              />
+            </Grid>
 
             <Grid item xs={12}>
               <TextField

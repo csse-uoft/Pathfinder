@@ -7,3 +7,7 @@ export async function createDataset(params) {
 export async function fetchDatasets() {
   return getJson('/api/datasets/');
 }
+
+export async function fetchDatasetInterfaces() {
+  return getJson('/api/datasets/interface');
+}
