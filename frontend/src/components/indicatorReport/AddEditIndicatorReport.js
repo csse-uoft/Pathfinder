@@ -53,7 +53,8 @@ export default function AddEditIndicatorReport() {
     endTime: '',
     dateCreated: '',
     uri: '',
-    hasAccesss: []
+    hasAccesss: [],
+    datasets: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -135,33 +136,33 @@ export default function AddEditIndicatorReport() {
 
   const validate = () => {
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-    if (!form.comment)
-      error.comment = 'The field cannot be empty';
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
-    if (!form.indicator)
-      error.indicator = 'The field cannot be empty';
-    if (!form.startTime)
-      error.startTime = 'The field cannot be empty';
-    if (!form.endTime)
-      error.endTime = 'The field cannot be empty';
-    if (form.uri && !isValidURL(form.uri))
-      error.uri = 'The field cannot be empty'
-    if (!!form.startTime && !!form.endTime && form.startTime > form.endTime){
-      error.startTime = 'The date must be earlier than the end date'
-      error.endTime = 'The date must be later than the start date';
-    }
-
-    if (!form.numericalValue)
-      error.numericalValue = 'The field cannot be empty';
+    // if (!form.name)
+    //   error.name = 'The field cannot be empty';
+    // if (!form.comment)
+    //   error.comment = 'The field cannot be empty';
+    // if (!form.organization)
+    //   error.organization = 'The field cannot be empty';
+    // if (!form.indicator)
+    //   error.indicator = 'The field cannot be empty';
+    // if (!form.startTime)
+    //   error.startTime = 'The field cannot be empty';
+    // if (!form.endTime)
+    //   error.endTime = 'The field cannot be empty';
+    // if (form.uri && !isValidURL(form.uri))
+    //   error.uri = 'The field cannot be empty'
+    // if (!!form.startTime && !!form.endTime && form.startTime > form.endTime){
+    //   error.startTime = 'The date must be earlier than the end date'
+    //   error.endTime = 'The date must be later than the start date';
+    // }
+    //
+    // if (!form.numericalValue)
+    //   error.numericalValue = 'The field cannot be empty';
     if (form.numericalValue && isNaN(form.numericalValue))
       error.numericalValue = 'The field must be a number';
     // if (!form.unitOfMeasure)
     //   error.unitOfMeasure = 'The field cannot be empty';
-    if (!form.dateCreated)
-      error.dateCreated = 'The field cannot be empty';
+    // if (!form.dateCreated)
+    //   error.dateCreated = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };

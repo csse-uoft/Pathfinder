@@ -9,6 +9,7 @@ import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import Dropdown from "./fields/MultiSelectField";
+import {fetchDatasetInterfaces} from "../../api/datasetApi";
 
 
 const filterOptions = createFilterOptions({
@@ -59,7 +60,9 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
     defaultValue ||
     {});
 
-  const [options, setOptions] = useState({});
+  const [options, setOptions] = useState({
+    datasets: {}, organization: {}
+  });
   const [indicators, setIndicators] = useState({})
   const {enqueueSnackbar} = useSnackbar();
 
@@ -68,6 +71,14 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
   const [errors, setErrors] = useState({...importErrors});
 
   const userContext = useContext(UserContext);
+
+  useEffect(() => {
+    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
+      if(success) {
+        setOptions(op => ({...op, datasets: datasetInterfaces}));
+      }
+    })
+  }, []);
 
 
   useEffect(() => {
@@ -385,6 +396,25 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 value={state.hasAccesss}
                 error={!!errors.hasAccesss}
                 helperText={errors.hasAccesss}
+                required={required}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Dropdown
+                label="Datasets"
+                key={'datasets'}
+                options={options.datasets}
+                onChange={(e) => {
+                  setState(state => ({...state, datasets: e.target.value}));
+                  const st = state;
+                  st.datasets = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.datasets}
+                error={!!errors.datasets}
+                helperText={errors.datasets}
                 required={required}
               />
             </Grid>
