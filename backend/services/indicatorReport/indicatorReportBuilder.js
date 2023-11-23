@@ -59,11 +59,11 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error);
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error);
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -78,10 +78,18 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     hasError = ret.hasError;
     ignore = ret.ignore;
 
+    if (environment === 'interface') {
+      form.dateCreated = new Date(form.dateCreated);
+    }
+
     ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
     error = ret.error;
     hasError = ret.hasError;
     ignore = ret.ignore;
+
+    if (environment === 'fileUploading') {
+      mainObject.dateCreated = new Date(mainObject.dateCreated)
+    }
 
     // add the indicatorReport to indicator if needed
     if (environment === 'interface' || (!ignore && !indicatorDict[mainObject.forIndicator])) {
@@ -121,7 +129,7 @@ async function indicatorReportBuilder(environment, object, organization, error, 
 
     // add the timeInterval to indicator report
     // todo: add form to it
-    if (environment === 'fileUploading') {
+    if (environment === 'fileUploading' && object.hasTime) {
       mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
         GDBDateTimeIntervalModel({
           hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],

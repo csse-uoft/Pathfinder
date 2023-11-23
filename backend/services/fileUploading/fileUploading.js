@@ -1,6 +1,6 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBOutcomeModel} = require("../../models/outcome");
-const {GDBOrganizationModel} = require("../../models/organization");
+const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
 const {GDBThemeModel} = require("../../models/theme");
 const {Server400Error} = require("../../utils");
 const {GDBIndicatorModel} = require("../../models/indicator");
@@ -36,6 +36,10 @@ const {GDBImpactRiskModel, GDBEvidenceRiskModel, GDBExternalRiskModel, GDBStakeh
   GDBUnexpectedImpactRiskModel
 } = require("../../models/impactRisk");
 const {impactRiskBuilder} = require("../impactRisk/impactRiskBuilder");
+const {GDBStakeholderModel} = require("../../models/stakeholder");
+const {stakeholderOrganizationBuilder} = require("../stakeholder/stakeholderOrganizationBuilder");
+const {GDBDataSetModel} = require("../../models/dataset");
+const {datasetBuilder} = require("../dataset/datasetBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -60,6 +64,7 @@ const fileUploading = async (req, res, next) => {
     const outcomeDict = {};
     const themeDict = {};
     const codeDict = {};
+    const stakeholderDict = {}
     const characteristicDict = {};
     const indicatorDict = {};
     const indicatorReportDict = {};
@@ -79,6 +84,7 @@ const fileUploading = async (req, res, next) => {
     const alignmentRiskDict = {};
     const enduranceRiskDict = {};
     const unexpectedImpactRiskDict = {};
+    const datasetDict ={};
 
 
     const dicts = {
@@ -104,7 +110,9 @@ const fileUploading = async (req, res, next) => {
       'executionRisk': executionRiskDict,
       'alignmentRisk': alignmentRiskDict,
       'enduranceRisk': enduranceRiskDict,
-      'unexpectedImpactRisk': unexpectedImpactRiskDict
+      'unexpectedImpactRisk': unexpectedImpactRiskDict,
+      'stakeholder': stakeholderDict,
+      'dataset': datasetDict,
     }
     const GDBModels = {
       'impactReport': GDBImpactReportModel,
@@ -130,6 +138,8 @@ const fileUploading = async (req, res, next) => {
       'impactScale': GDBImpactScaleModel,
       'impactDepth': GDBImpactDepthModel,
       'impactDuration': GDBImpactDurationModel,
+      'stakeholder': GDBStakeholderOrganizationModel,
+      'dataset': GDBDataSetModel
     }
 
     let messageBuffer = {
@@ -381,7 +391,6 @@ const fileUploading = async (req, res, next) => {
 
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
-    // const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}) || GDBImpactNormsModel({organization: organizationUri});
 
     if (!organization) {
       addTrace('        Error: Incorrect organization URI: No such Organization');
@@ -422,7 +431,7 @@ const fileUploading = async (req, res, next) => {
         error += 1
         continue;
       }
-      if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
+      if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1]) && !object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1]) ) {
         // check whether the uri belongs to other objects
         // duplicated uri in database
         addTrace('        Error: Duplicated URI');
@@ -491,6 +500,10 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorDict[uri] = {_uri: uri};
+      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        datasetDict[uri] = {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
@@ -501,6 +514,12 @@ const fileUploading = async (req, res, next) => {
         addMessage(4, 'readingMessage',
           {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorReportDict[uri] = {_uri: uri};
+
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage',
+          {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        stakeholderDict[uri] = {_uri: uri};
 
       } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
 
@@ -733,6 +752,10 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
         error = await impactRiskBuilder('fileUploading','unexpectedImpactRisk', object, organization, error,
           {impactRiskDict, evidenceRiskDict, externalRiskDict, stakeholderParticipationRiskDict, dropOffRiskDict, efficiencyRiskDict, executionRiskDict, alignmentRiskDict, enduranceRiskDict, unexpectedImpactRiskDict, objectDict}, {addMessage, addTrace, getValue, getFullPropertyURI, getListOfValue}, null);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+        error = await stakeholderOrganizationBuilder('fileUploading', object, organization, error, {stakeholderDict, objectDict, impactNormsDict}, {addMessage, addTrace, getValue, getFullPropertyURI, getListOfValue}, null)
+      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
+        error = await datasetBuilder('fileUploading', object, organization, error, {datasetDict, objectDict}, {addMessage, addTrace, getValue, getFullPropertyURI, getListOfValue}, null)
       } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
         error = await codeBuilder('fileUploading',object,organization, error, {codeDict}, {
           addMessage,

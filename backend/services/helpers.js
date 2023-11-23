@@ -96,7 +96,6 @@ async function assignImpactNorms(config, object, mainModel, mainObject, property
 
   return {hasError, error, ignore};
 
-
 }
 
 function assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error) {
@@ -235,7 +234,7 @@ function assignMeasure(environment, config, object, mainModel, mainObject, prope
     numericalValue = form[propertyName];
   }
 
-  if (!measureURI && !numericalValue && config[internalKey] && !form[propertyName]) {
+  if (!measureURI && !numericalValue && config[internalKey]) {
     if (config[internalKey].rejectFile) {
       if (environment === 'interface') {
         throw new Server400Error(`${propertyName} is Mandatory`);

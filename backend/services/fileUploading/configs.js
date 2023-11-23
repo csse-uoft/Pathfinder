@@ -54,7 +54,8 @@ const fullLevelConfig = {
   enduranceRisk: {},
   unexpectedImpactRisk: {},
   impactDuration: {},
-  dataset: {}
+  dataset: {},
+  stakeholder: {}
 }
 
 module.exports = {

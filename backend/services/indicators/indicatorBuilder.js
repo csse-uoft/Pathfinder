@@ -1,14 +1,10 @@
-const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
+const {fullLevelConfig} = require("../fileUploading/configs");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
-const {GDBMeasureModel} = require("../../models/measure");
-const {getObjectValue, assignMeasure, assignValue, assignValues, assignImpactNorms} = require("../helpers");
-const {Transaction} = require("graphdb-utils");
-const {fileUploadingHandler} = require("../fileUploading/fileUploading");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {assignMeasure, assignValue, assignValues} = require("../helpers");
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, object, organization, error, {
   indicatorDict,
@@ -71,17 +67,22 @@ async function indicatorBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'cids:hasIdentifier', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'tove_org:hasIdentifier', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
-    if (environment === 'interface')
-      form.dateCreated = new Date(form.dateCreated)
+    if (environment === 'interface') {
+      form.dateCreated = new Date(form.dateCreated);
+    }
     ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
+    if (environment === 'fileUploading') {
+      mainObject.dateCreated = new Date(mainObject.dateCreated)
+    }
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error);
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 

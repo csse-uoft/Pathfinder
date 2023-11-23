@@ -70,7 +70,7 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error, getListOfValue);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 

@@ -29,9 +29,7 @@ async function counterfactualBuilder(environment, object, organization, error, {
 
 
 
-    // ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error)
-
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'sch:description', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
