@@ -217,7 +217,8 @@ export default function StakeholderOutcomeReports() {
                 colorWithHover>{stakeholderOutcome.outcome?.name || 'Name Not Given'}</Link></Typography>
               <Typography variant={'body1'}> {`Importance: ${stakeholderOutcome.importance || 'Not Given'}`}</Typography>
               <Typography variant={'body1'}> {`isUnderserved: ${stakeholderOutcome.isUnderserved || 'Not Given'}`}</Typography>
-
+              <Typography variant={'body1'}> {`From Perspective Of: ${stakeholderOutcome.fromPerspectiveOf?.name || stakeholderOutcome.fromPerspectiveOf?.legalName || stakeholderOutcome.fromPerspectiveOf?._uri || 'Not Given'}`}</Typography>
+              <Typography variant={'body1'}> {`Intended Impact: ${stakeholderOutcome.intendedImpact || 'Not Given'}`}</Typography>
               <Typography variant={'body1'}> {stakeholderOutcome.codes?.length ? `Codes: ` : ''} </Typography>
               {stakeholderOutcome.codes?.length ?
                 stakeholderOutcome.codes.map(code =>

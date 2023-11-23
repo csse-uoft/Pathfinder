@@ -16,7 +16,7 @@ const fetchStakeholderOutcomes = async (req, res) => {
   const stakeholderOutcomes = await GDBStakeholderOutcomeModel.find({}, {populates:
     ['outcome',
     'codes',
-    'impactReports']
+    'impactReports', 'fromPerspectiveOf']
 })
   return res.status(200).json({success: true, stakeholderOutcomes})
 

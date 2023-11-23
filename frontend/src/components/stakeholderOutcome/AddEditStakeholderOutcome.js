@@ -7,8 +7,7 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
+import {fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {createStakeholderOutcome, fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
 import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
@@ -209,6 +208,14 @@ export default function AddEditStakeholderOutcome() {
             <Typography variant={'body1'}> {`${form.isUnderserved}`} </Typography>
             <Typography variant={'h6'}> {`Importance:`} </Typography>
             <Typography variant={'body1'}> {`${form.importance}`} </Typography>
+            <Typography variant={'h6'}> {`Intended Impact:`} </Typography>
+            <Typography variant={'body1'}> {`${form.intendedImpact || 'Not Given'}`} </Typography>
+            <Typography variant={'h6'}> {`From Perspective Of:`} </Typography>
+            {form.fromPerspectiveOf ?
+              <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(form.fromPerspectiveOf)}/view`}
+                                                  colorWithHover
+                                                  color={'#2f5ac7'}>{dict.stakeholder[form.fromPerspectiveOf]}</Link>
+              </Typography> : <Typography variant={'body1'}> {'Not Given'} </Typography>}
             <Typography variant={'h6'}> {`Outcome:`} </Typography>
             <Typography variant={'body1'}> <Link to={`/outcome/${encodeURIComponent(form.outcome)}/view`} colorWithHover
                                                  color={'#2f5ac7'}>{dict.outcome[form.outcome]}</Link> </Typography>
