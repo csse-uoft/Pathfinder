@@ -12,6 +12,7 @@ import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDatasetInterfaces} from "../../api/datasetApi";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -32,6 +33,9 @@ export default function AddEditIndicator() {
   const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
+
+  const [codesInterfaces, setCodesInterfaces] = useState({});
+  const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
   const [state, setState] = useState({
     submitDialog: false,
@@ -57,6 +61,32 @@ export default function AddEditIndicator() {
   });
   const [loading, setLoading] = useState(true);
 
+
+  useEffect(() => {
+    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
+      if (success){
+        setDatasetInterfaces(datasetInterfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching dataset interface", {variant: 'error'});
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchCodesInterfaces().then(({success, codesInterfaces}) => {
+      if (success){
+        setCodesInterfaces(codesInterfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
+    })
+  }, [])
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
@@ -181,10 +211,21 @@ export default function AddEditIndicator() {
           <Typography variant={'body1'}> {`${form.baseline || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Threshold:`} </Typography>
           <Typography variant={'body1'}> {`${form.threshold || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Identifier:`} </Typography>
+          <Typography variant={'body1'}> {`${form.identifier || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Identifier:`} </Typography>
+          <Typography variant={'body1'}> {`${form.identifier || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Codes:`} </Typography>
+
           {form.codes?.length?
             form.codes.map(code => <Typography variant={'body1'}> {<Link to={`/code/${encodeURIComponent(code)}/view`} colorWithHover
                                                                          color={'#2f5ac7'}>{codesInterfaces[code]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+          <Typography variant={'h6'}> {`Datasets:`} </Typography>
+          {form.datasets?.length?
+            form.datasets.map(dataset => <Typography variant={'body1'}> {<Link to={`/dataset/${encodeURIComponent(dataset)}/view`} colorWithHover
+                                                                         color={'#2f5ac7'}>{datasetInterfaces[dataset]}</Link>} </Typography>)
 
             : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 
