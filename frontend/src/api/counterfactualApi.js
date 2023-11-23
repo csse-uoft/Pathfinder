@@ -8,6 +8,10 @@ export async function fetchCounterfactuals() {
   return getJson('/api/counterfactuals/');
 }
 
+export async function fetchCounterfactual(uri) {
+  return getJson('/api/counterfactual/' + uri);
+}
+
 export async function fetchCounterfactualInterfaces() {
   return getJson('/api/counterfactuals/interface/');
 }

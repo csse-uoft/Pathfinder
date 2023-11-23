@@ -1,11 +1,11 @@
 const express = require('express');
-const {createCounterfactualHandler} = require("../services/counterfactual/counterfactual");
+const {createCounterfactualHandler, fetchCounterfactualHandler} = require("../services/counterfactual/counterfactual");
 
 
 const router = express.Router({mergeParams: true});
 
 router.post('/', createCounterfactualHandler);
-// router.get('/:uri/', fetchCodeHandler);
+router.get('/:uri/', fetchCounterfactualHandler);
 // router.put('/:uri/', updateCodeHandler);
 
 module.exports = router;

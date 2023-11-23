@@ -54,6 +54,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'fetchCounterfactual':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     case 'fetchCounterfactuals':
       if (userAccount.isSuperuser)
         return true;

@@ -253,7 +253,7 @@ const routes = (
            element={<PrivateRoute element={ImpactReports_ReportGenerate}/>}/>
 
 
-    {/*CounterFactual*/}
+    {/*Counterfactual*/}
     <Route
       path={`${process.env.PUBLIC_URL}/counterfactuals`}
       element={<PrivateRoute element={Counterfactuals}/>}/>
@@ -261,7 +261,7 @@ const routes = (
       path={`${process.env.PUBLIC_URL}/counterfactual/new`}
       element={<PrivateRoute element={AddEditCounterfactual}/>}/>
 
-    <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:viewMode`}
+    <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditCounterfactual}/>}/>
 
   </Routes>

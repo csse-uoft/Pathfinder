@@ -10,7 +10,7 @@ import {UserContext} from "../../context";
 import CounterFactualField from "../shared/CounterFactualField";
 import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {createCounterfactual} from "../../api/counterfactualApi";
+import {createCounterfactual, fetchCounterfactual} from "../../api/counterfactualApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -52,17 +52,18 @@ export default function AddEditCounterfactual() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if((mode === 'edit' && uri) || (mode === 'view' && uri)){
-      fetchOutcome(encodeURIComponent(uri)).then(({success, outcome}) => {
+    if((mode === 'edit' && uri) || (mode === 'view' && uri)) {
+      fetchCounterfactual(encodeURIComponent(uri)).then(({success, counterfactual}) => {
         if(success){
-          outcome.uri = outcome._uri;
-          setForm(outcome);
+          counterfactual.uri = counterfactual._uri;
+          setForm(counterfactual);
           setLoading(false)
         }
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
         setLoading(false);
+        console.log('here')
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else if(mode === 'edit' && (!uri || !orgUri) ) {
@@ -156,18 +157,14 @@ export default function AddEditCounterfactual() {
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
             <Typography variant={'h6'}> {`Located In:`} </Typography>
-            <Typography variant={'body1'}> {`${form.locatedIn}`} </Typography>
-            {<Typography variant={'h6'}> {`Themes:`} </Typography>}
-             {form.themes?.length? form.themes.map(themeURI => {
-              return (
-                <Typography variant={'body1'}>
-                <Link to={`/themes/${encodeURIComponent(themeURI)}/view`} colorWithHover
-                            color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
-                </Typography>
-                );
-            }):<Typography variant={'body1'}> {`Not Given`} </Typography>}
+            <Typography variant={'body1'}> {`${form.locatedIn || 'Not Given'}`} </Typography>
+            <Typography variant={'h6'}> {`Time Interval:`} </Typography>
+            <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
             <Typography variant={'h6'}> {`Description:`} </Typography>
             <Typography variant={'body1'}> {`${form.description}`} </Typography>
+            <Typography variant={'h6'}> {`Value:`} </Typography>
+            <Typography variant={'body1'}> {`${form.value}`} </Typography>
+
 
             <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
               navigate(`/outcome/${encodeURIComponent(uri)}/edit`);
