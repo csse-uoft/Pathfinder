@@ -10,8 +10,8 @@ import {UserContext} from "../../context";
 import IndicatorReportField from "../shared/IndicatorReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDatasetInterfaces} from "../../api/datasetApi";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -33,6 +33,21 @@ export default function AddEditIndicatorReport() {
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const userContext = useContext(UserContext);
+
+  const [datasetInterfaces, setDatasetInterfaces] = useState({});
+
+  useEffect(() => {
+    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
+      if (success){
+        setDatasetInterfaces(datasetInterfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching dataset interface", {variant: 'error'});
+    })
+  }, [])
 
   const [state, setState] = useState({
     submitDialog: false,
@@ -189,6 +204,13 @@ export default function AddEditIndicatorReport() {
           <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
           <Typography variant={'h6'}> {`Time Interval:`} </Typography>
           <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
+          <Typography variant={'h6'}> {`Datasets:`} </Typography>
+          {form.datasets?.length?
+            form.datasets.map(dataset => <Typography variant={'body1'}> {<Link to={`/dataset/${encodeURIComponent(dataset)}/view`} colorWithHover
+                                                                               color={'#2f5ac7'}>{datasetInterfaces[dataset]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
           <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
             navigate(`/indicatorReport/${encodeURIComponent(uri)}/edit`);
           }

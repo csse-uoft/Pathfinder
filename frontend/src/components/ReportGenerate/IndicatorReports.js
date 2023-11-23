@@ -218,6 +218,17 @@ export default function IndicatorReports_ReportGenerate() {
                     {indicatorReport.hasTime ?
                       <Typography variant={'body1'}
                                   sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography> : null}
+                    {indicatorReport.datasets ?
+                      (indicatorReport.datasets.map(dataset =>
+                        <Typography variant={'body1'} sx={{pl: 4}}> {'Dataset: '}<Link
+                          to={`/dataset/${encodeURIComponent(dataset._uri)}/view`} colorWithHover
+                          color={'#2f5ac7'}>{dataset.name || dataset._uri}</Link> </Typography>
+                      ))
+                      : null}
+                    {indicatorReport.dateCreated ?
+                      <Typography variant={'body1'}
+                                  sx={{pl: 4}}> {`Date Created: ${(new Date(indicatorReport.dateCreated)).toLocaleString()}`} </Typography> : null}
+
                   </Paper>
                 ))
                 : null

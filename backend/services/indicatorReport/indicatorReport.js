@@ -119,6 +119,7 @@ const fetchIndicatorReport = async (req, res) => {
     endTime: indicatorReport.hasTime?.hasEnd.date,
     dateCreated: indicatorReport.dateCreated,
     uri: indicatorReport._uri,
+    datasets: indicatorReport.datasets,
     unitOfMeasure: indicatorReport.forIndicator?.unitOfMeasure?.label,
     indicatorName: indicatorReport.forIndicator?.name,
     organizationName: indicatorReport.forOrganization?.legalName

@@ -18,7 +18,8 @@ const fetchIndicators = async (req, res) => {
 
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
-      const indicators = await GDBIndicatorModel.find({}, {populates: ['unitOfMeasure','baseline', 'indicatorReports.value', 'threshold', 'datasets', 'codes']});
+      const indicators = await GDBIndicatorModel.find({},
+        {populates: ['unitOfMeasure','baseline', 'indicatorReports.value', 'threshold', 'datasets', 'codes', 'indicatorReports.datasets']});
       indicators.map(indicator => indicator.editable = true);
       return res.status(200).json({success: true, indicators});
     }
