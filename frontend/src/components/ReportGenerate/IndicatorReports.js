@@ -14,6 +14,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import {UserContext} from "../../context";
+
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -34,7 +35,7 @@ const useStyles = makeStyles(() => ({
 
 export default function IndicatorReports_ReportGenerate() {
   const navigator = useNavigate();
-  const navigate = navigateHelper(navigator)
+  const navigate = navigateHelper(navigator);
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
@@ -46,14 +47,14 @@ export default function IndicatorReports_ReportGenerate() {
 
 
   const generateTXTFile = () => {
-    let str = ''
+    let str = '';
     const addLine = (line, space) => {
       if (space)
         [...Array(space).keys()].map(() => {
-          str += ' '
-        })
+          str += ' ';
+        });
       str += line + '\n';
-    }
+    };
     // const pdf = new jsPDF({
     //   orientation: 'p',
     //   unit: 'mm',
@@ -91,33 +92,32 @@ export default function IndicatorReports_ReportGenerate() {
       indicator.indicatorReports?.map(indicatorReport => {
         addLine(`Indicator Report: ${indicatorReport.name || 'Name Not Given'}`, 6);
         addLine(`Value: ${indicatorReport.value?.numericalValue || 'Not Given'}`, 10);
-        addLine(indicatorReport.hasTime? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning?.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd?.date)).toLocaleString()}` : '', 10);
-      })
-    })
+        addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning?.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd?.date)).toLocaleString()}` : '', 10);
+      });
+    });
 
-    const file = new Blob([str], { type: 'text/plain' });
+    const file = new Blob([str], {type: 'text/plain'});
     saveAs(file, 'indicatorReport.txt');
-  }
-
+  };
 
 
   useEffect(() => {
-      fetchOrganizations().then(({organizations, success}) => {
-        if (success) {
-          const organizationsOps = {};
-          if (userContext.isSuperuser)
-            organizationsOps['all'] = 'All Indicators'
-          organizations.map(organization => {
-            organizationsOps[organization._uri] = organization.legalName;
-          });
-          setOrganizations(organizationsOps);
-          setLoading(false);
-        }
-      }).catch(e => {
-        reportErrorToBackend(e);
+    fetchOrganizations().then(({organizations, success}) => {
+      if (success) {
+        const organizationsOps = {};
+        if (userContext.isSuperuser)
+          organizationsOps['all'] = 'All Indicators';
+        organizations.map(organization => {
+          organizationsOps[organization._uri] = organization.legalName;
+        });
+        setOrganizations(organizationsOps);
         setLoading(false);
-        enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
-      });
+      }
+    }).catch(e => {
+      reportErrorToBackend(e);
+      setLoading(false);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
+    });
 
   }, []);
 
@@ -133,7 +133,7 @@ export default function IndicatorReports_ReportGenerate() {
         enqueueSnackbar(e.json?.message || "Error occurs when fetching indicators", {variant: 'error'});
       });
     } else {
-      setIndicators([])
+      setIndicators([]);
     }
   }, [selectedOrganization]);
 
@@ -145,16 +145,19 @@ export default function IndicatorReports_ReportGenerate() {
       <Paper sx={{p: 2}} variant={'outlined'} sx={{position: 'relative'}}>
         <Typography variant={'h4'}> Indicators </Typography>
 
-        <Button variant="outlined"  sx={{position: 'absolute', right:0, marginTop:1.5, backgroundColor:'#dda0dd', color:'white'}} onClick={() => {
-          navigate('/reportGenerate');
-        }} startIcon={<Undo />}>
+        <Button variant="outlined"
+                sx={{position: 'absolute', right: 0, marginTop: 1.5, backgroundColor: '#dda0dd', color: 'white'}}
+                onClick={() => {
+                  navigate('/reportGenerate');
+                }} startIcon={<Undo/>}>
           Back
         </Button>
         {indicators.length ?
-            <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
-                    onClick={generateTXTFile} startIcon={<FileDownload />}>
-              Generate TXT File
-            </Button>
+          <Button variant="contained" color="primary" className={classes.button}
+                  sx={{position: 'absolute', right: 100, marginTop: 0}}
+                  onClick={generateTXTFile} startIcon={<FileDownload/>}>
+            Generate TXT File
+          </Button>
           :
           null}
 
@@ -175,23 +178,49 @@ export default function IndicatorReports_ReportGenerate() {
 
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'h6'}> {`Indicator: ${indicator.name || 'Name Not Given'}`}  </Typography>
-               <Typography variant={'body1'} sx={{pl:4}}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} colorWithHover color={'#2f5ac7'}>{indicator.name || ''}</Link> </Typography>
-              <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`} </Typography>
+              <Typography variant={'body1'} sx={{pl: 4}}> {'Name: '}<Link
+                to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} colorWithHover
+                color={'#2f5ac7'}>{indicator.name || ''}</Link> </Typography>
+              <Typography variant={'body1'}
+                          sx={{pl: 4}}> {`Has Identifier: ${indicator.identifier || 'Not Given'}`} </Typography>
+              <Typography variant={'body1'}
+                          sx={{pl: 4}}> {`Date Created: ${(new Date(indicator.dateCreated)).toLocaleString() || 'Not Given'}`} </Typography>
+              <Typography variant={'body1'}
+                          sx={{pl: 4}}> {`Baseline: ${indicator.baseline?.numericalValue || 'Not Given'}`} </Typography>
+              <Typography variant={'body1'}
+                          sx={{pl: 4}}> {`Threshold: ${indicator.threshold?.numericalValue || 'Not Given'}`} </Typography>
+              <Typography variant={'body1'}
+                          sx={{pl: 4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`} </Typography>
+              {indicator.datasets ?
+                (indicator.datasets.map(dataset =>
+                  <Typography variant={'body1'} sx={{pl: 4}}> {'Dataset: '}<Link
+                    to={`/dataset/${encodeURIComponent(dataset._uri)}/view`} colorWithHover
+                    color={'#2f5ac7'}>{dataset.name || dataset._uri}</Link> </Typography>
+                ))
+                : null}
 
-              {indicator.indicatorReports?
+              {indicator.codes ?
+                (indicator.codes.map(code =>
+                  <Typography variant={'body1'} sx={{pl: 4}}> {'Code: '}<Link
+                    to={`/code/${encodeURIComponent(code._uri)}/view`} colorWithHover
+                    color={'#2f5ac7'}>{code.name || code._uri}</Link> </Typography>
+                ))
+                : null}
+
+              {indicator.indicatorReports ?
                 (indicator.indicatorReports.map(indicatorReport =>
                   <Paper elevation={0} sx={{pl: 4}}>
                     <Typography variant={'body1'}> {`Indicator Report: `}<Link
                       to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
                       colorWithHover>{indicatorReport.name || 'Name Not Given'}</Link> </Typography>
-                    <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value?.numericalValue || ''}`} </Typography>
-                    {indicatorReport.hasTime?
+                    <Typography variant={'body1'}
+                                sx={{pl: 4}}> {`Value: ${indicatorReport.value?.numericalValue || ''}`} </Typography>
+                    {indicatorReport.hasTime ?
                       <Typography variant={'body1'}
-                                 sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>:null}
+                                  sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography> : null}
                   </Paper>
-
                 ))
-                :null
+                : null
               }
             </Paper>
 
