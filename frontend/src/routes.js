@@ -119,6 +119,8 @@ const routes = (
     {/*Datasets*/}
     <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/new`} element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/howMuchImpacts`} element={<PrivateRoute element={HowMuchImpacts}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/:uri/:operationMode`}
+             element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
 
     {/*ImpactRisk*/}
     <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>

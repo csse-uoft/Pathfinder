@@ -4,6 +4,7 @@ const {Server400Error} = require("../../utils");
 const {Transaction} = require("graphdb-utils");
 const {impactRiskBuilder} = require("../impactRisk/impactRiskBuilder");
 const {howMuchImpactBuilder} = require("./howMuchImpactBuilder");
+const {GDBCounterfactualModel} = require("../../models/counterfactual");
 
 const HowMuchImpactModelDict = {
   HowMuchImpact: GDBHowMuchImpactModel,
@@ -13,6 +14,29 @@ const HowMuchImpactModelDict = {
 }
 
 const RESOURCE = 'HowMuchImpact';
+
+const fetchHowMuchImpactHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + RESOURCE))
+      return await fetchHowMuchImpact(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchHowMuchImpact = async (req, res) => {
+  const {uri} = req.params;
+  if (!uri)
+    throw Server400Error('A howMuchImpact is needed');
+  const howMuchImpact = await GDBHowMuchImpactModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+  if (!howMuchImpact)
+    throw Server400Error('No such code');
+  howMuchImpact.startTime = howMuchImpact.hasTime?.startTime;
+  howMuchImpact.endTime = howMuchImpact.hasTime?.endTime;
+  howMuchImpact.value = howMuchImpact.value.numericalValue;
+  return res.status(200).json({success: true, howMuchImpact});
+}
 
 
 const createHowMuchImpactHandler = async (req, res, next) => {
@@ -50,7 +74,7 @@ const fetchHowMuchImpacts = async (req, res) => {
   let howMuchImpacts = [];
   if (!subType || subType === 'undefined') {
     howMuchImpacts = await GDBHowMuchImpactModel.find({});
-  } else if (HowMuchImpactModelDict[subType]){
+  } else if (HowMuchImpactModelDict[subType]) {
     howMuchImpacts = await HowMuchImpactModelDict[subType].find({});
   } else {
     throw new Server400Error('No Such subType');
@@ -60,5 +84,5 @@ const fetchHowMuchImpacts = async (req, res) => {
 
 
 module.exports = {
-  fetchHowMuchImpactsHandler, createHowMuchImpactHandler
+  fetchHowMuchImpactsHandler, createHowMuchImpactHandler, fetchHowMuchImpactHandler
 }

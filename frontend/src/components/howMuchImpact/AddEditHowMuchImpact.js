@@ -12,16 +12,13 @@ import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {createImpactReport, fetchImpactReport} from "../../api/impactReportAPI";
-import {fetchOrganizations} from "../../api/organizationApi";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import Dropdown from "../shared/fields/MultiSelectField";
-import {Add as AddIcon} from "@mui/icons-material";
-import {createImpactModel} from "../../api/impactModelAPI";
-import {fetchCounterfactualInterfaces, fetchCounterfactuals} from "../../api/counterfactualApi";
+import {fetchCounterfactualInterfaces} from "../../api/counterfactualApi";
 import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
-import {createHowMuchImpact} from "../../api/howMuchImpactApi";
+import {createHowMuchImpact, fetchHowMuchImpact, fetchHowMuchImpacts} from "../../api/howMuchImpactApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -65,7 +62,6 @@ export default function AddEditHowMuchImpact() {
     value: '',
     startTime: '',
     endTime: ''
-
   });
   const [loading, setLoading] = useState(true);
 
@@ -88,13 +84,10 @@ export default function AddEditHowMuchImpact() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactReport(encodeURIComponent(uri)).then(({success, impactReport}) => {
+      fetchHowMuchImpact(encodeURIComponent(uri)).then(({success, howMuchImpact}) => {
         if (success) {
-          impactReport.uri = impactReport._uri;
-          impactReport.organization = impactReport.forOrganization;
-          impactReport.impactScale = impactReport.impactScale?.value?.numericalValue;
-          impactReport.impactDepth = impactReport.impactDepth?.value?.numericalValue;
-          setForm(impactReport);
+          howMuchImpact.uri = howMuchImpact._uri;
+          setForm(howMuchImpact);
           setLoading(false);
         }
       }).catch(e => {
@@ -171,7 +164,6 @@ export default function AddEditHowMuchImpact() {
     setErrors(error);
     return Object.keys(error).length === 0;
   };
-  console.log(ops)
 
   if (loading)
     return <Loading/>;
@@ -181,23 +173,26 @@ export default function AddEditHowMuchImpact() {
       {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
 
-          <Typography variant={'h6'}> {`Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Description:`} </Typography>
+          <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`Comment:`} </Typography>
-          <Typography variant={'body1'}> {`${form.comment || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`Organization:`} </Typography>
-          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
-                                               colorWithHover
-                                               color={'#2f5ac7'}>{ops.organization[form.organization]}</Link>
-          </Typography>
+          <Typography variant={'h6'}> {`Value:`} </Typography>
+          <Typography variant={'body1'}> {`${form.value}`} </Typography>
+          <Typography variant={'h6'}> {`Indicator:`} </Typography>
+          <Typography variant={'body1'}> <Link to={`/indicator/${encodeURIComponent(form.indicator)}/view`} colorWithHover color={'#2f5ac7'}>{ops.indicators[form.indicator]}</Link> </Typography>
+          <Typography variant={'h6'}> {`Time Interval:`} </Typography>
+          <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
 
-          <Typography variant={'h6'}> {`Impact Scale:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactScale || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Counterfactuals:`} </Typography>
 
-          <Typography variant={'h6'}> {`Impact Depth:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactDepth || 'Not Given'}`} </Typography>
+          {form.counterfactuals?.length?
+            form.counterfactuals.map(counterfactual => <Typography variant={'body1'}> {<Link to={`/counterfactual/${encodeURIComponent(counterfactual)}/view`} colorWithHover
+                                                                         color={'#2f5ac7'}>{ops.counterfactuals[counterfactual]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
+
 
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/impactReport/${encodeURIComponent(uri)}/edit`);
