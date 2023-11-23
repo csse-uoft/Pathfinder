@@ -8,7 +8,6 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {
   fetchOrganizationsInterfaces,
-  updateOrganization
 } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
@@ -16,10 +15,9 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 import {createStakeholder, fetchStakeholder, updateStakeholder} from "../../api/stakeholderAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -63,11 +61,13 @@ export default function AddEditStakeholder() {
     organization: '',
     name: '',
     description: '',
-    catchmentArea: ''
+    catchmentArea: '',
+    partOfs:[]
   })
   // const [outcomeForm, setOutcomeForm] = useState([
   // ]);
   const [loading, setLoading] = useState(true);
+  const [impactModelInterfaces, setImpactModelInterfaces] = useState({});
   const [options, setOptions] = useState({
     organizations: [],
     catchmentAreas: ['local', 'provincial', 'national', 'multinational', 'global']
@@ -75,7 +75,6 @@ export default function AddEditStakeholder() {
 
 
   useEffect(() => {
-
     Promise.all([
       fetchOrganizationsInterfaces().then(({organizations, success}) => {
         if (success) {
@@ -85,7 +84,9 @@ export default function AddEditStakeholder() {
           });
           setOptions(options => ({...options, organizations: orgDict}))
         }
-      }),
+      }),fetchImpactModelInterfaces().then(({impactModelInterfaces}) => {
+        setImpactModelInterfaces(impactModelInterfaces)
+      })
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
         Promise.all([
@@ -101,6 +102,7 @@ export default function AddEditStakeholder() {
             if (res.success) {
               const {stakeholder} = res;
               setForm({
+                partOfs: stakeholder.partOfs,
                 name: stakeholder.name,
                 description: stakeholder.description,
                 catchmentArea: stakeholder.catchmentArea,
@@ -250,6 +252,14 @@ export default function AddEditStakeholder() {
               <Paper elevation={0}>
                 <Typography variant={'body1'}> {`ID: ${organizationId.organizationId}`}</Typography>
                 <Typography variant={'body1'}> Issued By: <Link to={`/organization/${encodeURIComponent(organizationId.issuedBy._uri)}/view`} colorWithHover color={'#2f5ac7'}>{organizationId.issuedBy.legalName}</Link></Typography>
+              </Paper>
+            )
+          })}
+          {form.partOfs?.length? <Typography variant={'h6'}> {`Part Of:`} </Typography>:null}
+          {form.partOfs?.map(partOf => {
+            return (
+              <Paper elevation={0}>
+                <Typography variant={'body1'}> {`Impact Model: ${impactModelInterfaces[partOf]}`}</Typography>
               </Paper>
             )
           })}
