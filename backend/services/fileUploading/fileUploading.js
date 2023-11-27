@@ -490,7 +490,7 @@ const fileUploading = async (req, res, next) => {
         unexpectedImpactRiskDict[uri] = {_uri: uri};
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) { // todo: may have to change the index
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) { // todo: may have to change the index
         impactNormsDict[uri] = {_uri: uri};
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
@@ -687,7 +687,7 @@ const fileUploading = async (req, res, next) => {
         error = await outcomeBuilder('fileUploading', object, organization, error, {objectDict, outcomeDict, impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue}, null);
       } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
         error = await counterfactualBuilder('fileUploading', object, organization, error, {counterfactualDict, objectDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
         error = await impactNormsBuilder('fileUploading', object, organization, error, {impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue})
       } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
         error = await indicatorBuilder('fileUploading', object, organization, error, {

@@ -1,9 +1,5 @@
 const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
-const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval} = require("../helpers");
-const {GDBMeasureModel} = require("../../models/measure");
-const {Server400Error} = require("../../utils");
-const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {Transaction} = require("graphdb-utils");
 const {
   GDBImpactRiskModel,

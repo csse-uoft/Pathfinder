@@ -48,20 +48,20 @@ const fetchImpactReportsHandler = async (req, res, next) => {
 const fetchImpactReportInterfaceHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
-      return await fetchImpactReportInterface(req, res);
+      return await fetchImpactReportInterfaces(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);
   }
 };
 
-const fetchImpactReportInterface = async (req, res) => {
-  const impactReportInterface = {}
+const fetchImpactReportInterfaces = async (req, res) => {
+  const impactReportInterfaces = {}
   const impactReports = await GDBImpactReportModel.find({});
   impactReports.map(impactReport => {
-    impactReportInterface[impactReport._uri] = impactReport.name
+    impactReportInterfaces[impactReport._uri] = impactReport.name || impactReport._uri
   })
-  return res.status(200).json({success: true, impactReportInterface});
+  return res.status(200).json({success: true, impactReportInterfaces});
 };
 
 const fetchImpactReports = async (req, res) => {
@@ -82,7 +82,7 @@ const fetchImpactReport = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is missing');
-  const impactReport = await GDBImpactReportModel.findOne({_uri: uri}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
+  const impactReport = await GDBImpactReportModel.findOne({_uri: uri}, {populates: ['forStakeholderOutcome']});
   if (!impactReport)
     throw new Server400Error('No such impact Report');
   return res.status(200).json({success: true, impactReport});

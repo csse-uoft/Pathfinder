@@ -14,7 +14,7 @@ import {fetchImpactReport} from "../../api/impactReportAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createImpactRisk} from "../../api/impactRiskApi";
+import {createImpactRisk, fetchImpactRisk, fetchImpactRisks} from "../../api/impactRiskApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -68,13 +68,10 @@ export default function AddEditImpactRisk() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactReport(encodeURIComponent(uri)).then(({success, impactReport}) => {
+      fetchImpactRisk(encodeURIComponent(uri)).then(({success, impactRisk}) => {
         if (success) {
-          impactReport.uri = impactReport._uri;
-          impactReport.organization = impactReport.forOrganization;
-          impactReport.impactScale = impactReport.impactScale?.value?.numericalValue;
-          impactReport.impactDepth = impactReport.impactDepth?.value?.numericalValue;
-          setForm(impactReport);
+          impactRisk.uri = impactRisk._uri;
+          setForm(impactRisk);
           setLoading(false);
         }
       }).catch(e => {
@@ -161,23 +158,11 @@ export default function AddEditImpactRisk() {
       {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
 
-          <Typography variant={'h6'}> {`Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Identifier:`} </Typography>
+          <Typography variant={'body1'}> {`${form.hasIdentifier || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`Comment:`} </Typography>
-          <Typography variant={'body1'}> {`${form.comment || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`Organization:`} </Typography>
-          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
-                                               colorWithHover
-                                               color={'#2f5ac7'}>{ops.organization[form.organization]}</Link>
-          </Typography>
 
-          <Typography variant={'h6'}> {`Impact Scale:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactScale || 'Not Given'}`} </Typography>
-
-          <Typography variant={'h6'}> {`Impact Depth:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactDepth || 'Not Given'}`} </Typography>
 
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/impactReport/${encodeURIComponent(uri)}/edit`);

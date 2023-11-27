@@ -43,13 +43,17 @@ const fetchStakeholderOutcomesThroughOrganization = async (req, res) => {
   if (!organizationUri)
     throw new Server400Error('Organization URI is missing')
 
-  const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}, {populates: ['stakeholderOutcomes.outcome', 'stakeholderOutcomes.codes', 'stakeholderOutcomes.impactReports']});
-  if (!impactNorms)
-    return res.status(200).json({success: true, stakeholderOutcomes: []})
-  const stakeholderOutcomes = impactNorms.stakeholderOutcomes
+  let stakeholderOutcomes = []
+  const impactNormss = await GDBImpactNormsModel.find({organization: organizationUri}, {populates: ['stakeholderOutcomes.outcome', 'stakeholderOutcomes.codes', 'stakeholderOutcomes.impactReports']});
+  if (!impactNormss.length)
+    return res.status(200).json({success: true, stakeholderOutcomes: [], editable: userAccount.isSuperuser})
+  for (let impactNorms of impactNormss) {
+    if (impactNorms.stakeholderOutcomes)
+      stakeholderOutcomes = [...stakeholderOutcomes, ...impactNorms.stakeholderOutcomes]
+  }
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
 
-  return res.status(200).json({success: true, stakeholderOutcomes, editable: userAccount.isSuperuser})
+  return res.status(200).json({success: true, stakeholderOutcomes: stakeholderOutcomes || [], editable: userAccount.isSuperuser})
 }
 
 

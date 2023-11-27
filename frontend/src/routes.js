@@ -125,7 +125,7 @@ const routes = (
     {/*ImpactRisk*/}
     <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactRisk/new`} element={<PrivateRoute element={AddEditImpactRisk}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/impactRisk/:uri/:viewMode`}
+    <Route path={`${process.env.PUBLIC_URL}/impactRisk/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditImpactRisk}/>}/>
 
 
@@ -197,7 +197,7 @@ const routes = (
            element={<PrivateRoute element={Organization_impactModels}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactModel/new`}
            element={<PrivateRoute element={AddEditImpactModel}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/impactModel/:orgUri/:operationMode`}
+    <Route path={`${process.env.PUBLIC_URL}/impactModel/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditImpactModel}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactModels/:uri`} element={<PrivateRoute element={ImpactModels}/>}/>
 

@@ -1,10 +1,10 @@
 const express = require("express");
-const {fetchHowMuchImpactsHandler} = require("../services/howMuchImpact/howMuchImpact");
+const {fetchHowMuchImpactsHandler, fetchHowMuchImpactInterfaceHandler} = require("../services/howMuchImpact/howMuchImpact");
 
 
 
 const router = express.Router();
 
-// router.get('/interface/:organizationUri', fetchImpactModelInterfacesHandler)
+router.get('/interface/', fetchHowMuchImpactInterfaceHandler)
 router.get('/:subType', fetchHowMuchImpactsHandler)
 module.exports = router;

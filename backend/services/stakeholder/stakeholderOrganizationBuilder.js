@@ -47,8 +47,8 @@ async function stakeholderOrganizationBuilder(environment, object, organization,
           if (!impactNorms.stakeholders)
             impactNorms.stakeholders = []
           impactNorms.stakeholders = [...impactNorms.stakeholders, uri]
+          await impactNorms.save();
         }
-        await impactNorms.save();
       }
     }
 

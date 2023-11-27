@@ -4,10 +4,11 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {hasAccess} = require("../../helpers/hasAccess");
-const {GDBImpactModelModel} = require("../../models/impactStuffs");
+const {GDBImpactModelModel, GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {impactNormsBuilder} = require("./impactNormsBuilder");
+const {GDBImpactReportModel} = require("../../models/impactReport");
 
 const RESOURCE = 'ImpactModel'
 
@@ -60,7 +61,7 @@ const fetchImpactModels = async (req, res) => {
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.impactModels)
-      return res.status(200).json({success: true, indicators: []});
+      return res.status(200).json({success: true, impactModels: [], editable: true});
     let editable;
     if (userAccount.isSuperuser || organization.editors?.includes(userAccount._uri)) {
       editable = true;
@@ -74,6 +75,8 @@ const fetchImpactModels = async (req, res) => {
 
 };
 
+
+
 const fetchImpactModelsHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchImpactModels'))
@@ -83,6 +86,26 @@ const fetchImpactModelsHandler = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
+};
+
+const fetchImpactModelHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + RESOURCE))
+      return await fetchImpactModel(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchImpactModel = async (req, res) => {
+  const {uri} = req.params;
+  if (!uri)
+    throw new Server400Error('URI is missing');
+  const impactNorms = await GDBImpactNormsModel.findOne({_uri: uri});
+  if (!impactNorms)
+    throw new Server400Error('No such impact Report');
+  return res.status(200).json({success: true, impactNorms});
 };
 
 const createImpactModelHandler = async (req, res, next) => {
@@ -136,5 +159,6 @@ const fetchImpactModelInterfaces = async (req, res) => {
 module.exports = {
   fetchImpactModelsHandler,
   fetchImpactModelInterfacesHandler,
-  createImpactModelHandler
+  createImpactModelHandler,
+  fetchImpactModelHandler
 }

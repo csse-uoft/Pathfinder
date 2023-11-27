@@ -107,10 +107,11 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               );
               const indicatorsDict = {}
               indicators.map(indicator => {
-                indicatorsDict[indicator._uri] = indicator
+                indicatorsDict[indicator._uri] = indicator.name || indicator._uri
               })
               setIndicators(indicatorsDict)
             }
+
           });
         })).then(() => {
           setLoading(false);

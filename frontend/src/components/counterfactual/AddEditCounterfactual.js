@@ -8,7 +8,7 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import CounterFactualField from "../shared/CounterFactualField";
-import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
+import {updateOutcome} from "../../api/outcomeApi";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import {createCounterfactual, fetchCounterfactual} from "../../api/counterfactualApi";
 
@@ -127,23 +127,6 @@ export default function AddEditCounterfactual() {
 
   const validate = () => {
     const error = {};
-    // if (!form.locatedIns)
-    //   error.locatedIns = 'The field cannot be empty';
-    // if (!form.indicators.length)
-    //   error.indicators = 'The field cannot be empty';
-    // if (!form.outcomes.length)
-    //   error.outcomes = 'The field cannot be empty';
-    // if (!form.locatedIn)
-    //   error.locatedIn = 'The field cannot be empty';
-
-    // if (!form.themes.length)
-    //   error.themes = 'The field cannot be empty';
-    // if (!form.description)
-    //   error.description = 'The field cannot be empty'
-    // if(form.uri && !isValidURL(form.uri))
-    //   error.uri = 'Not a valid URI';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
 
     return Object.keys(error).length === 0;
   };
@@ -156,6 +139,7 @@ export default function AddEditCounterfactual() {
       {mode === 'view'?
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
+            <Typography variant={'h4'}> Counterfactual </Typography>
             <Typography variant={'h6'}> {`Located In:`} </Typography>
             <Typography variant={'body1'}> {`${form.locatedIn || 'Not Given'}`} </Typography>
             <Typography variant={'h6'}> {`Time Interval:`} </Typography>

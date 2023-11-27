@@ -12,6 +12,36 @@ const {Transaction} = require("graphdb-utils");
 
 const RESOURCE = 'IndicatorReport';
 
+const fetchIndicatorReportInterfacesHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
+      return await fetchIndicatorReportInterfaces(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchIndicatorReportInterfaces = async (req, res) => {
+  const {organizationUri} = req.params;
+  let indicatorReports
+  if (organizationUri === 'undefined' || !organizationUri) {
+    // return all indicator Interfaces
+    indicatorReports = await GDBIndicatorReportModel.find({});
+  } else {
+    // return outcomes based on their organization
+    indicatorReports = await GDBIndicatorReportModel.find({forOrganization: organizationUri})
+  }
+
+  const indicatorReportInterfaces = {};
+  indicatorReports.map(indicatorReport => {
+    indicatorReportInterfaces[indicatorReport._uri] = indicatorReport.name || indicatorReport._uri;
+  });
+  return res.status(200).json({success: true, indicatorReportInterfaces});
+
+}
+
 const createIndicatorReportHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'create' + RESOURCE)){
@@ -220,5 +250,6 @@ module.exports = {
   createIndicatorReportHandler,
   fetchIndicatorReportHandler,
   updateIndicatorReportHandler,
-  fetchIndicatorReportsHandler
+  fetchIndicatorReportsHandler,
+  fetchIndicatorReportInterfacesHandler
 };

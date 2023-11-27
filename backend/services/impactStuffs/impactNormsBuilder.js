@@ -74,6 +74,10 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
     hasError = ret.hasError;
     error = ret.error;
 
+    if (mainObject.dateCreated) {
+      mainObject.dateCreated = new Date(mainObject.dateCreated)
+    }
+
     ret = assignValues(environment, config, object, mainModel, mainObject, 'indicators', 'cids:hasIndicator', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;

@@ -196,17 +196,18 @@ export default function AddEditCharacteristic() {
     <Container maxWidth="md">
       {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h4'}> Characteristic </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`Stakeholders:`} </Typography>
-          {form.stakeholders.map(stakeholder =>
+          {form.stakeholders?.length? <Typography variant={'h6'}> {`Stakeholders:`} </Typography>: null}
+          {form.stakeholders?.map(stakeholder =>
             <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(stakeholder)}/view`}
                                                  colorWithHover color={'#2f5ac7'}>{options.stakeholders[stakeholder] || stakeholder}</Link> </Typography>
           )}
-          <Typography variant={'h6'}> {`Codes:`} </Typography>
-          {form.codes.map(code =>
+          {form.codes?.length? <Typography variant={'h6'}> {`Codes:`} </Typography>:null}
+          {form.codes?.map(code =>
             <Typography variant={'body1'}> <Link to={`/code/${encodeURIComponent(code)}/view`}
                                                  colorWithHover color={'#2f5ac7'}>{options.codes[code] || code}</Link> </Typography>
           )}

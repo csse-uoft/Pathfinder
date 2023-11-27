@@ -70,7 +70,7 @@ export default function ImpactRisks() {
       label: 'Identifier',
       body: ({_uri, hasIdentifier}) => {
         return <Link colorWithHover to={`/impactRisk/${encodeURIComponent(_uri)}/view`}>
-          {hasIdentifier}
+          {hasIdentifier || _uri}
         </Link>
       },
       sortBy: ({_uri}) => _uri

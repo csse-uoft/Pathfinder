@@ -15,3 +15,7 @@ export async function updateIndicatorReport(uri, params) {
 export async function fetchIndicatorReports(orgUri) {
   return getJson(`/api/indicatorReports/${orgUri}`);
 }
+
+export async function fetchIndicatorReportInterfaces(orgUri) {
+  return getJson(`/api/indicatorReports/interfaces/` + orgUri);
+}

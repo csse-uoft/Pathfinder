@@ -21,11 +21,11 @@ const fetchCounterfactual = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw Server400Error('A counterfactual is needed');
-  const counterfactual = await GDBCounterfactualModel.findOne({_uri: uri}, {populates: ['hasTime', 'iso72Value', 'locatedIns']});
+  const counterfactual = await GDBCounterfactualModel.findOne({_uri: uri}, {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'iso72Value', 'locatedIns']});
   if (!counterfactual)
     throw Server400Error('No such code');
-  counterfactual.startTime = counterfactual.hasTime?.startTime;
-  counterfactual.endTime = counterfactual.hasTime?.endTime;
+  counterfactual.startTime = counterfactual.hasTime?.hasBeginning.date;
+  counterfactual.endTime = counterfactual.hasTime?.hasEnd.date;
   counterfactual.value = counterfactual.iso72Value?.numericalValue;
   return res.status(200).json({success: true, counterfactual});
 }

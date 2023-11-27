@@ -18,6 +18,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {createStakeholder, fetchStakeholder, updateStakeholder} from "../../api/stakeholderAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
+import {fetchCharacteristics} from "../../api/characteristicApi";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -68,10 +69,23 @@ export default function AddEditStakeholder() {
   // ]);
   const [loading, setLoading] = useState(true);
   const [impactModelInterfaces, setImpactModelInterfaces] = useState({});
+  const [characteristicInterfaces, setCharacteristicInterfaces] = useState({});
   const [options, setOptions] = useState({
     organizations: [],
     catchmentAreas: ['local', 'provincial', 'national', 'multinational', 'global']
   });
+
+  useEffect(() => {
+    fetchCharacteristics().then(({characteristics}) => {
+      const characteristicInterfaces = {}
+      characteristics.map(chara => {
+        characteristicInterfaces[chara._uri] = chara.name
+      })
+      setCharacteristicInterfaces(characteristicInterfaces);
+    })
+  }, [])
+
+  console.log(form.characteristics)
 
 
   useEffect(() => {
@@ -102,6 +116,7 @@ export default function AddEditStakeholder() {
             if (res.success) {
               const {stakeholder} = res;
               setForm({
+                characteristics: stakeholder.characteristics,
                 partOfs: stakeholder.partOfs,
                 name: stakeholder.name,
                 description: stakeholder.description,
@@ -236,14 +251,15 @@ export default function AddEditStakeholder() {
     <Container maxWidth="md">
       {mode === 'view'?
         <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h4'}> Stakeholder </Typography>
           <Typography variant={'h6'}> {`Legal Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
+          <Typography variant={'body1'}> {`${form.legalName || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.name}`} </Typography>
+          <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Description:`} </Typography>
-          <Typography variant={'body1'}> {`${form.description}`} </Typography>
+          <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Catchment Area:`} </Typography>
-          <Typography variant={'body1'}> {`${form.catchmentArea}`} </Typography>
+          <Typography variant={'body1'}> {`${form.catchmentArea || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
           {form.organizationIds.length? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
@@ -259,7 +275,22 @@ export default function AddEditStakeholder() {
           {form.partOfs?.map(partOf => {
             return (
               <Paper elevation={0}>
-                <Typography variant={'body1'}> {`Impact Model: ${impactModelInterfaces[partOf]}`}</Typography>
+                <Typography variant={'body1'}>
+                  {`Impact Model: `}
+                {<Link to={`/impactModel/${encodeURIComponent(partOf)}/view`} colorWithHover
+                       color={'#2f5ac7'}>{`${impactModelInterfaces[partOf]}`}</Link>}
+                </Typography>
+              </Paper>
+            )
+          })}
+          {form.characteristics?.length? <Typography variant={'h6'}> {`Characteristics:`} </Typography>:null}
+          {form.characteristics?.map(partOf => {
+            return (
+              <Paper elevation={0}>
+                <Typography variant={'body1'}>
+                  {<Link to={`/characteristic/${encodeURIComponent(partOf)}/view`} colorWithHover
+                         color={'#2f5ac7'}>{`${characteristicInterfaces[partOf]}`}</Link>}
+                </Typography>
               </Paper>
             )
           })}

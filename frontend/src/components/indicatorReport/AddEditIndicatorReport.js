@@ -189,7 +189,7 @@ export default function AddEditIndicatorReport() {
     <Container maxWidth="md">
       {mode === 'view'? (
         <Paper sx={{p: 2}} variant={'outlined'}>
-
+          <Typography variant={'h4'}> Indicator Report </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -206,8 +206,7 @@ export default function AddEditIndicatorReport() {
           <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
           <Typography variant={'h6'}> {`Datasets:`} </Typography>
           {form.datasets?.length?
-            form.datasets.map(dataset => <Typography variant={'body1'}> {<Link to={`/dataset/${encodeURIComponent(dataset)}/view`} colorWithHover
-                                                                               color={'#2f5ac7'}>{datasetInterfaces[dataset]}</Link>} </Typography>)
+            form.datasets.map(dataset => <Typography variant={'body1'}> {datasetInterfaces[dataset]} </Typography>)
 
             : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 

@@ -194,6 +194,7 @@ export default function AddEditCode() {
     <Container maxWidth="md">
       {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h4'}> Code </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>

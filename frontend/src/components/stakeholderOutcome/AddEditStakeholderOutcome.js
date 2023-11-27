@@ -14,6 +14,7 @@ import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
+import {fetchOrganizationsInterfaces} from "../../api/organizationApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -67,18 +68,22 @@ export default function AddEditStakeholderOutcome() {
     code: {},
     stakeholder: {}
   });
+  console.log(dict.stakeholder)
+  console.log(form.outcome)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (mode === 'view') {
       Promise.all(
         [
-          fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
+          fetchOrganizationsInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
         ]
-      ).then(([{stakeholderInterfaces}, {codesInterfaces}, {outcomeInterfaces}]) => {
+      ).then(([{organizations}, {codesInterfaces}, {outcomeInterfaces}]) => {
         const dict = {};
+        const stakeholder = {}
+        organizations.map(org => stakeholder[org._uri] = org.legalName)
         dict['outcome'] = outcomeInterfaces;
-        dict['stakeholder'] = stakeholderInterfaces;
+        dict['stakeholder'] = stakeholder;
         dict['code'] = codesInterfaces;
         console.log(dict);
         setDict(dict);

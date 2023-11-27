@@ -7,15 +7,22 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {updateIndicatorReport} from "../../api/indicatorReportApi";
+import {
+  fetchIndicatorReportInterfaces,
+  fetchIndicatorReports,
+  updateIndicatorReport
+} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {createImpactReport, fetchImpactReport} from "../../api/impactReportAPI";
+import {createImpactReport, fetchImpactReport, fetchImpactReportInterfaces} from "../../api/impactReportAPI";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createImpactModel} from "../../api/impactModelAPI";
+import {createImpactModel, fetchImpactModel, fetchImpactModelInterfaces} from "../../api/impactModelAPI";
+import {fetchOutcomeInterfaces} from "../../api/outcomeApi";
+import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
+import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -47,7 +54,12 @@ export default function AddEditImpactModel() {
   );
 
   const [ops, setOps] = useState({
-    organization: {}
+    organization: {},
+    outcome: {},
+    indicator: {},
+    impactReport: {},
+    indicatorReport: {},
+    stakeholderOutcome: {}
   });
 
   const [form, setForm] = useState({
@@ -58,6 +70,37 @@ export default function AddEditImpactModel() {
     uri: '',
   });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOutcomeInterfaces().then(({outcomeInterfaces}) => {
+      setOps(ops => ({...ops, outcome: outcomeInterfaces}))
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchIndicatorInterfaces().then(({indicatorInterfaces}) => {
+      setOps(ops => ({...ops, indicator: indicatorInterfaces}))
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchImpactReportInterfaces().then(({impactReportInterfaces}) => {
+
+      setOps(ops => ({...ops, impactReport: impactReportInterfaces}))
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchIndicatorReportInterfaces().then(({indicatorReportInterfaces}) => {
+      setOps(ops => ({...ops, indicatorReport: indicatorReportInterfaces}))
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchStakeholderOutcomeInterface().then(({stakeholderOutcomeInterfaces}) => {
+      setOps(ops => ({...ops, stakeholderOutcome: stakeholderOutcomeInterfaces}))
+    })
+  }, [])
 
   useEffect(() => {
     Promise.all([fetchOrganizations()]).then(
@@ -79,13 +122,9 @@ export default function AddEditImpactModel() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactReport(encodeURIComponent(uri)).then(({success, impactReport}) => {
+      fetchImpactModel(encodeURIComponent(uri)).then(({success, impactNorms}) => {
         if (success) {
-          impactReport.uri = impactReport._uri;
-          impactReport.organization = impactReport.forOrganization;
-          impactReport.impactScale = impactReport.impactScale?.value?.numericalValue;
-          impactReport.impactDepth = impactReport.impactDepth?.value?.numericalValue;
-          setForm(impactReport);
+          setForm(impactNorms);
           setLoading(false);
         }
       }).catch(e => {
@@ -119,6 +158,7 @@ export default function AddEditImpactModel() {
       setState(state => ({...state, submitDialog: true}));
     }
   };
+
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
@@ -159,33 +199,6 @@ export default function AddEditImpactModel() {
 
   const validate = () => {
     const error = {};
-    // if (!form.name)
-    //   error.name = 'The field cannot be empty';
-    // if (!form.comment)
-    //   error.comment = 'The field cannot be empty';
-    // if (!form.organization)
-    //   error.organization = 'The field cannot be empty';
-    // if (!form.indicator)
-    //   error.indicator = 'The field cannot be empty';
-    // if (!form.startTime)
-    //   error.startTime = 'The field cannot be empty';
-    // if (!form.endTime)
-    //   error.endTime = 'The field cannot be empty';
-    // if (form.uri && !isValidURL(form.uri))
-    //   error.uri = 'The field cannot be empty';
-    // if (!!form.startTime && !!form.endTime && form.startTime > form.endTime) {
-    //   error.startTime = 'The date must be earlier than the end date';
-    //   error.endTime = 'The date must be later than the start date';
-    // }
-
-    // if (!form.numericalValue)
-    //   error.numericalValue = 'The field cannot be empty';
-    // if (form.numericalValue && isNaN(form.numericalValue))
-    //   error.numericalValue = 'The field must be a number';
-    // if (!form.unitOfMeasure)
-    //   error.unitOfMeasure = 'The field cannot be empty';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -193,28 +206,70 @@ export default function AddEditImpactModel() {
   if (loading)
     return <Loading/>;
 
+  console.log(form)
+  console.log(ops)
+
   return (
     <Container maxWidth="md">
       {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
-
+          <Typography variant={'h4'}> Impact Model </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
-          <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`Comment:`} </Typography>
-          <Typography variant={'body1'}> {`${form.comment || 'Not Given'}`} </Typography>
+          <Typography variant={'body1'}> {`${form._uri}`} </Typography>
           <Typography variant={'h6'}> {`Organization:`} </Typography>
           <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
                                                colorWithHover
                                                color={'#2f5ac7'}>{ops.organization[form.organization]}</Link>
           </Typography>
 
-          <Typography variant={'h6'}> {`Impact Scale:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactScale || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Description:`} </Typography>
+          <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
 
-          <Typography variant={'h6'}> {`Impact Depth:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactDepth || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Date Created:`} </Typography>
+          <Typography variant={'body1'}> {form.dateCreated? `${(new Date(form.dateCreated)).toLocaleDateString()}` : 'Not Given'} </Typography>
+          <Typography variant={'h6'}> {`Stakeholders:`} </Typography>
+          {form.stakeholders?.length?
+            form.stakeholders.map(stakeholder => <Typography variant={'body1'}> {<Link to={`/stakeholder/${encodeURIComponent(stakeholder)}/view`} colorWithHover
+                                                                               color={'#2f5ac7'}>{ops.organization[stakeholder]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
+          <Typography variant={'h6'}> {`Outcomes:`} </Typography>
+          {form.outcomes?.length?
+            form.outcomes.map(outcome => <Typography variant={'body1'}> {<Link to={`/outcome/${encodeURIComponent(outcome)}/view`} colorWithHover
+                                                                                       color={'#2f5ac7'}>{ops.outcome[outcome]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
+          <Typography variant={'h6'}> {`Indicators:`} </Typography>
+          {form.indicators?.length?
+            form.indicators.map(indicator => <Typography variant={'body1'}> {<Link to={`/indicator/${encodeURIComponent(indicator)}/view`} colorWithHover
+                                                                               color={'#2f5ac7'}>{ops.indicator[indicator]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
+          <Typography variant={'h6'}> {`Impact Reports:`} </Typography>
+          {form.impactReports?.length?
+            form.impactReports.map(impactReport => <Typography variant={'body1'}> {<Link to={`/impactReport/${encodeURIComponent(impactReport)}/view`} colorWithHover
+                                                                               color={'#2f5ac7'}>{ops.impactReport[impactReport]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
+          <Typography variant={'h6'}> {`Indicator Reports:`} </Typography>
+          {form.indicatorReports?.length?
+            form.indicatorReports.map(indicatorReport => <Typography variant={'body1'}> {<Link to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`} colorWithHover
+                                                                                         color={'#2f5ac7'}>{ops.indicatorReport[indicatorReport]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
+          <Typography variant={'h6'}> {`Stakeholder Outcome:`} </Typography>
+          {form.stakeholderOutcomes?.length?
+            form.stakeholderOutcomes.map(so => <Typography variant={'body1'}> {<Link to={`/stakeholderOutcome/${encodeURIComponent(so)}/view`} colorWithHover
+                                                                                               color={'#2f5ac7'}>{ops.stakeholderOutcome[so]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/impactReport/${encodeURIComponent(uri)}/edit`);
@@ -279,6 +334,23 @@ export default function AddEditImpactModel() {
           }}
         />
         <GeneralField
+          fullWidth
+          type={'date'}
+          value={form.dateCreated}
+          label={'Date Created'}
+          onChange={e => form.dateCreated = e.target.value}
+          error={!!errors.dateCreated}
+          helperText={errors.dateCreated}
+          // onBlur={() => {
+          //     if (!state.dateCreated) {
+          //         setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
+          //     } else {
+          //         setErrors(errors => ({...errors, dateCreated: null}));
+          //     }
+          // }
+          // }
+        />
+        <GeneralField
           key={'description'}
           label={'Description'}
           value={form.description}
@@ -289,6 +361,7 @@ export default function AddEditImpactModel() {
           minRows={4}
           multiline
         />
+
 
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit

@@ -7,12 +7,13 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
+import {createIndicator, fetchIndicator, fetchIndicatorInterfaces, updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDatasetInterfaces} from "../../api/datasetApi";
+import {fetchIndicatorReportInterfaces} from "../../api/indicatorReportApi";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -60,6 +61,7 @@ export default function AddEditIndicator() {
     datasets: []
   });
   const [loading, setLoading] = useState(true);
+  const [indicatorReportInterfaces, setIndicatorReportInterfaces] = useState({});
 
 
   useEffect(() => {
@@ -79,6 +81,19 @@ export default function AddEditIndicator() {
     fetchCodesInterfaces().then(({success, codesInterfaces}) => {
       if (success){
         setCodesInterfaces(codesInterfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchIndicatorReportInterfaces().then(({success, indicatorReportInterfaces}) => {
+      if (success){
+        setIndicatorReportInterfaces(indicatorReportInterfaces)
       }
     }).catch(e => {
       if (e.json)
@@ -193,7 +208,7 @@ export default function AddEditIndicator() {
     <Container maxWidth="md">
       {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
-
+          <Typography variant={'h4'}> Indicator </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -201,8 +216,6 @@ export default function AddEditIndicator() {
           <Typography variant={'h6'}> {`Organization:`} </Typography>
           <Typography variant={'body1'}> {<Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover
                                                 color={'#2f5ac7'}>{form.organizationName}</Link>} </Typography>
-          <Typography variant={'h6'}> {`Identifier:`} </Typography>
-          <Typography variant={'body1'}> {`${form.identifier}`} </Typography>
           <Typography variant={'h6'}> {`Date Created:`} </Typography>
           <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
           <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
@@ -213,10 +226,13 @@ export default function AddEditIndicator() {
           <Typography variant={'body1'}> {`${form.threshold || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Identifier:`} </Typography>
           <Typography variant={'body1'}> {`${form.identifier || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`Identifier:`} </Typography>
-          <Typography variant={'body1'}> {`${form.identifier || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`Codes:`} </Typography>
+          <Typography variant={'h6'}> {`Indicator Reports:`} </Typography>
+          {form.indicatorReports?.length?
+            form.indicatorReports.map(indicatorReport => <Typography variant={'body1'}> {<Link to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`} colorWithHover
+                                                                                               color={'#2f5ac7'}>{[indicatorReport]}</Link>} </Typography>)
 
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+          <Typography variant={'h6'}> {`Codes:`} </Typography>
           {form.codes?.length?
             form.codes.map(code => <Typography variant={'body1'}> {<Link to={`/code/${encodeURIComponent(code)}/view`} colorWithHover
                                                                          color={'#2f5ac7'}>{codesInterfaces[code]}</Link>} </Typography>)
@@ -224,8 +240,7 @@ export default function AddEditIndicator() {
             : <Typography variant={'body1'}> {`Not Given`} </Typography>}
           <Typography variant={'h6'}> {`Datasets:`} </Typography>
           {form.datasets?.length?
-            form.datasets.map(dataset => <Typography variant={'body1'}> {<Link to={`/dataset/${encodeURIComponent(dataset)}/view`} colorWithHover
-                                                                         color={'#2f5ac7'}>{datasetInterfaces[dataset]}</Link>} </Typography>)
+            form.datasets.map(dataset => <Typography variant={'body1'}>{datasetInterfaces[dataset]} </Typography>)
 
             : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 

@@ -98,6 +98,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'fetchImpactRisk':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'fetchImpactRisks':
       if (userAccount.isSuperuser)
         return true;
@@ -109,6 +113,10 @@ async function hasAccess(req, operationType) {
         return true;
       break;
     case 'fetchImpactModelInterfaces':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'fetchImpactModel':
       if (userAccount.isSuperuser)
         return true;
       break;

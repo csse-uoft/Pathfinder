@@ -42,4 +42,25 @@ const fetchImpactRisks = async (req, res) => {
 }
 
 
-module.exports = {createImpactRiskHandler, fetchImpactRisksHandler}
+const fetchImpactRiskHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + RESOURCE))
+      return await fetchImpactRisk(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchImpactRisk = async (req, res) => {
+  const {uri} = req.params;
+  if (!uri)
+    throw new Server400Error('No such URI');
+  const impactRisk = await GDBImpactRiskModel.findOne({_uri: uri});
+  if (!impactRisk)
+    throw new Server400Error('No such Impact Risk');
+  return res.status(200).json({success: true, impactRisk});
+}
+
+
+module.exports = {createImpactRiskHandler, fetchImpactRisksHandler, fetchImpactRiskHandler}

@@ -8,14 +8,13 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import ImpactReportField from "../shared/ImpactReportField";
-import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
+import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {createImpactReport, fetchImpactReport} from "../../api/impactReportAPI";
 import {fetchOrganizations} from "../../api/organizationApi";
-import {createStakeholderOutcome, fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchHowMuchImpactInterfaces} from "../../api/howMuchImpactApi";
+import {fetchImpactRisks} from "../../api/impactRiskApi";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -47,7 +46,9 @@ export default function AddEditImpactReport() {
 
   const [ops, setOps] = useState({
     organization: {},
-    stakeholderOutcome: {}
+    stakeholderOutcome: {},
+    howMuchImpact: {},
+    impactRisk: {}
   });
 
   const [form, setForm] = useState({
@@ -67,13 +68,17 @@ export default function AddEditImpactReport() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchOrganizations(),]).then(
-      ([{organizations},]) => {
+    Promise.all([fetchOrganizations(), fetchHowMuchImpactInterfaces(), fetchImpactRisks()]).then(
+      ([{organizations}, {howMuchImpactInterfaces}, {impactRisks}]) => {
         const organizationsOps = {};
         organizations.map(organization => {
           organizationsOps[organization._uri] = organization.legalName;
         });
-        setOps(ops => ({...ops, organization: organizationsOps}));
+        const impactRiskInterfaces = {}
+        impactRisks.map(impactRisk => {
+          impactRiskInterfaces[impactRisk._uri] = impactRisk.hasIdentifier
+        })
+        setOps(ops => ({...ops, organization: organizationsOps, howMuchImpact: howMuchImpactInterfaces, impactRisk: impactRiskInterfaces}));
         setLoading(false);
       }
     ).catch(([e]) => {
@@ -90,8 +95,7 @@ export default function AddEditImpactReport() {
         if (success) {
           impactReport.uri = impactReport._uri;
           impactReport.organization = impactReport.forOrganization;
-          impactReport.impactScale = impactReport.impactScale?.value?.numericalValue;
-          impactReport.impactDepth = impactReport.impactDepth?.value?.numericalValue;
+
           setForm(impactReport);
           setLoading(false);
         }
@@ -204,7 +208,7 @@ export default function AddEditImpactReport() {
     <Container maxWidth="md">
       {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
-
+          <Typography variant={'h4'}> Impact Report </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -214,14 +218,32 @@ export default function AddEditImpactReport() {
           <Typography variant={'h6'}> {`Organization:`} </Typography>
           <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
                                                colorWithHover
-                                               color={'#2f5ac7'}>{ops.organization[form.organization]}</Link>
+                                               color={'#2f5ac7'}>{ops.organization[form.organization] || 'Not Given'}</Link>
           </Typography>
 
           <Typography variant={'h6'}> {`Impact Scale:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactScale || 'Not Given'}`} </Typography>
+          <Typography variant={'body1'}> { form.impactScale? <Link to={`/howMuchImpact/${encodeURIComponent(form.impactScale)}/view`}
+                                                colorWithHover
+                                                color={'#2f5ac7'}>{ops.howMuchImpact[form.impactScale] || 'Not Given'} </Link> :'Not Given'}
+          </Typography>
 
           <Typography variant={'h6'}> {`Impact Depth:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactDepth|| 'Not Given'}`} </Typography>
+          <Typography variant={'body1'}> {form.impactDepth ? <Link to={`/howMuchImpact/${encodeURIComponent(form.impactDepth)}/view`}
+                                                colorWithHover
+                                                color={'#2f5ac7'}>{ops.howMuchImpact[form.impactDepth]}</Link> : 'Not Given'}
+          </Typography>
+
+          <Typography variant={'h6'}> {`Impact Duration:`} </Typography>
+          <Typography variant={'body1'}> {form.impactDuration ? <Link to={`/howMuchImpact/${encodeURIComponent(form.impactDuration)}/view`}
+                                                                   colorWithHover
+                                                                   color={'#2f5ac7'}>{ops.howMuchImpact[form.impactDuration]}</Link> : 'Not Given'}
+          </Typography>
+          <Typography variant={'h6'}> {`Impact Risk:`} </Typography>
+          {form.impactRisks?.length?
+            form.impactRisks.map(code => <Typography variant={'body1'}> {<Link to={`/impactRisk/${encodeURIComponent(code)}/view`} colorWithHover
+                                                                         color={'#2f5ac7'}>{ops.impactRisk[code]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/impactReport/${encodeURIComponent(uri)}/edit`);

@@ -5,6 +5,7 @@ const {Transaction} = require("graphdb-utils");
 const {impactRiskBuilder} = require("../impactRisk/impactRiskBuilder");
 const {howMuchImpactBuilder} = require("./howMuchImpactBuilder");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
+const {GDBCodeModel} = require("../../models/code");
 
 const HowMuchImpactModelDict = {
   HowMuchImpact: GDBHowMuchImpactModel,
@@ -14,6 +15,22 @@ const HowMuchImpactModelDict = {
 }
 
 const RESOURCE = 'HowMuchImpact';
+
+const fetchHowMuchImpactInterface = async (req, res) => {
+  const howMuchImpacts = await GDBHowMuchImpactModel.find({});
+  const howMuchImpactInterfaces = {}
+  howMuchImpacts.map(howMuchImpact => howMuchImpactInterfaces[howMuchImpact._uri] = howMuchImpact._uri)
+
+  return res.status(200).json({success: true, howMuchImpactInterfaces});
+};
+
+const fetchHowMuchImpactInterfaceHandler = async (req, res, next) => {
+  try {
+    return await fetchHowMuchImpactInterface(req, res);
+  } catch (e) {
+    next(e);
+  }
+};
 
 const fetchHowMuchImpactHandler = async (req, res, next) => {
   try {
@@ -84,5 +101,5 @@ const fetchHowMuchImpacts = async (req, res) => {
 
 
 module.exports = {
-  fetchHowMuchImpactsHandler, createHowMuchImpactHandler, fetchHowMuchImpactHandler
+  fetchHowMuchImpactsHandler, createHowMuchImpactHandler, fetchHowMuchImpactHandler, fetchHowMuchImpactInterfaceHandler
 }
