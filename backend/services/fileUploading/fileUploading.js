@@ -354,7 +354,7 @@ const fileUploading = async (req, res, next) => {
       addTrace('The file should contain a list (start with [ and end with ] ) of json objects.');
       addTrace('Please consult the JSON-LD reference at: https://json-ld.org/');
       error += 1;
-      addMessage(0, 'fileNotAList', {});
+      addMessage(0, 'fileNotAList', {}, {});
       const msg = formatMessage();
       throw new Server400Error(msg);
     }
