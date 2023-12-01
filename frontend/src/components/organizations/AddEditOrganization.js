@@ -7,21 +7,17 @@ import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {
-  createOrganization,
-  fetchOrganization,
-  fetchOrganizations,
-  fetchOrganizationsInterfaces,
   updateOrganization
 } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -89,7 +85,7 @@ export default function AddEditOrganization() {
   useEffect(() => {
 
     Promise.all([
-      fetchOrganizationsInterfaces().then(({organizations, success}) => {
+      fetchDataTypeInterfaces('organization').then(({organizations, success}) => {
         if (success) {
           const orgDict = {};
           organizations.map(org => {
@@ -102,7 +98,7 @@ export default function AddEditOrganization() {
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
         Promise.all([
-          fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
+          fetchDataTypes('user', encodeURIComponent(uri)).then(({data, success}) => {
             const objectForm = {};
             data.map(user => {
               objectForm[user._uri] = `${user.person.givenName} ${user.person.familyName} URI: ${user._uri}`;
@@ -110,7 +106,7 @@ export default function AddEditOrganization() {
             if (success)
               setOptions(options => ({...options, objectForm}));
           }),
-          fetchOrganization(encodeURIComponent(uri)).then(res => {
+          fetchDataType('organization', encodeURIComponent(uri)).then(res => {
             if (res.success) {
               const {organization} = res;
               setForm({
@@ -181,7 +177,7 @@ export default function AddEditOrganization() {
           form.telephone.split('(')[1].split(') ')[1].split('-')[0] +
           form.telephone.split('(')[1].split(') ')[1].split('-')[1]);
       }
-      createOrganization({form}).then((ret) => {
+      createDataType('organization', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');

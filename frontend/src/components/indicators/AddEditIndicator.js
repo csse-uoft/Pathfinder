@@ -7,13 +7,11 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {createIndicator, fetchIndicator, fetchIndicatorInterfaces, updateIndicator} from "../../api/indicatorApi";
+import {updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCodesInterfaces} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDatasetInterfaces} from "../../api/datasetApi";
-import {fetchIndicatorReportInterfaces} from "../../api/indicatorReportApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -65,8 +63,8 @@ export default function AddEditIndicator() {
 
 
   useEffect(() => {
-    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
-      if (success){
+    fetchDataTypeInterfaces('dataset').then(({success, datasetInterfaces}) => {
+      if (success) {
         setDatasetInterfaces(datasetInterfaces)
       }
     }).catch(e => {
@@ -78,8 +76,8 @@ export default function AddEditIndicator() {
   }, [])
 
   useEffect(() => {
-    fetchCodesInterfaces().then(({success, codesInterfaces}) => {
-      if (success){
+    fetchDataTypeInterfaces('code').then(({success, codesInterfaces}) => {
+      if (success) {
         setCodesInterfaces(codesInterfaces)
       }
     }).catch(e => {
@@ -91,7 +89,7 @@ export default function AddEditIndicator() {
   }, [])
 
   useEffect(() => {
-    fetchIndicatorReportInterfaces().then(({success, indicatorReportInterfaces}) => {
+    fetchDataTypeInterfaces('indicatorReport').then(({success, indicatorReportInterfaces}) => {
       if (success){
         setIndicatorReportInterfaces(indicatorReportInterfaces)
       }
@@ -105,7 +103,7 @@ export default function AddEditIndicator() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchIndicator(encodeURIComponent(uri)).then(({success, indicator}) => {
+      fetchDataType('indicator', encodeURIComponent(uri)).then(({success, indicator}) => {
         if (success) {
           indicator.uri = indicator._uri;
           setForm(indicator);
@@ -136,7 +134,6 @@ export default function AddEditIndicator() {
   }, [mode, uri]);
 
   const handleSubmit = () => {
-    console.log(form)
     if (validate()) {
       setState(state => ({...state, submitDialog: true}));
     }
@@ -145,7 +142,7 @@ export default function AddEditIndicator() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicator({form}, userContext).then((ret) => {
+      createDataType('indicator', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organization-indicators');
@@ -180,7 +177,6 @@ export default function AddEditIndicator() {
   };
 
   const validate = () => {
-    console.log(form);
     const error = {};
     if (form.name === '')
       error.name = 'The field cannot be empty';

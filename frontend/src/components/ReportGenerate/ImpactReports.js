@@ -3,18 +3,13 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
 import SelectField from "../shared/fields/SelectField";
 import {Undo, PictureAsPdf, FileDownload} from "@mui/icons-material";
-import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
-import {fetchImpactReports} from "../../api/impactReportAPI";
-import {fetchStakeholderOutcome, fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {UserContext} from "../../context";
+import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -76,7 +71,7 @@ export default function ImpactReports_ReportGenerate() {
 
 
   useEffect(() => {
-    Promise.all([fetchOrganizations(), fetchStakeholderOutcomeInterface()]).then(
+    Promise.all([fetchDataTypes('organization'), fetchDataTypeInterfaces('stakeholderOutcome')]).then(
       ([{organizations}, {stakeholderOutcomeInterface}]) => {
         const organizationsOps = {};
         if (userContext.isSuperuser)
@@ -98,7 +93,7 @@ export default function ImpactReports_ReportGenerate() {
 
   useEffect(() => {
     if (selectedOrganization) {
-      fetchImpactReports(encodeURIComponent(selectedOrganization)).then(({success, impactReports}) => {
+      fetchDataTypes('impactReport', encodeURIComponent(selectedOrganization)).then(({success, impactReports}) => {
         if (success) {
           setImpactReports(impactReports);
         }

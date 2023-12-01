@@ -12,9 +12,9 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {createCode, fetchCode, updateCode} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataset} from "../../api/datasetApi";
+import {updateCode} from "../../api/codeAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
     root: {
         width: '80%'
@@ -81,7 +81,7 @@ export default function AddEditDataset() {
     const handleConfirm = () => {
         setState(state => ({...state, loadingButton: true}));
         if (mode === 'new') {
-            createDataset({form}).then((ret) => {
+            createDataType('dataset', {form}).then((ret) => {
                 if (ret.success) {
                     setState({loadingButton: false, submitDialog: false,});
                     navigate('/Datasets');

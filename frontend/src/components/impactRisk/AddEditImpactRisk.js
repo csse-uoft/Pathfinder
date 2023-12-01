@@ -10,11 +10,10 @@ import {UserContext} from "../../context";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchImpactReport} from "../../api/impactReportAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createImpactRisk, fetchImpactRisk, fetchImpactRisks} from "../../api/impactRiskApi";
+import {createDataType, fetchDataType} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -68,7 +67,7 @@ export default function AddEditImpactRisk() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactRisk(encodeURIComponent(uri)).then(({success, impactRisk}) => {
+      fetchDataType('impactRisk', encodeURIComponent(uri)).then(({success, impactRisk}) => {
         if (success) {
           impactRisk.uri = impactRisk._uri;
           setForm(impactRisk);
@@ -109,7 +108,7 @@ export default function AddEditImpactRisk() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createImpactRisk({form}).then((ret) => {
+      createDataType('impactRisk', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

@@ -4,10 +4,11 @@ import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate} from "react-router-dom";
 import {useSnackbar} from 'notistack';
-import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
+import {deleteOrganization} from "../../api/organizationApi";
 import {UserContext} from "../../context";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
+
 export default function Organization_indicators() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -23,7 +24,7 @@ export default function Organization_indicators() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOrganizations(userContext).then(res => {
+    fetchDataTypes('organization').then(res => {
       if (res.success)
         setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {

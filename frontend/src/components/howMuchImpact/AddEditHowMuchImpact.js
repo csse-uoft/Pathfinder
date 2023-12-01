@@ -7,18 +7,14 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import ImpactReportField from "../shared/ImpactReportField";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {createImpactReport, fetchImpactReport} from "../../api/impactReportAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import Dropdown from "../shared/fields/MultiSelectField";
-import {fetchCounterfactualInterfaces} from "../../api/counterfactualApi";
-import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
-import {createHowMuchImpact, fetchHowMuchImpact, fetchHowMuchImpacts} from "../../api/howMuchImpactApi";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -66,7 +62,7 @@ export default function AddEditHowMuchImpact() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchCounterfactualInterfaces(), fetchIndicatorInterfaces()]).then(
+    Promise.all([fetchDataTypeInterfaces('counterfactual'), fetchDataTypeInterfaces('indicator')]).then(
       ([{counterfactualInterfaces}, {indicatorInterfaces}]) => {
         const options = ops;
         options["counterfactuals"] = counterfactualInterfaces
@@ -84,7 +80,7 @@ export default function AddEditHowMuchImpact() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchHowMuchImpact(encodeURIComponent(uri)).then(({success, howMuchImpact}) => {
+      fetchDataType('howMuchImpact', encodeURIComponent(uri)).then(({success, howMuchImpact}) => {
         if (success) {
           howMuchImpact.uri = howMuchImpact._uri;
           setForm(howMuchImpact);
@@ -125,7 +121,7 @@ export default function AddEditHowMuchImpact() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createHowMuchImpact({form}).then((ret) => {
+      createDataType('howMuchImpact', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

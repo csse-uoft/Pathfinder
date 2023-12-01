@@ -8,10 +8,10 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import IndicatorReportField from "../shared/IndicatorReportField";
-import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
+import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDatasetInterfaces} from "../../api/datasetApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -32,12 +32,11 @@ export default function AddEditIndicatorReport() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
-  const userContext = useContext(UserContext);
 
   const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
   useEffect(() => {
-    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
+    fetchDataTypeInterfaces('dataset').then(({success, datasetInterfaces}) => {
       if (success){
         setDatasetInterfaces(datasetInterfaces)
       }
@@ -75,7 +74,7 @@ export default function AddEditIndicatorReport() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchIndicatorReport(encodeURIComponent(uri)).then(({success, indicatorReport}) => {
+      fetchDataType('indicatorReport', encodeURIComponent(uri)).then(({success, indicatorReport}) => {
         if (success) {
           setForm(indicatorReport);
           setLoading(false);
@@ -115,7 +114,7 @@ export default function AddEditIndicatorReport() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicatorReport({form}).then((ret) => {
+      createDataType('indicatorReport', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

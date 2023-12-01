@@ -4,10 +4,9 @@ import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
-import {UserContext} from "../../context";
-import {fetchOutcomes} from "../../api/outcomeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function Outcomes() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
@@ -24,7 +23,7 @@ export default function Outcomes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOutcomes(encodeURIComponent(uri)).then(res => {
+    fetchDataTypes('outcome', encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.outcomes, editable: res.editable}));
     }).catch(e => {

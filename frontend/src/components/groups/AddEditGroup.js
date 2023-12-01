@@ -6,16 +6,15 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {fetchOrganizations} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
-import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
+import {updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -66,7 +65,7 @@ export default function AddEditGroup() {
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
     Promise.all([
-      fetchOrganizations()
+      fetchDataTypes('organization')
         .then(({organizations}) => {
         organizations.map(organization => {
           options.organizations[organization._uri] = organization.legalName;
@@ -78,7 +77,7 @@ export default function AddEditGroup() {
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
       }),
-      fetchUsers().then(({data}) => {
+      fetchDataTypes('user').then(({data}) => {
         data.map((user) => {
           options.administrators[user._uri] = `${user.person.familyName} ${user.person.givenName} URI: ${user._uri}`;
         })
@@ -91,7 +90,7 @@ export default function AddEditGroup() {
       }),
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
-        fetchGroup(encodeURIComponent(uri)).then(res => {
+        fetchDataType('group', encodeURIComponent(uri)).then(res => {
           if (res.success) {
             const group = res.group;
             setForm({
@@ -137,7 +136,7 @@ export default function AddEditGroup() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createGroup(form).then((ret) => {
+      createDataType('group', form).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/groups');

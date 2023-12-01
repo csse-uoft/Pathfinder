@@ -5,9 +5,9 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {fetchIndicatorReports} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function IndicatorReports() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
@@ -25,7 +25,7 @@ export default function IndicatorReports() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicatorReports(encodeURIComponent(uri)).then(res => {
+    fetchDataTypes('indicatorReport', encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.indicatorReports, editable: res.editable}));
     }).catch(e => {

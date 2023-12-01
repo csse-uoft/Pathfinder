@@ -9,6 +9,7 @@ import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchCounterfactuals} from "../../api/counterfactualApi";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function Counterfactuals() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -25,7 +26,7 @@ export default function Counterfactuals() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchCounterfactuals().then(res => {
+    fetchDataTypes('counterfactual').then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.counterfactuals}));
     }).catch(e => {

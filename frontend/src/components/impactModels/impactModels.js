@@ -7,7 +7,7 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchImpactModels} from "../../api/impactModelAPI";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function ImpactModels() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
@@ -25,7 +25,7 @@ export default function ImpactModels() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchImpactModels(encodeURIComponent(uri)).then(res => {
+    fetchDataTypes('impactModel', encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.impactModels, editable: res.editable}));
     }).catch(e => {

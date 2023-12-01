@@ -7,8 +7,8 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCharacteristics} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 
 export default function Characteristics() {
   const navigator = useNavigate();
@@ -26,7 +26,7 @@ export default function Characteristics() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchCharacteristics().then(res => {
+    fetchDataTypes('characteristic').then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.characteristics}));
     }).catch(e => {

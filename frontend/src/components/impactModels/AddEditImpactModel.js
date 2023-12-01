@@ -8,21 +8,14 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {
-  fetchIndicatorReportInterfaces,
-  fetchIndicatorReports,
   updateIndicatorReport
 } from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {createImpactReport, fetchImpactReport, fetchImpactReportInterfaces} from "../../api/impactReportAPI";
-import {fetchOrganizations} from "../../api/organizationApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createImpactModel, fetchImpactModel, fetchImpactModelInterfaces} from "../../api/impactModelAPI";
-import {fetchOutcomeInterfaces} from "../../api/outcomeApi";
-import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
-import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -72,38 +65,37 @@ export default function AddEditImpactModel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchOutcomeInterfaces().then(({outcomeInterfaces}) => {
+    fetchDataTypeInterfaces('outcome').then(({outcomeInterfaces}) => {
       setOps(ops => ({...ops, outcome: outcomeInterfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchIndicatorInterfaces().then(({indicatorInterfaces}) => {
+    fetchDataTypeInterfaces('indicator').then(({indicatorInterfaces}) => {
       setOps(ops => ({...ops, indicator: indicatorInterfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchImpactReportInterfaces().then(({impactReportInterfaces}) => {
-
+    fetchDataTypeInterfaces('impactreport').then(({impactReportInterfaces}) => {
       setOps(ops => ({...ops, impactReport: impactReportInterfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchIndicatorReportInterfaces().then(({indicatorReportInterfaces}) => {
+    fetchDataTypeInterfaces('indicatorReport').then(({indicatorReportInterfaces}) => {
       setOps(ops => ({...ops, indicatorReport: indicatorReportInterfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchStakeholderOutcomeInterface().then(({stakeholderOutcomeInterfaces}) => {
+    fetchDataTypeInterfaces('stakeholderOutcome').then(({stakeholderOutcomeInterfaces}) => {
       setOps(ops => ({...ops, stakeholderOutcome: stakeholderOutcomeInterfaces}))
     })
   }, [])
 
   useEffect(() => {
-    Promise.all([fetchOrganizations()]).then(
+    Promise.all([fetchDataTypes('organization')]).then(
       ([{organizations}]) => {
         const organizationsOps = {};
         organizations.map(organization => {
@@ -122,7 +114,7 @@ export default function AddEditImpactModel() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactModel(encodeURIComponent(uri)).then(({success, impactNorms}) => {
+      fetchDataType('impactModel', encodeURIComponent(uri)).then(({success, impactNorms}) => {
         if (success) {
           setForm(impactNorms);
           setLoading(false);
@@ -163,7 +155,7 @@ export default function AddEditImpactModel() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createImpactModel({form}).then((ret) => {
+      createDataType('impactModel', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -205,9 +197,6 @@ export default function AddEditImpactModel() {
 
   if (loading)
     return <Loading/>;
-
-  console.log(form)
-  console.log(ops)
 
   return (
     <Container maxWidth="md">

@@ -7,8 +7,8 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDatasets} from "../../api/datasetApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function Datasets() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -25,7 +25,7 @@ export default function Datasets() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchDatasets().then(res => {
+    fetchDataTypes('dataset').then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.datasets}));
     }).catch(e => {

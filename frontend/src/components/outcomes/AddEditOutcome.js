@@ -8,10 +8,9 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, fetchOutcome, fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
+import {updateOutcome} from "../../api/outcomeApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -63,7 +62,7 @@ export default function AddEditOutcome() {
 
   useEffect(() => {
     if (form.organization) {
-      fetchOutcomeInterfaces(encodeURIComponent(form.organization)).then(({outcomeInterfaces}) => {
+      fetchDataTypeInterfaces('outcome', encodeURIComponent(form.organization)).then(({outcomeInterfaces}) => {
         setOutcomeInterfaces(outcomeInterfaces);
       });
     }
@@ -71,7 +70,7 @@ export default function AddEditOutcome() {
 
   useEffect(() => {
 
-    fetchImpactModelInterfaces().then(({impactModelInterfaces}) => {
+    fetchDataTypeInterfaces('impactModel').then(({impactModelInterfaces}) => {
       setImpactModelInterfaces(impactModelInterfaces);
     });
   }, []);
@@ -79,7 +78,7 @@ export default function AddEditOutcome() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchOutcome(encodeURIComponent(uri)).then(({success, outcome}) => {
+      fetchDataType('outcome', encodeURIComponent(uri)).then(({success, outcome}) => {
         if (success) {
           outcome.uri = outcome._uri;
           outcome.outcomes = outcome.canProduces;
@@ -119,7 +118,7 @@ export default function AddEditOutcome() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOutcome({form}).then((ret) => {
+      createDataType('outcome', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

@@ -9,8 +9,8 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import CounterFactualField from "../shared/CounterFactualField";
 import {updateOutcome} from "../../api/outcomeApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {createCounterfactual, fetchCounterfactual} from "../../api/counterfactualApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -53,7 +53,7 @@ export default function AddEditCounterfactual() {
 
   useEffect(() => {
     if((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchCounterfactual(encodeURIComponent(uri)).then(({success, counterfactual}) => {
+      fetchDataType('counterfactual', encodeURIComponent(uri)).then(({success, counterfactual}) => {
         if(success){
           counterfactual.uri = counterfactual._uri;
           setForm(counterfactual);
@@ -93,7 +93,7 @@ export default function AddEditCounterfactual() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createCounterfactual({form}).then((ret) => {
+      createDataType('counterfactual', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

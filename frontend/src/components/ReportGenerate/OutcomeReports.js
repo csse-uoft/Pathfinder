@@ -3,17 +3,14 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
-import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -114,7 +111,7 @@ export default function OutcomeReports() {
   }
 
   useEffect(() => {
-    fetchOrganizations().then(({organizations, success}) => {
+    fetchDataTypes('organization').then(({organizations, success}) => {
       if (success) {
         const organizationsOps = {};
         if (userContext.isSuperuser)
@@ -135,7 +132,7 @@ export default function OutcomeReports() {
 
   useEffect(() => {
     if (selectedOrganization) {
-      fetchOutcomes(encodeURIComponent(selectedOrganization)).then(({success, outcomes}) => {
+      fetchDataTypes('outcome', encodeURIComponent(selectedOrganization)).then(({success, outcomes}) => {
         if (success) {
           setOutcomes(outcomes);
         }

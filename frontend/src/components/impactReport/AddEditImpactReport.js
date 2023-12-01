@@ -10,11 +10,8 @@ import {UserContext} from "../../context";
 import ImpactReportField from "../shared/ImpactReportField";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {createImpactReport, fetchImpactReport} from "../../api/impactReportAPI";
-import {fetchOrganizations} from "../../api/organizationApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchHowMuchImpactInterfaces} from "../../api/howMuchImpactApi";
-import {fetchImpactRisks} from "../../api/impactRiskApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -68,7 +65,7 @@ export default function AddEditImpactReport() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchOrganizations(), fetchHowMuchImpactInterfaces(), fetchImpactRisks()]).then(
+    Promise.all([fetchDataTypes('organization'), fetchDataTypeInterfaces('howMuchImpact'), fetchDataTypes('impactRisk')]).then(
       ([{organizations}, {howMuchImpactInterfaces}, {impactRisks}]) => {
         const organizationsOps = {};
         organizations.map(organization => {
@@ -91,7 +88,7 @@ export default function AddEditImpactReport() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactReport(encodeURIComponent(uri)).then(({success, impactReport}) => {
+      fetchDataType('impactReport', encodeURIComponent(uri)).then(({success, impactReport}) => {
         if (success) {
           impactReport.uri = impactReport._uri;
           impactReport.organization = impactReport.forOrganization;
@@ -134,7 +131,7 @@ export default function AddEditImpactReport() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createImpactReport({form}).then((ret) => {
+      createDataType('impactReport', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

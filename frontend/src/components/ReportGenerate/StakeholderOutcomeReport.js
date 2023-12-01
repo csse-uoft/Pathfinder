@@ -8,16 +8,9 @@ import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
-import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
-import {
-  fetchStakeholderOutcomes,
-  fetchStakeholderOutcomesThroughOrganization,
-  fetchStakeholderOutcomesThroughStakeholder
-} from "../../api/stakeholderOutcomeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchOrganizations} from "../../api/organizationApi";
+import {fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -117,7 +110,7 @@ export default function StakeholderOutcomeReports() {
   };
 
   useEffect(() => {
-    fetchOrganizations().then(({organizations, success}) => {
+    fetchDataTypes('organization').then(({organizations, success}) => {
       if (success) {
         const organizationsOps = {};
         if (userContext.isSuperuser)
@@ -138,7 +131,7 @@ export default function StakeholderOutcomeReports() {
 
   useEffect(() => {
     if (selectedOrganization === 'all') {
-      fetchStakeholderOutcomes().then(({
+      fetchDataTypes('stakeholderOutcome').then(({
                                          success,
                                          stakeholderOutcomes
                                        }) => {
@@ -151,7 +144,7 @@ export default function StakeholderOutcomeReports() {
         enqueueSnackbar(e.json?.message || "Error occurs when fetching outcomes", {variant: 'error'});
       });
     } else if (selectedOrganization) {
-      fetchStakeholderOutcomesThroughOrganization(encodeURIComponent(selectedOrganization)).then(({
+      fetchDataTypes('stakeholderOutcome', `organization/${encodeURIComponent(selectedOrganization)}`).then(({
                                                                                                     success,
                                                                                                     stakeholderOutcomes
                                                                                                   }) => {

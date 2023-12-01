@@ -5,10 +5,11 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {deleteTheme, fetchThemes} from "../../api/themeApi";
+import {deleteTheme} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCodes} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
+
 export default function Codes() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -25,7 +26,7 @@ export default function Codes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchCodes().then(res => {
+    fetchDataTypes('code').then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.codes}));
     }).catch(e => {

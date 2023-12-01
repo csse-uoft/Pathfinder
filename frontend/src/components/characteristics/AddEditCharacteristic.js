@@ -9,14 +9,12 @@ import {AlertDialog} from "../shared/Dialogs";
 
 import {useSnackbar} from "notistack";
 import Dropdown from "../shared/fields/MultiSelectField";
-import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
-import {createCharacteristic, fetchCharacteristic, updateCharacteristic} from "../../api/characteristicApi";
+import {updateCharacteristic} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchCodes} from "../../api/codeAPI";
+import {createDataType, fetchDataType, fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -71,7 +69,7 @@ export default function AddEditCharacteristic() {
   useEffect(() => {
 
     Promise.all([
-      fetchCodes().then(({codes, success}) => {
+      fetchDataTypes('code').then(({codes, success}) => {
         if (success) {
           const codeDict = {};
           codes.map(code => {
@@ -80,7 +78,7 @@ export default function AddEditCharacteristic() {
           setOptions(options => ({...options, codes: codeDict}));
         }
       }),
-      fetchStakeholders().then(({stakeholders, success}) => {
+      fetchDataTypes('stakeholder').then(({stakeholders, success}) => {
         if (success) {
           const stakeholderDict = {}
           stakeholders.map(stakeholder => {
@@ -91,7 +89,7 @@ export default function AddEditCharacteristic() {
       })
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
-        fetchCharacteristic(encodeURIComponent(uri)).then(res => {
+        fetchDataType('characteristic', encodeURIComponent(uri)).then(res => {
           if (res.success) {
             const {characteristic} = res;
             setForm({...characteristic, uri: characteristic._uri});
@@ -134,7 +132,7 @@ export default function AddEditCharacteristic() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createCharacteristic({form}).then((ret) => {
+      createDataType('characteristic',{form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/characteristics');

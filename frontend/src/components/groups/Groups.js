@@ -8,6 +8,7 @@ import {deleteGroup, fetchGroups} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 
 export default function Groups() {
   const {enqueueSnackbar} = useSnackbar();
@@ -28,7 +29,7 @@ export default function Groups() {
       navigate('/dashboard');
       enqueueSnackbar("Wrong Auth", {variant: 'error'});
     }
-    fetchGroups().then(({groups}) => {
+    fetchDataTypes('group').then(({groups}) => {
       setState(state => ({...state, loading: false, data: groups}));
     }).catch(e => {
       reportErrorToBackend(e);

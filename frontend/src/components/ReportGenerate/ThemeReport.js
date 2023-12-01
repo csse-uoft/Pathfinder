@@ -7,11 +7,10 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
-import {fetchOutcomesThroughTheme} from "../../api/outcomeApi";
-import {fetchTheme, fetchThemes} from "../../api/themeApi";
 import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataType, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -120,7 +119,7 @@ export default function ThemeReports() {
 
   useEffect(() => {
     if (selectedTheme) {
-      Promise.all([fetchOutcomesThroughTheme(encodeURIComponent(selectedTheme)), fetchTheme(encodeURIComponent(selectedTheme))]).
+      Promise.all([fetchDataTypes('outcome', `theme/${encodeURIComponent(selectedTheme)}`), fetchDataType('theme', encodeURIComponent(selectedTheme))]).
       then(([outcomeRet, themeRet]) => {
         if (outcomeRet.success && themeRet.success){
           setOutcomes(outcomeRet.outcomes)
@@ -138,7 +137,7 @@ export default function ThemeReports() {
 
 
   useEffect(() => {
-      fetchThemes().then(({success, themes}) => {
+      fetchDataTypes('theme').then(({success, themes}) => {
         if (success) {
           const themeOps = {};
           themes.map(theme => {

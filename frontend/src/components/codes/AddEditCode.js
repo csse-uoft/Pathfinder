@@ -6,19 +6,14 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createCode, fetchCode, updateCode} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {updateCode} from "../../api/codeAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -78,7 +73,7 @@ export default function AddEditCode() {
   useEffect(() => {
 
     Promise.all([
-      fetchOrganizations().then(({organizations, success}) => {
+      fetchDataTypes('organization').then(({organizations, success}) => {
         if (success) {
           const orgDict = {};
           organizations.map(org => {
@@ -89,7 +84,7 @@ export default function AddEditCode() {
       }),
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
-          fetchCode(encodeURIComponent(uri)).then(res => {
+          fetchDataType('code', encodeURIComponent(uri)).then(res => {
             if (res.success) {
               const {code} = res;
               setForm({...code, uri: code._uri});
@@ -132,7 +127,7 @@ export default function AddEditCode() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createCode({form}).then((ret) => {
+      createDataType('code', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');
