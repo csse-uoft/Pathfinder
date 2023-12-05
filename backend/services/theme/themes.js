@@ -1,6 +1,9 @@
 const {GDBThemeModel} = require("../../models/theme");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBOutcomeModel} = require("../../models/outcome");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+
+const resource = 'Theme'
 
 const fetchThemes = async (req, res) => {
     const themes = await GDBThemeModel.find({});
@@ -9,7 +12,7 @@ const fetchThemes = async (req, res) => {
 
 const fetchThemesHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchThemes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchThemes(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
@@ -17,4 +20,15 @@ const fetchThemesHandler = async (req, res, next) => {
   }
 };
 
-module.exports = {fetchThemesHandler};
+const fetchThemeInterfacesHandler =  async (req, res, next) => {
+  try {
+    if (await hasAccess(req, `fetch${resource}s`))
+      return await fetchDataTypeInterfaces(resource, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+
+module.exports = {fetchThemesHandler, fetchThemeInterfacesHandler};

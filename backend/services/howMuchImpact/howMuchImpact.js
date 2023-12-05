@@ -2,10 +2,9 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBHowMuchImpactModel, GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {Server400Error} = require("../../utils");
 const {Transaction} = require("graphdb-utils");
-const {impactRiskBuilder} = require("../impactRisk/impactRiskBuilder");
 const {howMuchImpactBuilder} = require("./howMuchImpactBuilder");
-const {GDBCounterfactualModel} = require("../../models/counterfactual");
-const {GDBCodeModel} = require("../../models/code");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+
 
 const HowMuchImpactModelDict = {
   HowMuchImpact: GDBHowMuchImpactModel,
@@ -14,7 +13,7 @@ const HowMuchImpactModelDict = {
   ImpactDuration: GDBImpactDurationModel
 }
 
-const RESOURCE = 'HowMuchImpact';
+const resource = 'HowMuchImpact';
 
 const fetchHowMuchImpactInterface = async (req, res) => {
   const howMuchImpacts = await GDBHowMuchImpactModel.find({});
@@ -26,7 +25,9 @@ const fetchHowMuchImpactInterface = async (req, res) => {
 
 const fetchHowMuchImpactInterfaceHandler = async (req, res, next) => {
   try {
-    return await fetchHowMuchImpactInterface(req, res);
+    if (await hasAccess(req, 'fetch' + resource + 's'))
+      return await fetchHowMuchImpacts(resource, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);
   }
@@ -34,7 +35,7 @@ const fetchHowMuchImpactInterfaceHandler = async (req, res, next) => {
 
 const fetchHowMuchImpactHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE))
+    if (await hasAccess(req, 'fetch' + resource))
       return await fetchHowMuchImpact(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
@@ -78,8 +79,8 @@ const createHowMuchImpactHandler = async (req, res, next) => {
 
 const fetchHowMuchImpactsHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
-      return await fetchHowMuchImpacts(req, res);
+    if (await hasAccess(req, 'fetch' + resource + 's'))
+      return await fetchDataTypeInterfaces(resource, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);

@@ -1,5 +1,8 @@
 const {GDBCodeModel} = require("../../models/code");
 const {GDBFeatureModel} = require("../../models/feature");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+
+const resource = 'Feature'
 
 const fetchFeatureInterfaces = async (req, res) => {
   const features = await GDBFeatureModel.find({});
@@ -11,7 +14,7 @@ const fetchFeatureInterfaces = async (req, res) => {
 
 const fetchFeatureInterfacesHandler = async (req, res, next) => {
   try {
-    return await fetchFeatureInterfaces(req, res);
+    return await fetchDataTypeInterfaces(resource, res);
   } catch (e) {
     next(e);
   }

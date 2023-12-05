@@ -4,15 +4,16 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("./impactReportBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {fetchDatasetInterfacesHandler} = require("../dataset/datasets");
 
 
-const RESOURCE = 'ImpactReport';
+const resource = 'ImpactReport';
 
 const createImpactReportHandler = async (req, res, next) => {
   try {
     const {form} = req.body;
     await Transaction.beginTransaction();
-    if (await hasAccess(req, 'create' + RESOURCE)) {
+    if (await hasAccess(req, 'create' + resource)) {
       if (await impactReportBuilder('interface',null, null, null, {}, {}, form)){
         await Transaction.commit();
         return res.status(200).json({success: true})
@@ -27,7 +28,7 @@ const createImpactReportHandler = async (req, res, next) => {
 
 const fetchImpactReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE))
+    if (await hasAccess(req, 'fetch' + resource))
       return await fetchImpactReport(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -37,7 +38,7 @@ const fetchImpactReportHandler = async (req, res, next) => {
 
 const fetchImpactReportsHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
+    if (await hasAccess(req, 'fetch' + resource + 's'))
       return await fetchImpactReports(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -45,10 +46,10 @@ const fetchImpactReportsHandler = async (req, res, next) => {
   }
 };
 
-const fetchImpactReportInterfaceHandler = async (req, res, next) => {
+const fetchImpactReportInterfacesHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
-      return await fetchImpactReportInterfaces(req, res);
+    if (await hasAccess(req, 'fetch' + resource + 's'))
+      return await fetchDatasetInterfacesHandler(resource, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);
@@ -88,4 +89,4 @@ const fetchImpactReport = async (req, res) => {
   return res.status(200).json({success: true, impactReport});
 };
 
-module.exports = {fetchImpactReportHandler, fetchImpactReportsHandler, fetchImpactReportInterfaceHandler, createImpactReportHandler};
+module.exports = {fetchImpactReportHandler, fetchImpactReportsHandler, fetchImpactReportInterfacesHandler, createImpactReportHandler};

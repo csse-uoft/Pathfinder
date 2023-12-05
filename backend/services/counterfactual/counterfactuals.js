@@ -1,5 +1,6 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 const RESOURCE = 'Counterfactual'
 
@@ -30,7 +31,7 @@ const fetchCounterfactualsHandler = async (req, res, next) => {
 const fetchCounterfactualInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
-      return await fetchCounterfactualInterfaces(req, res);
+      return await fetchDataTypeInterfaces(RESOURCE, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);

@@ -1,11 +1,12 @@
 const express = require('express');
 
 
-const {fetchImpactRisksHandler} = require("../services/impactRisk/impactRisk");
+const {fetchImpactRisksHandler, fetchImpactRiskInterfacesHandler} = require("../services/impactRisk/impactRisk");
 
 
 const router = express.Router();
 
+router.get('/interface', fetchImpactRiskInterfacesHandler);
 router.get('/', fetchImpactRisksHandler);
 
 

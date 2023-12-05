@@ -1,5 +1,6 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBDataSetModel} = require("../../models/dataset");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 const RESOURCE = 'Dataset'
 
@@ -30,7 +31,7 @@ const fetchDatasetsHandler = async (req, res, next) => {
 const fetchDatasetInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
-      return await fetchDatasetInterfaces(req, res);
+      return await fetchDataTypeInterfaces(RESOURCE, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);

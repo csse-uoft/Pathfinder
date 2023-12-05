@@ -1,6 +1,9 @@
 
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+
+const resource = 'Characteristic'
 
 
 const fetchCharacteristics = async (req, res) => {
@@ -10,7 +13,7 @@ const fetchCharacteristics = async (req, res) => {
 
 const fetchCharacteristicsHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchCharacteristics'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchCharacteristics(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
@@ -18,6 +21,16 @@ const fetchCharacteristicsHandler = async (req, res, next) => {
   }
 };
 
+const fetchCharacteristicInterfacesHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, `fetch${resource}s`))
+      return await fetchDataTypeInterfaces(resource, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
 module.exports = {
-  fetchCharacteristicsHandler
+  fetchCharacteristicsHandler, fetchCharacteristicInterfacesHandler
 }

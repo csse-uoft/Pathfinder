@@ -1,13 +1,24 @@
 const {GDBGroupModel} = require("../../models/group");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {GDBOrganizationModel} = require("../../models/organization");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
+const resource = 'Group'
 
 const fetchGroupsHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchGroups'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchGroups(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchGroupInterfacesHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + resource + 's'))
+      return await fetchDataTypeInterfaces(resource, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
@@ -41,4 +52,4 @@ const fetchGroups = async (req, res) => {
 
 
 
-module.exports = {fetchGroupsHandler};
+module.exports = {fetchGroupsHandler, fetchGroupInterfacesHandler};
