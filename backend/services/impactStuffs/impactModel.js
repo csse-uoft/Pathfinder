@@ -9,8 +9,9 @@ const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {impactNormsBuilder} = require("./impactNormsBuilder");
 const {GDBImpactReportModel} = require("../../models/impactReport");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
-const RESOURCE = 'ImpactModel'
+const resource = 'ImpactModel'
 
 const fetchImpactModels = async (req, res) => {
 
@@ -90,7 +91,7 @@ const fetchImpactModelsHandler = async (req, res, next) => {
 
 const fetchImpactModelHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE))
+    if (await hasAccess(req, 'fetch' + resource))
       return await fetchImpactModel(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -112,7 +113,7 @@ const createImpactModelHandler = async (req, res, next) => {
   try {
     const {form} = req.body;
     await Transaction.beginTransaction();
-    if (await hasAccess(req, 'create' + RESOURCE)) {
+    if (await hasAccess(req, 'create' + resource)) {
       if (await impactNormsBuilder('interface', null, null, null, {}, {}, form)){
         await Transaction.commit();
         return res.status(200).json({success: true})
@@ -130,7 +131,7 @@ const createImpactModelHandler = async (req, res, next) => {
 const fetchImpactModelInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchImpactModelInterfaces'))
-      return await fetchImpactModelInterfaces(req, res);
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {

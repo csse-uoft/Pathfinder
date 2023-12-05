@@ -26,7 +26,7 @@ const fetchHowMuchImpactInterface = async (req, res) => {
 const fetchHowMuchImpactInterfaceHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + resource + 's'))
-      return await fetchHowMuchImpacts(resource, res);
+      return await fetchHowMuchImpacts(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);

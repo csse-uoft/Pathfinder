@@ -18,7 +18,7 @@ const fetchGroupsHandler = async (req, res, next) => {
 const fetchGroupInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + resource + 's'))
-      return await fetchDataTypeInterfaces(resource, res);
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);

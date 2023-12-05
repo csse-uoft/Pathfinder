@@ -10,8 +10,10 @@ const {GDBDataSetModel} = require("../models/dataset");
 const {GDBFeatureModel} = require("../models/feature");
 const {GDBGroupModel} = require("../models/group");
 const {GDBHowMuchImpactModel} = require("../models/howMuchImpact");
+const {GDBImpactModelModel} = require("../models/impactStuffs");
 
 const name2Model = {
+  ImpactModel: GDBImpactModelModel,
   Code: GDBCodeModel,
   Organization: GDBOrganizationModel,
   outcome: GDBOutcomeModel,

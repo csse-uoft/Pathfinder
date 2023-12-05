@@ -14,7 +14,7 @@ const fetchFeatureInterfaces = async (req, res) => {
 
 const fetchFeatureInterfacesHandler = async (req, res, next) => {
   try {
-    return await fetchDataTypeInterfaces(resource, res);
+    return await fetchDataTypeInterfaces(resource, req, res);
   } catch (e) {
     next(e);
   }

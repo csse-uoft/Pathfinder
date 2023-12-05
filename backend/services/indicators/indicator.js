@@ -7,6 +7,7 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 
 const fetchIndicators = async (req, res) => {
@@ -101,7 +102,7 @@ const fetchIndicatorHandler = async (req, res, next) => {
 const fetchIndicatorInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchIndicatorInterfaces'))
-      return await fetchIndicatorInterfaces(req, res);
+      return await fetchDataTypeInterfaces('Indicator', req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {

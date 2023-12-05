@@ -40,7 +40,7 @@ const fetchImpactRisksHandler = async (req, res, next) => {
 const fetchImpactRiskInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + resource + 's'))
-      return await fetchDatasetInterfacesHandler(resource, res);
+      return await fetchDatasetInterfacesHandler(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);
