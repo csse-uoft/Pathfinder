@@ -10,7 +10,12 @@ async function fetchDataTypeInterfaces(name, req, res) {
   if (organizationUri === 'undefined' || !organizationUri) {
     objects = await name2Model[name].find({});
   } else {
-    objects = await name2Model[name].find({organization: organizationUri})
+    if (name === 'IndicatorReport' || name === 'Indicator') {
+      objects = await name2Model[name].find({forOrganization: organizationUri})
+    } else {
+      objects = await name2Model[name].find({organization: organizationUri})
+    }
+
   }
 
   const interfaces = {}

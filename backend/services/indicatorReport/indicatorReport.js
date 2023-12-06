@@ -6,16 +6,16 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBDateTimeIntervalModel} = require("../../models/time");
 const {GDBMeasureModel} = require("../../models/measure");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {GDBOwnershipModel} = require("../../models/ownership");
 const {indicatorReportBuilder} = require("./indicatorReportBuilder");
 const {Transaction} = require("graphdb-utils");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
-const RESOURCE = 'IndicatorReport';
+const resource = 'IndicatorReport';
 
 const fetchIndicatorReportInterfacesHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
-      return await fetchIndicatorReportInterfaces(req, res);
+    if (await hasAccess(req, 'fetch' + resource + 's'))
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {
@@ -44,7 +44,7 @@ const fetchIndicatorReportInterfaces = async (req, res) => {
 
 const createIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'create' + RESOURCE)){
+    if (await hasAccess(req, 'create' + resource)){
       const {form} = req.body;
       form.value = form.numericalValue
       form.forIndicator = form.indicator
@@ -122,7 +122,7 @@ const createIndicatorReport = async (req, res) => {
 
 const fetchIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE))
+    if (await hasAccess(req, 'fetch' + resource))
       return await fetchIndicatorReport(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -159,7 +159,7 @@ const fetchIndicatorReport = async (req, res) => {
 
 const updateIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'update' + RESOURCE))
+    if (await hasAccess(req, 'update' + resource))
       return await updateIndicatorReport(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -220,7 +220,7 @@ const updateIndicatorReport = async (req, res) => {
 
 const fetchIndicatorReportsHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
+    if (await hasAccess(req, 'fetch' + resource + 's'))
       return await fetchIndicatorReports(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {

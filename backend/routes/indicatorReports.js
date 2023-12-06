@@ -7,7 +7,7 @@ const {
 const router = express.Router();
 
 router.get('/:orgUri', fetchIndicatorReportsHandler);
-router.get('/interfaces/:organizationUri', fetchIndicatorReportInterfacesHandler)
+router.get('/interface/:organizationUri', fetchIndicatorReportInterfacesHandler)
 
 
 module.exports = router;

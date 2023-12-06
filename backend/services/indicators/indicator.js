@@ -104,7 +104,6 @@ const fetchIndicatorInterfacesHandler = async (req, res, next) => {
     if (await hasAccess(req, 'fetchIndicatorInterfaces'))
       return await fetchDataTypeInterfaces('Indicator', req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
-
   } catch (e) {
     next(e);
   }
