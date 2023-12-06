@@ -85,14 +85,9 @@ export default function AddEditOrganization() {
   useEffect(() => {
 
     Promise.all([
-      fetchDataTypeInterfaces('organization').then(({organizations, success}) => {
+      fetchDataTypeInterfaces('organization').then(({interfaces, success}) => {
         if (success) {
-          const orgDict = {};
-          organizations.map(org => {
-            if (org._uri !== uri)
-              orgDict[org._uri] = org.legalName;
-          });
-          setOptions(options => ({...options, issuedBy: orgDict}))
+          setOptions(options => ({...options, issuedBy: interfaces}))
         }
       }),
     ]).then(() => {

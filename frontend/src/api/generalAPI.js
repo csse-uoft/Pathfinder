@@ -1,11 +1,11 @@
 import {getJson, postJson} from "./index";
 
 export async function fetchDataTypes(dataType, extra) {
-  return getJson(`/api/${dataType}s/` + extra? extra:'');
+  return getJson(`/api/${dataType}s/` + (extra? extra:''));
 }
 
 export async function fetchDataTypeInterfaces(dataType, extra) {
-  return getJson(`/api/${dataType}/interface/` + extra? extra:'');
+  return getJson(`/api/${dataType}s/interface/` + (extra? extra:''));
 }
 
 export async function createDataType(dataType, params, level) {
