@@ -69,19 +69,19 @@ async function stakeholderOrganizationBuilder(environment, object, organization,
     hasError = ret.hasError;
     error = ret.error;
     
-    mainObject.comment = previousOrganization.comment
-    mainObject.hasUsers = previousOrganization.hasUsers
-    mainObject.administrator = previousOrganization.administrator
-    mainObject.reporters = previousOrganization.reporters
-    mainObject.editors = previousOrganization.editors
-    mainObject.researchers = previousOrganization.researchers
-    mainObject.legalName = previousOrganization.legalName
-    mainObject.hasIds = previousOrganization.hasIds
-    mainObject.hasIndicators = previousOrganization.hasIndicators
-    mainObject.hasOutcomes = previousOrganization.hasOutcomes
-    mainObject.telephone = previousOrganization.telephone
-    mainObject.contactName = previousOrganization.contactName
-    mainObject.email = previousOrganization.email
+    mainObject.comment = previousOrganization?.comment
+    mainObject.hasUsers = previousOrganization?.hasUsers
+    mainObject.administrator = previousOrganization?.administrator
+    mainObject.reporters = previousOrganization?.reporters
+    mainObject.editors = previousOrganization?.editors
+    mainObject.researchers = previousOrganization?.researchers
+    mainObject.legalName = previousOrganization?.legalName
+    mainObject.hasIds = previousOrganization?.hasIds
+    mainObject.hasIndicators = previousOrganization?.hasIndicators
+    mainObject.hasOutcomes = previousOrganization?.hasOutcomes
+    mainObject.telephone = previousOrganization?.telephone
+    mainObject.contactName = previousOrganization?.contactName
+    mainObject.email = previousOrganization?.email
     
 
 

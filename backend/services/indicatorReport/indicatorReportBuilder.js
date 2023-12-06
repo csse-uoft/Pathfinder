@@ -1,13 +1,11 @@
 const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
-const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues, getFullObjectURI,
-  assignMeasure
+const {assignValue, assignValues,
+  assignMeasure, assignTimeInterval
 } = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
-const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {Server400Error} = require("../../utils");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorReportBuilder(environment, object, organization, error, {
   indicatorDict,
@@ -71,6 +69,10 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     error = ret.error;
     hasError = ret.hasError;
 
+    ret = assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error);
+    error = ret.error
+    hasError = ret.hasError
+
     // add indicator to the indicatorReport
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
@@ -92,78 +94,78 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     }
 
     // add the indicatorReport to indicator if needed
-    if (environment === 'interface' || (!ignore && !indicatorDict[mainObject.forIndicator])) {
-      // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
-      const indicatorURI = mainObject.forIndicator;
-      const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
-      if (!indicator) {
-        if (environment === 'fileUploading'){
-          addTrace('        Error: bad reference');
-          addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
-          addMessage(8, 'badReference',
-            {uri, referenceURI: indicatorURI, type: 'Indicator'}, {rejectFile: true});
-          error += 1;
-          hasError = true;
-        } else if (environment === 'interface') {
-          throw new Server400Error('No such Indicator');
-        }
-      } else if (indicator.forOrganization !== organization._uri) {
-        if (environment === 'fileUploading') {
-          addTrace('        Error:');
-          addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
-          addMessage(8, 'subjectDoesNotBelong',
-            {uri, type: 'Indicator', subjectURI: indicatorURI}, {rejectFile: true});
-          error += 1;
-          hasError = true;
-        } else if (environment === 'interface'){
-          throw new Server400Error('The indicator is not under the organization');
-        }
-      } else {
-        if (!indicator.indicatorReports) {
-          indicator.indicatorReports = [];
-        }
-        indicator.indicatorReports = [...indicator.indicatorReports, uri];
-        await indicator.save();
-      }
-    }
+    // if (environment === 'interface' || (!ignore && !indicatorDict[mainObject.forIndicator])) {
+    //   // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
+    //   const indicatorURI = mainObject.forIndicator;
+    //   const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
+    //   if (!indicator) {
+    //     if (environment === 'fileUploading'){
+    //       addTrace('        Error: bad reference');
+    //       addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
+    //       addMessage(8, 'badReference',
+    //         {uri, referenceURI: indicatorURI, type: 'Indicator'}, {rejectFile: true});
+    //       error += 1;
+    //       hasError = true;
+    //     } else if (environment === 'interface') {
+    //       throw new Server400Error('No such Indicator');
+    //     }
+    //   } else if (indicator.forOrganization !== organization._uri) {
+    //     if (environment === 'fileUploading') {
+    //       addTrace('        Error:');
+    //       addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
+    //       addMessage(8, 'subjectDoesNotBelong',
+    //         {uri, type: 'Indicator', subjectURI: indicatorURI}, {rejectFile: true});
+    //       error += 1;
+    //       hasError = true;
+    //     } else if (environment === 'interface'){
+    //       throw new Server400Error('The indicator is not under the organization');
+    //     }
+    //   } else {
+    //     if (!indicator.indicatorReports) {
+    //       indicator.indicatorReports = [];
+    //     }
+    //     indicator.indicatorReports = [...indicator.indicatorReports, uri];
+    //     await indicator.save();
+    //   }
+    // }
 
     // add the timeInterval to indicator report
     // todo: add form to it
-    if (environment === 'fileUploading' && object.hasTime) {
-      mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
-        GDBDateTimeIntervalModel({
-          hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
-              GDBDateTimeIntervalModel, 'hasBeginning') ||
-            GDBInstant({
-              date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
-            }, {
-              uri: getFullObjectURI(
-                object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                  [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
-              )
-            }),
-
-          hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
-              GDBDateTimeIntervalModel, 'hasEnd') ||
-            GDBInstant({
-              date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
-            }, {
-              uri: getFullObjectURI(
-                object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                  [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
-              )
-            })
-        }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])})
-    }
+    // if (environment === 'fileUploading' && object[getFullPropertyURI(mainModel, 'hasTime')]) {
+    //   mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
+    //     GDBDateTimeIntervalModel({
+    //       hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //           GDBDateTimeIntervalModel, 'hasBeginning') ||
+    //         GDBInstant({
+    //           date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+    //         }, {
+    //           uri: getFullObjectURI(
+    //             object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+    //           )
+    //         }),
+    //
+    //       hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //           GDBDateTimeIntervalModel, 'hasEnd') ||
+    //         GDBInstant({
+    //           date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+    //         }, {
+    //           uri: getFullObjectURI(
+    //             object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+    //           )
+    //         })
+    //     }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])})
+    // }
 
     if (environment === 'interface') {
-      if (form.startTime && form.endTime)
-        mainObject.hasTime =  GDBDateTimeIntervalModel({
-          hasBeginning: {date: new Date(form.startTime)},
-          hasEnd: {date: new Date(form.endTime)}
-        })
+      // if (form.startTime && form.endTime)
+      //   mainObject.hasTime =  GDBDateTimeIntervalModel({
+      //     hasBeginning: {date: new Date(form.startTime)},
+      //     hasEnd: {date: new Date(form.endTime)}
+      //   })
       await mainObject.save();
       return true
     }
