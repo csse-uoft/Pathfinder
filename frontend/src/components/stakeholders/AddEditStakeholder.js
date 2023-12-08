@@ -6,19 +6,14 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {
-  fetchOrganizationsInterfaces,
-} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
+
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {createStakeholder, fetchStakeholder, updateStakeholder} from "../../api/stakeholderAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
-import {fetchCharacteristics} from "../../api/characteristicApi";
+import {updateStakeholder} from "../../api/stakeholderAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -76,12 +71,8 @@ export default function AddEditStakeholder() {
   });
 
   useEffect(() => {
-    fetchCharacteristics().then(({characteristics}) => {
-      const characteristicInterfaces = {}
-      characteristics.map(chara => {
-        characteristicInterfaces[chara._uri] = chara.name
-      })
-      setCharacteristicInterfaces(characteristicInterfaces);
+    fetchDataTypeInterfaces('characteristic').then(({interfaces}) => {
+      setCharacteristicInterfaces(interfaces);
     })
   }, [])
 
@@ -90,21 +81,17 @@ export default function AddEditStakeholder() {
 
   useEffect(() => {
     Promise.all([
-      fetchOrganizationsInterfaces().then(({organizations, success}) => {
+      fetchDataTypeInterfaces('organization').then(({interfaces, success}) => {
         if (success) {
-          const orgDict = {};
-          organizations.map(org => {
-            orgDict[org._uri] = org.legalName;
-          });
-          setOptions(options => ({...options, organizations: orgDict}))
+          setOptions(options => ({...options, organizations: interfaces}))
         }
-      }),fetchImpactModelInterfaces().then(({impactModelInterfaces}) => {
-        setImpactModelInterfaces(impactModelInterfaces)
+      }), fetchDataTypeInterfaces('impactModel').then(({interfaces}) => {
+        setImpactModelInterfaces(interfaces)
       })
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
         Promise.all([
-          fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
+          fetchDataTypes('user', encodeURIComponent(uri)).then(({data, success}) => {
             const objectForm = {};
             data.map(user => {
               objectForm[user._uri] = `${user.person.givenName} ${user.person.familyName} URI: ${user._uri}`;
@@ -112,7 +99,7 @@ export default function AddEditStakeholder() {
             if (success)
               setOptions(options => ({...options, objectForm}));
           }),
-          fetchStakeholder(encodeURIComponent(uri)).then(res => {
+          fetchDataType('stakeholder', encodeURIComponent(uri)).then(res => {
             if (res.success) {
               const {stakeholder} = res;
               setForm({
@@ -182,7 +169,7 @@ export default function AddEditStakeholder() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createStakeholder({form}).then((ret) => {
+      createDataType('stakeholder', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/stakeholders');

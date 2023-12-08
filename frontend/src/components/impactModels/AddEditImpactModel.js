@@ -65,52 +65,40 @@ export default function AddEditImpactModel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDataTypeInterfaces('outcome').then(({outcomeInterfaces}) => {
-      setOps(ops => ({...ops, outcome: outcomeInterfaces}))
+    fetchDataTypeInterfaces('outcome').then(({interfaces}) => {
+      setOps(ops => ({...ops, outcome: interfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchDataTypeInterfaces('indicator').then(({indicatorInterfaces}) => {
-      setOps(ops => ({...ops, indicator: indicatorInterfaces}))
+    fetchDataTypeInterfaces('indicator').then(({interfaces}) => {
+      setOps(ops => ({...ops, indicator: interfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchDataTypeInterfaces('impactreport').then(({impactReportInterfaces}) => {
-      setOps(ops => ({...ops, impactReport: impactReportInterfaces}))
+    fetchDataTypeInterfaces('impactReport').then(({interfaces}) => {
+      setOps(ops => ({...ops, impactReport: interfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchDataTypeInterfaces('indicatorReport').then(({indicatorReportInterfaces}) => {
-      setOps(ops => ({...ops, indicatorReport: indicatorReportInterfaces}))
+    fetchDataTypeInterfaces('indicatorReport').then(({interfaces}) => {
+      setOps(ops => ({...ops, indicatorReport: interfaces}))
     })
   }, [])
 
   useEffect(() => {
-    fetchDataTypeInterfaces('stakeholderOutcome').then(({stakeholderOutcomeInterfaces}) => {
-      setOps(ops => ({...ops, stakeholderOutcome: stakeholderOutcomeInterfaces}))
+    fetchDataTypeInterfaces('stakeholderOutcome').then(({interfaces}) => {
+      setOps(ops => ({...ops, stakeholderOutcome: interfaces}))
     })
   }, [])
 
   useEffect(() => {
-    Promise.all([fetchDataTypes('organization')]).then(
-      ([{organizations}]) => {
-        const organizationsOps = {};
-        organizations.map(organization => {
-          organizationsOps[organization._uri] = organization.legalName;
-        });
-        setOps(ops => ({...ops, organization: organizationsOps}));
-        setLoading(false);
-      }
-    ).catch(([e]) => {
-      reportErrorToBackend(e);
-      setLoading(false);
-      enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
-    });
-
-  }, []);
+    fetchDataTypeInterfaces('organization').then(({interfaces}) => {
+      setOps(ops => ({...ops, organization: interfaces}))
+    })
+  }, [])
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {

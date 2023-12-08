@@ -11,6 +11,7 @@ const {GDBFeatureModel} = require("../models/feature");
 const {GDBGroupModel} = require("../models/group");
 const {GDBHowMuchImpactModel} = require("../models/howMuchImpact");
 const {GDBImpactModelModel} = require("../models/impactStuffs");
+const {GDBImpactReportModel} = require("../models/impactReport");
 
 const name2Model = {
   ImpactModel: GDBImpactModelModel,
@@ -25,7 +26,9 @@ const name2Model = {
   Dataset: GDBDataSetModel,
   Feature: GDBFeatureModel,
   Group: GDBGroupModel,
-  HowMuchImpact: GDBHowMuchImpactModel
+  HowMuchImpact: GDBHowMuchImpactModel,
+  ImpactReport: GDBImpactReportModel,
+  StakeholderOutcome: GDBStakeholderOutcomeModel
 }
 
 module.exports = {name2Model}

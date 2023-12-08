@@ -63,11 +63,11 @@ export default function AddEditHowMuchImpact() {
 
   useEffect(() => {
     Promise.all([fetchDataTypeInterfaces('counterfactual'), fetchDataTypeInterfaces('indicator')]).then(
-      ([{counterfactualInterfaces}, {indicatorInterfaces}]) => {
+      ([counterfactualRet, indicatorRet]) => {
         const options = ops;
-        options["counterfactuals"] = counterfactualInterfaces
-        options["indicators"] = indicatorInterfaces
-        setOps(ops => ({...options}));
+        options["counterfactuals"] = counterfactualRet.interfaces
+        options["indicators"] = indicatorRet.interfaces
+        setOps(ops => ({...ops, options}));
         setLoading(false);
       }
     ).catch(([e]) => {

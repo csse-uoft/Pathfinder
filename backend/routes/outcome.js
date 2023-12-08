@@ -5,7 +5,6 @@ const {createOutcomeHandler, fetchOutcomeHandler, updateOutcomeHandler, fetchOut
 
 const router = express.Router();
 
-router.get('/interface/:organizationUri', fetchOutcomeInterfaceHandler);
 // router.get('/interface', fetchOutcomeInterfaceHandler);
 router.get('/:uri', fetchOutcomeHandler);
 router.post('/', createOutcomeHandler);

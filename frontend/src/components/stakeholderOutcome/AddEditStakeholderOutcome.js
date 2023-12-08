@@ -9,12 +9,9 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {createStakeholderOutcome, fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
-import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
-import {fetchCodesInterfaces} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
-import {fetchOrganizationsInterfaces} from "../../api/organizationApi";
+import {createDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -52,40 +49,36 @@ export default function AddEditStakeholderOutcome() {
     name: '',
     description: '',
     codes: [],
-    stakeholder: '',
+    stakeholder: null,
     uri: '',
-    outcome: '',
-    importance: '',
+    outcome: null,
+    importance: null,
     inUnderserved: '',
     indicators: [],
     impactReports: [],
-    organization: '',
-    intendedImpact: '',
-    fromPerspectiveOf: ''
+    organization: null,
+    intendedImpact: null,
+    fromPerspectiveOf: null
   });
   const [dict, setDict] = useState({
     outcome: {},
     code: {},
     stakeholder: {}
   });
-  console.log(dict.stakeholder)
-  console.log(form.outcome)
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (mode === 'view') {
       Promise.all(
         [
-          fetchOrganizationsInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
+          fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('code'), fetchDataTypeInterfaces('outcome')
         ]
-      ).then(([{organizations}, {codesInterfaces}, {outcomeInterfaces}]) => {
+      ).then(([organizationRet, codeRet, outcomeRet]) => {
         const dict = {};
-        const stakeholder = {}
-        organizations.map(org => stakeholder[org._uri] = org.legalName)
-        dict['outcome'] = outcomeInterfaces;
-        dict['stakeholder'] = stakeholder;
-        dict['code'] = codesInterfaces;
-        console.log(dict);
+        dict['outcome'] = outcomeRet.interfaces;
+        dict['stakeholder'] = organizationRet.interfaces;
+        dict['code'] = codeRet.interfaces;
         setDict(dict);
       }).catch(e => {
         if (e.json) {
@@ -101,7 +94,7 @@ export default function AddEditStakeholderOutcome() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchStakeholderOutcome(encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
+      fetchDataTypes('stakeholderOutcome', encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
         if (success) {
           console.log(stakeholderOutcome);
           stakeholderOutcome.uri = stakeholderOutcome._uri;
@@ -141,7 +134,7 @@ export default function AddEditStakeholderOutcome() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createStakeholderOutcome({form}).then((ret) => {
+      createDataType('stakeholderOutcome', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

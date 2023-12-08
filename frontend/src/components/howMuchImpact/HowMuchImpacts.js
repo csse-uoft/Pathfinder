@@ -25,7 +25,7 @@ export default function HowMuchImpacts() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchDataTypes('howMuchImpact').then(res => {
+    fetchDataTypes('howMuchImpact', 'HowMuchImpact').then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.howMuchImpacts}));
     }).catch(e => {

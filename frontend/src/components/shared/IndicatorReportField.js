@@ -1,15 +1,13 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
-import {fetchIndicators} from "../../api/indicatorApi";
 import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import Dropdown from "./fields/MultiSelectField";
-import {fetchDatasetInterfaces} from "../../api/datasetApi";
+import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -73,45 +71,31 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
   const userContext = useContext(UserContext);
 
   useEffect(() => {
-    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
+    fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
       if(success) {
-        setOptions(op => ({...op, datasets: datasetInterfaces}));
+        setOptions(op => ({...op, datasets: interfaces}));
       }
     })
   }, []);
 
 
   useEffect(() => {
-    fetchOrganizationsInterfaces().then(({success, organizations}) => {
+    fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
       if (success) {
-        const options = {};
-        organizations.map(organization => {
-          // only organization which the user serves as an editor should be able to add
-          options[organization._uri] = organization.legalName;
-        });
-        setOptions(op => ({...op, organization: options}));
-        return options;
+        setOptions(op => ({...op, organization: interfaces}));
+        return interfaces;
       }
     }).then((organizations) => {
         Promise.all(Object.keys(organizations).map(organizationUri => {
-          return fetchIndicators(encodeURIComponent(organizationUri)).then(({success, indicators}) => {
+          return fetchDataTypeInterfaces('indicator', encodeURIComponent(organizationUri)).then(({success, interfaces}) => {
             if (success) {
-              const options = {};
-              indicators.map(indicator => {
-                options[indicator._uri] = indicator.name;
-              });
               setOptions(op => ({
                   ...op,
-                  [organizationUri]: options
+                  [organizationUri]: interfaces
                 })
               );
-              const indicatorsDict = {}
-              indicators.map(indicator => {
-                indicatorsDict[indicator._uri] = indicator.name || indicator._uri
-              })
-              setIndicators(indicatorsDict)
+              setIndicators(interfaces)
             }
-
           });
         })).then(() => {
           setLoading(false);
@@ -201,7 +185,6 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 type="text"
                 defaultValue={state.uri}
                 onChange={handleChange('uri')}
-                disabled={disabled || uriDiasbled}
                 required={required}
                 error={!!errors.uri}
                 helperText={errors.uri}
@@ -241,28 +224,8 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               }
             />
             </Grid>
-            {/*<Grid item xs={4}>*/}
-            {/*  <TextField*/}
-            {/*    sx={{mt: 2}}*/}
-            {/*    fullWidth*/}
-            {/*    label="Unit of Measure"*/}
-            {/*    type="text"*/}
-            {/*    defaultValue={state.unitOfMeasure}*/}
-            {/*    onChange={handleChange('unitOfMeasure')}*/}
-            {/*    disabled={disabled}*/}
-            {/*    required={required}*/}
-            {/*    error={!!errors.unitOfMeasure}*/}
-            {/*    helperText={errors.unitOfMeasure}*/}
-            {/*    onBlur={() => {*/}
-            {/*      if (!state.unitOfMeasure) {*/}
-            {/*        setErrors(errors => ({...errors, unitOfMeasure: 'This field cannot be empty'}));*/}
-            {/*      } else {*/}
-            {/*        setErrors(errors => ({...errors, unitOfMeasure: null}));*/}
-            {/*      }*/}
-            {/*    }*/}
-            {/*    }*/}
-            {/*  />*/}
-            {/*</Grid>*/}
+
+
             <Grid item xs={4}>
               <LoadingAutoComplete
                 label="Organization"

@@ -14,7 +14,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypes} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -32,7 +32,7 @@ export default function AddEditGroup() {
 
   const classes = useStyles();
   const navigator = useNavigate();
-  const navigate = navigateHelper(navigator)
+  const navigate = navigateHelper(navigator);
   const {uri, viewMode} = useParams();
   const mode = uri ? viewMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
@@ -60,31 +60,29 @@ export default function AddEditGroup() {
   });
 
   useEffect(() => {
-    if(!userContext.isSuperuser && !userContext.groupAdminOfs.length > 0) {
+    if (!userContext.isSuperuser && !userContext.groupAdminOfs.length > 0) {
       navigate('/groups');
-      enqueueSnackbar('Wrong auth', {variant: 'error'})
+      enqueueSnackbar('Wrong auth', {variant: 'error'});
     }
     Promise.all([
-      fetchDataTypes('organization')
-        .then(({organizations}) => {
-        organizations.map(organization => {
-          options.organizations[organization._uri] = organization.legalName;
-        })
-      }).catch(e => {
+      fetchDataTypeInterfaces('organization')
+        .then(({interfaces}) => {
+          options.organizations = interfaces;
+        }).catch(e => {
         if (e.json)
           setErrors(e.json);
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
       }),
       fetchDataTypes('user').then(({data}) => {
         data.map((user) => {
           options.administrators[user._uri] = `${user.person.familyName} ${user.person.givenName} URI: ${user._uri}`;
-        })
+        });
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occurs when fetching users", {variant: 'error'});
       }),
@@ -106,7 +104,7 @@ export default function AddEditGroup() {
         }).catch(e => {
           if (e.json)
             setErrors(e.json);
-          reportErrorToBackend(e)
+          reportErrorToBackend(e);
           setLoading(false);
           enqueueSnackbar(e.json?.message || "Error occurs when fetching group", {variant: 'error'});
         });
@@ -119,7 +117,7 @@ export default function AddEditGroup() {
     }).catch(e => {
       if (e.json)
         setErrors(e.json);
-      reportErrorToBackend(e)
+      reportErrorToBackend(e);
       setLoading(false);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
@@ -162,7 +160,7 @@ export default function AddEditGroup() {
         if (e.json) {
           setErrors(e.json);
         }
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when updating group', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -176,7 +174,7 @@ export default function AddEditGroup() {
       error.label = 'The field cannot be empty';
     }
     if (!form.administrator)
-      error.administrator = 'The field cannot be empty'
+      error.administrator = 'The field cannot be empty';
 
 
     setErrors(error);
@@ -188,7 +186,7 @@ export default function AddEditGroup() {
 
   return (
     <Container maxWidth="md">
-      {mode === 'view'?
+      {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
           <Typography variant={'h6'}> {`Label:`} </Typography>
           <Typography variant={'body1'}> {`${form.label}`} </Typography>
@@ -196,7 +194,7 @@ export default function AddEditGroup() {
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
           <Typography variant={'h6'}> {`Administrator:`} </Typography>
           <Typography variant={'body1'}> {`${form.administrator}`} </Typography>
-          {form.organizations.length? <Typography variant={'h6'}> {`Orgaizations:`} </Typography>:null}
+          {form.organizations.length ? <Typography variant={'h6'}> {`Orgaizations:`} </Typography> : null}
           {form.organizations.map(organizationURI => {
             return (
               <Typography variant={'body1'}>
@@ -205,10 +203,10 @@ export default function AddEditGroup() {
               </Typography>
             );
           })}
-          {form.comment? <Typography variant={'h6'}> {`Comment:`} </Typography>: null}
+          {form.comment ? <Typography variant={'h6'}> {`Comment:`} </Typography> : null}
           <Typography variant={'body1'}> {`${form.comment}`} </Typography>
 
-          <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/groups/${encodeURIComponent(uri)}/edit`);
           }
           }>
@@ -218,93 +216,93 @@ export default function AddEditGroup() {
         </Paper>
         :
         <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Group </Typography>
-        <GeneralField
-        key={'label'}
-        label={'Label'}
-        value={form.label}
-        required
-        disabled={!userContext.isSuperuser}
-        sx={{mt: '16px', minWidth: 350}}
-        onChange={e => form.label = e.target.value}
-        error={!!errors.label}
-        helperText={errors.label}
-        onBlur={() => {
-        if (form.label === '') {
-        setErrors(errors => ({...errors, label: 'This field cannot be empty'}));
-      } else {
-        setErrors(errors => ({...errors, label: ''}));
-      }
-      }}
-        />
-        <GeneralField
-        key={'uri'}
-        label={'URI'}
-        value={form.uri}
-        disabled={mode !== 'new'}
-        sx={{mt: '16px', minWidth: 350}}
-        onChange={e => form.uri = e.target.value}
-        error={!!errors.uri}
-        helperText={errors.uri}
-        onBlur={() => {
-        if (form.uri && !isValidURL(form.uri)) {
-        setErrors(errors => ({...errors, uri: 'Invalid URI'}));
-      } else {
-        setErrors(errors => ({...errors, uri: ''}));
-      }
-      }}
-        />
-        <SelectField
-        key={'administrator'}
-        disabled={!userContext.isSuperuser}
-        label={'Group Administrator'}
-        value={form.administrator}
-        options={options.administrators}
-        error={!!errors.administrator}
-        helperText={errors.administrator}
-        onChange={e => {
-        setForm(form => ({
-        ...form, administrator: e.target.value
-      })
-        );
-      }}
-        />
+          <Typography variant={'h4'}> Group </Typography>
+          <GeneralField
+            key={'label'}
+            label={'Label'}
+            value={form.label}
+            required
+            disabled={!userContext.isSuperuser}
+            sx={{mt: '16px', minWidth: 350}}
+            onChange={e => form.label = e.target.value}
+            error={!!errors.label}
+            helperText={errors.label}
+            onBlur={() => {
+              if (form.label === '') {
+                setErrors(errors => ({...errors, label: 'This field cannot be empty'}));
+              } else {
+                setErrors(errors => ({...errors, label: ''}));
+              }
+            }}
+          />
+          <GeneralField
+            key={'uri'}
+            label={'URI'}
+            value={form.uri}
+            disabled={mode !== 'new'}
+            sx={{mt: '16px', minWidth: 350}}
+            onChange={e => form.uri = e.target.value}
+            error={!!errors.uri}
+            helperText={errors.uri}
+            onBlur={() => {
+              if (form.uri && !isValidURL(form.uri)) {
+                setErrors(errors => ({...errors, uri: 'Invalid URI'}));
+              } else {
+                setErrors(errors => ({...errors, uri: ''}));
+              }
+            }}
+          />
+          <SelectField
+            key={'administrator'}
+            disabled={!userContext.isSuperuser}
+            label={'Group Administrator'}
+            value={form.administrator}
+            options={options.administrators}
+            error={!!errors.administrator}
+            helperText={errors.administrator}
+            onChange={e => {
+              setForm(form => ({
+                  ...form, administrator: e.target.value
+                })
+              );
+            }}
+          />
 
-        <Dropdown
-        label="Organizations"
-        key={'organizations'}
-        value={form.organizations}
-        onChange={e => {
-        form.organizations = e.target.value;
-      }}
-        options={options.organizations}
-        error={!!errors.organizations}
-        helperText={errors.organizations}
-        // sx={{mb: 2}}
-        />
-        <GeneralField
-        key={'comment'}
-        label={'Comment'}
-        value={form.comment}
-        sx={{mt: '16px', minWidth: 350}}
-        onChange={e => form.comment = e.target.value}
-        error={!!errors.comment}
-        helperText={errors.comment}
-        />
+          <Dropdown
+            label="Organizations"
+            key={'organizations'}
+            value={form.organizations}
+            onChange={e => {
+              form.organizations = e.target.value;
+            }}
+            options={options.organizations}
+            error={!!errors.organizations}
+            helperText={errors.organizations}
+            // sx={{mb: 2}}
+          />
+          <GeneralField
+            key={'comment'}
+            label={'Comment'}
+            value={form.comment}
+            sx={{mt: '16px', minWidth: 350}}
+            onChange={e => form.comment = e.target.value}
+            error={!!errors.comment}
+            helperText={errors.comment}
+          />
 
-        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-        Submit
-        </Button>
+          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+            Submit
+          </Button>
 
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-        dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Group?' :
-        'Are you sure you want to update this Group?'}
-        buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-        key={'cancel'}>{'cancel'}</Button>,
-        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-        key={'confirm'}
-        onClick={handleConfirm} children="confirm" autoFocus/>]}
-        open={state.submitDialog}/>
+          <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Group?' :
+                         'Are you sure you want to update this Group?'}
+                       buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                                         key={'cancel'}>{'cancel'}</Button>,
+                         <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                                        key={'confirm'}
+                                        onClick={handleConfirm} children="confirm" autoFocus/>]}
+                       open={state.submitDialog}/>
         </Paper>
       }
 

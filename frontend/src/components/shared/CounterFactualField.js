@@ -4,7 +4,7 @@ import {createFilterOptions} from '@mui/material/Autocomplete';
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
 import GeneralField from "./fields/GeneralField";
-import {fetchFeatureInterfaces} from "../../api/featureAPI";
+import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -61,7 +61,7 @@ export default function CounterFactualField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}, outcomes: {}, partOf: {}});
+  const [options, setOptions] = useState({features: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -73,9 +73,9 @@ export default function CounterFactualField({
 
   useEffect(() => {
     Promise.all([
-      fetchFeatureInterfaces().then(({success, featuresInterfaces}) => {
+      fetchDataTypeInterfaces('feature').then(({success, interfaces}) => {
         if (success) {
-          setOptions(op => ({...op, features: featuresInterfaces}))
+          setOptions(op => ({...op, features: interfaces}))
         }
       })
     ]).then(() => setLoading(false));

@@ -65,17 +65,13 @@ export default function AddEditImpactReport() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchDataTypes('organization'), fetchDataTypeInterfaces('howMuchImpact'), fetchDataTypes('impactRisk')]).then(
-      ([{organizations}, {howMuchImpactInterfaces}, {impactRisks}]) => {
-        const organizationsOps = {};
-        organizations.map(organization => {
-          organizationsOps[organization._uri] = organization.legalName;
-        });
+    Promise.all([fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('howMuchImpact'), fetchDataTypes('impactRisk')]).then(
+      ([organizationRet, {howMuchImpactInterfaces}, {impactRisks}]) => {
         const impactRiskInterfaces = {}
         impactRisks.map(impactRisk => {
           impactRiskInterfaces[impactRisk._uri] = impactRisk.hasIdentifier
         })
-        setOps(ops => ({...ops, organization: organizationsOps, howMuchImpact: howMuchImpactInterfaces, impactRisk: impactRiskInterfaces}));
+        setOps(ops => ({...ops, organization: organizationRet.interfaces, howMuchImpact: howMuchImpactInterfaces, impactRisk: impactRiskInterfaces}));
         setLoading(false);
       }
     ).catch(([e]) => {

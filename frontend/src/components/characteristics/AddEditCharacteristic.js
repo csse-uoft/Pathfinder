@@ -14,7 +14,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {updateCharacteristic} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypes} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -69,22 +69,14 @@ export default function AddEditCharacteristic() {
   useEffect(() => {
 
     Promise.all([
-      fetchDataTypes('code').then(({codes, success}) => {
+      fetchDataTypeInterfaces('code').then(({interfaces, success}) => {
         if (success) {
-          const codeDict = {};
-          codes.map(code => {
-            codeDict[code._uri] = code.name;
-          });
-          setOptions(options => ({...options, codes: codeDict}));
+          setOptions(options => ({...options, codes: interfaces}));
         }
       }),
-      fetchDataTypes('stakeholder').then(({stakeholders, success}) => {
+      fetchDataTypeInterfaces('stakeholder').then(({interfaces, success}) => {
         if (success) {
-          const stakeholderDict = {}
-          stakeholders.map(stakeholder => {
-            stakeholderDict[stakeholder._uri] = stakeholder.name;
-          })
-          setOptions(options => ({...options, stakeholders: stakeholderDict}));
+          setOptions(options => ({...options, stakeholders: interfaces}));
         }
       })
     ]).then(() => {

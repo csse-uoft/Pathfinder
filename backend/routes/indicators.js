@@ -5,9 +5,10 @@ const {fetchIndicatorsHandler, fetchIndicatorInterfacesHandler} = require("../se
 
 const router = express.Router();
 
+router.get('/interface/:organizationUri', fetchIndicatorInterfacesHandler);
+router.get('/interface', fetchIndicatorInterfacesHandler);
 router.get('/', fetchIndicatorsHandler);
 router.get('/:organizationUri', fetchIndicatorsHandler);
-router.get('/interface/:organizationUri', fetchIndicatorInterfacesHandler)
 
 
 

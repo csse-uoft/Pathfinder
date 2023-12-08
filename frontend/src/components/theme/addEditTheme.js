@@ -6,12 +6,13 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createTheme, fetchTheme, updateTheme} from "../../api/themeApi";
+import {updateTheme} from "../../api/themeApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -49,16 +50,11 @@ export default function AddEditTheme() {
     description: ''
   });
   const [loading, setLoading] = useState(true);
-  // const [options, setOptions] = useState({
-  //   reporters: {},
-  //   editors: [],
-  //   researchers: [],
-  //   administrators: [],
-  // });
+
 
   useEffect(() => {
     if (mode === 'edit' && uri || mode === 'view') {
-      fetchTheme(encodeURIComponent(uri)).then(res => {
+      fetchDataType('theme', encodeURIComponent(uri)).then(res => {
         if (res.success) {
           setForm({
             name: res.theme.name,
@@ -89,7 +85,7 @@ export default function AddEditTheme() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createTheme(form).then((ret) => {
+      createDataType('theme', form).then((ret) => {
           if (ret.success) {
             setState({loadingButton: false, submitDialog: false,});
             navigate('/themes');

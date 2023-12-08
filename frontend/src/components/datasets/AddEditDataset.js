@@ -63,10 +63,6 @@ export default function AddEditDataset() {
     // ]);
     // We are not fetching anything when we create a new dataset. so loading is false (we can even delete it if needed)
     const [loading, setLoading] = useState(false);
-    const [options, setOptions] = useState({
-        objectForm: {},
-        definedBy: {}
-    });
 
 
 

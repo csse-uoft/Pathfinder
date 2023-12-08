@@ -6,8 +6,9 @@ const {
 
 const router = express.Router();
 
+router.get('/interface/:organizationUri', fetchIndicatorReportInterfacesHandler);
+router.get('/interface', fetchIndicatorReportInterfacesHandler);
 router.get('/:orgUri', fetchIndicatorReportsHandler);
-router.get('/interface/:organizationUri', fetchIndicatorReportInterfacesHandler)
 
 
 module.exports = router;

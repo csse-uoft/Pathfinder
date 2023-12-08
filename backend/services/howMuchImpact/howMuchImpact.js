@@ -26,7 +26,7 @@ const fetchHowMuchImpactInterface = async (req, res) => {
 const fetchHowMuchImpactInterfaceHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + resource + 's'))
-      return await fetchHowMuchImpacts(resource, req, res);
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);
@@ -61,7 +61,7 @@ const createHowMuchImpactHandler = async (req, res, next) => {
   try {
     const {form} = req.body;
     await Transaction.beginTransaction();
-    if (await hasAccess(req, 'create' + RESOURCE)) {
+    if (await hasAccess(req, 'create' + resource)) {
       if (await howMuchImpactBuilder('interface', form.subtype
         , null, null, null,{}, {}, form)){
         await Transaction.commit();
@@ -80,7 +80,7 @@ const createHowMuchImpactHandler = async (req, res, next) => {
 const fetchHowMuchImpactsHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + resource + 's'))
-      return await fetchDataTypeInterfaces(resource, res);
+      return await fetchHowMuchImpacts(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);

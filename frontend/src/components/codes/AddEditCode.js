@@ -13,7 +13,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypes} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -73,13 +73,9 @@ export default function AddEditCode() {
   useEffect(() => {
 
     Promise.all([
-      fetchDataTypes('organization').then(({organizations, success}) => {
+      fetchDataTypeInterfaces('organization').then(({interfaces, success}) => {
         if (success) {
-          const orgDict = {};
-          organizations.map(org => {
-            orgDict[org._uri] = org.legalName;
-          });
-          setOptions(options => ({...options, definedBy: orgDict}));
+          setOptions(options => ({...options, definedBy: interfaces}));
         }
       }),
     ]).then(() => {

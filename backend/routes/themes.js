@@ -5,8 +5,8 @@ const {fetchThemesHandler, fetchThemeInterfacesHandler} = require("../services/t
 
 const router = express.Router();
 
-router.get('/', fetchThemesHandler);
 router.get('/interface', fetchThemeInterfacesHandler)
+router.get('/', fetchThemesHandler);
 
 
 

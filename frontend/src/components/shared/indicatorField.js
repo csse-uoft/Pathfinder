@@ -10,6 +10,7 @@ import GeneralField from "./fields/GeneralField";
 import {fetchDatasetInterfaces} from "../../api/datasetApi";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -68,9 +69,9 @@ export default function IndicatorField({defaultValue, required, onChange, label,
 
 
   useEffect(() => {
-    fetchCodesInterfaces().then(({success, codesInterfaces}) => {
-      if (success){
-        setCodesInterfaces(codesInterfaces)
+    fetchDataTypeInterfaces('code').then(({success, interfaces}) => {
+      if (success) {
+        setCodesInterfaces(interfaces)
       }
     }).catch(e => {
       if (e.json)
@@ -85,36 +86,26 @@ export default function IndicatorField({defaultValue, required, onChange, label,
   }, [importErrors]);
 
   useEffect(() => {
-    fetchOrganizationsInterfaces().then(({success, organizations}) => {
+    fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
       if(success) {
-        const options ={};
-        organizations.map(organization => {
-          // felt out the organization this user serves as the editor
-          options[organization._uri] = organization.legalName;
-        })
-        setOptions(options)
-
+        setOptions(interfaces)
       }
     })
   }, []);
 
   useEffect(() => {
-    fetchDatasetInterfaces().then(({success, datasetInterfaces}) => {
+    fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
       if(success) {
-        setDatasetOptions(datasetInterfaces);
+        setDatasetOptions(interfaces);
       }
     })
   }, []);
 
 
   useEffect(() => {
-        fetchStakeholders().then(({success, stakeholders}) => {
+        fetchDataTypeInterfaces('stakeholder').then(({success, interfaces}) => {
             if(success) {
-                const options = {};
-                stakeholders.map(stakeholder => {
-                    options[stakeholder._uri] = stakeholder.name;
-                })
-                setStakeholderOptions(options);
+                setStakeholderOptions(interfaces);
             }
         })
     }, [])

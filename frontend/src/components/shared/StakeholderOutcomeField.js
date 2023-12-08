@@ -12,6 +12,7 @@ import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import {fetchOutcomeInterfaces} from "../../api/outcomeApi";
 import Dropdown from "./fields/MultiSelectField";
+import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -73,13 +74,10 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
 
   useEffect(() => {
     Promise.all([
-      fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOrganizationsInterfaces()
-    ]).then(([{stakeholderInterfaces}, {codesInterfaces}, {organizations}]) => {
-      const organizationInterfaces = {}
-      organizations.map(({legalName, _uri}) => {
-        organizationInterfaces[_uri] = legalName
-      })
-      setOptions(op => ({...op, stakeholders: stakeholderInterfaces, codes: codesInterfaces, organizations: organizationInterfaces}));
+      fetchDataTypeInterfaces('stakeholderOutcome'), fetchDataTypeInterfaces('code'), fetchDataTypeInterfaces('organization')
+    ]).then(([stakeholderOutcomeRet, codeRet, organizationRet]) => {
+
+      setOptions(op => ({...op, stakeholders: stakeholderOutcomeRet.interfaces, codes: codeRet.interfaces, organizations: organizationRet.interfaces}));
       setLoading(false)
     }).catch(([e1, e2, e3]) => {
       const errorJson = e1.json || e2.json || e3.json
@@ -96,9 +94,9 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
   useEffect(() => {
     if (state.organization) {
       Promise.all([
-        fetchOutcomeInterfaces(encodeURIComponent(state.organization)), fetchIndicatorInterfaces(encodeURIComponent(state.organization))
-      ]).then(([{outcomeInterfaces}, {indicatorInterfaces}]) => {
-        setOptions(op => ({...op, outcomes: outcomeInterfaces, indicators: indicatorInterfaces}));
+        fetchDataTypeInterfaces('outcome', encodeURIComponent(state.organization)), fetchDataTypeInterfaces('indicator', encodeURIComponent(state.organization))
+      ]).then(([outcomeRet, indicatorRet]) => {
+        setOptions(op => ({...op, outcomes: outcomeRet.interfaces, indicators: indicatorRet.interfaces}));
       });
     }
   }, [state.organization])

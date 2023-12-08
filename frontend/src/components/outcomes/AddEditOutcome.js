@@ -62,16 +62,16 @@ export default function AddEditOutcome() {
 
   useEffect(() => {
     if (form.organization) {
-      fetchDataTypeInterfaces('outcome', encodeURIComponent(form.organization)).then(({outcomeInterfaces}) => {
-        setOutcomeInterfaces(outcomeInterfaces);
+      fetchDataTypeInterfaces('outcome', encodeURIComponent(form.organization)).then(({interfaces}) => {
+        setOutcomeInterfaces(interfaces);
       });
     }
   }, [form.organization]);
 
   useEffect(() => {
 
-    fetchDataTypeInterfaces('impactModel').then(({impactModelInterfaces}) => {
-      setImpactModelInterfaces(impactModelInterfaces);
+    fetchDataTypeInterfaces('impactModel').then(({interfaces}) => {
+      setImpactModelInterfaces(interfaces);
     });
   }, []);
 

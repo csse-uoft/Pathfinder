@@ -5,5 +5,6 @@ const {fetchImpactModelsHandler, fetchImpactModelInterfacesHandler} = require(".
 const router = express.Router();
 
 router.get('/interface/:organizationUri', fetchImpactModelInterfacesHandler)
+router.get('/interface/', fetchImpactModelInterfacesHandler)
 router.get('/:organizationUri', fetchImpactModelsHandler)
 module.exports = router;

@@ -12,6 +12,7 @@ import {fetchCodesInterfaces} from "../../api/codeAPI";
 import GeneralField from "./fields/GeneralField";
 import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
 import {fetchFeatureInterfaces} from "../../api/featureAPI";
+import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -81,33 +82,24 @@ export default function OutcomeField({
 
   useEffect(() => {
     Promise.all([
-      fetchThemes()
+      fetchDataTypeInterfaces('theme')
         .then(res => {
           if (res.success)
-            res.themes.map(
-              theme => {
-                options.themes[theme._uri] = theme.name;
-              }
-            );
+            options.themes = res.interfaces
         }),
-      fetchOrganizationsInterfaces().then(({success, organizations}) => {
+      fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
         if (success) {
-          const options = {};
-          organizations.map(organization => {
-            // only organization which the user serves as an editor should be able to add
-            options[organization._uri] = organization.legalName;
-          });
-          setOptions(op => ({...op, organization: options}));
+          setOptions(op => ({...op, organization: interfaces}));
         }
       }),
-      fetchCodesInterfaces().then(({success, codesInterfaces}) => {
+      fetchCodesInterfaces().then(({success, interfaces}) => {
         if (success) {
-          setOptions(op => ({...op, codes: codesInterfaces}));
+          setOptions(op => ({...op, codes: interfaces}));
         }
       }),
-      fetchFeatureInterfaces().then(({success, featuresInterfaces}) => {
+      fetchFeatureInterfaces().then(({success, interfaces}) => {
         if (success) {
-          setOptions(op => ({...op, features: featuresInterfaces}))
+          setOptions(op => ({...op, features: interfaces}))
         }
       })
     ]).then(() => setLoading(false));
@@ -116,24 +108,16 @@ export default function OutcomeField({
 
   useEffect(() => {
     if (state.organization) {
-      Promise.all([fetchIndicators(encodeURIComponent(state.organization)), fetchImpactModelInterfaces(encodeURIComponent(state.organization))]).
-      then(([{indicators}, {impactModelInterfaces}]) => {
-        const inds = {};
-        indicators.map(indicator => {
-          inds[indicator._uri] = indicator.name;
-        });
-        setOptions(ops => ({...ops, indicators: inds, partOf: impactModelInterfaces}));
+      Promise.all([fetchDataTypeInterfaces('indicator', encodeURIComponent(state.organization)), fetchDataTypeInterfaces('impactModel', encodeURIComponent(state.organization))]).
+      then(([indicatorRet, impactModelRet]) => {
+        setOptions(ops => ({...ops, indicators: indicatorRet.interfaces, partOf: impactModelRet.interfaces}));
       })
     }
 
       if (state.organization) {
-          fetchOutcomes(encodeURIComponent(state.organization)).then(({success, outcomes}) => {
+          fetchDataTypeInterfaces('outcome', encodeURIComponent(state.organization)).then(({success, interfaces}) => {
               if (success) {
-                  const outs = {};
-                  outcomes.map(outcome => {
-                      outs[outcome._uri] = outcome.name;
-                  });
-                  setOptions(ops => ({...ops, outcomes: outs}));
+                  setOptions(ops => ({...ops, outcomes: interfaces}));
               }
           });
       }

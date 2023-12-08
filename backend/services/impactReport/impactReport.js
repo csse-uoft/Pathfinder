@@ -5,6 +5,7 @@ const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("./impactReportBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {fetchDatasetInterfacesHandler} = require("../dataset/datasets");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 
 const resource = 'ImpactReport';
@@ -49,7 +50,7 @@ const fetchImpactReportsHandler = async (req, res, next) => {
 const fetchImpactReportInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + resource + 's'))
-      return await fetchDatasetInterfacesHandler(resource, req, res);
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);

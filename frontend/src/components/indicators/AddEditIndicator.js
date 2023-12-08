@@ -63,9 +63,9 @@ export default function AddEditIndicator() {
 
 
   useEffect(() => {
-    fetchDataTypeInterfaces('dataset').then(({success, datasetInterfaces}) => {
+    fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
       if (success) {
-        setDatasetInterfaces(datasetInterfaces)
+        setDatasetInterfaces(interfaces)
       }
     }).catch(e => {
       if (e.json)
@@ -76,9 +76,9 @@ export default function AddEditIndicator() {
   }, [])
 
   useEffect(() => {
-    fetchDataTypeInterfaces('code').then(({success, codesInterfaces}) => {
+    fetchDataTypeInterfaces('code').then(({success, interfaces}) => {
       if (success) {
-        setCodesInterfaces(codesInterfaces)
+        setCodesInterfaces(interfaces)
       }
     }).catch(e => {
       if (e.json)
@@ -89,9 +89,9 @@ export default function AddEditIndicator() {
   }, [])
 
   useEffect(() => {
-    fetchDataTypeInterfaces('indicatorReport').then(({success, indicatorReportInterfaces}) => {
+    fetchDataTypeInterfaces('indicatorReport').then(({success, interfaces}) => {
       if (success){
-        setIndicatorReportInterfaces(indicatorReportInterfaces)
+        setIndicatorReportInterfaces(interfaces)
       }
     }).catch(e => {
       if (e.json)

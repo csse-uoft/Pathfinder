@@ -5,14 +5,15 @@ const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
-const DATATYPE = 'StakeholderOutcome'
+const resource = 'StakeholderOutcome'
 
 const createStakeholderOutcomeHandler = async (req, res, next) => {
   try {
     await Transaction.beginTransaction();
     const {form} = req.body;
-    if (await hasAccess(req, 'create' + DATATYPE)) {
+    if (await hasAccess(req, 'create' + resource)) {
       await Transaction.beginTransaction();
       if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form)) {
         await Transaction.commit();
@@ -29,7 +30,7 @@ const createStakeholderOutcomeHandler = async (req, res, next) => {
 
 const fetchStakeholderOutcomesThroughOrganizationHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchStakeholderOutcomesThroughOrganization(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -59,7 +60,7 @@ const fetchStakeholderOutcomesThroughOrganization = async (req, res) => {
 
 const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchStakeholderOutcomesThroughStakeholder(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -70,7 +71,7 @@ const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next)
 
 const fetchStakeholderOutcomeHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchStakeholderOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -82,7 +83,7 @@ const fetchStakeholderOutcomeHandler = async (req, res, next) => {
 const fetchStakeholderOutcomeInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchStakeholderOutcomes'))
-      return await fetchStakeholderOutcomeInterfaces(req, res);
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {
