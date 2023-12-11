@@ -15,7 +15,7 @@ import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {  baseLevelConfig, fullLevelConfig } from "../../helpers/attributeConfig"
-import {validateField, validateURI} from "../../helpers";
+import {validateField, validateFieldAndURI, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -262,7 +262,7 @@ export default function AddEditCode() {
             onChange={e => form.identifier = e.target.value}
             error={!!errors.identifier}
             helperText={errors.identifier}
-            onBlur={validateField(form, attriConfig,'identifier','tove_org:hasIdentifier', setErrors)}
+            onBlur={validateFieldAndURI(form, attriConfig,'identifier','tove_org:hasIdentifier', setErrors)}
           />
 
           <GeneralField
