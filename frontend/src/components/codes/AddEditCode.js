@@ -14,6 +14,8 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {  baseLevelConfig, fullLevelConfig } from "../../helpers/attributeConfig"
+import {validateField, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -34,6 +36,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditCode() {
 
+  const attriConfig = fullLevelConfig.code
   const classes = useStyles();
   const userContext = useContext(UserContext);
   const navigator = useNavigate();
@@ -218,14 +221,7 @@ export default function AddEditCode() {
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
             helperText={errors.name}
-            onBlur={() => {
-              if (!form.name) {
-                setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, name: ''}));
-              }
-
-            }}
+            onBlur={validateField(form, attriConfig, 'name', 'cids:hasName', setErrors)}
           />
 
           <GeneralField
@@ -236,14 +232,7 @@ export default function AddEditCode() {
             onChange={e => form.uri = e.target.value}
             error={!!errors.uri}
             helperText={errors.uri}
-            onBlur={() => {
-              if (form.uri && !isValidURL(form.uri)) {
-                setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-              } else {
-                setErrors(errors => ({...errors, uri: ''}));
-              }
-
-            }}
+            onBlur={validateURI(form, setErrors)}
           />
 
           <SelectField
@@ -255,13 +244,7 @@ export default function AddEditCode() {
             helperText={
               errors.definedBy
             }
-            // onBlur={() => {
-            //   if (!form.definedBy) {
-            //     setErrors(errors => ({...errors, definedBy: 'This field cannot be empty' }))
-            //   } else {
-            //     setErrors(errors => ({...errors, definedBy: '' }))
-            //   }
-            // }}
+            onBlur={validateField(form, attriConfig,'definedBy','cids:definedBy', setErrors)}
             onChange={e => {
               setForm(form => ({
                   ...form, definedBy: e.target.value
@@ -279,17 +262,10 @@ export default function AddEditCode() {
             onChange={e => form.identifier = e.target.value}
             error={!!errors.identifier}
             helperText={errors.identifier}
-            onBlur={() => {
-              if (!form.identifier || !isValidURL(form.identifier)) {
-                setErrors(errors => ({...errors, identifier: 'Please input an valid URI'}));
-              } else {
-                setErrors(errors => ({...errors, identifier: ''}));
-              }
-            }}
+            onBlur={validateField(form, attriConfig,'identifier','tove_org:hasIdentifier', setErrors)}
           />
 
           <GeneralField
-            disabled={!userContext.isSuperuser}
             key={'specification'}
             label={'Specification'}
             value={form.specification}
@@ -297,13 +273,7 @@ export default function AddEditCode() {
             onChange={e => form.specification = e.target.value}
             error={!!errors.specification}
             helperText={errors.specification}
-            // onBlur={() => {
-            //   if (form.specification === '') {
-            //     setErrors(errors => ({...errors, specification: 'This field cannot be empty'}));
-            //   } else {
-            //     setErrors(errors => ({...errors, specification: ''}));
-            //   }
-            // }}
+            onBlur={validateField(form, attriConfig,'specification','cids:hasSpecification', setErrors)}
           />
 
           <GeneralField
@@ -315,13 +285,7 @@ export default function AddEditCode() {
             onChange={e => form.codeValue = e.target.value}
             error={!!errors.codeValue}
             helperText={errors.codeValue}
-            // onBlur={() => {
-            //   if (form.codeValue === '') {
-            //     setErrors(errors => ({...errors, codeValue: 'This field cannot be empty'}));
-            //   } else {
-            //     setErrors(errors => ({...errors, codeValue: ''}));
-            //   }
-            // }}
+            onBlur={validateField(form, attriConfig,'codeValue','schema:codeValue', setErrors)}
           />
 
           <GeneralField
@@ -333,13 +297,7 @@ export default function AddEditCode() {
             onChange={e => form.iso72Value = e.target.value}
             error={!!errors.iso72Value}
             helperText={errors.iso72Value}
-            // onBlur={() => {
-            //   if (form.iso72Value === '') {
-            //     setErrors(errors => ({...errors, iso72Value: 'This field cannot be empty'}));
-            //   } else {
-            //     setErrors(errors => ({...errors, iso72Value: ''}));
-            //   }
-            // }}
+            onBlur={validateField(form, attriConfig,'iso72Value','iso21972:value', setErrors)}
           />
 
           <GeneralField
@@ -352,6 +310,7 @@ export default function AddEditCode() {
             helperText={errors.description}
             minRows={4}
             multiline
+            onBlur={validateField(form, attriConfig,'description','cids:hasDescription', setErrors)}
           />
 
           <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}

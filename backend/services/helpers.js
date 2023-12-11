@@ -37,7 +37,6 @@ const getObjectValue = (object, graphdbModel, property) => {
 
 const getFullTypeURIList = (graphdbModel) => {
   return graphdbModel.schemaOptions.rdfTypes.map(uri => getFullURI(uri));
-  // return getFullURI(graphdbModel.schemaOptions.rdfTypes[1] || graphdbModel.schemaOptions.rdfTypes[0]);
 };
 
 const getFullPropertyURI = (graphdbModel, propertyName) => {
@@ -49,8 +48,6 @@ async function transSave(trans, object) {
   return await trans.update(new UpdateQueryPayload()
     .setQuery(query)
     .setContentType(QueryContentType.SPARQL_UPDATE)
-    // .setResponseType(RDFMimeType.RDF_XML)
-    // .setInference(true)
     .setTimeout(5));
 }
 

@@ -4,7 +4,6 @@ const {assignValue, assignValues,
 } = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorReportBuilder(environment, object, organization, error, {
