@@ -15,7 +15,7 @@ import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {  baseLevelConfig, fullLevelConfig } from "../../helpers/attributeConfig"
-import {validateField, validateFieldAndURI, validateURI} from "../../helpers";
+import {validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -64,8 +64,7 @@ export default function AddEditCode() {
     codeValue: '',
     iso72Value: ''
   });
-  // const [outcomeForm, setOutcomeForm] = useState([
-  // ]);
+
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     objectForm: {},
@@ -162,22 +161,21 @@ export default function AddEditCode() {
   };
 
   const validate = () => {
-    const error = {};
-    // Object.keys(form).map(key => {
-    //   if (key !== 'uri' && !form[key]) {
-    //     error[key] = 'This field cannot be empty';
-    //   }
-    // });
-    if (form.uri && !isValidURL(form.uri)) {
-      error.uri = 'The field should be a valid URI';
-    }
-    if (form.identifier && !isValidURL(form.identifier)){
-      error.identifier = 'The field should be a valid URI'
-    }
+    const errors = {};
 
-    setErrors(error);
+    validateForm(form, attriConfig, {
+      definedBy: 'cids:definedBy',
+      specification: 'cids:hasSpecification',
+      identifier: 'tove_org:hasIdentifier',
+      name: 'cids:hasName',
+      description: 'cids:hasDescription',
+      codeValue: 'schema:codeValue',
+      iso72Value: 'iso21972:value'
+    }, errors, ['identifier', 'uri'])
 
-    return Object.keys(error).length === 0;
+    setErrors(errors);
+
+    return Object.keys(errors).length === 0;
     // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
 

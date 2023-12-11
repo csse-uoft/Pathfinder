@@ -127,6 +127,20 @@ export function validateURI(form, setErrors) {
   }
 }
 
+export function validateForm(form, attriConfig, attributes, errors, URIs) {
+  for (let attribute in attributes) {
+    if (attriConfig[attributes[attribute]] && !form[attribute]) {
+      errors[attribute] = 'This field cannot be empty';
+    }
+  }
+
+  for (let attribute of URIs) {
+    if (form[attribute] && !isValidURL(form[attribute])) {
+      errors[attribute] = 'The field must be a valid URI';
+    }
+  }
+}
+
 export function validateFieldAndURI(form, attriConfig ,attributeName, compassAttributeName, setErrors) {
   return () => {
     if (!form[attributeName] && attriConfig[compassAttributeName]) {
