@@ -68,7 +68,7 @@ export default function Characteristics() {
     {
       label: 'Name',
       body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/characteristics/${encodeURIComponent(_uri)}/view`}>
+        return <Link colorWithHover to={`/characteristic/${encodeURIComponent(_uri)}/view`}>
           {name || _uri}
         </Link>
       },
@@ -78,7 +78,7 @@ export default function Characteristics() {
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'characteristics'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'characteristic'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
