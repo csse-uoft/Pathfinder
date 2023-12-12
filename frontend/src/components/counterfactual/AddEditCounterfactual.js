@@ -179,7 +179,6 @@ export default function AddEditCounterfactual() {
           disabledOrganization={!!orgUri}
           disableURI={mode !== 'new'}
           defaultValue={form}
-          required
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}

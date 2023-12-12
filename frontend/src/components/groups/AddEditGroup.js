@@ -15,6 +15,8 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateField, validateForm, validateURI} from "../../helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -30,6 +32,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditGroup() {
 
+  const attriConfig = fullLevelConfig.group
   const classes = useStyles();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
@@ -58,6 +61,13 @@ export default function AddEditGroup() {
     organizations: {},
     administrators: {},
   });
+  const attribute2Compass = {
+    label: 'rdfs:label',
+    administrator: ':hasAdministrator',
+    organizations: ':hasOrganization',
+    comment: 'rdfs:comment',
+    uri: '',
+  }
 
   useEffect(() => {
     if (!userContext.isSuperuser && !userContext.groupAdminOfs.length > 0) {
@@ -169,16 +179,12 @@ export default function AddEditGroup() {
   };
 
   const validate = () => {
-    const error = {};
-    if (form.label === '') {
-      error.label = 'The field cannot be empty';
-    }
-    if (!form.administrator)
-      error.administrator = 'The field cannot be empty';
+    const errors = {};
 
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
 
-    setErrors(error);
-    return Object.keys(error).length === 0;
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   if (loading)
@@ -221,19 +227,13 @@ export default function AddEditGroup() {
             key={'label'}
             label={'Label'}
             value={form.label}
-            required
             disabled={!userContext.isSuperuser}
             sx={{mt: '16px', minWidth: 350}}
             onChange={e => form.label = e.target.value}
             error={!!errors.label}
             helperText={errors.label}
-            onBlur={() => {
-              if (form.label === '') {
-                setErrors(errors => ({...errors, label: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, label: ''}));
-              }
-            }}
+            required={attriConfig[attribute2Compass['label']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig, 'label', attribute2Compass['label'], setErrors)}
           />
           <GeneralField
             key={'uri'}
@@ -244,13 +244,7 @@ export default function AddEditGroup() {
             onChange={e => form.uri = e.target.value}
             error={!!errors.uri}
             helperText={errors.uri}
-            onBlur={() => {
-              if (form.uri && !isValidURL(form.uri)) {
-                setErrors(errors => ({...errors, uri: 'Invalid URI'}));
-              } else {
-                setErrors(errors => ({...errors, uri: ''}));
-              }
-            }}
+            onBlur={validateURI(form, setErrors)}
           />
           <SelectField
             key={'administrator'}
@@ -266,6 +260,8 @@ export default function AddEditGroup() {
                 })
               );
             }}
+            required={attriConfig[attribute2Compass['administrator']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig, 'administrator', attriConfig['administrator'], setErrors)}
           />
 
           <Dropdown
@@ -278,7 +274,8 @@ export default function AddEditGroup() {
             options={options.organizations}
             error={!!errors.organizations}
             helperText={errors.organizations}
-            // sx={{mb: 2}}
+            required={attriConfig[attribute2Compass['organizations']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig, 'organizations', attriConfig['organizations'], setErrors)}
           />
           <GeneralField
             key={'comment'}
@@ -288,6 +285,8 @@ export default function AddEditGroup() {
             onChange={e => form.comment = e.target.value}
             error={!!errors.comment}
             helperText={errors.comment}
+            required={attriConfig[attribute2Compass['comment']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig, 'comment', attriConfig['comment'], setErrors)}
           />
 
           <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>

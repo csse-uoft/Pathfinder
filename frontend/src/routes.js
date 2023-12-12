@@ -115,6 +115,7 @@ const routes = (
     {/*Datasets*/}
     <Route path={`${process.env.PUBLIC_URL}/dataset/new`} element={<PrivateRoute element={AddEditDataset}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/datasets`} element={<PrivateRoute element={Datasets}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/dataset/:uri/:viewMode`} element={<PrivateRoute element={AddEditDataset}/>}/>
 
     {/*Datasets*/}
     <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/new`} element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>

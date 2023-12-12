@@ -1,8 +1,8 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
-import React, {useEffect, useState, useContext} from "react";
-import {Link, Loading} from "../shared";
-import {Button, Chip, Container, Paper, Typography} from "@mui/material";
+import React, {useState, useContext} from "react";
+import {Loading} from "../shared";
+import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
@@ -11,10 +11,11 @@ import {useSnackbar} from "notistack";
 
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
     root: {
         width: '80%'
@@ -34,6 +35,8 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditDataset() {
+
+    const attriConfig = fullLevelConfig.dataset
 
     const classes = useStyles();
     const userContext = useContext(UserContext);
@@ -57,11 +60,16 @@ export default function AddEditDataset() {
         name: '',
         description: '',
         dateCreated: '',
-
     });
-    // const [outcomeForm, setOutcomeForm] = useState([
-    // ]);
-    // We are not fetching anything when we create a new dataset. so loading is false (we can even delete it if needed)
+
+    const attribute2Compass = {
+        identifier: 'schema:identifier',
+        name: 'schema:name',
+        description: 'schema:description',
+        dateCreated: 'schema:dateCreated',
+    }
+
+
     const [loading, setLoading] = useState(false);
 
 
@@ -114,28 +122,10 @@ export default function AddEditDataset() {
 
     const validate = () => {
         console.log(form);
-        const error = {};
-        // Object.keys(form).map(key => {
-        //   if (key !== 'uri' && !form[key]) {
-        //     error[key] = 'This field cannot be empty';
-        //   }
-        // });
-
-        if (form.identifier && !isValidURL(form.identifier)){
-            error.identifier = 'The field should be a valid URI'
-        }
-        if (form.name === '')
-            error.name = 'The field cannot be empty';
-        // if (form.identifier === '')
-        //     error.identifier = 'The field cannot be empty';
-        // if (!form.description)
-        //     error.description = 'The field cannot be empty';
-        // if (!form.dateCreated)
-        //     error.dateCreated = 'The field cannot be empty';
-
-        setErrors(error);
-
-        return Object.keys(error).length === 0;
+        const errors = {};
+        validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
         // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
     };
 
@@ -165,19 +155,12 @@ export default function AddEditDataset() {
                         key={'name'}
                         label={'Name'}
                         value={form.name}
-                        required
                         sx={{mt: '16px', minWidth: 350}}
                         onChange={e => form.name = e.target.value}
                         error={!!errors.name}
                         helperText={errors.name}
-                        onBlur={() => {
-                            if (!form.name) {
-                                setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-                            } else {
-                                setErrors(errors => ({...errors, name: ''}));
-                            }
-
-                        }}
+                        required={attriConfig[attribute2Compass['name']]?.ignoreInstance}
+                        onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
                     />
 
                     <GeneralField
@@ -188,14 +171,7 @@ export default function AddEditDataset() {
                         onChange={e => form.uri = e.target.value}
                         error={!!errors.uri}
                         helperText={errors.uri}
-                        onBlur={() => {
-                            if (form.uri && !isValidURL(form.uri)) {
-                                setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-                            } else {
-                                setErrors(errors => ({...errors, uri: ''}));
-                            }
-
-                        }}
+                        onBlur={validateURI(form, setErrors)}
                     />
 
                     <GeneralField
@@ -203,20 +179,12 @@ export default function AddEditDataset() {
                         type={'date'}
                         value={form.dateCreated}
                         label={'Date Created'}
-                        required
                         onChange={e => form.dateCreated = e.target.value}
                         sx={{mt: '16px', minWidth: 350}}
                         error={!!errors.dateCreated}
                         helperText={errors.dateCreated}
-
-                        // onBlur={() => {
-                        //     if (!form.dateCreated) {
-                        //         setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
-                        //     } else {
-                        //         setErrors(errors => ({...errors, dateCreated: null}));
-                        //     }
-                        // }
-                        // }
+                        required={attriConfig[attribute2Compass['dateCreated']]?.ignoreInstance}
+                        onBlur={validateField(form, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
                     />
 
 
@@ -228,20 +196,9 @@ export default function AddEditDataset() {
                         onChange={e => form.identifier = e.target.value}
                         error={!!errors.identifier}
                         helperText={errors.identifier}
-                        required
-                        // onBlur={() => {
-                        //     if (!form.identifier || !isValidURL(form.identifier)) {
-                        //         setErrors(errors => ({...errors, identifier: 'Please input an valid URI'}));
-                        //     } else {
-                        //         setErrors(errors => ({...errors, identifier: ''}));
-                        //     }
-                        // }}
+                        required={attriConfig[attribute2Compass['identifier']]?.ignoreInstance}
+                        onBlur={validateField(form, attriConfig, 'identifier', attribute2Compass['identifier'], setErrors)}
                     />
-
-
-
-
-
 
 
                     <GeneralField
@@ -253,8 +210,9 @@ export default function AddEditDataset() {
                         error={!!errors.description}
                         helperText={errors.description}
                         minRows={4}
-                        required
                         multiline
+                        required={attriConfig[attribute2Compass['description']]?.ignoreInstance}
+                        onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
                     />
 
                     <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}

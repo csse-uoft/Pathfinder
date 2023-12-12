@@ -121,6 +121,16 @@ export default function AddEditCode() {
     }
   };
 
+  const attribute2Compass = {
+    definedBy: 'cids:definedBy',
+    specification: 'cids:hasSpecification',
+    identifier: 'tove_org:hasIdentifier',
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    codeValue: 'schema:codeValue',
+    iso72Value: 'iso21972:value'
+  }
+
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
@@ -162,15 +172,7 @@ export default function AddEditCode() {
   const validate = () => {
     const errors = {};
 
-    validateForm(form, attriConfig, {
-      definedBy: 'cids:definedBy',
-      specification: 'cids:hasSpecification',
-      identifier: 'tove_org:hasIdentifier',
-      name: 'cids:hasName',
-      description: 'cids:hasDescription',
-      codeValue: 'schema:codeValue',
-      iso72Value: 'iso21972:value'
-    }, errors, ['identifier', 'uri'])
+    validateForm(form, attriConfig, attribute2Compass, errors, ['identifier', 'uri'])
 
     setErrors(errors);
 
@@ -213,12 +215,12 @@ export default function AddEditCode() {
             key={'name'}
             label={'Name'}
             value={form.name}
-            required
+            required={attriConfig[attribute2Compass['name']]?.ignoreInstance}
             sx={{mt: '16px', minWidth: 350}}
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
             helperText={errors.name}
-            onBlur={validateField(form, attriConfig, 'name', 'cids:hasName', setErrors)}
+            onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
           />
 
           <GeneralField
@@ -238,10 +240,11 @@ export default function AddEditCode() {
             value={form.definedBy}
             options={options.definedBy}
             error={!!errors.definedBy}
+            required={attriConfig[attribute2Compass['definedBy']]?.ignoreInstance}
             helperText={
               errors.definedBy
             }
-            onBlur={validateField(form, attriConfig,'definedBy','cids:definedBy', setErrors)}
+            onBlur={validateField(form, attriConfig,'definedBy',attribute2Compass['definedBy'], setErrors)}
             onChange={e => {
               setForm(form => ({
                   ...form, definedBy: e.target.value
@@ -259,7 +262,8 @@ export default function AddEditCode() {
             onChange={e => form.identifier = e.target.value}
             error={!!errors.identifier}
             helperText={errors.identifier}
-            onBlur={validateFieldAndURI(form, attriConfig,'identifier','tove_org:hasIdentifier', setErrors)}
+            required={attriConfig[attribute2Compass['identifier']]?.ignoreInstance}
+            onBlur={validateFieldAndURI(form, attriConfig,'identifier',attribute2Compass['identifier'], setErrors)}
           />
 
           <GeneralField
@@ -270,7 +274,8 @@ export default function AddEditCode() {
             onChange={e => form.specification = e.target.value}
             error={!!errors.specification}
             helperText={errors.specification}
-            onBlur={validateField(form, attriConfig,'specification','cids:hasSpecification', setErrors)}
+            required={attriConfig[attribute2Compass['specification']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig,'specification',attribute2Compass['specification'], setErrors)}
           />
 
           <GeneralField
@@ -282,7 +287,8 @@ export default function AddEditCode() {
             onChange={e => form.codeValue = e.target.value}
             error={!!errors.codeValue}
             helperText={errors.codeValue}
-            onBlur={validateField(form, attriConfig,'codeValue','schema:codeValue', setErrors)}
+            required={attriConfig[attribute2Compass['codeValue']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig,'codeValue',attribute2Compass['codeValue'], setErrors)}
           />
 
           <GeneralField
@@ -294,7 +300,8 @@ export default function AddEditCode() {
             onChange={e => form.iso72Value = e.target.value}
             error={!!errors.iso72Value}
             helperText={errors.iso72Value}
-            onBlur={validateField(form, attriConfig,'iso72Value','iso21972:value', setErrors)}
+            required={attriConfig[attribute2Compass['iso72Value']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig,'iso72Value',attribute2Compass['iso72Value'], setErrors)}
           />
 
           <GeneralField
@@ -306,8 +313,9 @@ export default function AddEditCode() {
             error={!!errors.description}
             helperText={errors.description}
             minRows={4}
+            required={attriConfig[attribute2Compass['description']]?.ignoreInstance}
             multiline
-            onBlur={validateField(form, attriConfig,'description','cids:hasDescription', setErrors)}
+            onBlur={validateField(form, attriConfig,'description',attribute2Compass['description'], setErrors)}
           />
 
           <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}

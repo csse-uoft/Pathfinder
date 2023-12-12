@@ -57,7 +57,8 @@ const fullLevelConfig = {
   unexpectedImpactRisk: {},
   impactDuration: {},
   dataset: {},
-  stakeholder: {}
+  stakeholder: {},
+  group: {}
 }
 
 module.exports = {

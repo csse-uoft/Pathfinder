@@ -54,7 +54,6 @@ function LoadingAutoComplete({
 
 export default function CounterFactualField({
                                               defaultValue,
-                                              required,
                                               onChange,
                                               label,
                                               disabled,
@@ -125,7 +124,7 @@ export default function CounterFactualField({
                 value={state.locatedIns}
                 error={!!errors.locatedIns}
                 helperText={errors.locatedIns}
-                required={required}
+                required={attriConfig[attribute2Compass['locatedIns']]?.ignoreInstance}
                 onBlur={validateField(state, attriConfig, 'locatedIns', attribute2Compass['locatedIns'], setErrors)}
               />
             </Grid>
@@ -138,7 +137,7 @@ export default function CounterFactualField({
                 label={'Start Time'}
                 minWidth={187}
                 onChange={handleChange('startTime')}
-                required={required}
+                required={attriConfig[attribute2Compass['startTime']]?.ignoreInstance}
                 disabled={disabled}
                 error={!!errors.startTime}
                 helperText={errors.startTime}
@@ -154,7 +153,7 @@ export default function CounterFactualField({
                 label={'End Time'}
                 minWidth={187}
                 onChange={handleChange('endTime')}
-                required={required}
+                required={attriConfig[attribute2Compass['startTime']]?.ignoreInstance}
                 disabled={disabled}
                 error={!!errors.endTime}
                 helperText={errors.endTime}
@@ -170,7 +169,7 @@ export default function CounterFactualField({
                 type="text"
                 value={state.value}
                 disabled={disabled}
-                required={required}
+                required={attriConfig[attribute2Compass['value']]?.ignoreInstance}
                 onChange={handleChange('value')}
                 onBlur={validateField(state, attriConfig, 'value', attribute2Compass['value'], setErrors)}
               />
@@ -184,7 +183,7 @@ export default function CounterFactualField({
                 type="text"
                 defaultValue={state.description}
                 onChange={handleChange('description')}
-                required={required}
+                required={attriConfig[attribute2Compass['description']]?.ignoreInstance}
                 disabled={disabled}
                 error={!!errors.description}
                 helperText={errors.description}

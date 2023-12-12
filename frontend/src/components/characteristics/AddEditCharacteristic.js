@@ -216,12 +216,12 @@ export default function AddEditCharacteristic() {
             key={'name'}
             label={'Name'}
             value={form.name}
-            required
             sx={{mt: '16px', minWidth: 350}}
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
             helperText={errors.name}
-            onBlur={validateField(form, attriConfig, 'name', 'cids:hasName', setErrors)}
+            required={attriConfig[attribute2Compass['name']]?.ignoreInstance}
+            onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
           />
 
           <GeneralField
@@ -245,6 +245,7 @@ export default function AddEditCharacteristic() {
             options={options.stakeholders}
             error={!!errors.stakeholders}
             helperText={errors.stakeholders}
+            required={attriConfig[attribute2Compass['stakeholders']]?.ignoreInstance}
             onBlur={validateField(form, attriConfig, 'stakeholders', attriConfig['stakeholders'], setErrors)}
           />
 
@@ -258,6 +259,7 @@ export default function AddEditCharacteristic() {
             options={options.codes}
             error={!!errors.codes}
             helperText={errors.codes}
+            required={attriConfig[attribute2Compass['codes']]?.ignoreInstance}
             onBlur={validateField(form, attriConfig, 'codes', attriConfig['codes'], setErrors)}
           />
 
@@ -271,6 +273,7 @@ export default function AddEditCharacteristic() {
             onChange={e => form.value = e.target.value}
             error={!!errors.value}
             helperText={errors.value}
+            required={attriConfig[attribute2Compass['value']]?.ignoreInstance}
             onBlur={validateField(form, attriConfig, 'value', attriConfig['value'], setErrors)}
           />
 
