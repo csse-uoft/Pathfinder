@@ -18,8 +18,8 @@ const fetchStakeholderHandler = async (req, res, next) => {
 
 const fetchStakeholderInterfaceHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, `fetch${resource}Interface`))
-      return await fetchDataTypeInterfaces(resource, res);
+    if (await hasAccess(req, `fetch${resource}s`))
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
