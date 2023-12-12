@@ -10,7 +10,6 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";

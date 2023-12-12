@@ -11,10 +11,11 @@ import {useSnackbar} from "notistack";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {updateCharacteristic} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -34,6 +35,8 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditCharacteristic() {
+
+  const attriConfig = fullLevelConfig.characteristic
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -121,6 +124,13 @@ export default function AddEditCharacteristic() {
     }
   };
 
+  const attribute2Compass = {
+    stakeholders: 'cids:forStakeholder',
+    codes: 'cids:hasCode',
+    name: 'cids:hasName',
+    value: 'iso21972:value'
+  }
+
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
@@ -160,22 +170,13 @@ export default function AddEditCharacteristic() {
   };
 
   const validate = () => {
-    const error = {};
-    Object.keys(form).map(key => {
-      if (key !== 'uri' && !form[key]) {
-        error[key] = 'This field cannot be empty';
-      }
-    });
-    if (form.uri && !isValidURL(form.uri)) {
-      error.uri = 'The field should be a valid URI';
-    }
-    if (form.identifier && !isValidURL(form.identifier)){
-      error.identifier = 'The field should be a valid URI'
-    }
+    const errors = {};
 
-    setErrors(error);
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
 
-    return Object.keys(error).length === 0;
+    setErrors(errors);
+
+    return Object.keys(errors).length === 0;
     // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
 
@@ -221,6 +222,7 @@ export default function AddEditCharacteristic() {
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
             helperText={errors.name}
+            onBlur={validateField(form, attriConfig, 'name', 'cids:hasName', setErrors)}
           />
 
           <GeneralField
@@ -231,13 +233,7 @@ export default function AddEditCharacteristic() {
             onChange={e => form.uri = e.target.value}
             error={!!errors.uri}
             helperText={errors.uri}
-            onBlur={() => {
-              if (form.uri && !isValidURL(form.uri)) {
-                setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-              } else {
-                setErrors(errors => ({...errors, uri: ''}));
-              }
-            }}
+            onBlur={validateURI(form, setErrors)}
           />
 
           <Dropdown
@@ -250,7 +246,7 @@ export default function AddEditCharacteristic() {
             options={options.stakeholders}
             error={!!errors.stakeholders}
             helperText={errors.stakeholders}
-            // sx={{mb: 2}}
+            onBlur={validateField(form, attriConfig, 'stakeholders', attriConfig['stakeholders'], setErrors)}
           />
 
           <Dropdown
@@ -263,7 +259,7 @@ export default function AddEditCharacteristic() {
             options={options.codes}
             error={!!errors.codes}
             helperText={errors.codes}
-            // sx={{mb: 2}}
+            onBlur={validateField(form, attriConfig, 'codes', attriConfig['codes'], setErrors)}
           />
 
 
@@ -276,13 +272,7 @@ export default function AddEditCharacteristic() {
             onChange={e => form.value = e.target.value}
             error={!!errors.value}
             helperText={errors.value}
-            onBlur={() => {
-              if (form.value === '') {
-                setErrors(errors => ({...errors, value: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, value: ''}));
-              }
-            }}
+            onBlur={validateField(form, attriConfig, 'value', attriConfig['value'], setErrors)}
           />
 
 
