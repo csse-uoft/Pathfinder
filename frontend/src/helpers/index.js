@@ -103,7 +103,7 @@ export function verifyOtherAddressesFields(location, result) {
 export function validateField(form, attriConfig ,attributeName, compassAttributeName, setErrors) {
 
   return () => {
-    if ((Array.isArray(form[attributeName])? form[attributeName].length : !form[attributeName]) && attriConfig[compassAttributeName]) {
+    if ((Array.isArray(form[attributeName])? !form[attributeName].length : !form[attributeName]) && attriConfig[compassAttributeName]) {
       if (attriConfig[compassAttributeName].ignoreInstance) {
         setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'}));
       } else if (attriConfig[compassAttributeName].flag) {
@@ -129,7 +129,7 @@ export function validateURI(form, setErrors) {
 
 export function validateForm(form, attriConfig, attributes, errors, URIs) {
   for (let attribute in attributes) {
-    if (attriConfig[attributes[attribute]] && !form[attribute]) {
+    if (attriConfig[attributes[attribute]] && (Array.isArray(form[attribute])? !form[attribute].length : !form[attribute])) {
       errors[attribute] = 'This field cannot be empty';
     }
   }

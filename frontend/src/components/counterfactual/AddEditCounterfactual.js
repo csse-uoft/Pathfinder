@@ -11,6 +11,8 @@ import CounterFactualField from "../shared/CounterFactualField";
 import {updateOutcome} from "../../api/outcomeApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateForm} from "../../helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -25,6 +27,8 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditCounterfactual() {
+  const attriConfig = fullLevelConfig.counterfactual
+
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -33,6 +37,14 @@ export default function AddEditCounterfactual() {
   const mode = uri? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
+
+  const attribute2Compass = {
+    startTime: 'cids:hasTime',
+    endTime: 'cids:hasTime',
+    description: 'schema:description',
+    locatedIns: 'iso21972:located_in',
+    value:'iso21972:value',
+  }
 
   const [state, setState] = useState({
     submitDialog: false,
@@ -126,9 +138,10 @@ export default function AddEditCounterfactual() {
   };
 
   const validate = () => {
-    const error = {};
-
-    return Object.keys(error).length === 0;
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, [])
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   if (loading)
@@ -171,6 +184,7 @@ export default function AddEditCounterfactual() {
             setForm(form => ({...form, ...state}));
           }}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
 
         {mode==='view'?

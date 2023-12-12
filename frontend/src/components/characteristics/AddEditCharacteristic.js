@@ -177,7 +177,6 @@ export default function AddEditCharacteristic() {
     setErrors(errors);
 
     return Object.keys(errors).length === 0;
-    // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
 
   if (loading)
