@@ -11,7 +11,7 @@ import {fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
-import {createDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -94,9 +94,8 @@ export default function AddEditStakeholderOutcome() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchDataTypes('stakeholderOutcome', encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
+      fetchDataType('stakeholderOutcome', encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
         if (success) {
-          console.log(stakeholderOutcome);
           stakeholderOutcome.uri = stakeholderOutcome._uri;
           setForm(stakeholderOutcome);
           setLoading(false);

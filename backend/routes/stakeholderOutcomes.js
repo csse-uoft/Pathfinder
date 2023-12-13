@@ -4,8 +4,8 @@ const {fetchStakeholderOutcomeInterfacesHandler} = require("../services/stakehol
 
 const router = express.Router();
 
-router.get('/interface', fetchStakeholderOutcomeInterfacesHandler)
 router.get('/interface/:organizationUri', fetchStakeholderOutcomeInterfacesHandler)
+router.get('/interface', fetchStakeholderOutcomeInterfacesHandler)
 router.get('/', fetchStakeholderOutcomesHandler);
 
 

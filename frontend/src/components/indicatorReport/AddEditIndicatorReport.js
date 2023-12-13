@@ -6,7 +6,6 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
-import {UserContext} from "../../context";
 import IndicatorReportField from "../shared/IndicatorReportField";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -36,9 +35,9 @@ export default function AddEditIndicatorReport() {
   const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
   useEffect(() => {
-    fetchDataTypeInterfaces('dataset').then(({success, datasetInterfaces}) => {
+    fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
       if (success){
-        setDatasetInterfaces(datasetInterfaces)
+        setDatasetInterfaces(interfaces)
       }
     }).catch(e => {
       if (e.json)

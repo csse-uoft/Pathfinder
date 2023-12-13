@@ -76,8 +76,6 @@ export default function AddEditStakeholder() {
     })
   }, [])
 
-  console.log(form.characteristics)
-
 
   useEffect(() => {
     Promise.all([
