@@ -12,7 +12,7 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 
 
 const config = require('../config');
-const {initUserAccounts, addSuperPassword} = require('../services/userAccount/user');
+const {initUserAccounts, addSuperPassword, addSampleOrganizations} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
@@ -114,6 +114,7 @@ initUserAccounts();
 addSuperPassword();
 initStreetTypes();
 initStreetDirections();
+addSampleOrganizations();
 
 app.use(errorHandler);
 

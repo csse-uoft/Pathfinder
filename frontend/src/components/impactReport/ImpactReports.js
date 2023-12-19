@@ -83,8 +83,8 @@ export default function ImpactReports() {
     {
       label: 'For Stakeholder Outcome',
       body: ({forStakeholderOutcome}) => {
-        return <Link colorWithHover to={`/stakeholderOutcome/${encodeURIComponent(forStakeholderOutcome._uri)}/view`}>
-          {forStakeholderOutcome.name}
+        return <Link colorWithHover to={`/stakeholderOutcome/${encodeURIComponent(forStakeholderOutcome?._uri)}/view`}>
+          {forStakeholderOutcome?.name}
         </Link>
       }
     },

@@ -81,6 +81,16 @@ export default function AddEditOrganization() {
     issuedBy: {}
   });
 
+  const [impactModels, setImpactModels] = useState([])
+
+
+  useEffect(() => {
+    if (mode === 'view') {
+      fetchDataTypes('impactModel', encodeURIComponent(uri)).then(({impactModels, success}) => {
+        setImpactModels(impactModels)
+      })
+    }
+  }, [])
 
   useEffect(() => {
 
@@ -292,6 +302,16 @@ export default function AddEditOrganization() {
               <Typography variant={'body1'}>
                 <Link to={`/indicator/${encodeURIComponent(researcherURI)}/view`} colorWithHover
                       color={'#2f5ac7'}>{form.researcherNames[researcherURI]}</Link>
+              </Typography>
+            );
+          })}
+          {impactModels?.length? <Typography variant={'h6'}> {`ImpactModels:`} </Typography>:null}
+          {impactModels?.map(impactModel => {
+            console.log(impactModel)
+            return (
+              <Typography variant={'body1'}>
+                <Link to={`/impactModel/${encodeURIComponent(impactModel._uri)}/view`} colorWithHover
+                      color={'#2f5ac7'}>{impactModel.name || impactModel._uri}</Link>
               </Typography>
             );
           })}

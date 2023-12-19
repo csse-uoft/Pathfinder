@@ -1,9 +1,6 @@
 const {fullLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
-const {GDBCodeModel} = require("../../models/code");
-const {GDBMeasureModel} = require("../../models/measure");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
-const {getObjectValue} = require("../../helpers");
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, assignValues} = require("../helpers");
 const {GDBOrganizationModel} = require("../../models/organization");

@@ -225,7 +225,7 @@ export default function AddEditIndicator() {
           <Typography variant={'h6'}> {`Indicator Reports:`} </Typography>
           {form.indicatorReports?.length?
             form.indicatorReports.map(indicatorReport => <Typography variant={'body1'}> {<Link to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`} colorWithHover
-                                                                                               color={'#2f5ac7'}>{[indicatorReport]}</Link>} </Typography>)
+                                                                                               color={'#2f5ac7'}>{indicatorReportInterfaces[indicatorReport]}</Link>} </Typography>)
 
             : <Typography variant={'body1'}> {`Not Given`} </Typography>}
           <Typography variant={'h6'}> {`Codes:`} </Typography>

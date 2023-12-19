@@ -1,16 +1,14 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
 import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
-import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
 import {fetchHowMuchImpacts} from "../../api/howMuchImpactApi";
 import {fetchImpactRisks} from "../../api/impactRiskApi";
 import Dropdown from "./fields/MultiSelectField";
+import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -106,14 +104,9 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
 
   useEffect(() => {
-    fetchOrganizationsInterfaces().then(({success, organizations}) => {
+    fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
       if (success) {
-        const options = {};
-        organizations.map(organization => {
-          // only organization which the user serves as an editor should be able to add
-          options[organization._uri] = organization.legalName;
-        });
-        setOptions(op => ({...op, organization: options}));
+        setOptions(op => ({...op, organization: interfaces}));
         setLoading(false);
       }
     }).catch(e => {
@@ -130,9 +123,9 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
   useEffect(() => {
     if (state.organization) {
-      fetchStakeholderOutcomeInterface(encodeURIComponent(state.organization)).then(({stakeholderOutcomeInterfaces}) => {
-        console.log(stakeholderOutcomeInterfaces)
-        setOptions(ops => ({...ops, stakeholderOutcomes: stakeholderOutcomeInterfaces}))
+      fetchDataTypeInterfaces('stakeholderOutcome', encodeURIComponent(state.organization)).then(({interfaces}) => {
+        console.log(interfaces)
+        setOptions(ops => ({...ops, stakeholderOutcomes: interfaces}))
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
@@ -147,8 +140,8 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
   useEffect(() => {
     if (state.organization) {
-      fetchIndicatorInterfaces(encodeURIComponent(state.organization)).then(({indicatorInterfaces}) => {
-        setOptions(ops => ({...ops, indicators: indicatorInterfaces}))
+      fetchDataTypeInterfaces('indicator', encodeURIComponent(state.organization)).then(({interfaces}) => {
+        setOptions(ops => ({...ops, indicators: interfaces}))
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
@@ -225,14 +218,6 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 required={required}
                 error={!!errors.uri}
                 helperText={errors.uri}
-                onBlur={() => {
-                  if (!state.uri) {
-                    setErrors(errors => ({...errors, uri: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, uri: null}));
-                  }
-                }
-                }
               />
             </Grid>
 
@@ -247,14 +232,14 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 helperText={errors.organization}
                 required={required}
                 disabled={disabled || disabledOrganization}
-                onBlur={() => {
-                  if (!state.organization) {
-                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, organization: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.organization) {
+                //     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, organization: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
             <Grid item xs={4}>
@@ -269,12 +254,12 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.forStakeholderOutcome}
                 helperText={errors.forStakeholderOutcome}
                 required={required}
-                onBlur={() => {
-                  if (state.forStakeholderOutcome) {
-                    setErrors(errors => ({...errors, forStakeholderOutcome: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (state.forStakeholderOutcome) {
+                //     setErrors(errors => ({...errors, forStakeholderOutcome: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
@@ -289,12 +274,12 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.impactScale}
                 helperText={errors.impactScale}
                 required={required}
-                onBlur={() => {
-                  if (state.impactScale) {
-                    setErrors(errors => ({...errors, impactScale: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (state.impactScale) {
+                //     setErrors(errors => ({...errors, impactScale: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
@@ -309,12 +294,12 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.impactDepth}
                 helperText={errors.impactDepth}
                 required={required}
-                onBlur={() => {
-                  if (state.impactDepth) {
-                    setErrors(errors => ({...errors, impactDepth: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (state.impactDepth) {
+                //     setErrors(errors => ({...errors, impactDepth: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
@@ -328,12 +313,12 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 required={required}
                 error={!!errors.impactDuration}
                 helperText={errors.impactDuration}
-                onBlur={() => {
-                  if (state.impactDuration) {
-                    setErrors(errors => ({...errors, impactDuration: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (state.impactDuration) {
+                //     setErrors(errors => ({...errors, impactDuration: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
@@ -446,14 +431,14 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 helperText={errors.comment}
                 multiline
                 minRows={5}
-                onBlur={() => {
-                  if (!state.comment) {
-                    setErrors(errors => ({...errors, comment: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, comment: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.comment) {
+                //     setErrors(errors => ({...errors, comment: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, comment: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 

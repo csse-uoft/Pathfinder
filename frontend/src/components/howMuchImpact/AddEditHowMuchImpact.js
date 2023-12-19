@@ -168,7 +168,7 @@ export default function AddEditHowMuchImpact() {
     <Container maxWidth="md">
       {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
-          <Typography variant={'h4'}> Impact Model </Typography>
+          <Typography variant={'h4'}> How Much Impact </Typography>
           <Typography variant={'h6'}> {`Description:`} </Typography>
           <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>

@@ -36,32 +36,6 @@ export default function ImpactModels() {
     });
   }, [trigger]);
 
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
 
   const columns = [
     {
@@ -73,17 +47,10 @@ export default function ImpactModels() {
       },
       sortBy: ({name}) => name
     },
-    // {
-    //   label: 'value',
-    //   body: ({value}) => {
-    //     return value.numericalValue;
-    //   }
-    // },
     {
       label: 'Date Created',
       body: ({dateCreated}) => {
-        return
-          dateCreated
+        return dateCreated? `${(new Date(dateCreated)).toLocaleDateString()}` : 'Not Given'
 
       }
     },

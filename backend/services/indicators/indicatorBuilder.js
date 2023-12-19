@@ -71,13 +71,11 @@ async function indicatorBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
-    if (environment === 'interface') {
-      form.dateCreated = new Date(form.dateCreated);
-    }
     ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
-    if (environment === 'fileUploading') {
+
+    if (mainObject.dateCreated) {
       mainObject.dateCreated = new Date(mainObject.dateCreated)
     }
 

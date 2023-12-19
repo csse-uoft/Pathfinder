@@ -204,7 +204,7 @@ export default function AddEditCode() {
           {form.iso72Value ? <Typography variant={'h6'}> {`iso72 Value:`} </Typography> : null}
           <Typography variant={'body1'}> {form.iso72Value} </Typography>
           <Typography variant={'h6'}> {`Description:`} </Typography>
-          <Typography variant={'body1'}> {`${form.description}`} </Typography>
+          <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
 
 
         </Paper>

@@ -234,7 +234,7 @@ export default function AddEditOutcome() {
               );
             }) : <Typography variant={'body1'}> {`Not Given`} </Typography>}
             <Typography variant={'h6'}> {`Description:`} </Typography>
-            <Typography variant={'body1'}> {`${form.description}`} </Typography>
+            <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
 
             <Button variant="contained" color="primary" className={classes.button} onClick={() => {
               navigate(`/outcome/${encodeURIComponent(uri)}/edit`);

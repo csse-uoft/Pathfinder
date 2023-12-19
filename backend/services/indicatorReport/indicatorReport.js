@@ -49,7 +49,7 @@ const createIndicatorReportHandler = async (req, res, next) => {
       form.value = form.numericalValue
       form.forIndicator = form.indicator
       await Transaction.beginTransaction();
-      if (await indicatorReportBuilder('interface', null, null, null, null, {}, {}, form))
+      if (await indicatorReportBuilder('interface', null, null, null, {}, {}, form))
         await Transaction.commit();
         return res.status(200).json({success: true})
         }

@@ -158,9 +158,9 @@ export default function AddEditCounterfactual() {
             <Typography variant={'h6'}> {`Time Interval:`} </Typography>
             <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
             <Typography variant={'h6'}> {`Description:`} </Typography>
-            <Typography variant={'body1'}> {`${form.description}`} </Typography>
+            <Typography variant={'body1'}> {form.description || 'Not Given'} </Typography>
             <Typography variant={'h6'}> {`Value:`} </Typography>
-            <Typography variant={'body1'}> {`${form.value}`} </Typography>
+            <Typography variant={'body1'}> {form.value || 'Not Given'} </Typography>
 
 
             <Button variant="contained" color="primary" className={classes.button} onClick={()=>{

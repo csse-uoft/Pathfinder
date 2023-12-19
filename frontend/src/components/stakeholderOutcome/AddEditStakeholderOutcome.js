@@ -7,7 +7,7 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
+import {updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
@@ -169,14 +169,6 @@ export default function AddEditStakeholderOutcome() {
     const error = {};
     if (!form.name)
       error.name = 'The field cannot be empty';
-    // if (!form.indicators.length)
-    //   error.indicators = 'The field cannot be empty';
-    // if (!form.themes.length)
-    //   error.themes = 'The field cannot be empty';
-    // if (!form.description)
-    //   error.description = 'The field cannot be empty'
-    // if (!form.organization)
-    //   error.organization = 'The field cannot be empty';
     if (form.uri && !isValidURL(form.uri))
       error.uri = 'Not a valid URI';
     setErrors(error);
@@ -191,7 +183,7 @@ export default function AddEditStakeholderOutcome() {
       {mode === 'view' ?
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
-
+            <Typography variant={'h4'}> Stakeholder Outcome </Typography>
             <Typography variant={'h6'}> {`Name:`} </Typography>
             <Typography variant={'body1'}> {`${form.name}`} </Typography>
             <Typography variant={'h6'}> {`URI:`} </Typography>

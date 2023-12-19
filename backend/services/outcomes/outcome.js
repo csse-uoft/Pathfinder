@@ -2,13 +2,10 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
-const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {outcomeBuilder} = require("./outcomeBuilder");
-const {getRepository} = require("../../loaders/graphDB");
-const {transSave} = require("../helpers");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 

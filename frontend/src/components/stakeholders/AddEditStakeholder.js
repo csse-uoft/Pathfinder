@@ -241,8 +241,8 @@ export default function AddEditStakeholder() {
           <Typography variant={'body1'}> {`${form.legalName || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`Description:`} </Typography>
-          <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
+          {/*<Typography variant={'h6'}> {`Description:`} </Typography>*/}
+          {/*<Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>*/}
           <Typography variant={'h6'}> {`Catchment Area:`} </Typography>
           <Typography variant={'body1'}> {`${form.catchmentArea || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>

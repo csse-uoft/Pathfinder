@@ -13,6 +13,7 @@ const {GDBHowMuchImpactModel} = require("../models/howMuchImpact");
 const {GDBImpactModelModel} = require("../models/impactStuffs");
 const {GDBImpactReportModel} = require("../models/impactReport");
 const {GDBStakeholderModel} = require("../models/stakeholder");
+const {GDBThemeModel} = require("../models/theme");
 
 const name2Model = {
   ImpactModel: GDBImpactModelModel,
@@ -30,7 +31,8 @@ const name2Model = {
   HowMuchImpact: GDBHowMuchImpactModel,
   ImpactReport: GDBImpactReportModel,
   StakeholderOutcome: GDBStakeholderOutcomeModel,
-  Stakeholder: GDBStakeholderModel
+  Stakeholder: GDBStakeholderModel,
+  Theme: GDBThemeModel
 }
 
 module.exports = {name2Model}

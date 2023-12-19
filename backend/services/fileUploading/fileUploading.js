@@ -582,7 +582,7 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBMeasureModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
 
         if (!object[getFullPropertyURI(GDBMeasureModel, 'numericalValue')]) {
           addTrace('        Error: Mandatory property missing');
@@ -592,7 +592,7 @@ const fileUploading = async (req, res, next) => {
               uri,
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(GDBMeasureModel, 'numericalValue'))
-            });
+            }, {});
           error += 1;
           hasError = true;
         }
@@ -606,7 +606,7 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBDateTimeIntervalModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
 
         // if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')] ||
         //   !object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')]) {
@@ -624,7 +624,7 @@ const fileUploading = async (req, res, next) => {
               uri,
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning'))
-            });
+            }, {});
           error += 1;
           hasError = true;
         }
@@ -637,7 +637,7 @@ const fileUploading = async (req, res, next) => {
               uri,
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd'))
-            });
+            }, {});
           error += 1;
           hasError = true;
         }

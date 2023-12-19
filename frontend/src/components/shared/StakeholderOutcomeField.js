@@ -106,7 +106,6 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
   }, [importErrors]);
 
   const handleChange = name => (e, value) => {
-    console.log(name)
     if(name !== 'indicator'){
       setState(state => {
         state[name] = value ?? e.target.value;

@@ -11,7 +11,6 @@ const resource = 'StakeholderOutcome'
 
 const createStakeholderOutcomeHandler = async (req, res, next) => {
   try {
-    await Transaction.beginTransaction();
     const {form} = req.body;
     if (await hasAccess(req, 'create' + resource)) {
       await Transaction.beginTransaction();

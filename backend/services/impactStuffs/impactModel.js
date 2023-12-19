@@ -6,9 +6,7 @@ const {Server400Error} = require("../../utils");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBImpactModelModel, GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Transaction} = require("graphdb-utils");
-const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {impactNormsBuilder} = require("./impactNormsBuilder");
-const {GDBImpactReportModel} = require("../../models/impactReport");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 const resource = 'ImpactModel'

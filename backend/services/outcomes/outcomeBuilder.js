@@ -84,7 +84,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     hasError = ret.hasError;
     error = ret.error;
 
-    if (environment === 'fileUploading' && mainObject.dateCreated)
+    if (mainObject.dateCreated)
       mainObject.dateCreated = new Date(mainObject.dateCreated)
 
     ret = assignValues(environment, config, object, mainModel, mainObject, 'locatedIns', 'iso21972:located_in', addMessage, form, uri, hasError, error, getListOfValue)

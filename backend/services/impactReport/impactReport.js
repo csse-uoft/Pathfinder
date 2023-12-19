@@ -4,7 +4,6 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("./impactReportBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {fetchDatasetInterfacesHandler} = require("../dataset/datasets");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 
