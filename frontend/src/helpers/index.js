@@ -117,6 +117,10 @@ export function validateField(form, attriConfig ,attributeName, compassAttribute
   }
 }
 
+export function isFieldRequired(attriConfig, attribute2Compass, key) {
+  return attriConfig[attribute2Compass[key]]?.ignoreInstance
+}
+
 export function validateURI(form, setErrors) {
   return () => {
     if (form.uri && !isValidURL(form.uri)) {

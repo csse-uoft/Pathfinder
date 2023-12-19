@@ -5,7 +5,7 @@ import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
 import GeneralField from "./fields/GeneralField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
-import {validateField} from "../../helpers";
+import {isFieldRequired, validateField} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 
@@ -124,7 +124,7 @@ export default function CounterFactualField({
                 value={state.locatedIns}
                 error={!!errors.locatedIns}
                 helperText={errors.locatedIns}
-                required={attriConfig[attribute2Compass['locatedIns']]?.ignoreInstance}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'locatedIns')}
                 onBlur={validateField(state, attriConfig, 'locatedIns', attribute2Compass['locatedIns'], setErrors)}
               />
             </Grid>
@@ -137,7 +137,7 @@ export default function CounterFactualField({
                 label={'Start Time'}
                 minWidth={187}
                 onChange={handleChange('startTime')}
-                required={attriConfig[attribute2Compass['startTime']]?.ignoreInstance}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'startTime')}
                 disabled={disabled}
                 error={!!errors.startTime}
                 helperText={errors.startTime}
@@ -153,7 +153,7 @@ export default function CounterFactualField({
                 label={'End Time'}
                 minWidth={187}
                 onChange={handleChange('endTime')}
-                required={attriConfig[attribute2Compass['startTime']]?.ignoreInstance}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'endTime')}
                 disabled={disabled}
                 error={!!errors.endTime}
                 helperText={errors.endTime}
@@ -169,7 +169,7 @@ export default function CounterFactualField({
                 type="text"
                 value={state.value}
                 disabled={disabled}
-                required={attriConfig[attribute2Compass['value']]?.ignoreInstance}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'value')}
                 onChange={handleChange('value')}
                 onBlur={validateField(state, attriConfig, 'value', attribute2Compass['value'], setErrors)}
               />
@@ -183,7 +183,7 @@ export default function CounterFactualField({
                 type="text"
                 defaultValue={state.description}
                 onChange={handleChange('description')}
-                required={attriConfig[attribute2Compass['description']]?.ignoreInstance}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
                 disabled={disabled}
                 error={!!errors.description}
                 helperText={errors.description}

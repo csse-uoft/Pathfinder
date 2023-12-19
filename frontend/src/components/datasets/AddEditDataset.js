@@ -15,7 +15,7 @@ import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
-import {validateField, validateForm, validateURI} from "../../helpers";
+import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
     root: {
         width: '80%'
@@ -159,7 +159,7 @@ export default function AddEditDataset() {
                         onChange={e => form.name = e.target.value}
                         error={!!errors.name}
                         helperText={errors.name}
-                        required={attriConfig[attribute2Compass['name']]?.ignoreInstance}
+                        required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
                         onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
                     />
 
@@ -183,7 +183,7 @@ export default function AddEditDataset() {
                         sx={{mt: '16px', minWidth: 350}}
                         error={!!errors.dateCreated}
                         helperText={errors.dateCreated}
-                        required={attriConfig[attribute2Compass['dateCreated']]?.ignoreInstance}
+                        required={isFieldRequired(attriConfig, attribute2Compass, 'dateCreated')}
                         onBlur={validateField(form, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
                     />
 
@@ -196,7 +196,7 @@ export default function AddEditDataset() {
                         onChange={e => form.identifier = e.target.value}
                         error={!!errors.identifier}
                         helperText={errors.identifier}
-                        required={attriConfig[attribute2Compass['identifier']]?.ignoreInstance}
+                        required={isFieldRequired(attriConfig, attribute2Compass, 'identifier')}
                         onBlur={validateField(form, attriConfig, 'identifier', attribute2Compass['identifier'], setErrors)}
                     />
 
@@ -211,7 +211,7 @@ export default function AddEditDataset() {
                         helperText={errors.description}
                         minRows={4}
                         multiline
-                        required={attriConfig[attribute2Compass['description']]?.ignoreInstance}
+                        required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
                         onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
                     />
 

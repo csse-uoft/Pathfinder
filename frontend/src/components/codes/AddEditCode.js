@@ -14,7 +14,7 @@ import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {  baseLevelConfig, fullLevelConfig } from "../../helpers/attributeConfig"
-import {validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
+import {isFieldRequired, validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -215,7 +215,7 @@ export default function AddEditCode() {
             key={'name'}
             label={'Name'}
             value={form.name}
-            required={attriConfig[attribute2Compass['name']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
             sx={{mt: '16px', minWidth: 350}}
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
@@ -240,7 +240,7 @@ export default function AddEditCode() {
             value={form.definedBy}
             options={options.definedBy}
             error={!!errors.definedBy}
-            required={attriConfig[attribute2Compass['definedBy']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'definedBy')}
             helperText={
               errors.definedBy
             }
@@ -262,7 +262,7 @@ export default function AddEditCode() {
             onChange={e => form.identifier = e.target.value}
             error={!!errors.identifier}
             helperText={errors.identifier}
-            required={attriConfig[attribute2Compass['identifier']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'identifier')}
             onBlur={validateFieldAndURI(form, attriConfig,'identifier',attribute2Compass['identifier'], setErrors)}
           />
 
@@ -274,7 +274,7 @@ export default function AddEditCode() {
             onChange={e => form.specification = e.target.value}
             error={!!errors.specification}
             helperText={errors.specification}
-            required={attriConfig[attribute2Compass['specification']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'specification')}
             onBlur={validateField(form, attriConfig,'specification',attribute2Compass['specification'], setErrors)}
           />
 
@@ -287,7 +287,7 @@ export default function AddEditCode() {
             onChange={e => form.codeValue = e.target.value}
             error={!!errors.codeValue}
             helperText={errors.codeValue}
-            required={attriConfig[attribute2Compass['codeValue']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'codeValue')}
             onBlur={validateField(form, attriConfig,'codeValue',attribute2Compass['codeValue'], setErrors)}
           />
 
@@ -300,7 +300,7 @@ export default function AddEditCode() {
             onChange={e => form.iso72Value = e.target.value}
             error={!!errors.iso72Value}
             helperText={errors.iso72Value}
-            required={attriConfig[attribute2Compass['iso72Value']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'iso72Value')}
             onBlur={validateField(form, attriConfig,'iso72Value',attribute2Compass['iso72Value'], setErrors)}
           />
 
@@ -313,7 +313,7 @@ export default function AddEditCode() {
             error={!!errors.description}
             helperText={errors.description}
             minRows={4}
-            required={attriConfig[attribute2Compass['description']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
             multiline
             onBlur={validateField(form, attriConfig,'description',attribute2Compass['description'], setErrors)}
           />

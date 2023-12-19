@@ -15,7 +15,7 @@ import {updateCharacteristic} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
-import {validateField, validateForm, validateURI} from "../../helpers";
+import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -220,7 +220,7 @@ export default function AddEditCharacteristic() {
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
             helperText={errors.name}
-            required={attriConfig[attribute2Compass['name']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
             onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
           />
 
@@ -245,7 +245,7 @@ export default function AddEditCharacteristic() {
             options={options.stakeholders}
             error={!!errors.stakeholders}
             helperText={errors.stakeholders}
-            required={attriConfig[attribute2Compass['stakeholders']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'stakeholders')}
             onBlur={validateField(form, attriConfig, 'stakeholders', attriConfig['stakeholders'], setErrors)}
           />
 
@@ -259,7 +259,7 @@ export default function AddEditCharacteristic() {
             options={options.codes}
             error={!!errors.codes}
             helperText={errors.codes}
-            required={attriConfig[attribute2Compass['codes']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
             onBlur={validateField(form, attriConfig, 'codes', attriConfig['codes'], setErrors)}
           />
 
@@ -273,7 +273,7 @@ export default function AddEditCharacteristic() {
             onChange={e => form.value = e.target.value}
             error={!!errors.value}
             helperText={errors.value}
-            required={attriConfig[attribute2Compass['value']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'value')}
             onBlur={validateField(form, attriConfig, 'value', attriConfig['value'], setErrors)}
           />
 
