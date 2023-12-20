@@ -13,7 +13,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {updateCharacteristic} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces,} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
@@ -171,9 +171,7 @@ export default function AddEditCharacteristic() {
 
   const validate = () => {
     const errors = {};
-
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
-
     setErrors(errors);
 
     return Object.keys(errors).length === 0;

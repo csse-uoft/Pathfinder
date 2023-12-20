@@ -1,6 +1,5 @@
 const {fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
-const {GDBCounterfactualModel} = require("../../models/counterfactual");
 const {GDBDataSetModel} = require("../../models/dataset");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
