@@ -44,7 +44,7 @@ export default function FileUploadingPage() {
     loading: true,
     submitDialog: false,
     loadingButton: false,
-    fileType: 'JSON',
+    fileType: 'JSON-ld',
     // useParams().fileType,
     formType: useParams().formType,
     organization: useParams().orgUri,
@@ -57,7 +57,7 @@ export default function FileUploadingPage() {
   });
   const [fileName, setFileName] = useState('')
   const [options, setOptions] = useState({
-    fileTypes: ['JSON'],
+    fileTypes: ['JSON-ld'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
     organizations: {}
   });
