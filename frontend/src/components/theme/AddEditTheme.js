@@ -10,7 +10,6 @@ import {updateTheme} from "../../api/themeApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {isFieldRequired, validateField, validateURI, validateForm} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {navigateHelper} from "../../helpers/navigatorHelper";

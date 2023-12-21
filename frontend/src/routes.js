@@ -26,9 +26,8 @@ import AddEditOrganization from "./components/organizations/AddEditOrganization"
 import EditUserForm from "./components/users/EditUserForm";
 import Groups from "./components/groups/Groups";
 import AddEditGroup from "./components/groups/AddEditGroup";
-import Profile from "./components/userProfile/Profile";
 import Themes from "./components/theme/Themes";
-import AddEditTheme from "./components/theme/addEditTheme";
+import AddEditTheme from "./components/theme/AddEditTheme";
 import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
 import AddEditIndicator from "./components/indicators/AddEditIndicator";
