@@ -11,7 +11,7 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {isFieldRequired, validateField, validateURI} from "../../helpers";
+import {isFieldRequired, validateField, validateURI, validateForm} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType} from "../../api/generalAPI";
@@ -125,15 +125,10 @@ export default function AddEditTheme() {
   };
 
   const validate = () => {
-    const error = {};
-    if (!form.name) {
-      error.name = 'The field cannot be empty';
-    }
-    if (!form.description) {
-      error.description = 'The field cannot be empty';
-    }
-    setErrors(error);
-    return Object.keys(error).length === 0;
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const attribute2Compass = {
