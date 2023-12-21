@@ -15,6 +15,7 @@ import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -29,6 +30,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditHowMuchImpact() {
+  const attriConfig = fullLevelConfig.howMuchImpact
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();

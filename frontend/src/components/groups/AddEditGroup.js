@@ -12,11 +12,10 @@ import SelectField from "../shared/fields/SelectField";
 import {updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
-import {validateField, validateForm, validateURI} from "../../helpers";
+import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -66,7 +65,6 @@ export default function AddEditGroup() {
     administrator: ':hasAdministrator',
     organizations: ':hasOrganization',
     comment: 'rdfs:comment',
-    uri: '',
   }
 
   useEffect(() => {
@@ -180,9 +178,7 @@ export default function AddEditGroup() {
 
   const validate = () => {
     const errors = {};
-
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
-
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -232,7 +228,7 @@ export default function AddEditGroup() {
             onChange={e => form.label = e.target.value}
             error={!!errors.label}
             helperText={errors.label}
-            required={attriConfig[attribute2Compass['label']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'label')}
             onBlur={validateField(form, attriConfig, 'label', attribute2Compass['label'], setErrors)}
           />
           <GeneralField
@@ -260,7 +256,7 @@ export default function AddEditGroup() {
                 })
               );
             }}
-            required={attriConfig[attribute2Compass['administrator']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'administrator')}
             onBlur={validateField(form, attriConfig, 'administrator', attriConfig['administrator'], setErrors)}
           />
 
@@ -274,7 +270,7 @@ export default function AddEditGroup() {
             options={options.organizations}
             error={!!errors.organizations}
             helperText={errors.organizations}
-            required={attriConfig[attribute2Compass['organizations']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'organizations')}
             onBlur={validateField(form, attriConfig, 'organizations', attriConfig['organizations'], setErrors)}
           />
           <GeneralField
@@ -285,7 +281,7 @@ export default function AddEditGroup() {
             onChange={e => form.comment = e.target.value}
             error={!!errors.comment}
             helperText={errors.comment}
-            required={attriConfig[attribute2Compass['comment']]?.ignoreInstance}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'comment')}
             onBlur={validateField(form, attriConfig, 'comment', attriConfig['comment'], setErrors)}
           />
 
