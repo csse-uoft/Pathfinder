@@ -59,7 +59,7 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, uri, hasError, error);
+    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, uri, hasError, error, form);
     error = ret.error;
     hasError = ret.hasError;
 

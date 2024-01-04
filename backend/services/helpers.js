@@ -114,7 +114,7 @@ function assignMeasure(environment, config, object, mainModel, mainObject, prope
   if (measureObject)
     numericalValue = getValue(measureObject, GDBMeasureModel, 'numericalValue');
 
-  if (!measureURI && !numericalValue && config[internalKey] && !form[propertyName]) {
+  if (!measureURI && !numericalValue && config[internalKey]) {
     if (config[internalKey].rejectFile) {
       if (environment === 'interface') {
         throw new Server400Error(`${propertyName} is Mandatory`);
