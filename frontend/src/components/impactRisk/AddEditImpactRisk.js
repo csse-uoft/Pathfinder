@@ -29,7 +29,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactRisk() {
-  const attriConfig = fullLevelConfig.characteristic
+  const attriConfig = fullLevelConfig.impactRisk
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();

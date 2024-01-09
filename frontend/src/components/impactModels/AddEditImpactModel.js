@@ -30,7 +30,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactModel() {
-  const attriConfig = fullLevelConfig.characteristic
+  const attriConfig = fullLevelConfig.impactNorms
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();

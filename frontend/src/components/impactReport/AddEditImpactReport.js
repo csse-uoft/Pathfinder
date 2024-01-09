@@ -12,8 +12,9 @@ import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
-import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateForm} from "../../helpers";
+
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -25,9 +26,8 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-
 export default function AddEditImpactReport() {
-  const attriConfig = fullLevelConfig.characteristic
+  const attriConfig = fullLevelConfig.impactReport
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -40,6 +40,7 @@ export default function AddEditImpactReport() {
     submitDialog: false,
     loadingButton: false,
   });
+  
   const [errors, setErrors] = useState(
     {}
   );
@@ -251,6 +252,7 @@ export default function AddEditImpactReport() {
           }}
           uriDiasbled={mode !== 'new'}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
           
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>

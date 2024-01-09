@@ -9,7 +9,7 @@ import {fetchHowMuchImpacts} from "../../api/howMuchImpactApi";
 import {fetchImpactRisks} from "../../api/impactRiskApi";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
-import {isFieldRequired, validateField, validateForm, validateURI, validateFieldAndURI} from "../../helpers";
+import {isFieldRequired, validateField, validateURI, validateFieldAndURI} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 const filterOptions = createFilterOptions({
@@ -71,7 +71,7 @@ function LoadingAutoComplete({
 }
 
 export default function ImpactReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled}) {
-  const attriConfig = fullLevelConfig.characteristic
+  
   const [state, setState] = useState(
     defaultValue ||
     {});
@@ -81,6 +81,8 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
   });
 
   const {enqueueSnackbar} = useSnackbar();
+
+  const attriConfig = fullLevelConfig.impactReport
 
   const [loading, setLoading] = useState(true);
 
