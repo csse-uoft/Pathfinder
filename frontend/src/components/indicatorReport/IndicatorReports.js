@@ -76,7 +76,7 @@ export default function IndicatorReports() {
     {
       label: 'value',
       body: ({value}) => {
-        return value.numericalValue;
+        return value?.numericalValue;
       }
     },
     {

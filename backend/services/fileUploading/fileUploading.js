@@ -666,7 +666,7 @@ const fileUploading = async (req, res, next) => {
           addTrace('             Organization in the file is different from the organization chosen in the interface');
           addMessage(8, 'differentOrganization',
             {uri, organizationUri}, {rejectFile: true});
-          // error += 1;
+          error += 1;
 
         } else {
           addTrace(`        Warning: organization object is ignored`);
