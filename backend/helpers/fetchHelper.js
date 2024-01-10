@@ -5,17 +5,19 @@ const {GDBImpactModelModel} = require("../models/impactStuffs");
 
 
 async function fetchDataTypeInterfaces(name, req, res) {
-  const {organizationUri} = req.params;
+  const {organizationUri, themeUri} = req.params;
   let objects
-  if (organizationUri === 'undefined' || !organizationUri) {
+  if ((organizationUri === 'undefined' || !organizationUri) && (themeUri === 'undefined' || !themeUri)) {
     objects = await name2Model[name].find({});
-  } else {
+  } else if (organizationUri) {
     if (name === 'IndicatorReport' || name === 'Indicator') {
       objects = await name2Model[name].find({forOrganization: organizationUri})
     } else {
       objects = await name2Model[name].find({organization: organizationUri})
     }
-
+  } else if (themeUri) {
+    objects = name2Model[name].find({});
+    objects = objects.filter(object => object.themes.includes(themeUri));
   }
 
   const interfaces = {}

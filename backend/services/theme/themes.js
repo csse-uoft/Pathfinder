@@ -1,6 +1,5 @@
 const {GDBThemeModel} = require("../../models/theme");
 const {hasAccess} = require("../../helpers/hasAccess");
-const {GDBOutcomeModel} = require("../../models/outcome");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 const resource = 'Theme'

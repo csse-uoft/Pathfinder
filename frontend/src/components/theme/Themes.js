@@ -8,6 +8,7 @@ import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 export default function Themes() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -22,8 +23,12 @@ export default function Themes() {
   });
   const [trigger, setTrigger] = useState(true);
 
+  const [codeInterfaces, setCodeInterfaces] = useState({});
+
+  const [outcomeNames, setOutcomeNames] = useState({})
+
   useEffect(() => {
-    fetchThemes().then(res => {
+    fetchDataTypes('theme').then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.themes}));
     }).catch(e => {
@@ -32,6 +37,27 @@ export default function Themes() {
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
   }, [trigger]);
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('code').then(({interfaces}) => {
+      setCodeInterfaces(interfaces)
+    })
+  }, []);
+
+  useEffect(() => {
+    if (state.data.length) {
+      state.data.map((theme, index) => {
+        fetchDataTypes('outcome', `theme/${encodeURIComponent(theme._uri)}`).then(({outcomes, success}) => {
+          console.log(success)
+          if (success) {
+            console.log(outcomes);
+            setOutcomeNames(({...outcomeNames}) => ({...outcomeNames, [theme._uri]: outcomes.map(outcome => outcome.name)}))
+
+          }
+        })
+      })
+    }
+  }, [state])
 
   const showDeleteDialog = (uri) => {
     setState(state => ({
@@ -63,21 +89,40 @@ export default function Themes() {
 
   const columns = [
     {
-      label: 'Name',
-      body: ({_uri, name}) => {
+      label: 'Theme Name',
+      body: ({name}) => {
+        return name;
+      }
+    },
+    {
+      label: 'Theme URI',
+      body: ({_uri}) => {
         return <Link colorWithHover to={`/themes/${encodeURIComponent(_uri)}/view`}>
-          {name}
+          {_uri}
         </Link>
       },
       sortBy: ({legalName}) => legalName
     },
     {
-      label: 'Description',
+      label: 'Theme Description',
       body: ({description}) => {
         return description;
       }
     },
-
+    {
+      label: 'Theme Code(s)',
+      style: { whiteSpace: 'pre-line' },
+      body: ({codes}) => {
+        return codes?.map(code => `${codeInterfaces[code]}\n\n`);
+      }
+    },
+    {
+      label: 'Associated Outcome(s)',
+      style: { whiteSpace: 'pre-line' },
+      body: ({_uri}) => {
+        return outcomeNames[_uri]?.map(outcome => `${outcome}\n\n`);
+      }
+    },
     {
       label: ' ',
       body: ({_uri}) =>
