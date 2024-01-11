@@ -13,6 +13,8 @@ import {fetchCodesInterfaces} from "../../api/codeAPI";
 import {fetchOutcomeInterfaces} from "../../api/outcomeApi";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {isFieldRequired, validateField, validateURI} from "../../helpers";
 
 
 const filterOptions = createFilterOptions({
@@ -71,6 +73,23 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
   const [errors, setErrors] = useState({...importErrors});
 
   const userContext = useContext(UserContext);
+
+  const attriConfig = fullLevelConfig.stakeholderOutcome;
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    codes: 'cids:hasCode',
+    stakeholder: 'cids:forStakeholder',
+    outcome: 'cids:forOutcome',
+    importance: 'cids:hasImportance',
+    inUnderserved: 'cids:isUnderserved',
+    indicators: 'cids:hasIndicator',
+    impactReports: 'cids:hasImpactReport',
+    // organization: null,
+    intendedImpact: 'cids:intendedImpact',
+    fromPerspectiveOf: 'cids:fromPerspectiveOf'
+  }
+
 
   useEffect(() => {
     Promise.all([
@@ -139,17 +158,11 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 defaultValue={state.name}
                 onChange={handleChange('name')}
                 disabled={disabled}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
                 error={!!errors.name}
                 helperText={errors.name}
-                onBlur={() => {
-                  if (!state.name) {
-                    setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, name: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'name', attribute2Compass['name'], setErrors)}
+
               />
             </Grid>
 
@@ -162,17 +175,10 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 defaultValue={state.uri}
                 onChange={handleChange('uri')}
                 disabled={disabled || uriDiasbled}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
                 error={!!errors.uri}
                 helperText={errors.uri}
-                onBlur={() => {
-                  if (state.uri && !isValidURL(state.uri)) {
-                    setErrors(errors => ({...errors, uri: 'Invalid URI'}));
-                  } else {
-                    setErrors(errors => ({...errors, uri: null}));
-                  }
-                }
-                }
+                onBlur={validateURI(defaultValue, setErrors)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -183,14 +189,9 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 onChange={handleChange('organization')}
                 error={!!errors.organization}
                 helperText={errors.organization}
-                onBlur={() => {
-                  if (!state.organization) {
-                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, organization: null}));
-                  }
-                }
-                }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'organization')}
+                onBlur={validateField(defaultValue, attriConfig, 'organization', attribute2Compass['organization'], setErrors)}
+
               />
             </Grid>
 
@@ -202,15 +203,8 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 onChange={handleChange('stakeholder')}
                 error={!!errors.stakeholder}
                 helperText={errors.stakeholder}
-                required={required}
-                onBlur={() => {
-                  if (!state.stakeholder) {
-                    setErrors(errors => ({...errors, stakeholder: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, stakeholder: null}));
-                  }
-                }
-                }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'stakeholder')}
+                onBlur={validateField(defaultValue, attriConfig, 'stakeholder', attribute2Compass['stakeholder'], setErrors)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -221,15 +215,8 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 onChange={handleChange('fromPerspectiveOf')}
                 error={!!errors.fromPerspectiveOf}
                 helperText={errors.fromPerspectiveOf}
-                required={required}
-                // onBlur={() => {
-                //   if (!state.stakeholder) {
-                //     setErrors(errors => ({...errors, stakeholder: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, stakeholder: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'fromPerspectiveOf')}
+                onBlur={validateField(defaultValue, attriConfig, 'fromPerspectiveOf', attribute2Compass['fromPerspectiveOf'], setErrors)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -243,12 +230,9 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 disabled={!state.organization}
                 error={!!errors.outcome}
                 helperText={errors.outcome}
-                onBlur={() => {
-                  if (state.outcome) {
-                    setErrors(errors => ({...errors, outcome: null}));
-                  }
-                }
-                }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'outcome')}
+                onBlur={validateField(defaultValue, attriConfig, 'outcome', attribute2Compass['outcome'], setErrors)}
+
               />
             </Grid>
             <Grid item xs={12}>
@@ -257,6 +241,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 options={options.indicators}
                 value={state.indicators}
                 disabled={!state.organization}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'indicators')}
                 onChange={(e) => {
                   setState(state => ({...state, indicators: e.target.value}));
                   const st = state;
@@ -264,6 +249,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                   onChange(st);
                 }
                 }
+                onBlur={validateField(defaultValue, attriConfig, 'indicators', attribute2Compass['indicators'], setErrors)}
               />
             </Grid>
 
@@ -275,15 +261,8 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 onChange={handleChange('intendedImpact')}
                 error={!!errors.intendedImpact}
                 helperText={errors.intendedImpact}
-                required={required}
-                // onBlur={() => {
-                //   if (!state.stakeholder) {
-                //     setErrors(errors => ({...errors, stakeholder: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, stakeholder: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'intendedImpact')}
+                onBlur={validateField(defaultValue, attriConfig, 'intendedImpact', attribute2Compass['intendedImpact'], setErrors)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -299,6 +278,8 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 }
                 }
                 minWidth={188}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
+                onBlur={validateField(defaultValue, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -311,7 +292,9 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 }
                 error={!!errors.importance}
                 helperText={errors.importance}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'importance')}
+                onBlur={validateField(defaultValue, attriConfig, 'importance', attribute2Compass['importance'], setErrors)}
+
               />
             </Grid>
             <Grid item xs={3}>
@@ -324,7 +307,9 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 }
                 error={!!errors.isUnderserved}
                 helperText={errors.isUnderserved}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'isUnderserved')}
+                onBlur={validateField(defaultValue, attriConfig, 'isUnderserved', attribute2Compass['isUnderserved'], setErrors)}
+
               />
             </Grid>
 
@@ -336,20 +321,14 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 type="text"
                 defaultValue={state.description}
                 onChange={handleChange('description')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
                 disabled={disabled}
                 error={!!errors.description}
                 helperText={errors.description}
                 multiline
                 minRows={2}
-                onBlur={() => {
-                  if (!state.description) {
-                    setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, description: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+
               />
             </Grid>
 
