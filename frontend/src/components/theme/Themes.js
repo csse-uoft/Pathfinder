@@ -48,11 +48,8 @@ export default function Themes() {
     if (state.data.length) {
       state.data.map((theme, index) => {
         fetchDataTypes('outcome', `theme/${encodeURIComponent(theme._uri)}`).then(({outcomes, success}) => {
-          console.log(success)
           if (success) {
-            console.log(outcomes);
             setOutcomeNames(({...outcomeNames}) => ({...outcomeNames, [theme._uri]: outcomes.map(outcome => outcome.name)}))
-
           }
         })
       })
@@ -113,14 +110,14 @@ export default function Themes() {
       label: 'Theme Code(s)',
       style: { whiteSpace: 'pre-line' },
       body: ({codes}) => {
-        return codes?.map(code => `${codeInterfaces[code]}\n\n`);
+        return codes?.map(code => codeInterfaces[code]);
       }
     },
     {
       label: 'Associated Outcome(s)',
       style: { whiteSpace: 'pre-line' },
       body: ({_uri}) => {
-        return outcomeNames[_uri]?.map(outcome => `${outcome}\n\n`);
+        return outcomeNames[_uri];
       }
     },
     {

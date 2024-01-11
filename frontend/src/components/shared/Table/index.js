@@ -204,7 +204,18 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
                       />
                     </TableCell>
                     {columns.map((cell, idx) => <TableCell style={cell.style}
-                                                           key={idx + 1}>{cell.body(row, extraData)}</TableCell>)}
+                                                           key={idx + 1}>{
+                      Array.isArray(cell.body(row, extraData))?
+                        cell.body(row, extraData).map((object, index) => {
+                          if (index === 0) {
+                            return `${object}`
+                          } else {
+                            return `\n\n${object}`;
+                          }
+                        })
+                        :
+                        cell.body(row, extraData)
+                    }</TableCell>)}
                   </TableRow>
                 );
               })}
