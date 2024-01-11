@@ -86,7 +86,7 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
         } else if (environment === 'interface') {
           throw new Server400Error('No such Indicator');
         }
-      } else if (!indicator.forOrganization !== organization._uri) {
+      } else if (indicator.forOrganization !== organization._uri) {
         if (environment === 'fileUploading') {
           addTrace('        Error:');
           addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
