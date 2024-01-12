@@ -225,26 +225,49 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
                         checked={isItemSelected}
                       />
                     </TableCell>
-                    {columns.map((cell, idx) => <TableCell style={cell.style} colSpan={cell.colSpan}
-                                                           key={idx + 1}>{
-                      Array.isArray(cell.body(row, extraData)) ?
-                        cell.body(row, extraData).map((object, index) => {
-                          // if (index === 0) {
-                          //   return `${object}`
-                          // } else {
-                          //   return `\n\n${object}`;
-                          // }
-                          return (
-                            <TableRow>
-                              <TableCell>
-                                {object}
-                              </TableCell>
-                            </TableRow>
-                            )
-                        })
-                        :
-                        cell.body(row, extraData)
-                    }</TableCell>)}
+                    {columns.map((cell, idx) =>{
+                      if (cell.body) {
+                        return (<TableCell style={cell.style} colSpan={cell.colSpan}
+                                           key={idx + 1}>{
+                          Array.isArray(cell.body(row, extraData)) ?
+                            cell.body(row, extraData).map((objects) => {
+                              if (Array.isArray(objects)) {
+                                return (
+                                  <TableRow>
+                                    {
+
+                                      objects?.map(object => {
+                                        return (<TableCell style={{
+                                          width: `${100 / objects.length}%`,
+                                          wordBreak: 'break-word'
+                                        }}>
+                                          {object}
+                                        </TableCell>)
+                                      })
+
+                                    }
+                                  </TableRow>
+                                )
+                              } else {
+                                return (<TableRow>
+                                  {
+
+                                    <TableCell>
+                                      {objects}
+                                    </TableCell>
+
+                                  }
+                                </TableRow>)
+                              }
+                            })
+                            :
+                            cell.body(row, extraData)
+                        }</TableCell>)
+                      } else {
+                        return null
+                      }
+                    }
+                      )}
                   </TableRow>
                 );
               })}
