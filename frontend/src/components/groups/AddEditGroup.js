@@ -257,7 +257,7 @@ export default function AddEditGroup() {
               );
             }}
             required={isFieldRequired(attriConfig, attribute2Compass, 'administrator')}
-            onBlur={validateField(form, attriConfig, 'administrator', attriConfig['administrator'], setErrors)}
+            onBlur={validateField(form, attriConfig, 'administrator', attribute2Compass['administrator'], setErrors)}
           />
 
           <Dropdown
@@ -271,7 +271,7 @@ export default function AddEditGroup() {
             error={!!errors.organizations}
             helperText={errors.organizations}
             required={isFieldRequired(attriConfig, attribute2Compass, 'organizations')}
-            onBlur={validateField(form, attriConfig, 'organizations', attriConfig['organizations'], setErrors)}
+            onBlur={validateField(form, attriConfig, 'organizations', attribute2Compass['organizations'], setErrors)}
           />
           <GeneralField
             key={'comment'}
@@ -282,7 +282,7 @@ export default function AddEditGroup() {
             error={!!errors.comment}
             helperText={errors.comment}
             required={isFieldRequired(attriConfig, attribute2Compass, 'comment')}
-            onBlur={validateField(form, attriConfig, 'comment', attriConfig['comment'], setErrors)}
+            onBlur={validateField(form, attriConfig, 'comment', attribute2Compass['comment'], setErrors)}
           />
 
           <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>

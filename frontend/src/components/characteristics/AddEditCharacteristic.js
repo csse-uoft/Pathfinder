@@ -244,7 +244,7 @@ export default function AddEditCharacteristic() {
             error={!!errors.stakeholders}
             helperText={errors.stakeholders}
             required={isFieldRequired(attriConfig, attribute2Compass, 'stakeholders')}
-            onBlur={validateField(form, attriConfig, 'stakeholders', attriConfig['stakeholders'], setErrors)}
+            onBlur={validateField(form, attriConfig, 'stakeholders', attribute2Compass['stakeholders'], setErrors)}
           />
 
           <Dropdown
@@ -258,7 +258,7 @@ export default function AddEditCharacteristic() {
             error={!!errors.codes}
             helperText={errors.codes}
             required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
-            onBlur={validateField(form, attriConfig, 'codes', attriConfig['codes'], setErrors)}
+            onBlur={validateField(form, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
           />
 
 
@@ -272,7 +272,7 @@ export default function AddEditCharacteristic() {
             error={!!errors.value}
             helperText={errors.value}
             required={isFieldRequired(attriConfig, attribute2Compass, 'value')}
-            onBlur={validateField(form, attriConfig, 'value', attriConfig['value'], setErrors)}
+            onBlur={validateField(form, attriConfig, 'value', attribute2Compass['value'], setErrors)}
           />
 
 
