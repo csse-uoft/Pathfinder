@@ -236,18 +236,18 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 onBlur={validateField(defaultValue, attriConfig, 'indicator', attribute2Compass['indicator'], setErrors)}
               />
             </Grid>
-            <Grid item xs={3}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
-                label="Unit Of Measure"
-                type="text"
-                value={state.unitOfMeasure}
-                disabled
-                required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}
-              />
-            </Grid>
-            <Grid item xs={3}>
+            {/*<Grid item xs={3}>*/}
+            {/*  <TextField*/}
+            {/*    sx={{mt: 2}}*/}
+            {/*    fullWidth*/}
+            {/*    label="Unit Of Measure"*/}
+            {/*    type="text"*/}
+            {/*    value={state.unitOfMeasure}*/}
+            {/*    disabled*/}
+            {/*    required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}*/}
+            {/*  />*/}
+            {/*</Grid>*/}
+            <Grid item xs={4}>
               <GeneralField
                 fullWidth
                 type={'date'}
@@ -262,7 +262,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
@@ -278,7 +278,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               />
             </Grid>
 
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
@@ -310,6 +310,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 error={!!errors.hasAccesss}
                 helperText={errors.hasAccesss}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'hasAccesss')}
+                onBlur={validateField(defaultValue, attriConfig, 'hasAccesss', attribute2Compass['hasAccesss'], setErrors)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -329,6 +330,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 error={!!errors.datasets}
                 helperText={errors.datasets}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'datasets')}
+                onBlur={validateField(defaultValue, attriConfig, 'datasets', attribute2Compass['datasets'], setErrors)}
               />
             </Grid>
             <Grid item xs={12}>
