@@ -8,6 +8,8 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {isFieldRequired, validateField, validateURI} from "../../helpers";
 
 
 const filterOptions = createFilterOptions({
@@ -52,7 +54,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled}) {
+export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled, attribute2Compass}) {
 
   const [state, setState] = useState(
     defaultValue ||
@@ -69,6 +71,9 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
   const [errors, setErrors] = useState({...importErrors});
 
   const userContext = useContext(UserContext);
+
+  const attriConfig = fullLevelConfig.indicatorReport;
+
 
   useEffect(() => {
     fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
@@ -163,17 +168,10 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 defaultValue={state.name}
                 onChange={handleChange('name')}
                 disabled={disabled}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
                 error={!!errors.name}
                 helperText={errors.name}
-                onBlur={() => {
-                  if (!state.name) {
-                    setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, name: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'name', attribute2Compass['name'], setErrors)}
               />
             </Grid>
 
@@ -185,17 +183,10 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 type="text"
                 defaultValue={state.uri}
                 onChange={handleChange('uri')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
                 error={!!errors.uri}
                 helperText={errors.uri}
-                onBlur={() => {
-                  if (state.uri && !isValidURL(state.uri)) {
-                    setErrors(errors => ({...errors, uri: 'Invalid URI'}));
-                  } else {
-                    setErrors(errors => ({...errors, uri: null}));
-                  }
-                }
-                }
+                onBlur={validateURI(defaultValue, setErrors)}
               />
             </Grid>
 
@@ -209,19 +200,10 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               defaultValue={state.numericalValue}
               onChange={handleChange('numericalValue')}
               disabled={disabled}
-              required={required}
+              required={isFieldRequired(attriConfig, attribute2Compass, 'numericalValue')}
               error={!!errors.numericalValue}
               helperText={errors.numericalValue}
-              onBlur={() => {
-                if (!state.numericalValue) {
-                  setErrors(errors => ({...errors, numericalValue: 'This field cannot be empty'}));
-                } if(isNaN(state.numericalValue)) {
-                  setErrors(errors => ({...errors, numericalValue: 'This field must be a number'}));
-                } else {
-                  setErrors(errors => ({...errors, numericalValue: null}));
-                }
-              }
-              }
+              onBlur={validateField(defaultValue, attriConfig, 'numericalValue', attribute2Compass['numericalValue'], setErrors)}
             />
             </Grid>
 
@@ -234,16 +216,9 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 onChange={handleChange('organization')}
                 error={!!errors.organization}
                 helperText={errors.organization}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'organization')}
                 disabled={disabled || disabledOrganization}
-                onBlur={() => {
-                  if (!state.organization) {
-                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, organization: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'organization', attribute2Compass['organization'], setErrors)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -257,13 +232,8 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 }
                 error={!!errors.indicator}
                 helperText={errors.indicator}
-                required={required}
-                onBlur={() => {
-                  if (state.indicator) {
-                    setErrors(errors => ({...errors, indicator: null}));
-                  }
-                }
-                }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'indicator')}
+                onBlur={validateField(defaultValue, attriConfig, 'indicator', attribute2Compass['indicator'], setErrors)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -274,7 +244,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 type="text"
                 value={state.unitOfMeasure}
                 disabled
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}
               />
             </Grid>
             <Grid item xs={3}>
@@ -284,19 +254,12 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 value={state.dateCreated}
                 label={'Date Created'}
                 onChange={handleChange('dateCreated')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'dateCreated')}
                 disabled={disabled}
                 error={!!errors.dateCreated}
                 helperText={errors.dateCreated}
                 minWidth={187}
-                onBlur={() => {
-                  if (!state.dateCreated) {
-                    setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, dateCreated: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
               />
             </Grid>
             <Grid item xs={3}>
@@ -307,18 +270,11 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 label={'Start Time'}
                 minWidth={187}
                 onChange={handleChange('startTime')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'startTime')}
                 disabled={disabled}
                 error={!!errors.startTime}
                 helperText={errors.startTime}
-                onBlur={() => {
-                  if (!state.startTime) {
-                    setErrors(errors => ({...errors, startTime: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, startTime: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'startTime', attribute2Compass['startTime'], setErrors)}
               />
             </Grid>
 
@@ -330,18 +286,11 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 label={'End Time'}
                 minWidth={187}
                 onChange={handleChange('endTime')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'endTime')}
                 disabled={disabled}
                 error={!!errors.endTime}
                 helperText={errors.endTime}
-                onBlur={() => {
-                  if (!state.endTime) {
-                    setErrors(errors => ({...errors, endTime: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, endTime: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'endTime', attribute2Compass['endTime'], setErrors)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -360,7 +309,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 value={state.hasAccesss}
                 error={!!errors.hasAccesss}
                 helperText={errors.hasAccesss}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'hasAccesss')}
               />
             </Grid>
             <Grid item xs={12}>
@@ -379,7 +328,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 value={state.datasets}
                 error={!!errors.datasets}
                 helperText={errors.datasets}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'datasets')}
               />
             </Grid>
             <Grid item xs={12}>
@@ -390,20 +339,13 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 type="text"
                 defaultValue={state.comment}
                 onChange={handleChange('comment')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'comment')}
                 disabled={disabled}
                 error={!!errors.comment}
                 helperText={errors.comment}
                 multiline
                 minRows={2}
-                onBlur={() => {
-                  if (!state.comment) {
-                    setErrors(errors => ({...errors, comment: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, comment: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'comment', attribute2Compass['comment'], setErrors)}
               />
             </Grid>
 

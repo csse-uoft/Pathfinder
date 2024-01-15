@@ -12,6 +12,8 @@ import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {validateForm} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -60,6 +62,25 @@ export default function AddEditIndicator() {
   });
   const [loading, setLoading] = useState(true);
   const [indicatorReportInterfaces, setIndicatorReportInterfaces] = useState({});
+
+  const attriConfig = fullLevelConfig.indicator;
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    organization: 'cids:Organization',
+    indicator: 'cids:Indicator',
+    numericalValue: 'iso21972:value',
+    unitOfMeasure: 'iso21972:value',
+    startTime: 'cids:hasTime',
+    endTime: 'cids:hasTime',
+    dateCreated: 'schema:dateCreated',
+    hasAccess: 'cids:hasAccess',
+    datasets: 'dcat:dataset',
+    identifier: 'tove_org:hasIdentifier',
+    baseline: 'cids:hasBaseline',
+    threshold: 'cids:hasThreshold',
+    codes: 'cids:hasCode',
+  }
 
 
   useEffect(() => {
@@ -178,21 +199,7 @@ export default function AddEditIndicator() {
 
   const validate = () => {
     const error = {};
-    if (form.name === '')
-      error.name = 'The field cannot be empty';
-    // if (form.identifier === '')
-    //     error.identifier = 'The field cannot be empty';
-    // if (!form.description)
-    //   error.description = 'The field cannot be empty';
-    // if (!form.organization)
-    //   error.organization = 'The field cannot be empty';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
-    // if (!form.uri)
-    //   error.uri = 'The field cannot be empty';
-
-    // if (!form.hasIdentifier)
-    //   error.hasIdentifier = 'The field cannot be empty';
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri']);
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -265,6 +272,7 @@ export default function AddEditIndicator() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?

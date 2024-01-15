@@ -11,6 +11,8 @@ import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateForm} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -31,6 +33,8 @@ export default function AddEditIndicatorReport() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
+
+  const attriConfig = fullLevelConfig.indicatorReport;
 
   const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
@@ -148,37 +152,25 @@ export default function AddEditIndicatorReport() {
   };
 
   const validate = () => {
-    const error = {};
-    // if (!form.name)
-    //   error.name = 'The field cannot be empty';
-    // if (!form.comment)
-    //   error.comment = 'The field cannot be empty';
-    // if (!form.organization)
-    //   error.organization = 'The field cannot be empty';
-    // if (!form.indicator)
-    //   error.indicator = 'The field cannot be empty';
-    // if (!form.startTime)
-    //   error.startTime = 'The field cannot be empty';
-    // if (!form.endTime)
-    //   error.endTime = 'The field cannot be empty';
-    // if (form.uri && !isValidURL(form.uri))
-    //   error.uri = 'The field cannot be empty'
-    // if (!!form.startTime && !!form.endTime && form.startTime > form.endTime){
-    //   error.startTime = 'The date must be earlier than the end date'
-    //   error.endTime = 'The date must be later than the start date';
-    // }
-    //
-    // if (!form.numericalValue)
-    //   error.numericalValue = 'The field cannot be empty';
-    if (form.numericalValue && isNaN(form.numericalValue))
-      error.numericalValue = 'The field must be a number';
-    // if (!form.unitOfMeasure)
-    //   error.unitOfMeasure = 'The field cannot be empty';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
-    setErrors(error);
-    return Object.keys(error).length === 0;
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
+
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    comment: 'cids:hasComment',
+    organization: 'cids:Organization',
+    indicator: 'cids:Indicator',
+    numericalValue: 'iso21972:value',
+    unitOfMeasure: 'iso21972:value',
+    startTime: 'cids:hasTime',
+    endTime: 'cids:hasTime',
+    dateCreated: 'schema:dateCreated',
+    hasAccesss: 'cids:hasAccess',
+    datasets: 'dcat:dataset',
+  }
 
   if (loading)
     return <Loading/>;
@@ -228,6 +220,7 @@ export default function AddEditIndicatorReport() {
           }}
           uriDiasbled={mode !== 'new'}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
 
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
