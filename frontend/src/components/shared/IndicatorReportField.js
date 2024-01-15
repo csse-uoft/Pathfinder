@@ -54,7 +54,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled}) {
+export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled, attribute2Compass}) {
 
   const [state, setState] = useState(
     defaultValue ||
@@ -74,19 +74,6 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
 
   const attriConfig = fullLevelConfig.indicatorReport;
 
-  const attribute2Compass = {
-    name: 'cids:hasName',
-    comment: 'cids:hasDescription',
-    organization: 'cids:definedBy',
-    indicator: 'cids:hasIndicatorReport',
-    numericalValue: 'cids:hasThreshold',
-    unitOfMeasure: 'iso21972:unit_of_measure',
-    startTime: 'cids:hasTime',
-    endTime: 'cids:hasTime',
-    dateCreated: 'schema:dateCreated',
-    hasAccesss: 'cids:hasAccess',
-    datasets: 'dcat:dataset',
-  };
 
   useEffect(() => {
     fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {

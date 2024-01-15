@@ -59,7 +59,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function StakeholderOutcomeField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled}) {
+export default function StakeholderOutcomeField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled, attribute2Compass}) {
 
   const [state, setState] = useState(
     defaultValue ||
@@ -75,20 +75,6 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
   const userContext = useContext(UserContext);
 
   const attriConfig = fullLevelConfig.stakeholderOutcome;
-  const attribute2Compass = {
-    name: 'cids:hasName',
-    description: 'cids:hasDescription',
-    codes: 'cids:hasCode',
-    stakeholder: 'cids:forStakeholder',
-    outcome: 'cids:forOutcome',
-    importance: 'cids:hasImportance',
-    inUnderserved: 'cids:isUnderserved',
-    indicators: 'cids:hasIndicator',
-    impactReports: 'cids:hasImpactReport',
-    // organization: null,
-    intendedImpact: 'cids:intendedImpact',
-    fromPerspectiveOf: 'cids:fromPerspectiveOf'
-  }
 
 
   useEffect(() => {

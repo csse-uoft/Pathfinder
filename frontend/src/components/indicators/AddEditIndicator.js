@@ -67,14 +67,14 @@ export default function AddEditIndicator() {
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',
-    organization: 'cids:definedBy',
-    indicator: 'cids:hasIndicatorReport',
-    numericalValue: 'cids:hasThreshold',
+    organization: 'cids:Organization',
+    indicator: 'cids:Indicator',
+    numericalValue: 'iso21972:numerical_value',
     unitOfMeasure: 'iso21972:unit_of_measure',
     startTime: 'cids:hasTime',
     endTime: 'cids:hasTime',
     dateCreated: 'schema:dateCreated',
-    hasAccesss: 'cids:hasAccess',
+    hasAccess: 'cids:hasAccess',
     datasets: 'dcat:dataset',
     identifier: 'tove_org:hasIdentifier',
     baseline: 'cids:hasBaseline',
@@ -272,6 +272,7 @@ export default function AddEditIndicator() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?

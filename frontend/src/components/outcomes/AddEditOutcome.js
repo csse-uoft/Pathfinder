@@ -252,6 +252,7 @@ export default function AddEditOutcome() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?

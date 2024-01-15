@@ -58,7 +58,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function IndicatorField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, disabledURI}) {
+export default function IndicatorField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, disabledURI, attribute2Compass}) {
 
   const [state, setState] = useState(defaultValue || {});
   const [options, setOptions] = useState({});
@@ -70,23 +70,6 @@ export default function IndicatorField({defaultValue, required, onChange, label,
   const [errors, setErrors] = useState({...importErrors});
 
     const attriConfig = fullLevelConfig.indicator;
-    const attribute2Compass = {
-        name: 'cids:hasName',
-        description: 'cids:hasDescription',
-        organization: 'cids:definedBy',
-        indicator: 'cids:hasIndicatorReport',
-        numericalValue: 'cids:hasThreshold',
-        unitOfMeasure: 'iso21972:unit_of_measure',
-        startTime: 'cids:hasTime',
-        endTime: 'cids:hasTime',
-        dateCreated: 'schema:dateCreated',
-        hasAccesss: 'cids:hasAccess',
-        datasets: 'dcat:dataset',
-        identifier: 'tove_org:hasIdentifier',
-        baseline: 'cids:hasBaseline',
-        threshold: 'cids:hasThreshold',
-        codes: 'cids:hasCode',
-    }
 
 
   useEffect(() => {

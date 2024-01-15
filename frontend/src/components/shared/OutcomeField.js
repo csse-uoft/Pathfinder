@@ -68,6 +68,7 @@ export default function OutcomeField({
                                        disableURI,
                                        disabled,
                                        importErrors,
+                                         attribute2Compass
                                      }) {
 
   const [state, setState] = useState(defaultValue || {});
@@ -82,18 +83,6 @@ export default function OutcomeField({
   const userContext = useContext(UserContext);
 
     const attriConfig = fullLevelConfig.outcome;
-    const attribute2Compass = {
-        name: 'cids:hasName',
-        description: 'cids:hasDescription',
-        organization: 'cids:forOrganization',
-        indicators: 'cids:hasIndicator',
-        themes: 'cids:forTheme',
-        codes: 'cids:hasCode',
-        dateCreated: 'schema:dateCreated',
-        canProduces: 'cids:canProduce',
-        locatedIns: 'iso21972:located_in',
-        partOf: 'oep:partOf',
-    }
 
 
   useEffect(() => {

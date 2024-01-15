@@ -81,7 +81,7 @@ export default function AddEditStakeholderOutcome() {
     inUnderserved: 'cids:isUnderserved',
     indicators: 'cids:hasIndicator',
     impactReports: 'cids:hasImpactReport',
-    // organization: null,
+    organization: 'cids:Organization',
     intendedImpact: 'cids:intendedImpact',
     fromPerspectiveOf: 'cids:fromPerspectiveOf'
   }
@@ -257,6 +257,7 @@ export default function AddEditStakeholderOutcome() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?

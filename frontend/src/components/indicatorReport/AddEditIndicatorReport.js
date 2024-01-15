@@ -160,10 +160,10 @@ export default function AddEditIndicatorReport() {
 
   const attribute2Compass = {
     name: 'cids:hasName',
-    comment: 'cids:hasDescription',
-    organization: 'cids:definedBy',
-    indicator: 'cids:hasIndicatorReport',
-    numericalValue: 'cids:hasThreshold',
+    comment: 'cids:hasComment',
+    organization: 'cids:Organization',
+    indicator: 'cids:Indicator',
+    numericalValue: 'iso21972:numerical_value',
     unitOfMeasure: 'iso21972:unit_of_measure',
     startTime: 'cids:hasTime',
     endTime: 'cids:hasTime',
@@ -220,6 +220,7 @@ export default function AddEditIndicatorReport() {
           }}
           uriDiasbled={mode !== 'new'}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
 
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
