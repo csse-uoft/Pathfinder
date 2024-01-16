@@ -67,8 +67,8 @@ export default function AddEditIndicator() {
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',
-    organization: 'cids:Organization',
-    indicator: 'cids:Indicator',
+    organization: 'cids:forOrganization',
+    indicator: 'cids:forIndicator',
     numericalValue: 'iso21972:value',
     unitOfMeasure: 'iso21972:value',
     startTime: 'cids:hasTime',

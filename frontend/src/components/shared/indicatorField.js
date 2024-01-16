@@ -306,7 +306,6 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 onChange={handleChange('baseline')}
                 disabled={disabled}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'baseline')}
-
                 error={!!errors.baseline}
                 helperText={errors.baseline}
                 onBlur={validateField(defaultValue, attriConfig, 'baseline', attribute2Compass['baseline'], setErrors)}
