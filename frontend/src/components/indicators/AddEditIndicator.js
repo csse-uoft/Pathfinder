@@ -64,22 +64,19 @@ export default function AddEditIndicator() {
   const [indicatorReportInterfaces, setIndicatorReportInterfaces] = useState({});
 
   const attriConfig = fullLevelConfig.indicator;
+
   const attribute2Compass = {
     name: 'cids:hasName',
-    description: 'cids:hasDescription',
-    organization: 'cids:forOrganization',
-    indicator: 'cids:forIndicator',
-    numericalValue: 'iso21972:value',
-    unitOfMeasure: 'iso21972:value',
-    startTime: 'cids:hasTime',
-    endTime: 'cids:hasTime',
-    dateCreated: 'schema:dateCreated',
-    hasAccess: 'cids:hasAccess',
-    datasets: 'dcat:dataset',
     identifier: 'tove_org:hasIdentifier',
+    description: 'cids:hasDescription',
+    unitOfMeasure: 'iso21972:value',
+    organization: 'cids:forOrganization',
     baseline: 'cids:hasBaseline',
     threshold: 'cids:hasThreshold',
     codes: 'cids:hasCode',
+    dateCreated: 'schema:dateCreated',
+    access: 'cids:hasAccess',
+    datasets: 'dcat:dataset'
   }
 
 
