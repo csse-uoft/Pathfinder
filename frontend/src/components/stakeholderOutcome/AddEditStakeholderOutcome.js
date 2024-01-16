@@ -81,7 +81,7 @@ export default function AddEditStakeholderOutcome() {
     inUnderserved: 'cids:isUnderserved',
     indicators: 'cids:hasIndicator',
     impactReports: 'cids:hasImpactReport',
-    organization: 'cids:Organization',
+    organization: 'cids:forOrganization',
     intendedImpact: 'cids:intendedImpact',
     fromPerspectiveOf: 'cids:fromPerspectiveOf'
   }
