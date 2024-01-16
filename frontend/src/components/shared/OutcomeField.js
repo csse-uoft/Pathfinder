@@ -13,6 +13,8 @@ import GeneralField from "./fields/GeneralField";
 import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
 import {fetchFeatureInterfaces} from "../../api/featureAPI";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {isFieldRequired, validateField, validateURI} from "../../helpers";
 
 
 const filterOptions = createFilterOptions({
@@ -66,6 +68,7 @@ export default function OutcomeField({
                                        disableURI,
                                        disabled,
                                        importErrors,
+                                         attribute2Compass
                                      }) {
 
   const [state, setState] = useState(defaultValue || {});
@@ -78,6 +81,8 @@ export default function OutcomeField({
 
 
   const userContext = useContext(UserContext);
+
+    const attriConfig = fullLevelConfig.outcome;
 
 
   useEffect(() => {
@@ -153,17 +158,10 @@ export default function OutcomeField({
                 defaultValue={state.name}
                 onChange={handleChange('name')}
                 disabled={disabled}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
                 error={!!errors.name}
                 helperText={errors.name}
-                onBlur={() => {
-                  if (!state.name) {
-                    setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, name: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'name', attribute2Compass['name'], setErrors)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -175,17 +173,10 @@ export default function OutcomeField({
                 defaultValue={state.uri}
                 onChange={handleChange('uri')}
                 disabled={disabled || disableURI}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
                 error={!!errors.uri}
                 helperText={errors.uri}
-                onBlur={() => {
-                  if (state.uri && !isValidURL(state.uri)) {
-                    setErrors(errors => ({...errors, uri: 'Please input a valid URI'}));
-                  } else {
-                    setErrors(errors => ({...errors, uri: null}));
-                  }
-                }
-                }
+                onBlur={validateURI(defaultValue, setErrors)}
               />
             </Grid>
               <Grid item xs={4}>
@@ -195,19 +186,12 @@ export default function OutcomeField({
                       value={state.dateCreated}
                       label={'Date Created'}
                       onChange={handleChange('dateCreated')}
-                      required={required}
+                      required={isFieldRequired(attriConfig, attribute2Compass, 'dateCreated')}
                       disabled={disabled}
                       error={!!errors.dateCreated}
                       helperText={errors.dateCreated}
                       minWidth={187}
-                      onBlur={() => {
-                          if (!state.dateCreated) {
-                              setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
-                          } else {
-                              setErrors(errors => ({...errors, dateCreated: null}));
-                          }
-                      }
-                      }
+                      onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
                   />
               </Grid>
 
@@ -227,7 +211,8 @@ export default function OutcomeField({
                 value={state.locatedIns}
                 error={!!errors.locatedIns}
                 helperText={errors.locatedIns}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'locatedIns')}
+                onBlur={validateField(defaultValue, attriConfig, 'locatedIns', attribute2Compass['locatedIns'], setErrors)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -245,14 +230,8 @@ export default function OutcomeField({
                 // error={!!errors.themes}
                 // helperText={errors.themes}
                 disabled={disabled}
-                // onBlur={() => {
-                //   if (!state.themes.length) {
-                //     setErrors(errors => ({...errors, themes: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, themes: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'themes')}
+                onBlur={validateField(defaultValue, attriConfig, 'themes', attribute2Compass['themes'], setErrors)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -265,16 +244,10 @@ export default function OutcomeField({
                 onChange={handleChange}
                 error={!!errors.organization}
                 helperText={errors.organization}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'organization')}
                 disabled={disabled}
-                onBlur={() => {
-                  if (!state.organization) {
-                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, organization: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'organization', attribute2Compass['organization'], setErrors)}
+
               />
             </Grid>
 
@@ -292,6 +265,9 @@ export default function OutcomeField({
                 }
                 minWidth={775}
                 disabled={disabled}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
+                onBlur={validateField(defaultValue, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
+
               />
             </Grid>
             <Grid item xs={12}>
@@ -310,16 +286,10 @@ export default function OutcomeField({
                 value={state.indicators}
                 error={!!errors.indicators}
                 helperText={errors.indicators}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'indicators')}
                 disabled={disabled || !state.organization}
-                onBlur={() => {
-                  if (!state.indicators) {
-                    setErrors(errors => ({...errors, indicators: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, indicators: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'indicators', attribute2Compass['indicators'], setErrors)}
+
               />
             </Grid>
             <Grid item xs={12}>
@@ -332,16 +302,10 @@ export default function OutcomeField({
                 onChange={handleChange}
                 error={!!errors.partOf}
                 helperText={errors.partOf}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'partOf')}
                 disabled={!state.organization}
-                // onBlur={() => {
-                //   if (!state.organization) {
-                //     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, organization: null}));
-                //   }
-                // }
-                // }
+                onBlur={validateField(defaultValue, attriConfig, 'partOf', attribute2Compass['partOf'], setErrors)}
+
               />
             </Grid>
               <Grid item xs={12}>
@@ -360,16 +324,10 @@ export default function OutcomeField({
                       value={state.canProduces}
                       error={!!errors.canProduces}
                       helperText={errors.canProduces}
-                      required={required}
+                      required={isFieldRequired(attriConfig, attribute2Compass, 'canProduces')}
                       disabled={disabled || !state.organization}
-                      // onBlur={() => {
-                      //     if (!state.outcomes) {
-                      //         setErrors(errors => ({...errors, outcomes: 'This field cannot be empty'}));
-                      //     } else {
-                      //         setErrors(errors => ({...errors, outcomes: null}));
-                      //     }
-                      // }
-                      // }
+                      onBlur={validateField(defaultValue, attriConfig, 'canProduces', attribute2Compass['canProduces'], setErrors)}
+
                   />
               </Grid>
             <Grid item xs={12}>
@@ -380,20 +338,14 @@ export default function OutcomeField({
                 type="text"
                 defaultValue={state.description}
                 onChange={handleChange('description')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
                 disabled={disabled}
                 error={!!errors.description}
                 helperText={errors.description}
                 multiline
                 minRows={4}
-                onBlur={() => {
-                  if (!state.description) {
-                    setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, description: null}));
-                  }
-                }
-                }
+                onBlur={validateField(defaultValue, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+
               />
             </Grid>
 

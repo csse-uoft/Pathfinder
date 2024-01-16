@@ -11,6 +11,8 @@ import OutcomeField from "../shared/OutcomeField";
 import {updateOutcome} from "../../api/outcomeApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {validateForm} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -59,6 +61,20 @@ export default function AddEditOutcome() {
     partOf: null,
   });
   const [loading, setLoading] = useState(true);
+
+  const attriConfig = fullLevelConfig.outcome;
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    organization: 'cids:forOrganization',
+    indicators: 'cids:hasIndicator',
+    themes: 'cids:forTheme',
+    codes: 'cids:hasCode',
+    dateCreated: 'schema:dateCreated',
+    canProduces: 'cids:canProduce',
+    locatedIns: 'iso21972:located_in',
+    partOf: 'oep:partOf',
+  }
 
   useEffect(() => {
     if (form.organization) {
@@ -153,28 +169,7 @@ export default function AddEditOutcome() {
   const validate = () => {
     console.log(form);
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-
-    // if (!form.indicators.length)
-    //   error.indicators = 'The field cannot be empty';
-    // if (!form.outcomes.length)
-    //   error.outcomes = 'The field cannot be empty';
-    // if (!form.locatedIn)
-    //   error.locatedIn = 'The field cannot be empty';
-
-    // if (!form.themes.length)
-    //   error.themes = 'The field cannot be empty';
-    // if (!form.description)
-    //   error.description = 'The field cannot be empty'
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
-    // if(form.uri && !isValidURL(form.uri))
-    //   error.uri = 'Not a valid URI';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
-    if (!form.partOf)
-      error.partOf = 'The field cannot be empty';
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri']);
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -257,6 +252,7 @@ export default function AddEditOutcome() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?
