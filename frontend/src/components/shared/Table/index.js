@@ -158,26 +158,6 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
 
   };
 
-  const subTable = () => (
-    <Table>
-      <TableBody>
-        <TableRow style={{'border-bottom': '1px solid #000'}}>
-          <TableCell colSpan={2}>
-            12
-          </TableCell>
-          <TableCell>
-            4
-          </TableCell>
-        </TableRow>
-
-        <TableRow>
-          <TableCell>
-            12
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-  );
 
 
   return (

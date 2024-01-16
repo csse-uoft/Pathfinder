@@ -54,7 +54,9 @@ export default function Indicators() {
     {
       label: 'Indicator URI',
       body: ({_uri}) => {
-        return _uri
+        return <Link colorWithHover to={`/indicator/${encodeURIComponent(_uri)}/view`}>
+          {_uri}
+        </Link>
 
       },
     },
@@ -68,7 +70,9 @@ export default function Indicators() {
       label: 'Outcome(s) URI',
       colSpan: 2,
       body: ({forOutcomes}) => {
-        return forOutcomes?.map(outcomeUri => [outcomeUri, outcomeInterfaces[outcomeUri]])
+        return forOutcomes?.map(outcomeUri => [<Link colorWithHover to={`/outcome/${encodeURIComponent(outcomeUri)}/view`}>
+          {outcomeUri}
+        </Link>, outcomeInterfaces[outcomeUri]])
       },
     },
     {
@@ -84,7 +88,9 @@ export default function Indicators() {
       label: 'indicatorReport URI',
       colSpan: 3,
       body: ({indicatorReports}) => {
-        return indicatorReports?.map(indicatorReport => [indicatorReport._uri,
+        return indicatorReports?.map(indicatorReport => [<Link colorWithHover to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}>
+          {indicatorReport._uri}
+        </Link>,
           indicatorReport.value?.numericalValue,
           (indicatorReport.hasTime?.hasBeginning?.date && indicatorReport.hasTime?.hasEnd?.date)? `${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : null
         ]);
