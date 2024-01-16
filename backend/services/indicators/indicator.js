@@ -7,6 +7,7 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
 
 const fetchIndicators = async (req, res) => {
@@ -18,7 +19,8 @@ const fetchIndicators = async (req, res) => {
 
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
-      const indicators = await GDBIndicatorModel.find({}, {populates: ['unitOfMeasure','baseline', 'indicatorReports.value']});
+      const indicators = await GDBIndicatorModel.find({},
+        {populates: ['unitOfMeasure','baseline', 'indicatorReports.value', 'threshold', 'datasets', 'codes', 'indicatorReports.datasets', 'indicatorReports.hasTime']});
       indicators.map(indicator => indicator.editable = true);
       return res.status(200).json({success: true, indicators});
     }
@@ -100,9 +102,8 @@ const fetchIndicatorHandler = async (req, res, next) => {
 const fetchIndicatorInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchIndicatorInterfaces'))
-      return await fetchIndicatorInterfaces(req, res);
+      return await fetchDataTypeInterfaces('Indicator', req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
-
   } catch (e) {
     next(e);
   }
@@ -131,9 +132,10 @@ const fetchIndicator = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('Id is not given');
-  const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure', 'baseline']});
+  const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure', 'baseline', 'threshold']});
   indicator.unitOfMeasure = indicator.unitOfMeasure?.label;
-  indicator.baseline = indicator.baseline?.numericalValue
+  indicator.baseline = indicator.baseline?.numericalValue;
+  indicator.threshold = indicator.threshold?.numericalValue;
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization})

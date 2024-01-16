@@ -1,6 +1,6 @@
 const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
-const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval} = require("../helpers");
+const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval, assignMeasure} = require("../helpers");
 const {GDBMeasureModel} = require("../../models/measure");
 const {Server400Error} = require("../../utils");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
@@ -55,49 +55,54 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
       error = ret.error;
     }
 
-    let measureURI = getValue(object, mainModel, 'value');
-    let measureObject = getObjectValue(object, mainModel, 'value');
+    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, uri, hasError, error, form);
+    hasError = ret.hasError;
+    error = ret.error;
 
-    let value;
-    if (measureObject)
-      value = getValue(measureObject, GDBMeasureModel, 'numericalValue');
+    // let measureURI = getValue(object, mainModel, 'value');
+    // let measureObject = getObjectValue(object, mainModel, 'value');
 
-    if (!measureURI && !value && config['iso21972:value'] && !form.value) {
-      if (config['iso21972:value'].rejectFile) {
-        if (environment === 'interface') {
-          throw new Server400Error(`${subType} Iso21972 Value is Mandatory`);
-        } else if (environment === 'fileUploading') {
-          error += 1;
-          hasError = true;
-        }
-      }
-      if (environment === 'fileUploading')
-        addMessage(8, 'propertyMissing',
-          {
-            uri,
-            type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(mainModel, 'value'))
-          },
-          config['iso21972:value']
-        );
-    } else if (measureURI || value || form?.value) {
-      mainObject.value = measureURI ||
-        GDBMeasureModel({
-            numericalValue: value
-          },
-          {uri: measureObject['@id']});
+    // let value;
+    // if (measureObject)
+    //   value = getValue(measureObject, GDBMeasureModel, 'numericalValue');
+    //
+    // if (!measureURI && !value && config['iso21972:value'] && !form.value) {
+    //   if (config['iso21972:value'].rejectFile) {
+    //     if (environment === 'interface') {
+    //       throw new Server400Error(`${subType} Iso21972 Value is Mandatory`);
+    //     } else if (environment === 'fileUploading') {
+    //       error += 1;
+    //       hasError = true;
+    //     }
+    //   }
+    //   if (environment === 'fileUploading')
+    //     addMessage(8, 'propertyMissing',
+    //       {
+    //         uri,
+    //         type: getPrefixedURI(object['@type'][0]),
+    //         property: getPrefixedURI(getFullPropertyURI(mainModel, 'value'))
+    //       },
+    //       config['iso21972:value']
+    //     );
+    // } else if (measureURI || value || form?.value) {
+    //   mainObject.value = measureURI ||
+    //     GDBMeasureModel({
+    //         numericalValue: value
+    //       },
+    //       {uri: measureObject['@id']});
+    // }
+
+    if (environment === 'interface') {
+      await mainObject.save();
+      return true
     }
+
     if (!ignore && !hasError && environment === 'fileUploading') {
       addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
     }
 
-    if (environment === 'interface') {
-      await mainObject.save();
-      await Transaction.commit();
-      return true
-    }
 
   }
   return error;

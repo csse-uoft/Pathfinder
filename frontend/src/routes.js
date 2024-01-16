@@ -26,9 +26,8 @@ import AddEditOrganization from "./components/organizations/AddEditOrganization"
 import EditUserForm from "./components/users/EditUserForm";
 import Groups from "./components/groups/Groups";
 import AddEditGroup from "./components/groups/AddEditGroup";
-import Profile from "./components/userProfile/Profile";
 import Themes from "./components/theme/Themes";
-import AddEditTheme from "./components/theme/addEditTheme";
+import AddEditTheme from "./components/theme/AddEditTheme";
 import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
 import AddEditIndicator from "./components/indicators/AddEditIndicator";
@@ -61,14 +60,18 @@ import Organization_impactReports from "./components/impactReport/Organization-i
 import ImpactReports from "./components/impactReport/ImpactReports";
 import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
 import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutcomes";
-import AddEditDataset from "./components/datasets/AddEditDataset"
+import AddEditDataset from "./components/datasets/AddEditDataset";
 import Organization_impactModels from "./components/impactModels/organization-impactModels";
 import ImpactModels from "./components/impactModels/impactModels";
 import AddEditImpactModel from "./components/impactModels/AddEditImpactModel";
-import CounterFactuals from "./components/counterfactual/Counterfactuals";
-import AddEditCounterfactual from "./components/counterfactual/AddEditCounterfactual"
+import AddEditCounterfactual from "./components/counterfactual/AddEditCounterfactual";
 import AddEditImpactRisk from "./components/impactRisk/AddEditImpactRisk";
 import ImpactRisks from "./components/impactRisk/ImpactRisks";
+import Counterfactuals from "./components/counterfactual/Counterfactuals";
+import Datasets from "./components/datasets/Datasets";
+import AddEditHowMuchImpact from "./components/howMuchImpact/AddEditHowMuchImpact";
+import HowMuchImpacts from "./components/howMuchImpact/HowMuchImpacts";
+import Characteristics from "./components/characteristics/Characteristics";
 
 
 const routes = (
@@ -110,16 +113,24 @@ const routes = (
 
     {/*Datasets*/}
     <Route path={`${process.env.PUBLIC_URL}/dataset/new`} element={<PrivateRoute element={AddEditDataset}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/datasets`} element={<PrivateRoute element={Datasets}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/dataset/:uri/:viewMode`} element={<PrivateRoute element={AddEditDataset}/>}/>
+
+    {/*Datasets*/}
+    <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/new`} element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/howMuchImpacts`} element={<PrivateRoute element={HowMuchImpacts}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/:uri/:operationMode`}
+             element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
 
     {/*ImpactRisk*/}
     <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactRisk/new`} element={<PrivateRoute element={AddEditImpactRisk}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/impactRisk/:uri/:viewMode`}
+    <Route path={`${process.env.PUBLIC_URL}/impactRisk/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditImpactRisk}/>}/>
 
 
     {/*Characteristic*/}
-    {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
+    <Route path={`${process.env.PUBLIC_URL}/characteristics`} element={<PrivateRoute element={Characteristics}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/characteristic/new`}
            element={<PrivateRoute element={AddEditCharacteristic}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/:viewMode`}
@@ -186,7 +197,7 @@ const routes = (
            element={<PrivateRoute element={Organization_impactModels}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactModel/new`}
            element={<PrivateRoute element={AddEditImpactModel}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/impactModel/:orgUri/:operationMode`}
+    <Route path={`${process.env.PUBLIC_URL}/impactModel/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditImpactModel}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactModels/:uri`} element={<PrivateRoute element={ImpactModels}/>}/>
 
@@ -244,15 +255,16 @@ const routes = (
            element={<PrivateRoute element={ImpactReports_ReportGenerate}/>}/>
 
 
-    {/*CounterFactual*/}
-    <Route 
-          path={`${process.env.PUBLIC_URL}/counterfactual`} 
-          element={<PrivateRoute element={CounterFactuals}/>}/>
-    <Route                                
-          path={`${process.env.PUBLIC_URL}/counterfactual/new`} 
-          element={<PrivateRoute element={AddEditCounterfactual}/>}/>
+    {/*Counterfactual*/}
+    <Route
+      path={`${process.env.PUBLIC_URL}/counterfactuals`}
+      element={<PrivateRoute element={Counterfactuals}/>}/>
+    <Route
+      path={`${process.env.PUBLIC_URL}/counterfactual/new`}
+      element={<PrivateRoute element={AddEditCounterfactual}/>}/>
 
-    <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:viewMode`} element={<PrivateRoute element={AddEditCounterfactual}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:operationMode`}
+           element={<PrivateRoute element={AddEditCounterfactual}/>}/>
 
   </Routes>
 );

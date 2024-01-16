@@ -4,16 +4,16 @@ import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
-import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
-import {fetchIndicators} from "../../api/indicatorApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 export default function Indicators() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
+  const [outcomeInterfaces, setOutcomeInterfaces] = useState({})
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
@@ -26,7 +26,11 @@ export default function Indicators() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicators(encodeURIComponent(uri)).then(res => {
+    fetchDataTypeInterfaces('outcome').then(({interfaces}) => setOutcomeInterfaces(interfaces))
+  }, [])
+
+  useEffect(() => {
+    fetchDataTypes('indicator', encodeURIComponent(uri)).then(res => {
       if(res.success) {
         console.log(res.indicators)
         setState(state => ({...state, loading: false, data: res.indicators}));
@@ -38,56 +42,67 @@ export default function Indicators() {
     });
   }, [trigger]);
 
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
-
   const columns = [
     {
-      label: 'Name',
-      body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/indicator/${encodeURIComponent(_uri)}/view`}>
-          {name}
-        </Link>
+      label: 'Indicator Name',
+      body: ({name}) => {
+        return name
+
       },
       sortBy: ({name}) => name
     },
     {
-      label: 'Unit of Measure',
-      body: ({unitOfMeasure}) => {
-        return unitOfMeasure?.label;
+      label: 'Indicator URI',
+      body: ({_uri}) => {
+        return _uri
+
+      },
+    },
+    {
+      label: 'Indicator Description',
+      body: ({description}) => {
+        return description
+      },
+    },
+    {
+      label: 'Outcome(s) URI',
+      colSpan: 2,
+      body: ({forOutcomes}) => {
+        return forOutcomes?.map(outcomeUri => [outcomeUri, outcomeInterfaces[outcomeUri]])
+      },
+    },
+    {
+      label: 'Outcome(s) Name',
+    },
+    {
+      label: 'Indicator Baseline',
+      body: (baseline) => {
+        return baseline?.numericalValue
       }
+    },
+    {
+      label: 'indicatorReport URI',
+      colSpan: 3,
+      body: ({indicatorReports}) => {
+        return indicatorReports?.map(indicatorReport => [indicatorReport._uri,
+          indicatorReport.value?.numericalValue,
+          (indicatorReport.hasTime?.hasBeginning?.date && indicatorReport.hasTime?.hasEnd?.date)? `${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : null
+        ]);
+      }
+    },
+    {
+      label: 'IndicatorReport Value'
+    },
+    {
+      label: 'IndicatorReport Time Interval'
     },
 
     {
       label: ' ',
       body: ({_uri}) => {
         return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
-                      hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                      handleDelete={() => showDeleteDialog(_uri)}/>;
+                             hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                             handleDelete={() => showDeleteDialog(_uri)}/>;
       }
     }
   ];

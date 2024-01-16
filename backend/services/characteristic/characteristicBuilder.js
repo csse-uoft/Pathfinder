@@ -38,7 +38,7 @@ async function characteristicBuilder(environment, object, error, {characteristic
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'cids:hasValue', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 

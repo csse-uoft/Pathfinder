@@ -1,13 +1,10 @@
-const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
+const {fullLevelConfig} = require("../fileUploading/configs");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
-const {GDBMeasureModel} = require("../../models/measure");
-const {getObjectValue, assignMeasure, assignValue, assignValues, assignImpactNorms} = require("../helpers");
-const {Transaction} = require("graphdb-utils");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {assignMeasure, assignValue, assignValues} = require("../helpers");
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, object, organization, error, {
   indicatorDict,
@@ -26,7 +23,6 @@ async function indicatorBuilder(environment, object, organization, error, {
   let impactNorms;
   const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
-    await Transaction.beginTransaction();
     await mainObject.save();
     uri = mainObject._uri;
   }
@@ -38,10 +34,10 @@ async function indicatorBuilder(environment, object, organization, error, {
     // add the organization to it, and add it to the organization
     if (environment === 'interface') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-      impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})
-      if (!impactNorms.indicators)
-        impactNorms.indicators = [];
-      impactNorms.indicators = [...impactNorms.indicators, uri]
+      // impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})
+      // if (!impactNorms.indicators)
+      //   impactNorms.indicators = [];
+      // impactNorms.indicators = [...impactNorms.indicators, uri]
     }
 
     mainObject.forOrganization = organization._uri;
@@ -52,7 +48,7 @@ async function indicatorBuilder(environment, object, organization, error, {
 
     if (environment === 'interface') {
       await organization.save();
-      await impactNorms.save();
+      // await impactNorms.save();
     }
 
 
@@ -71,7 +67,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'cids:hasIdentifier', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'tove_org:hasIdentifier', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -79,7 +75,12 @@ async function indicatorBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error);
+    if (mainObject.dateCreated) {
+      mainObject.dateCreated = new Date(mainObject.dateCreated)
+    }
+
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -97,7 +98,6 @@ async function indicatorBuilder(environment, object, organization, error, {
 
     if (environment === 'interface'){
       await mainObject.save();
-      await Transaction.commit();
       return true
     }
 

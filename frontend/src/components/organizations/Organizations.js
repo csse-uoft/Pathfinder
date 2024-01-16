@@ -3,11 +3,12 @@ import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useSnackbar } from 'notistack';
-import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
+import {deleteOrganization} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import {useNavigate} from "react-router-dom";
+import {fetchDataTypes} from "../../api/generalAPI";
 
 export default function Organizations() {
 
@@ -27,7 +28,7 @@ export default function Organizations() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOrganizations().then(res => {
+    fetchDataTypes('organization').then(res => {
       if(res.success)
       setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {
@@ -67,27 +68,39 @@ export default function Organizations() {
 
   const columns = [
     {
-      label: 'Legal Name',
-      body: ({_uri, legalName, editable}) => {
+      label: 'Organization ID',
+      body: ({_uri, hasId , editable}) => {
         return editable?
           <Link colorWithHover to={`/organizations/${encodeURIComponent(_uri)}/view/`}>
-          {legalName}
+          {hasId}
         </Link>:
-          legalName
+          hasId
       },
       sortBy: ({legalName}) => legalName
     },
     {
-      label: 'Administrator',
-      body: ({administrator}) => {
-        return administrator;
+      label: 'Organization Name',
+      body: ({legalName}) => {
+        return legalName;
+      }
+    },
+    {
+      label: 'Organization URI',
+      body: ({_uri}) => {
+        return _uri;
       }
     },
 
     {
+      label: 'Legal Status',
+      body: ({legalStatus}) => {
+        return legalStatus;
+      }
+    },
+    {
       label: ' ',
       body: ({_uri, editable}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectUri={encodeURIComponent(_uri)} hideViewOption hideDeleteOption
+        <DropdownMenu urlPrefix={'organizations'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
                       hideEditOption={!editable}
                       handleDelete={() => showDeleteDialog(_uri)}/>
     }

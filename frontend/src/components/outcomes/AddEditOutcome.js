@@ -8,9 +8,12 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {updateOutcome} from "../../api/outcomeApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {validateForm} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -25,11 +28,13 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditOutcome() {
   const navigator = useNavigate();
-  const navigate = navigateHelper(navigator)
+  const navigate = navigateHelper(navigator);
   const classes = useStyles();
-  const {uri, orgUri
-    , operationMode} = useParams();
-  const mode = uri? operationMode : 'new';
+  const {
+    uri, orgUri
+    , operationMode
+  } = useParams();
+  const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -37,15 +42,16 @@ export default function AddEditOutcome() {
     submitDialog: false,
     loadingButton: false,
   });
-  const [errors, setErrors] = useState(
-    {}
-  );
+  const [errors, setErrors] = useState({});
+
+  const [outcomeInterfaces, setOutcomeInterfaces] = useState({});
+  const [impactModelInterfaces, setImpactModelInterfaces] = useState({})
 
   const [form, setForm] = useState({
     name: '',
     description: '',
     organization: null,
-    indicators:[],
+    indicators: [],
     uri: '',
     themes: [],
     codes: [],
@@ -56,13 +62,44 @@ export default function AddEditOutcome() {
   });
   const [loading, setLoading] = useState(true);
 
+  const attriConfig = fullLevelConfig.outcome;
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    organization: 'cids:forOrganization',
+    indicators: 'cids:hasIndicator',
+    themes: 'cids:forTheme',
+    codes: 'cids:hasCode',
+    dateCreated: 'schema:dateCreated',
+    canProduces: 'cids:canProduce',
+    locatedIns: 'iso21972:located_in',
+    partOf: 'oep:partOf',
+  }
+
   useEffect(() => {
-    if((mode === 'edit' && uri) || (mode === 'view' && uri)){
-      fetchOutcome(encodeURIComponent(uri)).then(({success, outcome}) => {
-        if(success){
+    if (form.organization) {
+      fetchDataTypeInterfaces('outcome', encodeURIComponent(form.organization)).then(({interfaces}) => {
+        setOutcomeInterfaces(interfaces);
+      });
+    }
+  }, [form.organization]);
+
+  useEffect(() => {
+
+    fetchDataTypeInterfaces('impactModel').then(({interfaces}) => {
+      setImpactModelInterfaces(interfaces);
+    });
+  }, []);
+
+
+  useEffect(() => {
+    if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
+      fetchDataType('outcome', encodeURIComponent(uri)).then(({success, outcome}) => {
+        if (success) {
           outcome.uri = outcome._uri;
+          outcome.outcomes = outcome.canProduces;
           setForm(outcome);
-          setLoading(false)
+          setLoading(false);
         }
       }).catch(e => {
         if (e.json)
@@ -70,19 +107,19 @@ export default function AddEditOutcome() {
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if(mode === 'edit' && (!uri || !orgUri) ) {
+    } else if (mode === 'edit' && (!uri || !orgUri)) {
       navigate(-1);
       enqueueSnackbar("No URI or orgUri provided", {variant: 'error'});
-    } else if (mode === 'new' && !orgUri){
+    } else if (mode === 'new' && !orgUri) {
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new' && orgUri) {
-      setForm(form => ({...form, organizations: [orgUri]}))
+    } else if (mode === 'new' && orgUri) {
+      setForm(form => ({...form, organizations: [orgUri]}));
       setLoading(false);
     } else {
       navigate(-1);
-      enqueueSnackbar('Wrong auth', {variant: 'error'})
+      enqueueSnackbar('Wrong auth', {variant: 'error'});
     }
 
   }, [mode, uri]);
@@ -97,7 +134,7 @@ export default function AddEditOutcome() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOutcome({form}).then((ret) => {
+      createDataType('outcome', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -107,7 +144,7 @@ export default function AddEditOutcome() {
         if (e.json) {
           setErrors(e.json);
         }
-        console.log(e)
+        console.log(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -130,30 +167,9 @@ export default function AddEditOutcome() {
   };
 
   const validate = () => {
-    console.log(form)
+    console.log(form);
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-
-    // if (!form.indicators.length)
-    //   error.indicators = 'The field cannot be empty';
-    // if (!form.outcomes.length)
-    //   error.outcomes = 'The field cannot be empty';
-    // if (!form.locatedIn)
-    //   error.locatedIn = 'The field cannot be empty';
-
-    // if (!form.themes.length)
-    //   error.themes = 'The field cannot be empty';
-    // if (!form.description)
-    //   error.description = 'The field cannot be empty'
-    if(!form.organization)
-      error.organization = 'The field cannot be empty'
-    // if(form.uri && !isValidURL(form.uri))
-    //   error.uri = 'Not a valid URI';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
-    if (!form.partOf)
-      error.partOf = 'The field cannot be empty'
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri']);
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -163,52 +179,59 @@ export default function AddEditOutcome() {
 
   return (
     <Container maxWidth="md">
-      {mode === 'view'?
+      {mode === 'view' ?
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
-
+            <Typography variant={'h4'}> Outcome </Typography>
             <Typography variant={'h6'}> {`Name:`} </Typography>
             <Typography variant={'body1'}> {`${form.name}`} </Typography>
             <Typography variant={'h6'}> {`URI:`} </Typography>
             <Typography variant={'body1'}> {`${form.uri}`} </Typography>
             <Typography variant={'h6'}> {`Organization:`} </Typography>
-            <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
+            <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
+                                                 colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link>
+            </Typography>
+            <Typography variant={'h6'}> {`Part Of:`} </Typography>
+            <Typography variant={'body1'}> <Link to={`/impactModel/${encodeURIComponent(form.partOf)}/view`}
+                                                 colorWithHover color={'#2f5ac7'}>{impactModelInterfaces[form.partOf]}</Link>
+            </Typography>
             <Typography variant={'h6'}> {`Date Created:`} </Typography>
-            <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
+            <Typography
+              variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}` : 'Not Given'} </Typography>
             <Typography variant={'h6'}> {`Located In:`} </Typography>
-            <Typography variant={'body1'}> {`${form.locatedIn}`} </Typography>
+            <Typography variant={'body1'}> {`${form.locatedIn || 'Not Given'}`} </Typography>
             {<Typography variant={'h6'}> {`Themes:`} </Typography>}
-             {form.themes?.length? form.themes.map(themeURI => {
+            {form.themes?.length ? form.themes.map(themeURI => {
               return (
                 <Typography variant={'body1'}>
-                <Link to={`/themes/${encodeURIComponent(themeURI)}/view`} colorWithHover
-                            color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
+                  <Link to={`/themes/${encodeURIComponent(themeURI)}/view`} colorWithHover
+                        color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
                 </Typography>
-                );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
+              );
+            }) : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 
             <Typography variant={'h6'}> {`Indicators:`} </Typography>
-            {form.indicators?.length? form.indicators.map(indicatorURI => {
+            {form.indicators?.length ? form.indicators.map(indicatorURI => {
               return (
                 <Typography variant={'body1'}>
                   <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover
                         color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>
                 </Typography>
               );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
-            <Typography variant={'h6'}> {`Outcomes:`} </Typography>
-            {form.outcomes?.length? form.outcomes.map(outcomeURI => {
+            }) : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+            <Typography variant={'h6'}> {`Can Produce:`} </Typography>
+            {form.outcomes?.length ? form.outcomes.map(outcomeURI => {
               return (
-                  <Typography variant={'body1'}>
-                    <Link to={`/outcome/${encodeURIComponent(outcomeURI)}/view`} colorWithHover
-                          color={'#2f5ac7'}>{form.outcomes[outcomeURI]}</Link>
-                  </Typography>
+                <Typography variant={'body1'}>
+                  <Link to={`/outcome/${encodeURIComponent(outcomeURI)}/view`} colorWithHover
+                        color={'#2f5ac7'}>{outcomeInterfaces[outcomeURI]}</Link>
+                </Typography>
               );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
+            }) : <Typography variant={'body1'}> {`Not Given`} </Typography>}
             <Typography variant={'h6'}> {`Description:`} </Typography>
-            <Typography variant={'body1'}> {`${form.description}`} </Typography>
+            <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
 
-            <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+            <Button variant="contained" color="primary" className={classes.button} onClick={() => {
               navigate(`/outcome/${encodeURIComponent(uri)}/edit`);
             }
             }>
@@ -218,35 +241,36 @@ export default function AddEditOutcome() {
           </Paper>
         )
         : (<Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Outcome </Typography>
-        <OutcomeField
-          disabled={mode === 'view'}
-          disabledOrganization={!!orgUri}
-          disableURI={mode !== 'new'}
-          defaultValue={form}
-          required
-          onChange={(state) => {
-            setForm(form => ({...form, ...state}));
-          }}
-          importErrors={errors}
-        />
+          <Typography variant={'h4'}> Outcome </Typography>
+          <OutcomeField
+            disabled={mode === 'view'}
+            disabledOrganization={!!orgUri}
+            disableURI={mode !== 'new'}
+            defaultValue={form}
+            required
+            onChange={(state) => {
+              setForm(form => ({...form, ...state}));
+            }}
+            importErrors={errors}
+            attribute2Compass={attribute2Compass}
+          />
 
-        {mode==='view'?
-          <div/>:
-          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-            Submit
-          </Button>}
+          {mode === 'view' ?
+            <div/> :
+            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+              Submit
+            </Button>}
 
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
-                       'Are you sure you want to update this outcome?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
-                     open={state.submitDialog}/>
-      </Paper>)}
+          <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
+                         'Are you sure you want to update this outcome?'}
+                       buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                                         key={'cancel'}>{'cancel'}</Button>,
+                         <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                                        key={'confirm'}
+                                        onClick={handleConfirm} children="confirm" autoFocus/>]}
+                       open={state.submitDialog}/>
+        </Paper>)}
     </Container>);
 
 }

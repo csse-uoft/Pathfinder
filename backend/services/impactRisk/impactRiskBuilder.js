@@ -1,9 +1,5 @@
 const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
-const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval} = require("../helpers");
-const {GDBMeasureModel} = require("../../models/measure");
-const {Server400Error} = require("../../utils");
-const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {Transaction} = require("graphdb-utils");
 const {
   GDBImpactRiskModel,
@@ -78,7 +74,7 @@ async function impactRiskBuilder(environment, subType, object, organization, err
 
   if (mainObject) {
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'hasIdentifier', 'cids:hasIdentifier', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'hasIdentifier', 'tove_org:hasIdentifier', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 

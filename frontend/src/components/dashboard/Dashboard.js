@@ -81,16 +81,24 @@ function Dashboard() {
       <NavButton to={`/organization-stakeholderOutcomes`} icon={<Edit/>} key={'stakeholderOutcomes'}
                  text="Manage Stakeholder Outcomes"/>
 
+      <NavButton to={'/datasets'} icon={<Edit/>} key={`dataset`}
+                 text="Manage Datasets"/>
+
+      <NavButton to={'/impactRisks'} icon={<Edit/>} key={`impactRisk`}
+                 text="Manage ImpactRisk"/>
+
+      <NavButton to={'/counterfactuals'} icon={<Edit/>} key={`counterfactual`}
+                 text="Manage Counterfactuals"/>
+
+      <NavButton to={'/howMuchImpacts'} icon={<Edit/>} key={`howMuchImpacts`}
+                 text="Manage HowMuchImpacts"/>
 
 
       {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={`/fileUploading`} icon={<FileUpload/>} key={'fileUploading'}
-                  text="File Upload"/>:null}
+                                                                           text="File Upload"/>:null}
 
       <NavButton to={'/reportGenerate'} icon={<Download/>} key={`reportGenerate`}
                  text="Reports"/>
-
-      <NavButton to={'/dataset/new'} icon={<Download/>} key={`createDataset`}
-                 text="Create Dataset"/>
 
 
 

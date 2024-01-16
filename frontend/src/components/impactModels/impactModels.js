@@ -7,7 +7,7 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchImpactModels} from "../../api/impactModelAPI";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function ImpactModels() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
@@ -25,7 +25,7 @@ export default function ImpactModels() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchImpactModels(encodeURIComponent(uri)).then(res => {
+    fetchDataTypes('impactModel', encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.impactModels, editable: res.editable}));
     }).catch(e => {
@@ -36,32 +36,6 @@ export default function ImpactModels() {
     });
   }, [trigger]);
 
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
 
   const columns = [
     {
@@ -73,17 +47,10 @@ export default function ImpactModels() {
       },
       sortBy: ({name}) => name
     },
-    // {
-    //   label: 'value',
-    //   body: ({value}) => {
-    //     return value.numericalValue;
-    //   }
-    // },
     {
       label: 'Date Created',
       body: ({dateCreated}) => {
-        return
-          dateCreated
+        return dateCreated? `${(new Date(dateCreated)).toLocaleDateString()}` : 'Not Given'
 
       }
     },

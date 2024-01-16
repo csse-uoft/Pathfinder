@@ -1,11 +1,11 @@
 const express = require('express');
-const {createImpactRiskHandler} = require("../services/impactRisk/impactRisk");
+const {createImpactRiskHandler, fetchImpactRiskHandler} = require("../services/impactRisk/impactRisk");
 
 
 
 const router = express.Router();
 
-// router.get('/:uri', fetchImpactReportHandler);
+router.get('/:uri', fetchImpactRiskHandler);
 router.post('/', createImpactRiskHandler);
 // router.put('/:uri', updateIndicatorReportHandler);
 

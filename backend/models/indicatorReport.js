@@ -1,7 +1,6 @@
 const {createGraphDBModel, Types} = require("graphdb-utils");
 const {GDBDateTimeIntervalModel} = require("./time");
 const {GDBMeasureModel} = require("./measure");
-const {GDBOwnershipModel} = require("./ownership");
 
 const GDBIndicatorReportModel = createGraphDBModel({
   name: {type: String, internalKey: 'cids:hasName'},

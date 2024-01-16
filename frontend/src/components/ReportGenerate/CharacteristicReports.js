@@ -3,17 +3,11 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
-import SelectField from "../shared/fields/SelectField";
 import {Undo, PictureAsPdf, FileDownload} from "@mui/icons-material";
-import {fetchIndicators} from "../../api/indicatorApi";
-import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
-import {fetchCharacteristics} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -97,7 +91,7 @@ export default function Characteristic_ReportGenerate() {
 
 
   useEffect(() => {
-    fetchCharacteristics().then(({success, characteristics}) => {
+    fetchDataTypes('characteristic').then(({success, characteristics}) => {
       if (success) {
         setCharacteristics(characteristics);
         setLoading(false)

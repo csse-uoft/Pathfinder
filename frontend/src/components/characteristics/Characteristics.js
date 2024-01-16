@@ -7,10 +7,12 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCodes} from "../../api/codeAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 
-export default function Codes() {
-  const navigate = useNavigate();
+export default function Characteristics() {
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
 
   const userContext = useContext(UserContext);
@@ -24,9 +26,9 @@ export default function Codes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchCodes().then(res => {
+    fetchDataTypes('characteristic').then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.codes}));
+        setState(state => ({...state, loading: false, data: res.characteristics}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
@@ -66,44 +68,38 @@ export default function Codes() {
     {
       label: 'Name',
       body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/code/${encodeURIComponent(_uri)}/view`}>
-          {name}
+        return <Link colorWithHover to={`/characteristic/${encodeURIComponent(_uri)}/view`}>
+          {name || _uri}
         </Link>
       },
       sortBy: ({legalName}) => legalName
-    },
-    {
-      label: 'Description',
-      body: ({description}) => {
-        return description;
-      }
     },
 
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'characteristic'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading codes...`}/>;
+    return <Loading message={`Loading characteristics...`}/>;
 
   return (
     <Container>
       <DataTable
-        title={"Codes"}
+        title={"Characteristics"}
         data={state.data}
         columns={columns}
         uriField="uriField"
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/code/new')}
+            onClick={() => navigate('/characteristic/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Theme"
+            label="Add new Characteristic"
             variant="outlined"/>
         }
 

@@ -4,10 +4,9 @@ import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
-import {UserContext} from "../../context";
-import {fetchOutcomes} from "../../api/outcomeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function Outcomes() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
@@ -24,7 +23,7 @@ export default function Outcomes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOutcomes(encodeURIComponent(uri)).then(res => {
+    fetchDataTypes('outcome', encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.outcomes, editable: res.editable}));
     }).catch(e => {
@@ -34,33 +33,6 @@ export default function Outcomes() {
       enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
     });
   }, [trigger]);
-
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
 
   const columns = [
     {
@@ -80,22 +52,7 @@ export default function Outcomes() {
         // return indicators.join(", ");
       }
     },
-    // {
-    //   label: 'Last name',
-    //   body: ({person}) => {
-    //     if(person && person.familyName)
-    //       return person.familyName
-    //     return 'Not Provided'
-    //   }
-    // },
-    // {
-    //   label: 'Phone Number',
-    //   body: ({primaryContact}) => {
-    //     if (primaryContact && primaryContact.telephone)
-    //       return formatPhoneNumber(primaryContact.telephone);
-    //     return 'Not Provided';
-    //   },
-    // },
+
 
     {
       label: ' ',

@@ -2,14 +2,14 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
-const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {outcomeBuilder} = require("./outcomeBuilder");
-const {getRepository} = require("../../loaders/graphDB");
-const {transSave} = require("../helpers");
 const {Transaction} = require("graphdb-utils");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+
+const resource = 'Outcome'
 
 
 const fetchOutcomes = async (req, res) => {
@@ -57,13 +57,6 @@ const fetchOutcomes = async (req, res) => {
     if (!organization.hasOutcomes)
       return res.status(200).json({success: true, outcomes: [], editable});
 
-    // for (let outcome of organization.hasOutcomes) {
-    //   await outcome.populate('indicators')
-    //   // outcome.indicators = (await Promise.all(outcome.indicators.map(indicatorURI =>
-    //   //   GDBIndicatorModel.findOne({_uri: indicatorURI})
-    //   // ))).map(indicator => indicator.name);
-    // }
-
     return res.status(200).json({success: true, outcomes: organization.hasOutcomes, editable});
   }
 
@@ -72,7 +65,7 @@ const fetchOutcomes = async (req, res) => {
 
 const fetchOutcomesHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchOutcomes(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -93,7 +86,7 @@ const fetchOutcomesThroughThemeHandler = async (req, res, next) => {
 
 const fetchOutcomeHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOutcome'))
+    if (await hasAccess(req, `fetch${resource}`))
       return await fetchOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -104,8 +97,8 @@ const fetchOutcomeHandler = async (req, res, next) => {
 
 const fetchOutcomeInterfaceHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOutcomeInterface'))
-      return await fetchOutcomeInterface(req, res);
+    if (await hasAccess(req, `fetch${resource}s`))
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {

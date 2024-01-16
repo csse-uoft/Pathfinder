@@ -14,7 +14,7 @@ const GDBIndicatorModel = createGraphDBModel({
   baseline: {type: GDBMeasureModel, internalKey: 'cids:hasBaseline'},
   threshold: {type: GDBMeasureModel, internalKey: 'cids:hasThreshold'},
   hasAccesss: {type: [() => require("./organization").GDBOrganizationModel], internalKey: 'cids:hasAccess'},
-  identifier: {type: String, internalKey: 'cids:hasIdentifier'},
+  identifier: {type: String, internalKey: 'tove_org:hasIdentifier'},
   dateCreated: {type: Date, internalKey: 'schema:dateCreated'},
   datasets: {type: [() => require('./dataset').GDBDataSetModel], internalKey: 'dcat:dataset'}
 }, {

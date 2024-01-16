@@ -8,6 +8,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchImpactReports} from "../../api/impactReportAPI";
+import {fetchDataTypes} from "../../api/generalAPI";
 export default function ImpactReports() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
@@ -25,7 +26,7 @@ export default function ImpactReports() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchImpactReports(encodeURIComponent(uri)).then(res => {
+    fetchDataTypes('impactReport', encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.impactReports, editable: res.editable}));
     }).catch(e => {
@@ -82,8 +83,8 @@ export default function ImpactReports() {
     {
       label: 'For Stakeholder Outcome',
       body: ({forStakeholderOutcome}) => {
-        return <Link colorWithHover to={`/stakeholderOutcome/${encodeURIComponent(forStakeholderOutcome._uri)}/view`}>
-          {forStakeholderOutcome.name}
+        return <Link colorWithHover to={`/stakeholderOutcome/${encodeURIComponent(forStakeholderOutcome?._uri)}/view`}>
+          {forStakeholderOutcome?.name}
         </Link>
       }
     },

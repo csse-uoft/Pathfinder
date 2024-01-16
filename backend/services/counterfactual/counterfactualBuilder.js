@@ -1,4 +1,3 @@
-const {Transaction} = require("graphdb-utils");
 const {fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
@@ -20,7 +19,6 @@ async function counterfactualBuilder(environment, object, organization, error, {
   let ret;
   const mainObject = environment === 'fileUploading' ? counterfactualDict[uri] : mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
-    await Transaction.beginTransaction();
     await mainObject.save();
     uri = mainObject._uri;
   }
@@ -31,9 +29,7 @@ async function counterfactualBuilder(environment, object, organization, error, {
 
 
 
-    // ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error)
-
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'sch:description', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -50,9 +46,8 @@ async function counterfactualBuilder(environment, object, organization, error, {
     error = ret.error;
 
 
-    if (environment === 'interface'){
+    if (environment === 'interface') {
       await mainObject.save();
-      await Transaction.commit();
       return true
     }
 

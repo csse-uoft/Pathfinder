@@ -61,7 +61,7 @@ export default function FileUploader({title, disabled, onchange, importedError, 
     //   setChecked(true);
     } catch (e) {
       console.log(e);
-      setError(e.message ? 'Not a valid JSON file: ' + e.message : 'Error occurred when validating the file.');
+      setError(e.message ? 'Not a valid JSON-ld file: ' + e.message : 'Error occurred when validating the file.');
     }
 
   };

@@ -1,11 +1,10 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBOutcomeModel} = require("../../models/outcome");
-const {GDBOrganizationModel} = require("../../models/organization");
+const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
 const {GDBThemeModel} = require("../../models/theme");
 const {Server400Error} = require("../../utils");
 const {GDBIndicatorModel} = require("../../models/indicator");
-const {getRepository} = require("../../loaders/graphDB");
-const {expand, frame} = require('jsonld');
+const {expand} = require('jsonld');
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBUnitOfMeasure, GDBMeasureModel} = require("../../models/measure");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
@@ -13,7 +12,7 @@ const {isValidURL} = require("../../helpers/validator");
 const {GraphDB, Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
-const {transSave, getFullPropertyURI, getValue, getObjectValue, getFullTypeURIList} = require("../helpers")
+const {getFullPropertyURI, getValue, getObjectValue, getFullTypeURIList} = require("../helpers")
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {themeBuilder} = require("../theme/themeBuilder");
 const {GDBCodeModel} = require("../../models/code");
@@ -27,7 +26,7 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {stakeholderOutcomeBuilder} = require("../stakeholderOutcome/stakeholderOutcomeBuilder");
 const {impactNormsBuilder} = require("../impactStuffs/impactNormsBuilder");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
-const {GDBHowMuchImpactModel, GDBImpactDepthModel, GDBImpactScaleModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
+const {GDBImpactDepthModel, GDBImpactScaleModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
 const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
 const {counterfactualBuilder} = require("../counterfactual/counterfactualBuilder");
@@ -36,6 +35,9 @@ const {GDBImpactRiskModel, GDBEvidenceRiskModel, GDBExternalRiskModel, GDBStakeh
   GDBUnexpectedImpactRiskModel
 } = require("../../models/impactRisk");
 const {impactRiskBuilder} = require("../impactRisk/impactRiskBuilder");
+const {stakeholderOrganizationBuilder} = require("../stakeholder/stakeholderOrganizationBuilder");
+const {GDBDataSetModel} = require("../../models/dataset");
+const {datasetBuilder} = require("../dataset/datasetBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -60,6 +62,7 @@ const fileUploading = async (req, res, next) => {
     const outcomeDict = {};
     const themeDict = {};
     const codeDict = {};
+    const stakeholderDict = {}
     const characteristicDict = {};
     const indicatorDict = {};
     const indicatorReportDict = {};
@@ -79,6 +82,7 @@ const fileUploading = async (req, res, next) => {
     const alignmentRiskDict = {};
     const enduranceRiskDict = {};
     const unexpectedImpactRiskDict = {};
+    const datasetDict ={};
 
 
     const dicts = {
@@ -104,7 +108,9 @@ const fileUploading = async (req, res, next) => {
       'executionRisk': executionRiskDict,
       'alignmentRisk': alignmentRiskDict,
       'enduranceRisk': enduranceRiskDict,
-      'unexpectedImpactRisk': unexpectedImpactRiskDict
+      'unexpectedImpactRisk': unexpectedImpactRiskDict,
+      'stakeholder': stakeholderDict,
+      'dataset': datasetDict,
     }
     const GDBModels = {
       'impactReport': GDBImpactReportModel,
@@ -130,6 +136,8 @@ const fileUploading = async (req, res, next) => {
       'impactScale': GDBImpactScaleModel,
       'impactDepth': GDBImpactDepthModel,
       'impactDuration': GDBImpactDurationModel,
+      'stakeholder': GDBStakeholderOrganizationModel,
+      'dataset': GDBDataSetModel
     }
 
     let messageBuffer = {
@@ -346,7 +354,7 @@ const fileUploading = async (req, res, next) => {
       addTrace('The file should contain a list (start with [ and end with ] ) of json objects.');
       addTrace('Please consult the JSON-LD reference at: https://json-ld.org/');
       error += 1;
-      addMessage(0, 'fileNotAList', {});
+      addMessage(0, 'fileNotAList', {}, {});
       const msg = formatMessage();
       throw new Server400Error(msg);
     }
@@ -381,7 +389,6 @@ const fileUploading = async (req, res, next) => {
 
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
-    // const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}) || GDBImpactNormsModel({organization: organizationUri});
 
     if (!organization) {
       addTrace('        Error: Incorrect organization URI: No such Organization');
@@ -422,7 +429,7 @@ const fileUploading = async (req, res, next) => {
         error += 1
         continue;
       }
-      if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
+      if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1]) && !object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1]) ) {
         // check whether the uri belongs to other objects
         // duplicated uri in database
         addTrace('        Error: Duplicated URI');
@@ -483,7 +490,7 @@ const fileUploading = async (req, res, next) => {
         unexpectedImpactRiskDict[uri] = {_uri: uri};
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) { // todo: may have to change the index
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) { // todo: may have to change the index
         impactNormsDict[uri] = {_uri: uri};
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
@@ -491,6 +498,10 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorDict[uri] = {_uri: uri};
+      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        datasetDict[uri] = {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
@@ -501,6 +512,12 @@ const fileUploading = async (req, res, next) => {
         addMessage(4, 'readingMessage',
           {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorReportDict[uri] = {_uri: uri};
+
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage',
+          {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        stakeholderDict[uri] = {_uri: uri};
 
       } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
 
@@ -565,7 +582,7 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBMeasureModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
 
         if (!object[getFullPropertyURI(GDBMeasureModel, 'numericalValue')]) {
           addTrace('        Error: Mandatory property missing');
@@ -575,7 +592,7 @@ const fileUploading = async (req, res, next) => {
               uri,
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(GDBMeasureModel, 'numericalValue'))
-            });
+            }, {});
           error += 1;
           hasError = true;
         }
@@ -589,7 +606,7 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBDateTimeIntervalModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
 
         // if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')] ||
         //   !object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')]) {
@@ -607,7 +624,7 @@ const fileUploading = async (req, res, next) => {
               uri,
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning'))
-            });
+            }, {});
           error += 1;
           hasError = true;
         }
@@ -620,7 +637,7 @@ const fileUploading = async (req, res, next) => {
               uri,
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd'))
-            });
+            }, {});
           error += 1;
           hasError = true;
         }
@@ -649,7 +666,7 @@ const fileUploading = async (req, res, next) => {
           addTrace('             Organization in the file is different from the organization chosen in the interface');
           addMessage(8, 'differentOrganization',
             {uri, organizationUri}, {rejectFile: true});
-          // error += 1;
+          error += 1;
 
         } else {
           addTrace(`        Warning: organization object is ignored`);
@@ -670,7 +687,7 @@ const fileUploading = async (req, res, next) => {
         error = await outcomeBuilder('fileUploading', object, organization, error, {objectDict, outcomeDict, impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue}, null);
       } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
         error = await counterfactualBuilder('fileUploading', object, organization, error, {counterfactualDict, objectDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
         error = await impactNormsBuilder('fileUploading', object, organization, error, {impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue})
       } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
         error = await indicatorBuilder('fileUploading', object, organization, error, {
@@ -733,6 +750,10 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
         error = await impactRiskBuilder('fileUploading','unexpectedImpactRisk', object, organization, error,
           {impactRiskDict, evidenceRiskDict, externalRiskDict, stakeholderParticipationRiskDict, dropOffRiskDict, efficiencyRiskDict, executionRiskDict, alignmentRiskDict, enduranceRiskDict, unexpectedImpactRiskDict, objectDict}, {addMessage, addTrace, getValue, getFullPropertyURI, getListOfValue}, null);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+        error = await stakeholderOrganizationBuilder('fileUploading', object, organization, error, {stakeholderDict, objectDict, impactNormsDict}, {addMessage, addTrace, getValue, getFullPropertyURI, getListOfValue}, null)
+      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
+        error = await datasetBuilder('fileUploading', object, organization, error, {datasetDict, objectDict}, {addMessage, addTrace, getValue, getFullPropertyURI, getListOfValue}, null)
       } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
         error = await codeBuilder('fileUploading',object,organization, error, {codeDict}, {
           addMessage,

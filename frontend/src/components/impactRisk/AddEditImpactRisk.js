@@ -10,11 +10,10 @@ import {UserContext} from "../../context";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchImpactReport} from "../../api/impactReportAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createImpactRisk} from "../../api/impactRiskApi";
+import {createDataType, fetchDataType} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -68,13 +67,10 @@ export default function AddEditImpactRisk() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactReport(encodeURIComponent(uri)).then(({success, impactReport}) => {
+      fetchDataType('impactRisk', encodeURIComponent(uri)).then(({success, impactRisk}) => {
         if (success) {
-          impactReport.uri = impactReport._uri;
-          impactReport.organization = impactReport.forOrganization;
-          impactReport.impactScale = impactReport.impactScale?.value?.numericalValue;
-          impactReport.impactDepth = impactReport.impactDepth?.value?.numericalValue;
-          setForm(impactReport);
+          impactRisk.uri = impactRisk._uri;
+          setForm(impactRisk);
           setLoading(false);
         }
       }).catch(e => {
@@ -112,7 +108,7 @@ export default function AddEditImpactRisk() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createImpactRisk({form}).then((ret) => {
+      createDataType('impactRisk', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -139,7 +135,7 @@ export default function AddEditImpactRisk() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating outcome', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating ImpactRisk', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -161,23 +157,11 @@ export default function AddEditImpactRisk() {
       {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
 
-          <Typography variant={'h6'}> {`Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Identifier:`} </Typography>
+          <Typography variant={'body1'}> {`${form.hasIdentifier || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`Comment:`} </Typography>
-          <Typography variant={'body1'}> {`${form.comment || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`Organization:`} </Typography>
-          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
-                                               colorWithHover
-                                               color={'#2f5ac7'}>{ops.organization[form.organization]}</Link>
-          </Typography>
 
-          <Typography variant={'h6'}> {`Impact Scale:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactScale || 'Not Given'}`} </Typography>
-
-          <Typography variant={'h6'}> {`Impact Depth:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactDepth || 'Not Given'}`} </Typography>
 
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/impactReport/${encodeURIComponent(uri)}/edit`);
@@ -188,7 +172,7 @@ export default function AddEditImpactRisk() {
 
         </Paper>
       ) : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
-        <Typography variant={'h4'}> Impact Model </Typography>
+        <Typography variant={'h4'}> Impact Risk </Typography>
 
         <SelectField
           key={'hasIdentifier'}

@@ -1,7 +1,7 @@
 import {getJson, postJson, putJson} from "./index";
 
 export async function fetchImpactReportInterfaces() {
-  return getJson('/api/fetchImpactReports/interface');
+  return getJson('/api/impactReports/interface');
 }
 
 export async function fetchImpactReports(organizationUri) {

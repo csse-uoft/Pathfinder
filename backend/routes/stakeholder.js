@@ -5,7 +5,6 @@ const {createStakeholderHandler, fetchStakeholderHandler, updateStakeholderHandl
 const router = express.Router();
 
 router.post('/', createStakeholderHandler);
-router.get('/interface', fetchStakeholderInterfaceHandler);
 router.get('/:uri', fetchStakeholderHandler);
 router.put('/:uri', updateStakeholderHandler);
 

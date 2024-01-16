@@ -2,10 +2,13 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
 const {GDBStakeholderModel} = require("../../models/stakeholder");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+
+const resource = 'Stakeholder'
 
 const fetchStakeholderHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholder'))
+    if (await hasAccess(req, `fetch${resource}`))
       return await fetchStakeholder(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
@@ -15,8 +18,8 @@ const fetchStakeholderHandler = async (req, res, next) => {
 
 const fetchStakeholderInterfaceHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholderInterface'))
-      return await fetchStakeholderInterface(req, res);
+    if (await hasAccess(req, `fetch${resource}s`))
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);

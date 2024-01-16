@@ -5,14 +5,14 @@ const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
-const DATATYPE = 'StakeholderOutcome'
+const resource = 'StakeholderOutcome'
 
 const createStakeholderOutcomeHandler = async (req, res, next) => {
   try {
-    await Transaction.beginTransaction();
     const {form} = req.body;
-    if (await hasAccess(req, 'create' + DATATYPE)) {
+    if (await hasAccess(req, 'create' + resource)) {
       await Transaction.beginTransaction();
       if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form)) {
         await Transaction.commit();
@@ -29,7 +29,7 @@ const createStakeholderOutcomeHandler = async (req, res, next) => {
 
 const fetchStakeholderOutcomesThroughOrganizationHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchStakeholderOutcomesThroughOrganization(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -43,19 +43,23 @@ const fetchStakeholderOutcomesThroughOrganization = async (req, res) => {
   if (!organizationUri)
     throw new Server400Error('Organization URI is missing')
 
-  const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}, {populates: ['stakeholderOutcomes.outcome', 'stakeholderOutcomes.codes', 'stakeholderOutcomes.impactReports']});
-  if (!impactNorms)
-    return res.status(200).json({success: true, stakeholderOutcomes: []})
-  const stakeholderOutcomes = impactNorms.stakeholderOutcomes
+  let stakeholderOutcomes = []
+  const impactNormss = await GDBImpactNormsModel.find({organization: organizationUri}, {populates: ['stakeholderOutcomes.outcome', 'stakeholderOutcomes.codes', 'stakeholderOutcomes.impactReports']});
+  if (!impactNormss.length)
+    return res.status(200).json({success: true, stakeholderOutcomes: [], editable: userAccount.isSuperuser})
+  for (let impactNorms of impactNormss) {
+    if (impactNorms.stakeholderOutcomes)
+      stakeholderOutcomes = [...stakeholderOutcomes, ...impactNorms.stakeholderOutcomes]
+  }
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
 
-  return res.status(200).json({success: true, stakeholderOutcomes, editable: userAccount.isSuperuser})
+  return res.status(200).json({success: true, stakeholderOutcomes: stakeholderOutcomes || [], editable: userAccount.isSuperuser})
 }
 
 
 const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchStakeholderOutcomesThroughStakeholder(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -66,7 +70,7 @@ const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next)
 
 const fetchStakeholderOutcomeHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchStakeholderOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -78,7 +82,7 @@ const fetchStakeholderOutcomeHandler = async (req, res, next) => {
 const fetchStakeholderOutcomeInterfacesHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchStakeholderOutcomes'))
-      return await fetchStakeholderOutcomeInterfaces(req, res);
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {

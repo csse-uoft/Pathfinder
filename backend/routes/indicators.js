@@ -1,10 +1,12 @@
 const express = require('express');
-const {fetchIndicatorsHandler} = require("../services/indicators/indicator");
+const {fetchIndicatorsHandler, fetchIndicatorInterfacesHandler} = require("../services/indicators/indicator");
 
 
 
 const router = express.Router();
 
+router.get('/interface/:organizationUri', fetchIndicatorInterfacesHandler);
+router.get('/interface', fetchIndicatorInterfacesHandler);
 router.get('/', fetchIndicatorsHandler);
 router.get('/:organizationUri', fetchIndicatorsHandler);
 

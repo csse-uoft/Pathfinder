@@ -3,10 +3,13 @@ const {allReachableOrganizations} = require("../../helpers");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {hasAccess} = require('../../helpers/hasAccess')
 const {GDBGroupModel} = require("../../models/group");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+
+const resource = "Organization"
 
 const fetchOrganizationsHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOrganizations'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchOrganizations(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
@@ -16,19 +19,13 @@ const fetchOrganizationsHandler = async (req, res, next) => {
 
 const fetchOrganizationsInterfacesHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOrganizationsInterfaces'))
-      return await fetchOrganizationsInterfaces(req, res);
+    if (await hasAccess(req, `fetch${resource}sInterfaces`))
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
   }
 };
-
-const fetchOrganizationsInterfaces = async (req, res) => {
-  const organizations = await GDBOrganizationModel.find({});
-  const ret = organizations.map(org => ({legalName: org.legalName, _uri: org._uri}));
-  return res.status(200).json({organizations: ret, success: true});
-}
 
 const fetchOrganizations = async (req, res) => {
   const {groupUri, orgAdminUri} = req.params

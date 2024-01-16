@@ -4,7 +4,9 @@ import {createFilterOptions} from '@mui/material/Autocomplete';
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
 import GeneralField from "./fields/GeneralField";
-import {fetchFeatureInterfaces} from "../../api/featureAPI";
+import {fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {isFieldRequired, validateField} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 
 const filterOptions = createFilterOptions({
@@ -51,17 +53,19 @@ function LoadingAutoComplete({
 }
 
 export default function CounterFactualField({
-                                       defaultValue,
-                                       required,
-                                       onChange,
-                                       label,
-                                       disabled,
-                                       importErrors,
-                                     }) {
+                                              defaultValue,
+                                              onChange,
+                                              label,
+                                              disabled,
+                                              importErrors,
+                                              attribute2Compass,
+                                            }) {
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}, outcomes: {}, partOf: {}});
+  const attriConfig = fullLevelConfig.counterfactual
+
+  const [options, setOptions] = useState({features: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -73,15 +77,15 @@ export default function CounterFactualField({
 
   useEffect(() => {
     Promise.all([
-      fetchFeatureInterfaces().then(({success, featuresInterfaces}) => {
+      fetchDataTypeInterfaces('feature').then(({success, interfaces}) => {
         if (success) {
-          setOptions(op => ({...op, features: featuresInterfaces}))
+          setOptions(op => ({...op, features: interfaces}));
         }
       })
     ]).then(() => setLoading(false));
 
   }, []);
- //   console.log(options)
+  //   console.log(options)
   useEffect(() => {
     setErrors({...importErrors});
   }, [importErrors]);
@@ -103,7 +107,7 @@ export default function CounterFactualField({
       {!loading &&
         <>
           <Grid container columnSpacing={2}>
-          
+
             <Grid item xs={12}>
               <Dropdown
                 label="Located In"
@@ -120,10 +124,11 @@ export default function CounterFactualField({
                 value={state.locatedIns}
                 error={!!errors.locatedIns}
                 helperText={errors.locatedIns}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'locatedIns')}
+                onBlur={validateField(state, attriConfig, 'locatedIns', attribute2Compass['locatedIns'], setErrors)}
               />
             </Grid>
-              
+
             <Grid item xs={4}>
               <GeneralField
                 fullWidth
@@ -132,18 +137,11 @@ export default function CounterFactualField({
                 label={'Start Time'}
                 minWidth={187}
                 onChange={handleChange('startTime')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'startTime')}
                 disabled={disabled}
                 error={!!errors.startTime}
                 helperText={errors.startTime}
-                onBlur={() => {
-                  if (!state.startTime) {
-                    setErrors(errors => ({...errors, startTime: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, startTime: null}));
-                  }
-                }
-                }
+                onBlur={validateField(state, attriConfig, 'startTime', attribute2Compass['startTime'], setErrors)}
               />
             </Grid>
 
@@ -155,18 +153,11 @@ export default function CounterFactualField({
                 label={'End Time'}
                 minWidth={187}
                 onChange={handleChange('endTime')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'endTime')}
                 disabled={disabled}
                 error={!!errors.endTime}
                 helperText={errors.endTime}
-                onBlur={() => {
-                  if (!state.endTime) {
-                    setErrors(errors => ({...errors, endTime: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, endTime: null}));
-                  }
-                }
-                }
+                onBlur={validateField(state, attriConfig, 'endTime', attribute2Compass['endTime'], setErrors)}
               />
             </Grid>
 
@@ -176,25 +167,14 @@ export default function CounterFactualField({
                 fullWidth
                 label="Value"
                 type="text"
-                value={state.Value}
+                value={state.value}
                 disabled={disabled}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'value')}
+                onChange={handleChange('value')}
+                onBlur={validateField(state, attriConfig, 'value', attribute2Compass['value'], setErrors)}
               />
             </Grid>
 
-            {/* <Dropdown
-            label="wasGeneratedBy"
-            key={'wasGeneratedBy'}
-            value={form.wasGeneratedBy}
-            onChange={e => {
-              form.wasGeneratedBy = e.target.value;
-            }}
-            options={options.wasGeneratedBy}
-            error={!!errors.wasGeneratedBy}
-            helperText={errors.wasGeneratedBy}
-            // sx={{mb: 2}}
-          /> */}
-          
             <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
@@ -203,24 +183,16 @@ export default function CounterFactualField({
                 type="text"
                 defaultValue={state.description}
                 onChange={handleChange('description')}
-                required={required}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
                 disabled={disabled}
                 error={!!errors.description}
                 helperText={errors.description}
                 multiline
                 minRows={4}
-                onBlur={() => {
-                  if (!state.description) {
-                    setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, description: null}));
-                  }
-                }
-                }
+                onBlur={validateField(state, attriConfig, 'description', attribute2Compass['description'], setErrors)}
               />
             </Grid>
 
-            
 
           </Grid>
         </>

@@ -10,10 +10,10 @@ import {
   TablePagination,
   TableRow
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import { visuallyHidden } from "@mui/utils";
-import { EnhancedTableHead } from "./EnhancedTableHead";
-import { EnhancedTableToolbar } from "./EnhancedTableToolbar";
+import {makeStyles} from "@mui/styles";
+import {visuallyHidden} from "@mui/utils";
+import {EnhancedTableHead} from "./EnhancedTableHead";
+import {EnhancedTableToolbar} from "./EnhancedTableToolbar";
 
 function descendingComparator(a, b, getValue, extraData) {
   b = getValue(b, extraData) || '';
@@ -81,7 +81,7 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
   const [rowsPerPage, setRowsPerPage] = React.useState(rowsPerPageOptions[0]);
   const [dataFilter, setDataFilter] = React.useState(
     data => data
-  )
+  );
 
   const handleRequestSort = (event, getFieldValueFn) => {
     const isAsc = orderBy === getFieldValueFn && order === 'asc';
@@ -134,7 +134,7 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
     if (onChangePage)
       onChangePage(0);
     if (onChangeRowsPerPage)
-      onChangeRowsPerPage(rowsPerPage)
+      onChangeRowsPerPage(rowsPerPage);
   };
 
   const isSelected = (uri) => selected.indexOf(uri) !== -1;
@@ -148,7 +148,7 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
       }
       setSelected([]);
     }
-  }
+  };
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -156,12 +156,34 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
 
   const handleOnSearch = (searchTarget) => {
 
-  }
+  };
+
+  const subTable = () => (
+    <Table>
+      <TableBody>
+        <TableRow style={{'border-bottom': '1px solid #000'}}>
+          <TableCell colSpan={2}>
+            12
+          </TableCell>
+          <TableCell>
+            4
+          </TableCell>
+        </TableRow>
+
+        <TableRow>
+          <TableCell>
+            12
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
 
 
   return (
     <Paper elevation={5} className={classes.paper}>
-      <EnhancedTableToolbar title={title} numSelected={selected.length} onDelete={handleDelete} onSearch={handleOnSearch}
+      <EnhancedTableToolbar title={title} numSelected={selected.length} onDelete={handleDelete}
+                            onSearch={handleOnSearch}
                             customToolbar={customToolbar}/>
       <TableContainer style={{maxHeight: height || 'calc(100vh - 228px)'}}>
         <Table
@@ -203,8 +225,49 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
                         checked={isItemSelected}
                       />
                     </TableCell>
-                    {columns.map((cell, idx) => <TableCell style={cell.style}
-                                                           key={idx + 1}>{cell.body(row, extraData)}</TableCell>)}
+                    {columns.map((cell, idx) =>{
+                      if (cell.body) {
+                        return (<TableCell style={cell.style} colSpan={cell.colSpan}
+                                           key={idx + 1}>{
+                          Array.isArray(cell.body(row, extraData)) ?
+                            cell.body(row, extraData).map((objects) => {
+                              if (Array.isArray(objects)) {
+                                return (
+                                  <TableRow>
+                                    {
+
+                                      objects?.map(object => {
+                                        return (<TableCell style={{
+                                          width: `${100 / objects.length}%`,
+                                          wordBreak: 'break-word'
+                                        }}>
+                                          {object}
+                                        </TableCell>)
+                                      })
+
+                                    }
+                                  </TableRow>
+                                )
+                              } else {
+                                return (<TableRow>
+                                  {
+
+                                    <TableCell>
+                                      {objects}
+                                    </TableCell>
+
+                                  }
+                                </TableRow>)
+                              }
+                            })
+                            :
+                            cell.body(row, extraData)
+                        }</TableCell>)
+                      } else {
+                        return null
+                      }
+                    }
+                      )}
                   </TableRow>
                 );
               })}

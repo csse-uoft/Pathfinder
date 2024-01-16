@@ -7,14 +7,13 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
+import {updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {createStakeholderOutcome, fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
-import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
-import {fetchCodesInterfaces} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {validateForm} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -52,36 +51,53 @@ export default function AddEditStakeholderOutcome() {
     name: '',
     description: '',
     codes: [],
-    stakeholder: '',
+    stakeholder: null,
     uri: '',
-    outcome: '',
-    importance: '',
+    outcome: null,
+    importance: null,
     inUnderserved: '',
     indicators: [],
     impactReports: [],
-    organization: '',
-    intendedImpact: '',
-    fromPerspectiveOf: ''
+    organization: null,
+    intendedImpact: null,
+    fromPerspectiveOf: null
   });
   const [dict, setDict] = useState({
     outcome: {},
     code: {},
     stakeholder: {}
   });
+
   const [loading, setLoading] = useState(true);
+
+  const attriConfig = fullLevelConfig.stakeholderOutcome;
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    codes: 'cids:hasCode',
+    stakeholder: 'cids:forStakeholder',
+    outcome: 'cids:forOutcome',
+    importance: 'cids:hasImportance',
+    inUnderserved: 'cids:isUnderserved',
+    indicators: 'cids:hasIndicator',
+    impactReports: 'cids:hasImpactReport',
+    organization: 'cids:Organization',
+    intendedImpact: 'cids:intendedImpact',
+    fromPerspectiveOf: 'cids:fromPerspectiveOf'
+  }
+
 
   useEffect(() => {
     if (mode === 'view') {
       Promise.all(
         [
-          fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
+          fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('code'), fetchDataTypeInterfaces('outcome')
         ]
-      ).then(([{stakeholderInterfaces}, {codesInterfaces}, {outcomeInterfaces}]) => {
+      ).then(([organizationRet, codeRet, outcomeRet]) => {
         const dict = {};
-        dict['outcome'] = outcomeInterfaces;
-        dict['stakeholder'] = stakeholderInterfaces;
-        dict['code'] = codesInterfaces;
-        console.log(dict);
+        dict['outcome'] = outcomeRet.interfaces;
+        dict['stakeholder'] = organizationRet.interfaces;
+        dict['code'] = codeRet.interfaces;
         setDict(dict);
       }).catch(e => {
         if (e.json) {
@@ -97,9 +113,8 @@ export default function AddEditStakeholderOutcome() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchStakeholderOutcome(encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
+      fetchDataType('stakeholderOutcome', encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
         if (success) {
-          console.log(stakeholderOutcome);
           stakeholderOutcome.uri = stakeholderOutcome._uri;
           setForm(stakeholderOutcome);
           setLoading(false);
@@ -137,7 +152,7 @@ export default function AddEditStakeholderOutcome() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createStakeholderOutcome({form}).then((ret) => {
+      createDataType('stakeholderOutcome', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -171,18 +186,7 @@ export default function AddEditStakeholderOutcome() {
 
   const validate = () => {
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-    // if (!form.indicators.length)
-    //   error.indicators = 'The field cannot be empty';
-    // if (!form.themes.length)
-    //   error.themes = 'The field cannot be empty';
-    // if (!form.description)
-    //   error.description = 'The field cannot be empty'
-    // if (!form.organization)
-    //   error.organization = 'The field cannot be empty';
-    if (form.uri && !isValidURL(form.uri))
-      error.uri = 'Not a valid URI';
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri']);
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -195,7 +199,7 @@ export default function AddEditStakeholderOutcome() {
       {mode === 'view' ?
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
-
+            <Typography variant={'h4'}> Stakeholder Outcome </Typography>
             <Typography variant={'h6'}> {`Name:`} </Typography>
             <Typography variant={'body1'}> {`${form.name}`} </Typography>
             <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -209,6 +213,14 @@ export default function AddEditStakeholderOutcome() {
             <Typography variant={'body1'}> {`${form.isUnderserved}`} </Typography>
             <Typography variant={'h6'}> {`Importance:`} </Typography>
             <Typography variant={'body1'}> {`${form.importance}`} </Typography>
+            <Typography variant={'h6'}> {`Intended Impact:`} </Typography>
+            <Typography variant={'body1'}> {`${form.intendedImpact || 'Not Given'}`} </Typography>
+            <Typography variant={'h6'}> {`From Perspective Of:`} </Typography>
+            {form.fromPerspectiveOf ?
+              <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(form.fromPerspectiveOf)}/view`}
+                                                  colorWithHover
+                                                  color={'#2f5ac7'}>{dict.stakeholder[form.fromPerspectiveOf]}</Link>
+              </Typography> : <Typography variant={'body1'}> {'Not Given'} </Typography>}
             <Typography variant={'h6'}> {`Outcome:`} </Typography>
             <Typography variant={'body1'}> <Link to={`/outcome/${encodeURIComponent(form.outcome)}/view`} colorWithHover
                                                  color={'#2f5ac7'}>{dict.outcome[form.outcome]}</Link> </Typography>
@@ -245,6 +257,7 @@ export default function AddEditStakeholderOutcome() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?

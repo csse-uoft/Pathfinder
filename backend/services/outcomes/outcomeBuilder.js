@@ -83,7 +83,9 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error)
     hasError = ret.hasError;
     error = ret.error;
-    mainObject.dateCreated = new Date(mainObject.dateCreated)
+
+    if (mainObject.dateCreated)
+      mainObject.dateCreated = new Date(mainObject.dateCreated)
 
     ret = assignValues(environment, config, object, mainModel, mainObject, 'locatedIns', 'iso21972:located_in', addMessage, form, uri, hasError, error, getListOfValue)
     hasError = ret.hasError;

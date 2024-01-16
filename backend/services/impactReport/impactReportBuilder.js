@@ -1,6 +1,6 @@
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBImpactReportModel} = require("../../models/impactReport");
-const {baseLevelConfig} = require("../fileUploading/configs");
+const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, getFullObjectURI, assignValues} = require("../helpers");
@@ -32,7 +32,7 @@ async function impactReportBuilder(environment, object, organization, error, {
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = baseLevelConfig.indicatorReport;
+  const config = fullLevelConfig.impactReport;
 
   if (mainObject) {
     if (environment !== 'fileUploading') {
@@ -53,24 +53,24 @@ async function impactReportBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
-    if (environment === 'interface') {
-      const impactScale = GDBImpactScaleModel({
-        value: {
-          numericalValue: form.impactScale
-        },
-        indicator: form.impactScaleIndicator
-      });
-      const impactDepth = GDBImpactDepthModel({
-        value: {
-          numericalValue: form.impactDepth
-        },
-        indicator: form.impactDepthIndicator
-      });
-      await impactScale.save();
-      await impactDepth.save();
-      form.impactScale = impactScale._uri;
-      form.impactDepth = impactDepth._uri;
-    }
+    // if (environment === 'interface') {
+    //   const impactScale = GDBImpactScaleModel({
+    //     value: {
+    //       numericalValue: form.impactScale
+    //     },
+    //     indicator: form.impactScaleIndicator
+    //   });
+    //   const impactDepth = GDBImpactDepthModel({
+    //     value: {
+    //       numericalValue: form.impactDepth
+    //     },
+    //     indicator: form.impactDepthIndicator
+    //   });
+    //   await impactScale.save();
+    //   await impactDepth.save();
+    //   form.impactScale = impactScale._uri;
+    //   form.impactDepth = impactDepth._uri;
+    // }
 
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'impactScale', 'cids:hasImpactScale', addMessage, form, uri, hasError, error);

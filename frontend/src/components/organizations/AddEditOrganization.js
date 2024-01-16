@@ -7,21 +7,17 @@ import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {
-  createOrganization,
-  fetchOrganization,
-  fetchOrganizations,
-  fetchOrganizationsInterfaces,
   updateOrganization
 } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -85,24 +81,29 @@ export default function AddEditOrganization() {
     issuedBy: {}
   });
 
+  const [impactModels, setImpactModels] = useState([])
+
+
+  useEffect(() => {
+    if (mode === 'view') {
+      fetchDataTypes('impactModel', encodeURIComponent(uri)).then(({impactModels, success}) => {
+        setImpactModels(impactModels)
+      })
+    }
+  }, [])
 
   useEffect(() => {
 
     Promise.all([
-      fetchOrganizationsInterfaces().then(({organizations, success}) => {
+      fetchDataTypeInterfaces('organization').then(({interfaces, success}) => {
         if (success) {
-          const orgDict = {};
-          organizations.map(org => {
-            if (org._uri !== uri)
-              orgDict[org._uri] = org.legalName;
-          });
-          setOptions(options => ({...options, issuedBy: orgDict}))
+          setOptions(options => ({...options, issuedBy: interfaces}))
         }
       }),
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
         Promise.all([
-          fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
+          fetchDataTypes('user', encodeURIComponent(uri)).then(({data, success}) => {
             const objectForm = {};
             data.map(user => {
               objectForm[user._uri] = `${user.person.givenName} ${user.person.familyName} URI: ${user._uri}`;
@@ -110,7 +111,7 @@ export default function AddEditOrganization() {
             if (success)
               setOptions(options => ({...options, objectForm}));
           }),
-          fetchOrganization(encodeURIComponent(uri)).then(res => {
+          fetchDataType('organization', encodeURIComponent(uri)).then(res => {
             if (res.success) {
               const {organization} = res;
               setForm({
@@ -181,7 +182,7 @@ export default function AddEditOrganization() {
           form.telephone.split('(')[1].split(') ')[1].split('-')[0] +
           form.telephone.split('(')[1].split(') ')[1].split('-')[1]);
       }
-      createOrganization({form}).then((ret) => {
+      createDataType('organization', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
@@ -301,6 +302,16 @@ export default function AddEditOrganization() {
               <Typography variant={'body1'}>
                 <Link to={`/indicator/${encodeURIComponent(researcherURI)}/view`} colorWithHover
                       color={'#2f5ac7'}>{form.researcherNames[researcherURI]}</Link>
+              </Typography>
+            );
+          })}
+          {impactModels?.length? <Typography variant={'h6'}> {`ImpactModels:`} </Typography>:null}
+          {impactModels?.map(impactModel => {
+            console.log(impactModel)
+            return (
+              <Typography variant={'body1'}>
+                <Link to={`/impactModel/${encodeURIComponent(impactModel._uri)}/view`} colorWithHover
+                      color={'#2f5ac7'}>{impactModel.name || impactModel._uri}</Link>
               </Typography>
             );
           })}
@@ -550,19 +561,6 @@ export default function AddEditOrganization() {
                 label={'Number Issued By'}
                 value={issuedBy}
                 options={options.issuedBy}
-                // error={!!errors.organizationIds[index].issuedBy}
-                // helperText={
-                //   errors.organizationIds[index].issuedBy
-                // }
-                // onBlur={() => {
-                //   const organizationIdErrors = errors.organizationIds;
-                //   if (form.organizationIds[index].issuedBy === '') {
-                //     organizationIdErrors[index].issuedBy = 'This field cannot be empty'
-                //   } else {
-                //     organizationIdErrors[index].issuedBy = ''
-                //   }
-                //   setErrors(errors => ({...errors, organizationIds: organizationIdErrors}));
-                // }}
                 onChange={e => {
                   const ids = form.organizationIds;
                   ids[index].issuedBy = e.target.value

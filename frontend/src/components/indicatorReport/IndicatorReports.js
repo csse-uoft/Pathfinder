@@ -1,139 +1,127 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Chip, Container } from "@mui/material";
-import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
-import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
+import React, {useEffect, useState, useContext} from 'react';
+import {Chip, Container} from "@mui/material";
+import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
+import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
-import { useSnackbar } from 'notistack';
+import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
-import {fetchIndicatorReports} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
+import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
+
 export default function IndicatorReports() {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
   const navigator = useNavigate();
-  const navigate = navigateHelper(navigator)
+  const navigate = navigateHelper(navigator);
+
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedUri: null,
+    selectedId: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
-    editable: false
   });
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicatorReports(encodeURIComponent(uri)).then(res => {
-      if(res.success)
-        setState(state => ({...state, loading: false, data: res.indicatorReports, editable: res.editable}));
+    fetchDataTypes('indicator', encodeURIComponent(uri)).then(res => {
+      if (res.success) {
+        console.log(res.indicators);
+        setState(state => ({...state, loading: false, data: res.indicators}));
+      }
     }).catch(e => {
-      reportErrorToBackend(e)
-      setState(state => ({...state, loading: false}))
-      console.log(e)
+      setState(state => ({...state, loading: false}));
+      reportErrorToBackend(e);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
   }, [trigger]);
 
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
-
   const columns = [
     {
-      label: 'Name',
-      body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/indicatorReport/${encodeURIComponent(_uri)}/view`}>
-          {name}
-        </Link>
+      label: 'Indicator Report Name',
+      body: ({name}) => {
+        return name;
       },
       sortBy: ({name}) => name
     },
     {
-      label: 'value',
+      label: 'Time Interval of Report',
+      body: ({hasTime}) => {
+        return (hasTime?.hasBeginning?.date && hasTime?.hasEnd?.date)? `${(new Date(hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(hasTime.hasEnd.date)).toLocaleString()}` : null
+      }
+    },
+    {
+      label: 'Indicator Report Value',
       body: ({value}) => {
-        return value.numericalValue;
+        return value?.numericalValue;
       }
-    },
-    {
-      label: 'Unit Of Measure',
-      body: ({forIndicator}) => {
-        return forIndicator?.unitOfMeasure?.label
-      }
-    },
-    {
-      label: 'Start Time',
-      body: ({hasTime}) => {
-        return hasTime? (new Date(hasTime?.hasBeginning.date)).toString() : 'Not Given'
-      },
-    },
-    {
-      label: 'End Time',
-      body: ({hasTime}) => {
-        return hasTime? (new Date(hasTime.hasEnd.date)).toString() : 'Not Given'
-      },
     },
 
     {
+      label: 'Comment',
+      body: ({comment}) => {
+        return comment;
+      }
+    },
+
+
+
+    {
       label: ' ',
-      body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'indicatorReport'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable} hideDeleteOption
-                      handleDelete={() => showDeleteDialog(_uri)}/>
+      body: ({_uri}) => {
+        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+                             hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                             handleDelete={() => showDeleteDialog(_uri)}/>;
+      }
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading Indicator Reports...`}/>;
+    return <Loading message={`Loading indicators...`}/>;
 
   return (
     <Container>
-      <DataTable
-        title={"Indicator Reports"}
-        data={state.data}
-        columns={columns}
-        uriField="uri"
-        customToolbar={
-          <Chip
-            disabled={!state.editable}
-            onClick={() => navigate(`/indicatorReport/${encodeURIComponent(uri)}/new`)}
-            color="primary"
-            icon={<AddIcon/>}
-            label="Add new IndicatorReports"
-            variant="outlined"/>
-        }
+      <EnhancedTableToolbar title={'Indicators'}
+                            numSelected={0}
+                            customToolbar={
+                              <Chip
+                                disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                                onClick={() => navigate(`/indicatorReport/${encodeURIComponent(uri)}/new`)}
+                                color="primary"
+                                icon={<AddIcon/>}
+                                label="Add new Indicator Report"
+                                variant="outlined"/>}/>
+      {
+        state.data.map(indicator =>
+          <DataTable
+            title={`Indicator: ${indicator.name}`}
+            data={indicator.indicatorReports}
+            columns={columns}
+            uriField="uri"
+          />
+        )
+      }
 
-      />
-      {/*<DeleteModal*/}
-      {/*  objectId={state.selectedId}*/}
-      {/*  title={state.deleteDialogTitle}*/}
-      {/*  show={state.showDeleteDialog}*/}
-      {/*  onHide={() => setState(state => ({...state, showDeleteDialog: false}))}*/}
-      {/*  delete={handleDelete}*/}
+      {/*<DataTable*/}
+      {/*  title={"Indicators"}*/}
+      {/*  data={state.data}*/}
+      {/*  columns={columns}*/}
+      {/*  uriField="uri"*/}
+      {/*  customToolbar={*/}
+      {/*    <Chip*/}
+      {/*      disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}*/}
+      {/*      onClick={() => navigate(`/indicator/${encodeURIComponent(uri)}/new`)}*/}
+      {/*      color="primary"*/}
+      {/*      icon={<AddIcon/>}*/}
+      {/*      label="Add new Indicator"*/}
+      {/*      variant="outlined"/>*/}
+      {/*  }*/}
+
       {/*/>*/}
     </Container>
   );
+
 }

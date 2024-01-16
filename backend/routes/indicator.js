@@ -5,7 +5,6 @@ const {fetchIndicatorHandler, createIndicatorHandler, updateIndicatorHandler, fe
 
 const router = express.Router();
 
-router.get('/interface/:organizationUri', fetchIndicatorInterfacesHandler)
 router.get('/:uri', fetchIndicatorHandler);
 router.post('/', createIndicatorHandler)
 router.put('/:uri', updateIndicatorHandler)

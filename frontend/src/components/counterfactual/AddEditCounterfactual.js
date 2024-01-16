@@ -8,10 +8,12 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import CounterFactualField from "../shared/CounterFactualField";
-import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
+import {updateOutcome} from "../../api/outcomeApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateForm} from "../../helpers";
+
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -25,6 +27,8 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditCounterfactual() {
+  const attriConfig = fullLevelConfig.counterfactual
+
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -33,6 +37,14 @@ export default function AddEditCounterfactual() {
   const mode = uri? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
+
+  const attribute2Compass = {
+    startTime: 'cids:hasTime',
+    endTime: 'cids:hasTime',
+    description: 'schema:description',
+    locatedIns: 'iso21972:located_in',
+    value:'iso21972:value',
+  }
 
   const [state, setState] = useState({
     submitDialog: false,
@@ -47,22 +59,23 @@ export default function AddEditCounterfactual() {
     endTime: '',
     description: '',
     locatedIns: [],
-    Value:'',
+    value:'',
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if((mode === 'edit' && uri) || (mode === 'view' && uri)){
-      fetchOutcome(encodeURIComponent(uri)).then(({success, outcome}) => {
+    if((mode === 'edit' && uri) || (mode === 'view' && uri)) {
+      fetchDataType('counterfactual', encodeURIComponent(uri)).then(({success, counterfactual}) => {
         if(success){
-          outcome.uri = outcome._uri;
-          setForm(outcome);
+          counterfactual.uri = counterfactual._uri;
+          setForm(counterfactual);
           setLoading(false)
         }
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
         setLoading(false);
+        console.log('here')
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else if(mode === 'edit' && (!uri || !orgUri) ) {
@@ -72,7 +85,7 @@ export default function AddEditCounterfactual() {
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new' && orgUri) {
+    } else if (mode === 'new' && orgUri) {
       setForm(form => ({...form, organizations: [orgUri]}))
       setLoading(false);
     } else {
@@ -92,7 +105,7 @@ export default function AddEditCounterfactual() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOutcome({form}).then((ret) => {
+      createDataType('counterfactual', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -103,7 +116,7 @@ export default function AddEditCounterfactual() {
           setErrors(e.json);
         }
         console.log(e)
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating counterfactual', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
@@ -125,27 +138,10 @@ export default function AddEditCounterfactual() {
   };
 
   const validate = () => {
-    console.log(form)
-    const error = {};
-    if (!form.locatedIns)
-      error.locatedIns = 'The field cannot be empty';
-    // if (!form.indicators.length)
-    //   error.indicators = 'The field cannot be empty';
-    // if (!form.outcomes.length)
-    //   error.outcomes = 'The field cannot be empty';
-    // if (!form.locatedIn)
-    //   error.locatedIn = 'The field cannot be empty';
-
-    // if (!form.themes.length)
-    //   error.themes = 'The field cannot be empty';
-    // if (!form.description)
-    //   error.description = 'The field cannot be empty'
-    // if(form.uri && !isValidURL(form.uri))
-    //   error.uri = 'Not a valid URI';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
-
-    return Object.keys(error).length === 0;
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, [])
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   if (loading)
@@ -156,19 +152,16 @@ export default function AddEditCounterfactual() {
       {mode === 'view'?
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
+            <Typography variant={'h4'}> Counterfactual </Typography>
             <Typography variant={'h6'}> {`Located In:`} </Typography>
-            <Typography variant={'body1'}> {`${form.locatedIn}`} </Typography>
-            {<Typography variant={'h6'}> {`Themes:`} </Typography>}
-             {form.themes?.length? form.themes.map(themeURI => {
-              return (
-                <Typography variant={'body1'}>
-                <Link to={`/themes/${encodeURIComponent(themeURI)}/view`} colorWithHover
-                            color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
-                </Typography>
-                );
-            }):<Typography variant={'body1'}> {`Not Given`} </Typography>}
+            <Typography variant={'body1'}> {`${form.locatedIn || 'Not Given'}`} </Typography>
+            <Typography variant={'h6'}> {`Time Interval:`} </Typography>
+            <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
             <Typography variant={'h6'}> {`Description:`} </Typography>
-            <Typography variant={'body1'}> {`${form.description}`} </Typography>
+            <Typography variant={'body1'}> {form.description || 'Not Given'} </Typography>
+            <Typography variant={'h6'}> {`Value:`} </Typography>
+            <Typography variant={'body1'}> {form.value || 'Not Given'} </Typography>
+
 
             <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
               navigate(`/outcome/${encodeURIComponent(uri)}/edit`);
@@ -186,11 +179,11 @@ export default function AddEditCounterfactual() {
           disabledOrganization={!!orgUri}
           disableURI={mode !== 'new'}
           defaultValue={form}
-          required
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
 
         {mode==='view'?
@@ -200,7 +193,7 @@ export default function AddEditCounterfactual() {
           </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Counterfactual?' :
                        'Are you sure you want to update this outcome?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,

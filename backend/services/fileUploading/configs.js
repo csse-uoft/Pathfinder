@@ -41,6 +41,7 @@ const fullLevelConfig = {
     'cids:forIndicator': {ignoreInstance: true},
     'iso21972:value': {flag: true}
   },
+  impactReport: {},
   counterfactual: {},
   impactRisk: {},
   evidenceRisk: {},
@@ -53,6 +54,8 @@ const fullLevelConfig = {
   enduranceRisk: {},
   unexpectedImpactRisk: {},
   impactDuration: {},
+  dataset: {},
+  stakeholder: {}
 }
 
 module.exports = {

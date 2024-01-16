@@ -54,8 +54,7 @@ const GDBStakeholderOrganizationModel = createGraphDBModel({
   description: {type: String, internalKey: 'schema:description'},
   partOfs: {type: [() => require('./impactStuffs').GDBImpactModelModel], internalKey: 'oep:partOf'},
   catchmentArea: {type: String, internalKey: 'cids:hasCatchmentArea'},
-  name: {type: String, internalKey: 'genprops:hasName'},
-  characteristic: {type: () => require("./characteristic").GDBCharacteristicModel, internalKey: 'cids:hasCharacteristic'}
+  name: {type: String, internalKey: 'cids:hasName'}
 },{
   rdfTypes: ['cids:Organization', 'cids:Stakeholder'], name: 'stakeholderOrganization'
 })

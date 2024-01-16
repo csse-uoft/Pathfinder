@@ -6,20 +6,50 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBDateTimeIntervalModel} = require("../../models/time");
 const {GDBMeasureModel} = require("../../models/measure");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {GDBOwnershipModel} = require("../../models/ownership");
 const {indicatorReportBuilder} = require("./indicatorReportBuilder");
 const {Transaction} = require("graphdb-utils");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 
-const RESOURCE = 'IndicatorReport';
+const resource = 'IndicatorReport';
+
+const fetchIndicatorReportInterfacesHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + resource + 's'))
+      return await fetchDataTypeInterfaces(resource, req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchIndicatorReportInterfaces = async (req, res) => {
+  const {organizationUri} = req.params;
+  let indicatorReports
+  if (organizationUri === 'undefined' || !organizationUri) {
+    // return all indicator Interfaces
+    indicatorReports = await GDBIndicatorReportModel.find({});
+  } else {
+    // return outcomes based on their organization
+    indicatorReports = await GDBIndicatorReportModel.find({forOrganization: organizationUri})
+  }
+
+  const indicatorReportInterfaces = {};
+  indicatorReports.map(indicatorReport => {
+    indicatorReportInterfaces[indicatorReport._uri] = indicatorReport.name || indicatorReport._uri;
+  });
+  return res.status(200).json({success: true, indicatorReportInterfaces});
+
+}
 
 const createIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'create' + RESOURCE)){
+    if (await hasAccess(req, 'create' + resource)){
       const {form} = req.body;
       form.value = form.numericalValue
       form.forIndicator = form.indicator
       await Transaction.beginTransaction();
-      if (await indicatorReportBuilder('interface', null, null, null, null, {}, {}, form))
+      if (await indicatorReportBuilder('interface', null, null, null, {}, {}, form))
         await Transaction.commit();
         return res.status(200).json({success: true})
         }
@@ -92,7 +122,7 @@ const createIndicatorReport = async (req, res) => {
 
 const fetchIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE))
+    if (await hasAccess(req, 'fetch' + resource))
       return await fetchIndicatorReport(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -119,6 +149,7 @@ const fetchIndicatorReport = async (req, res) => {
     endTime: indicatorReport.hasTime?.hasEnd.date,
     dateCreated: indicatorReport.dateCreated,
     uri: indicatorReport._uri,
+    datasets: indicatorReport.datasets,
     unitOfMeasure: indicatorReport.forIndicator?.unitOfMeasure?.label,
     indicatorName: indicatorReport.forIndicator?.name,
     organizationName: indicatorReport.forOrganization?.legalName
@@ -128,7 +159,7 @@ const fetchIndicatorReport = async (req, res) => {
 
 const updateIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'update' + RESOURCE))
+    if (await hasAccess(req, 'update' + resource))
       return await updateIndicatorReport(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -189,7 +220,7 @@ const updateIndicatorReport = async (req, res) => {
 
 const fetchIndicatorReportsHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
+    if (await hasAccess(req, 'fetch' + resource + 's'))
       return await fetchIndicatorReports(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
@@ -219,5 +250,6 @@ module.exports = {
   createIndicatorReportHandler,
   fetchIndicatorReportHandler,
   updateIndicatorReportHandler,
-  fetchIndicatorReportsHandler
+  fetchIndicatorReportsHandler,
+  fetchIndicatorReportInterfacesHandler
 };

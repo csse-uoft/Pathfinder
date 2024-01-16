@@ -1,9 +1,6 @@
 const {fullLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
-const {GDBCodeModel} = require("../../models/code");
-const {GDBMeasureModel} = require("../../models/measure");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
-const {getObjectValue} = require("../../helpers");
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, assignValues} = require("../helpers");
 const {GDBOrganizationModel} = require("../../models/organization");
@@ -70,9 +67,13 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error, getListOfValue);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
+
+    if (mainObject.dateCreated) {
+      mainObject.dateCreated = new Date(mainObject.dateCreated)
+    }
 
     ret = assignValues(environment, config, object, mainModel, mainObject, 'indicators', 'cids:hasIndicator', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;

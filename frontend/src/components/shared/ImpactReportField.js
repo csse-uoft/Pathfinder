@@ -1,15 +1,14 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
-import {fetchOutcomeInterfaces, fetchOutcomes} from '../../api/outcomeApi';
 import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
-import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
+import {fetchHowMuchImpacts} from "../../api/howMuchImpactApi";
+import {fetchImpactRisks} from "../../api/impactRiskApi";
+import Dropdown from "./fields/MultiSelectField";
+import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -61,7 +60,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
     {});
 
   const [options, setOptions] = useState({
-    organizations : {},stakeholderOutcomes: {}, indicators: {}, 
+    organizations : {},stakeholderOutcomes: {}, indicators: {}, impactScales: {}, impactDepths: {}, impactDurations: {}, impactRisks: {}
   });
 
   const {enqueueSnackbar} = useSnackbar();
@@ -72,16 +71,42 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
   const userContext = useContext(UserContext);
 
+  useEffect(() => {
+    Promise.all([fetchHowMuchImpacts('ImpactScale'), fetchHowMuchImpacts('ImpactDepth'), fetchHowMuchImpacts('ImpactDuration'), fetchImpactRisks()])
+      .then(([impactScaleRet, impactDepthRet, impactDurationRet, {impactRisks}]) => {
+        const impactScales = {};
+        const impactDepths = {};
+        const impactDurations = {};
+        const impactRisksDict = {}
+        if (impactScaleRet.howMuchImpacts.length) {
+          impactScaleRet.howMuchImpacts.map(impactScale => {
+            impactScales[impactScale._uri] = impactScale.description || impactScale._uri
+          })
+        }
+        if (impactDepthRet.howMuchImpacts.length) {
+          impactDepthRet.howMuchImpacts.map(impactDepth => {
+            impactDepths[impactDepth._uri] = impactDepth.description || impactDepth._uri
+          })
+        }
+        if (impactDurationRet.howMuchImpacts.length) {
+          impactDurationRet.howMuchImpacts.map(impactDuration => {
+            impactDurations[impactDuration._uri] = impactDuration.description || impactDuration._uri
+          })
+        }
+        if (impactRisks.length) {
+          impactRisks.map(impactRisk => {
+            impactRisksDict[impactRisk._uri] = impactRisk.hasIdentifier || impactRisk._uri
+          })
+        }
+        setOptions(ops => ({...ops, impactScales, impactDepths, impactDurations, impactRisks: impactRisksDict}))
+      }).catch()
+  }, [])
+
 
   useEffect(() => {
-    fetchOrganizationsInterfaces().then(({success, organizations}) => {
+    fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
       if (success) {
-        const options = {};
-        organizations.map(organization => {
-          // only organization which the user serves as an editor should be able to add
-          options[organization._uri] = organization.legalName;
-        });
-        setOptions(op => ({...op, organization: options}));
+        setOptions(op => ({...op, organization: interfaces}));
         setLoading(false);
       }
     }).catch(e => {
@@ -98,9 +123,9 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
   useEffect(() => {
     if (state.organization) {
-      fetchStakeholderOutcomeInterface(encodeURIComponent(state.organization)).then(({stakeholderOutcomeInterfaces}) => {
-        console.log(stakeholderOutcomeInterfaces)
-        setOptions(ops => ({...ops, stakeholderOutcomes: stakeholderOutcomeInterfaces}))
+      fetchDataTypeInterfaces('stakeholderOutcome', encodeURIComponent(state.organization)).then(({interfaces}) => {
+        console.log(interfaces)
+        setOptions(ops => ({...ops, stakeholderOutcomes: interfaces}))
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
@@ -115,8 +140,8 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
   useEffect(() => {
     if (state.organization) {
-      fetchIndicatorInterfaces(encodeURIComponent(state.organization)).then(({indicatorInterfaces}) => {
-        setOptions(ops => ({...ops, indicators: indicatorInterfaces}))
+      fetchDataTypeInterfaces('indicator', encodeURIComponent(state.organization)).then(({interfaces}) => {
+        setOptions(ops => ({...ops, indicators: interfaces}))
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
@@ -134,8 +159,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
   }, [importErrors]);
 
   const handleChange = name => (e, value) => {
-    console.log(name)
-    if(name !== 'outcome'){
+    if(name !== 'outcome') {
       setState(state => {
         state[name] = value ?? e.target.value;
         return state;
@@ -194,14 +218,6 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 required={required}
                 error={!!errors.uri}
                 helperText={errors.uri}
-                onBlur={() => {
-                  if (!state.uri) {
-                    setErrors(errors => ({...errors, uri: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, uri: null}));
-                  }
-                }
-                }
               />
             </Grid>
 
@@ -216,14 +232,14 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 helperText={errors.organization}
                 required={required}
                 disabled={disabled || disabledOrganization}
-                onBlur={() => {
-                  if (!state.organization) {
-                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, organization: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.organization) {
+                //     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, organization: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
             <Grid item xs={4}>
@@ -238,137 +254,83 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.forStakeholderOutcome}
                 helperText={errors.forStakeholderOutcome}
                 required={required}
-                onBlur={() => {
-                  if (state.forStakeholderOutcome) {
-                    setErrors(errors => ({...errors, forStakeholderOutcome: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (state.forStakeholderOutcome) {
+                //     setErrors(errors => ({...errors, forStakeholderOutcome: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
-            {/* <Grid item xs={4}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
-                label="Impact Scale"
-                disabled={disabled}
-                options = {options.impactScale}
+            <Grid item xs={4}>
+              <LoadingAutoComplete
+                label={"Impact Scale"}
+                options={options.impactScales}
                 state={state.impactScale}
-                onChange={handleChange('impactScale')}
-                
-                required={required}
+                onChange={
+                  handleChange('impactScale')
+                }
                 error={!!errors.impactScale}
                 helperText={errors.impactScale}
-                onBlur={() => {
-                  if (!state.impactScale) {
-                    setErrors(errors => ({...errors, impactScale: 'This field cannot be empty'}));
-                  } if(isNaN(state.impactScale)) {
-                    setErrors(errors => ({...errors, impactScale: 'This field must be a number'}));
-                  } else {
-                    setErrors(errors => ({...errors, impactScale: null}));
-                  }
-                }
-                }
-              />
-            </Grid> */}
-
-            <Grid item xs={4}>
-              <LoadingAutoComplete
-                label={"Impact Scale Indicator"}
-                disabled={!state.organization}
-                options={options.indicators}
-                state={state.impactScaleIndicator}
-                onChange={
-                  handleChange('impactScaleIndicator')
-                }
-                error={!!errors.impactScaleIndicator}
-                helperText={errors.impactScaleIndicator}
                 required={required}
-                onBlur={() => {
-                  if (state.impactScaleIndicator) {
-                    setErrors(errors => ({...errors, impactScaleIndicator: null}));
-                  }
-                }
-                }
-              />
-            </Grid>
-            
-            {/* <Grid item xs={4}>
-            <TextField
-              sx={{mt: 2}}
-              fullWidth
-              label="Impact Depth"
-              defaultValue={state.impactDepth}
-              onChange={handleChange('impactDepth')}
-              disabled={disabled}
-              required={required}
-              error={!!errors.impactDepth}
-              helperText={errors.impactDepth}
-              onBlur={() => {
-                if (!state.impactDepth) {
-                  setErrors(errors => ({...errors, impactDepth: 'This field cannot be empty'}));
-                } if(isNaN(state.impactDepth)) {
-                  setErrors(errors => ({...errors, impactDepth: 'This field must be a number'}));
-                } else {
-                  setErrors(errors => ({...errors, impactDepth: null}));
-                }
-              }
-              }
-            />
-            </Grid> */}
-
-            <Grid item xs={4}>
-              <LoadingAutoComplete
-                label={"Impact Depth Indicator"}
-                disabled={!state.organization}
-                options={options.indicators}
-                state={state.impactDepthIndicator}
-                onChange={
-                  handleChange('impactDepthIndicator')
-                }
-                error={!!errors.impactDepthIndicator}
-                helperText={errors.impactDepthIndicator}
-                required={required}
-                onBlur={() => {
-                  if (state.impactDepthIndicator) {
-                    setErrors(errors => ({...errors, impactDepthIndicator: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (state.impactScale) {
+                //     setErrors(errors => ({...errors, impactScale: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
             <Grid item xs={4}>
               <LoadingAutoComplete
-                label="Report Impact"
-                options={["positive", "negative", "neutral"]}
-                onChange={handleChange('Report Impact')}
-                value={state.ReportImpact}
+                label={"Impact Depth"}
+                options={options.impactDepths}
+                state={state.impactDepth}
+                onChange={
+                  handleChange('impactDepth')
+                }
+                error={!!errors.impactDepth}
+                helperText={errors.impactDepth}
+                required={required}
+                // onBlur={() => {
+                //   if (state.impactDepth) {
+                //     setErrors(errors => ({...errors, impactDepth: null}));
+                //   }
+                // }
+                // }
+              />
+            </Grid>
+
+            <Grid item xs={4}>
+              <LoadingAutoComplete
+                sx={{mt: 2}}
+                label={"Impact Duration"}
+                options={options.impactDurations}
+                state={state.impactDuration}
+                onChange={handleChange('impactDuration')}
+                required={required}
+                error={!!errors.impactDuration}
+                helperText={errors.impactDuration}
+                // onBlur={() => {
+                //   if (state.impactDuration) {
+                //     setErrors(errors => ({...errors, impactDuration: null}));
+                //   }
+                // }
+                // }
+              />
+            </Grid>
+
+            <Grid item xs={4}>
+              <LoadingAutoComplete
+                label="Reported Impact"
+                options={{"positive": "positive", "negative": "negative", "neutral": "neutral"}}
+                onChange={handleChange('reportedImpact')}
+                value={state.reportedImpact}
                 required={required}
                 disabled={disabled}
               />
-            </Grid>
-            
-
-            <Grid item xs={4}>
-            <LoadingAutoComplete
-              sx={{mt: 2}}
-              label={"Impact Duration Indicator"}
-              disabled={!state.organization}
-              options={options.indicators}
-              state={state.ImpactDurationIndicator}
-              onChange={handleChange('ImpactDurationIndicator')}
-              required={required}
-              error={!!errors.ImpactDurationIndicator}
-              helperText={errors.ImpactDurationIndicator}
-              onBlur={() => {
-                if (state.ImpactDurationIndicator) {
-                  setErrors(errors => ({...errors, ImpactDurationIndicator: null}));
-                }
-              }
-              }
-            />
             </Grid>
 
         
@@ -384,14 +346,14 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 disabled={disabled}
                 error={!!errors.startTime}
                 helperText={errors.startTime}
-                onBlur={() => {
-                  if (!state.startTime) {
-                    setErrors(errors => ({...errors, startTime: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, startTime: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.startTime) {
+                //     setErrors(errors => ({...errors, startTime: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, startTime: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 
@@ -407,58 +369,37 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 disabled={disabled}
                 error={!!errors.endTime}
                 helperText={errors.endTime}
-                onBlur={() => {
-                  if (!state.endTime) {
-                    setErrors(errors => ({...errors, endTime: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, endTime: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.endTime) {
+                //     setErrors(errors => ({...errors, endTime: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, endTime: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
             <Grid item xs={6}>
-              <LoadingAutoComplete
+              <Dropdown
                 sx={{mt: 2}}
-                label={"Impact Risk Indicator"}
-                disabled={!state.organization}
-                options={options.indicators}
-                state={state.ImpactRiskIndicator}
-                onChange={handleChange('ImpactRiskIndicator')}
-                required={required}
-                error={!!errors.ImpactRiskIndicator}
-                helperText={errors.ImpactRiskIndicator}
-                onBlur={() => {
-                  if (state.ImpactRiskIndicator) {
-                    setErrors(errors => ({...errors, ImpactDurationIndicator: null}));
-                  }
+                label={"Impact Risk"}
+                options={options.impactRisks}
+                state={state.impactRisk}
+                onChange={(e) => {
+                  setState(state => ({...state, impactRisks: e.target.value}));
+                  const st = state;
+                  st.impactRisks = e.target.value;
+                  onChange(st);
                 }
                 }
+                error={!!errors.impactRisks}
+                helperText={errors.impactRisks}
               />
+
 
               
             </Grid>
-
-            <Grid item xs={4}>
-            <LoadingAutoComplete
-              sx={{mt: 2}}
-              label={"Impact Duration Indicator"}
-              disabled={!state.organization}
-              options={options.indicators}
-              state={state.impactDurationIndicator}
-              onChange={handleChange('impactDurationIndicator')}
-              required={required}
-              error={!!errors.impactDurationIndicator}
-              helperText={errors.impactDurationIndicator}
-              onBlur={() => {
-                if (state.impactDurationIndicator) {
-                  setErrors(errors => ({...errors, impactDurationIndicator: null}));
-                }
-              }
-              }
-            />
-            </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 sx={{mt: 2}}
@@ -471,15 +412,8 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.expectation}
                 helperText={errors.expectation}
                 multiline
-                minRows={1}
-                onBlur={() => {
-                  if (!state.expectation) {
-                    setErrors(errors => ({...errors, expectation: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, expectation: null}));
-                  }
-                }
-                }
+                minRows={4}
+
               />
             </Grid>
 
@@ -496,15 +430,15 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.comment}
                 helperText={errors.comment}
                 multiline
-                minRows={2}
-                onBlur={() => {
-                  if (!state.comment) {
-                    setErrors(errors => ({...errors, comment: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, comment: null}));
-                  }
-                }
-                }
+                minRows={5}
+                // onBlur={() => {
+                //   if (!state.comment) {
+                //     setErrors(errors => ({...errors, comment: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, comment: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
 

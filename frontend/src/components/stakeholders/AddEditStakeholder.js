@@ -6,20 +6,14 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {
-  fetchOrganizationsInterfaces,
-  updateOrganization
-} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
+
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createStakeholder, fetchStakeholder, updateStakeholder} from "../../api/stakeholderAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {updateStakeholder} from "../../api/stakeholderAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -63,33 +57,39 @@ export default function AddEditStakeholder() {
     organization: '',
     name: '',
     description: '',
-    catchmentArea: ''
+    catchmentArea: '',
+    partOfs:[]
   })
   // const [outcomeForm, setOutcomeForm] = useState([
   // ]);
   const [loading, setLoading] = useState(true);
+  const [impactModelInterfaces, setImpactModelInterfaces] = useState({});
+  const [characteristicInterfaces, setCharacteristicInterfaces] = useState({});
   const [options, setOptions] = useState({
     organizations: [],
     catchmentAreas: ['local', 'provincial', 'national', 'multinational', 'global']
   });
 
+  useEffect(() => {
+    fetchDataTypeInterfaces('characteristic').then(({interfaces}) => {
+      setCharacteristicInterfaces(interfaces);
+    })
+  }, [])
+
 
   useEffect(() => {
-
     Promise.all([
-      fetchOrganizationsInterfaces().then(({organizations, success}) => {
+      fetchDataTypeInterfaces('organization').then(({interfaces, success}) => {
         if (success) {
-          const orgDict = {};
-          organizations.map(org => {
-            orgDict[org._uri] = org.legalName;
-          });
-          setOptions(options => ({...options, organizations: orgDict}))
+          setOptions(options => ({...options, organizations: interfaces}))
         }
-      }),
+      }), fetchDataTypeInterfaces('impactModel').then(({interfaces}) => {
+        setImpactModelInterfaces(interfaces)
+      })
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
         Promise.all([
-          fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
+          fetchDataTypes('user', encodeURIComponent(uri)).then(({data, success}) => {
             const objectForm = {};
             data.map(user => {
               objectForm[user._uri] = `${user.person.givenName} ${user.person.familyName} URI: ${user._uri}`;
@@ -97,10 +97,12 @@ export default function AddEditStakeholder() {
             if (success)
               setOptions(options => ({...options, objectForm}));
           }),
-          fetchStakeholder(encodeURIComponent(uri)).then(res => {
+          fetchDataType('stakeholder', encodeURIComponent(uri)).then(res => {
             if (res.success) {
               const {stakeholder} = res;
               setForm({
+                characteristics: stakeholder.characteristics,
+                partOfs: stakeholder.partOfs,
                 name: stakeholder.name,
                 description: stakeholder.description,
                 catchmentArea: stakeholder.catchmentArea,
@@ -165,7 +167,7 @@ export default function AddEditStakeholder() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createStakeholder({form}).then((ret) => {
+      createDataType('stakeholder', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/stakeholders');
@@ -234,14 +236,15 @@ export default function AddEditStakeholder() {
     <Container maxWidth="md">
       {mode === 'view'?
         <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h4'}> Stakeholder </Typography>
           <Typography variant={'h6'}> {`Legal Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
+          <Typography variant={'body1'}> {`${form.legalName || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.name}`} </Typography>
-          <Typography variant={'h6'}> {`Description:`} </Typography>
-          <Typography variant={'body1'}> {`${form.description}`} </Typography>
+          <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
+          {/*<Typography variant={'h6'}> {`Description:`} </Typography>*/}
+          {/*<Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>*/}
           <Typography variant={'h6'}> {`Catchment Area:`} </Typography>
-          <Typography variant={'body1'}> {`${form.catchmentArea}`} </Typography>
+          <Typography variant={'body1'}> {`${form.catchmentArea || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
           {form.organizationIds.length? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
@@ -250,6 +253,29 @@ export default function AddEditStakeholder() {
               <Paper elevation={0}>
                 <Typography variant={'body1'}> {`ID: ${organizationId.organizationId}`}</Typography>
                 <Typography variant={'body1'}> Issued By: <Link to={`/organization/${encodeURIComponent(organizationId.issuedBy._uri)}/view`} colorWithHover color={'#2f5ac7'}>{organizationId.issuedBy.legalName}</Link></Typography>
+              </Paper>
+            )
+          })}
+          {form.partOfs?.length? <Typography variant={'h6'}> {`Part Of:`} </Typography>:null}
+          {form.partOfs?.map(partOf => {
+            return (
+              <Paper elevation={0}>
+                <Typography variant={'body1'}>
+                  {`Impact Model: `}
+                {<Link to={`/impactModel/${encodeURIComponent(partOf)}/view`} colorWithHover
+                       color={'#2f5ac7'}>{`${impactModelInterfaces[partOf]}`}</Link>}
+                </Typography>
+              </Paper>
+            )
+          })}
+          {form.characteristics?.length? <Typography variant={'h6'}> {`Characteristics:`} </Typography>:null}
+          {form.characteristics?.map(partOf => {
+            return (
+              <Paper elevation={0}>
+                <Typography variant={'body1'}>
+                  {<Link to={`/characteristic/${encodeURIComponent(partOf)}/view`} colorWithHover
+                         color={'#2f5ac7'}>{`${characteristicInterfaces[partOf]}`}</Link>}
+                </Typography>
               </Paper>
             )
           })}
