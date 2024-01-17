@@ -150,8 +150,10 @@ export function validateFieldAndURI(form, attriConfig ,attributeName, compassAtt
     if (!form[attributeName] && attriConfig[compassAttributeName]) {
       if (attriConfig[compassAttributeName].ignoreInstance) {
         setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'}));
+        return
       } else if (attriConfig[compassAttributeName].flag) {
-
+        setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'}));
+        return
       } else {
         setErrors(errors => ({...errors, [attributeName]: ''}));
       }
@@ -160,6 +162,7 @@ export function validateFieldAndURI(form, attriConfig ,attributeName, compassAtt
     }
     if (form[attributeName] && !isValidURL(form[attributeName])) {
       setErrors(errors => ({...errors, [attributeName]: 'Please input an valid URI'}));
+      return
     } else {
       setErrors(errors => ({...errors, [attributeName]: ''}));
     }
