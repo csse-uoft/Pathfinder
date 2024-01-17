@@ -25,13 +25,13 @@ const fetchIndicatorReportInterfacesHandler = async (req, res, next) => {
 
 const fetchIndicatorReportInterfaces = async (req, res) => {
   const {organizationUri} = req.params;
-  let indicatorReports
+  let indicatorReports;
   if (organizationUri === 'undefined' || !organizationUri) {
     // return all indicator Interfaces
     indicatorReports = await GDBIndicatorReportModel.find({});
   } else {
     // return outcomes based on their organization
-    indicatorReports = await GDBIndicatorReportModel.find({forOrganization: organizationUri})
+    indicatorReports = await GDBIndicatorReportModel.find({forOrganization: organizationUri});
   }
 
   const indicatorReportInterfaces = {};
@@ -40,19 +40,19 @@ const fetchIndicatorReportInterfaces = async (req, res) => {
   });
   return res.status(200).json({success: true, indicatorReportInterfaces});
 
-}
+};
 
 const createIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'create' + resource)){
+    if (await hasAccess(req, 'create' + resource)) {
       const {form} = req.body;
-      form.value = form.numericalValue
-      form.forIndicator = form.indicator
+      form.value = form.numericalValue;
+      form.forIndicator = form.indicator;
       await Transaction.beginTransaction();
       if (await indicatorReportBuilder('interface', null, null, null, {}, {}, form))
         await Transaction.commit();
-        return res.status(200).json({success: true})
-        }
+      return res.status(200).json({success: true});
+    }
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     if (Transaction.isActive())
@@ -69,7 +69,7 @@ const createIndicatorReport = async (req, res) => {
   if (form?.indicatorName) { // handle the case when no such indicator name
     const indicator = await GDBIndicatorModel.findOne({name: form.indicatorName});
     if (!indicator)
-      return res.status(200).json({success: false, message: 'Wrong indicatorName'})
+      return res.status(200).json({success: false, message: 'Wrong indicatorName'});
     form.indicator = indicator._uri;
   }
   if (!form || !form.name || !form.organization || !form.indicator
@@ -102,12 +102,12 @@ const createIndicatorReport = async (req, res) => {
     }),
     dateCreated: new Date(form.dateCreated),
     value: GDBMeasureModel({numericalValue: form.numericalValue}),
-  }, form.uri?{uri: form.uri}:null);
+  }, form.uri ? {uri: form.uri} : null);
 
 
   await indicatorReport.save();
-  if(!indicator.indicatorReports)
-    indicator.indicatorReports = []
+  if (!indicator.indicatorReports)
+    indicator.indicatorReports = [];
   indicator.indicatorReports.push(indicatorReport);
   await indicator.save();
   // const ownership = GDBOwnershipModel({
@@ -198,7 +198,7 @@ const updateIndicatorReport = async (req, res) => {
     const index = indicatorReport.forIndicator.indicatorReports.indexOf(uri);
     indicatorReport.forIndicator.indicatorReports.splice(index, 1);
     if (!indicator.indicatorReports)
-      indicator.indicatorReports = []
+      indicator.indicatorReports = [];
     indicator.indicatorReports.push(uri);
     await indicatorReport.forIndicator.save();
     await indicator.save();
@@ -229,20 +229,33 @@ const fetchIndicatorReportsHandler = async (req, res, next) => {
 };
 
 const fetchIndicatorReports = async (req, res) => {
-  const {orgUri} = req.params;
-  if (!orgUri)
+  const {orgUri, indicatorUri} = req.params;
+  if (!orgUri && !indicatorUri)
     throw new Server400Error('Wrong input');
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
-  const organization = await GDBOrganizationModel.findOne({_uri: orgUri});
-  if (!organization)
-    throw new Server400Error('No such organization');
   let editable;
-  if (userAccount.isSuperuser || organization.editors?.includes(req.session._uri)) {
-    editable = true; // to tell the frontend that the outcome belong to the organization is editable
+  let indicatorReports;
+  if (!userAccount)
+    throw new Server400Error('Wrong Account Information');
+  if (indicatorUri) {
+    const indicator = await GDBIndicatorModel.findOne({_uri: indicatorUri}, {populates: ['indicatorReports.hasTime.hasEnd', 'indicatorReports.hasTime.hasBeginning', 'indicatorReports.value']});
+    if (!indicator)
+      throw new Server400Error('No Such Indicator');
+    //todo: didn't check access
+    indicatorReports = indicator.indicatorReports || [];
+  } else if (orgUri) {
+    const organization = await GDBOrganizationModel.findOne({_uri: orgUri});
+    if (!organization)
+      throw new Server400Error('No such organization');
+    if (userAccount.isSuperuser || organization.editors?.includes(req.session._uri)) {
+      editable = true; // to tell the frontend that the outcome belong to the organization is editable
+    }
+    indicatorReports = await GDBIndicatorReportModel.find({forOrganization: orgUri},
+      {populates: ['value', 'hasTime.hasEnd', 'hasTime.hasBeginning', 'forIndicator.unitOfMeasure']}
+    );
   }
-  const indicatorReports = await GDBIndicatorReportModel.find({forOrganization: orgUri},
-    {populates: ['value', 'hasTime.hasEnd', 'hasTime.hasBeginning', 'forIndicator.unitOfMeasure']}
-  );
+
+
   return res.status(200).json({success: true, indicatorReports, editable});
 };
 

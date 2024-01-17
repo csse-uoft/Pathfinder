@@ -9,7 +9,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
-export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri}) {
+export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri, organizationUri}) {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
@@ -25,15 +25,29 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
   });
   const [trigger, setTrigger] = useState(true);
 
+  const [indicatorReportDict, setIndicatorReportDict] = useState({})
+
+  useEffect(() => {
+    fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}`: encodeURIComponent(organizationUri)).then(({success, indicatorReports}) => {
+      if (success) {
+        const indicatorReportDict = {};
+        indicatorReports.map(indicatorReport => {
+          indicatorReportDict[indicatorReport._uri] = indicatorReport
+        })
+        console.log(indicatorReportDict)
+        setIndicatorReportDict(indicatorReportDict)
+      }
+    })
+  }, [state])
+
   useEffect(() => {
     fetchDataTypeInterfaces('outcome').then(({interfaces}) => setOutcomeInterfaces(interfaces))
   }, [])
 
   useEffect(() => {
     if (multi) {
-      fetchDataTypes('indicator', encodeURIComponent(uri)).then(res => {
+      fetchDataTypes('indicator', encodeURIComponent(organizationUri)).then(res => {
         if(res.success) {
-          console.log(res.indicators)
           setState(state => ({...state, loading: false, data: res.indicators}));
         }
       }).catch(e => {
@@ -101,11 +115,11 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
       label: 'indicatorReport URI',
       colSpan: 3,
       body: ({indicatorReports}) => {
-        return indicatorReports?.map(indicatorReport => [<Link colorWithHover to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}>
-          {indicatorReport._uri}
+        return indicatorReports?.map(indicatorReportUri => [<Link colorWithHover to={`/indicatorReport/${encodeURIComponent(indicatorReportUri)}/view`}>
+          {indicatorReportUri}
         </Link>,
-          indicatorReport.value?.numericalValue,
-          (indicatorReport.hasTime?.hasBeginning?.date && indicatorReport.hasTime?.hasEnd?.date)? `${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : null
+          indicatorReportDict[indicatorReportUri]?.value?.numericalValue,
+          (indicatorReportDict[indicatorReportUri]?.hasTime?.hasBeginning?.date && indicatorReportDict[indicatorReportUri]?.hasTime?.hasEnd?.date)? `${(new Date(indicatorReportDict[indicatorReportUri]?.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReportDict[indicatorReportUri]?.hasTime.hasEnd.date)).toLocaleString()}` : null
         ]);
       }
     },
