@@ -107,7 +107,7 @@ export function validateField(form, attriConfig ,attributeName, compassAttribute
       if (attriConfig[compassAttributeName].ignoreInstance) {
         setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'}));
       } else if (attriConfig[compassAttributeName].flag) {
-
+        setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'})); // todo: to be checked
       } else {
         setErrors(errors => ({...errors, [attributeName]: ''}));
       }
