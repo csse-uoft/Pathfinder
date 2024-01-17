@@ -14,7 +14,8 @@ import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import {createDataType, fetchDataType} from "../../api/generalAPI";
-
+import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -28,6 +29,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactRisk() {
+  const attriConfig = fullLevelConfig.impactRisk
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();
@@ -104,7 +106,10 @@ export default function AddEditImpactRisk() {
       setState(state => ({...state, submitDialog: true}));
     }
   };
-
+  const attribute2Compass = {
+    hasIdentifier:'tove_org:hasIdentifier',
+ 
+  }
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
@@ -144,7 +149,7 @@ export default function AddEditImpactRisk() {
 
   const validate = () => {
     const error = {};
-
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri'])
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -189,6 +194,9 @@ export default function AddEditImpactRisk() {
               })
             );
           }}
+
+          required={isFieldRequired(attriConfig, attribute2Compass, 'hasIdentifier')}
+          onBlur={validateField(form, attriConfig, 'hasIdentifier', attribute2Compass['hasIdentifier'], setErrors)}
         />
 
         <GeneralField
@@ -199,14 +207,7 @@ export default function AddEditImpactRisk() {
           onChange={e => form.uri = e.target.value}
           error={!!errors.uri}
           helperText={errors.uri}
-          onBlur={() => {
-            if (form.uri !== '' && !isValidURL(form.uri)) {
-              setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-            } else {
-              setErrors(errors => ({...errors, uri: ''}));
-            }
-
-          }}
+          onBlur={validateURI(form, setErrors)}
         />
 
 

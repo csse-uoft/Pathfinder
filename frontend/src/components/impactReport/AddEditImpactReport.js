@@ -12,6 +12,9 @@ import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {validateForm} from "../../helpers";
+
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -23,8 +26,8 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-
 export default function AddEditImpactReport() {
+  const attriConfig = fullLevelConfig.impactReport
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -37,6 +40,7 @@ export default function AddEditImpactReport() {
     submitDialog: false,
     loadingButton: false,
   });
+  
   const [errors, setErrors] = useState(
     {}
   );
@@ -124,6 +128,23 @@ export default function AddEditImpactReport() {
     }
   };
 
+  const attribute2Compass = {
+    stakeholders: 'cids:forStakeholder',
+    codes: 'cids:hasCode',
+    name: 'cids:hasName',
+    comment: 'cids:hasComment',
+    forStakeholderOutcome:'cids:forOutcome',
+    forOrganization: 'cids:forOrganization',
+    impactScale: 'cids:hasImpactScale',
+    impactDepth: 'cids:hasImpactDepth',
+    impactDuration: 'cids:hasImpactDuration',
+    hasTime: 'time:hasTime',
+    reportedImpact: 'cids:hasReportedImpact',
+    expectation: 'cids:hasExpectation',
+    impactRisks: 'cids:hasImpactRisk',
+ 
+  }
+
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
@@ -163,33 +184,7 @@ export default function AddEditImpactReport() {
 
   const validate = () => {
     const error = {};
-    // if (!form.name)
-    //   error.name = 'The field cannot be empty';
-    // if (!form.comment)
-    //   error.comment = 'The field cannot be empty';
-    // if (!form.organization)
-    //   error.organization = 'The field cannot be empty';
-    // if (!form.indicator)
-    //   error.indicator = 'The field cannot be empty';
-    // if (!form.startTime)
-    //   error.startTime = 'The field cannot be empty';
-    // if (!form.endTime)
-    //   error.endTime = 'The field cannot be empty';
-    // if (form.uri && !isValidURL(form.uri))
-    //   error.uri = 'The field cannot be empty';
-    if (!!form.startTime && !!form.endTime && form.startTime > form.endTime) {
-      error.startTime = 'The date must be earlier than the end date';
-      error.endTime = 'The date must be later than the start date';
-    }
-
-    // if (!form.numericalValue)
-    //   error.numericalValue = 'The field cannot be empty';
-    // if (form.numericalValue && isNaN(form.numericalValue))
-    //   error.numericalValue = 'The field must be a number';
-    // if (!form.unitOfMeasure)
-    //   error.unitOfMeasure = 'The field cannot be empty';
-    // if (!form.dateCreated)
-    //   error.dateCreated = 'The field cannot be empty';
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri'])
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -252,12 +247,12 @@ export default function AddEditImpactReport() {
           disabled={mode === 'view'}
           disabledOrganization={!!orgUri}
           defaultValue={form}
-          required
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
           uriDiasbled={mode !== 'new'}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
           
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
