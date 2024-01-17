@@ -68,7 +68,7 @@ export default function OutcomeField({
                                        disableURI,
                                        disabled,
                                        importErrors,
-                                         attribute2Compass
+                                       attribute2Compass
                                      }) {
 
   const [state, setState] = useState(defaultValue || {});
@@ -82,7 +82,7 @@ export default function OutcomeField({
 
   const userContext = useContext(UserContext);
 
-    const attriConfig = fullLevelConfig.outcome;
+  const attriConfig = fullLevelConfig.outcome;
 
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function OutcomeField({
       fetchDataTypeInterfaces('theme')
         .then(res => {
           if (res.success)
-            options.themes = res.interfaces
+            options.themes = res.interfaces;
         }),
       fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
         if (success) {
@@ -104,7 +104,7 @@ export default function OutcomeField({
       }),
       fetchFeatureInterfaces().then(({success, interfaces}) => {
         if (success) {
-          setOptions(op => ({...op, features: interfaces}))
+          setOptions(op => ({...op, features: interfaces}));
         }
       })
     ]).then(() => setLoading(false));
@@ -113,21 +113,20 @@ export default function OutcomeField({
 
   useEffect(() => {
     if (state.organization) {
-      Promise.all([fetchDataTypeInterfaces('indicator', encodeURIComponent(state.organization)), fetchDataTypeInterfaces('impactModel', encodeURIComponent(state.organization))]).
-      then(([indicatorRet, impactModelRet]) => {
+      Promise.all([fetchDataTypeInterfaces('indicator', encodeURIComponent(state.organization)), fetchDataTypeInterfaces('impactModel', encodeURIComponent(state.organization))]).then(([indicatorRet, impactModelRet]) => {
         setOptions(ops => ({...ops, indicators: indicatorRet.interfaces, partOf: impactModelRet.interfaces}));
-      })
+      });
     }
 
-      if (state.organization) {
-          fetchDataTypeInterfaces('outcome', encodeURIComponent(state.organization)).then(({success, interfaces}) => {
-              if (success) {
-                  setOptions(ops => ({...ops, outcomes: interfaces}));
-              }
-          });
-      }
+    if (state.organization) {
+      fetchDataTypeInterfaces('outcome', encodeURIComponent(state.organization)).then(({success, interfaces}) => {
+        if (success) {
+          setOptions(ops => ({...ops, outcomes: interfaces}));
+        }
+      });
+    }
   }, [state.organization]);
- //   console.log(options)
+  //   console.log(options)
   useEffect(() => {
     setErrors({...importErrors});
   }, [importErrors]);
@@ -179,21 +178,21 @@ export default function OutcomeField({
                 onBlur={validateURI(defaultValue, setErrors)}
               />
             </Grid>
-              <Grid item xs={4}>
-                  <GeneralField
-                      fullWidth
-                      type={'date'}
-                      value={state.dateCreated}
-                      label={'Date Created'}
-                      onChange={handleChange('dateCreated')}
-                      required={isFieldRequired(attriConfig, attribute2Compass, 'dateCreated')}
-                      disabled={disabled}
-                      error={!!errors.dateCreated}
-                      helperText={errors.dateCreated}
-                      minWidth={187}
-                      onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
-                  />
-              </Grid>
+            <Grid item xs={4}>
+              <GeneralField
+                fullWidth
+                type={'date'}
+                value={state.dateCreated}
+                label={'Date Created'}
+                onChange={handleChange('dateCreated')}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'dateCreated')}
+                disabled={disabled}
+                error={!!errors.dateCreated}
+                helperText={errors.dateCreated}
+                minWidth={187}
+                onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
+              />
+            </Grid>
 
             <Grid item xs={8}>
               <Dropdown
@@ -308,28 +307,28 @@ export default function OutcomeField({
 
               />
             </Grid>
-              <Grid item xs={12}>
-                  <Dropdown
-                      label="Can Produce"
-                      key={'CanProduce'}
-                      options={options.outcomes}
-                      onChange={(e) => {
-                          setState(state => ({...state, canProduces: e.target.value}));
-                          const st = state;
-                          st.canProduces = e.target.value;
-                          onChange(st);
-                      }
-                      }
-                      fullWidth
-                      value={state.canProduces}
-                      error={!!errors.canProduces}
-                      helperText={errors.canProduces}
-                      required={isFieldRequired(attriConfig, attribute2Compass, 'canProduces')}
-                      disabled={disabled || !state.organization}
-                      onBlur={validateField(defaultValue, attriConfig, 'canProduces', attribute2Compass['canProduces'], setErrors)}
+            <Grid item xs={12}>
+              <Dropdown
+                label="Can Produce"
+                key={'CanProduce'}
+                options={options.outcomes}
+                onChange={(e) => {
+                  setState(state => ({...state, canProduces: e.target.value}));
+                  const st = state;
+                  st.canProduces = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.canProduces}
+                error={!!errors.canProduces}
+                helperText={errors.canProduces}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'canProduces')}
+                disabled={disabled || !state.organization}
+                onBlur={validateField(defaultValue, attriConfig, 'canProduces', attribute2Compass['canProduces'], setErrors)}
 
-                  />
-              </Grid>
+              />
+            </Grid>
             <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
