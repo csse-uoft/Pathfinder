@@ -8,7 +8,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {useNavigate} from "react-router-dom";
-import {fetchDataTypes} from "../../api/generalAPI";
+import {fetchDataTypes, fetchDataType} from "../../api/generalAPI";
 
 export default function OrganizationView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -85,10 +85,13 @@ export default function OrganizationView({organizationUser, groupUser, superUser
     {
       label: 'Organization URI',
       body: ({_uri}) => {
-        return <Link colorWithHover to={`${process.env.PUBLIC_URL}/organizationOfUsers/${encodeURIComponent(_uri)}`}>
+        if (multi)
+          return <Link colorWithHover to={`/organization/${encodeURIComponent(_uri)}/view`}>
           {_uri}
         </Link>;
-      }
+        if (single)
+          return _uri
+      },
     },
     { // todo
       label: 'Organization ID',
@@ -102,6 +105,18 @@ export default function OrganizationView({organizationUser, groupUser, superUser
         return hasLegalStatus?.label;
       }
     },
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        if (multi)
+          return <DropdownMenu urlPrefix={'organization'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+                               hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
+        if (single)
+          return null
+      }
+
+
+    }
   ];
 
   if (state.loading)

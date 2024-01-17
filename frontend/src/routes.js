@@ -72,6 +72,7 @@ import Datasets from "./components/datasets/Datasets";
 import AddEditHowMuchImpact from "./components/howMuchImpact/AddEditHowMuchImpact";
 import HowMuchImpacts from "./components/howMuchImpact/HowMuchImpacts";
 import Characteristics from "./components/characteristics/Characteristics";
+import Organization from "./components/organizations/Organization";
 
 
 const routes = (
@@ -97,7 +98,9 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/organizations`} element={<PrivateRoute element={Organizations}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/organizations/new`}
            element={<PrivateRoute element={AddEditOrganization}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/organizations/:uri/:viewMode`}
+      <Route path={`${process.env.PUBLIC_URL}/organization/:uri/view`}
+             element={<PrivateRoute element={Organization}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organization/:uri/:viewMode`}
            element={<PrivateRoute element={AddEditOrganization}/>}/>
     {/*stakeholders*/}
     <Route path={`${process.env.PUBLIC_URL}/stakeholders`} element={<PrivateRoute element={Stakeholders}/>}/>
