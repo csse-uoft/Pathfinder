@@ -184,7 +184,7 @@ export default function AddEditImpactReport() {
 
   const validate = () => {
     const error = {};
-    validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri'])
     setErrors(error);
     return Object.keys(error).length === 0;
   };

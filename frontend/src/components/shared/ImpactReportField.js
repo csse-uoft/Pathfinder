@@ -17,23 +17,6 @@ const filterOptions = createFilterOptions({
   matchFrom: 'start'
 });
 
-const attribute2Compass = {
-  stakeholders: 'cids:forStakeholder',
-  codes: 'cids:hasCode',
-  name: 'cids:hasName',
-  comment: 'cids:hasComment',
-  forStakeholderOutcome:'cids:forOutcome',
-  forOrganization: 'cids:forOrganization',
-  impactScale: 'cids:hasImpactScale',
-  impactDepth: 'cids:hasImpactDepth',
-  impactDuration: 'cids:hasImpactDuration',
-  hasTime: 'time:hasTime',
-  reportedImpact: 'cids:hasReportedImpact',
-  expectation: 'cids:hasExpectation',
-  impactRisks: 'cids:hasImpactRisk',
-
-}
-
 function LoadingAutoComplete({
                                label,
                                options,
@@ -70,7 +53,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function ImpactReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled}) {
+export default function ImpactReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled,attribute2Compass,}) {
   
   const [state, setState] = useState(
     defaultValue ||
@@ -89,20 +72,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
   const [errors, setErrors] = useState({...importErrors});
 
   const userContext = useContext(UserContext);
-  const [form, setForm] = useState({
-    name: '',
-    comment: '',
-    impactScale: null,
-    impactDepth: null,
-    impactDuration: null,
-    forStakeholderOutcome: null,
-    reportedImpact: null,
-    organization: null,
-    impactRisks: null,
-    startTime: '',
-    endTime: '',
-    uri: '',
-  });
+
 
   useEffect(() => {
     Promise.all([fetchHowMuchImpacts('ImpactScale'), fetchHowMuchImpacts('ImpactDepth'), fetchHowMuchImpacts('ImpactDuration'), fetchImpactRisks()])
@@ -229,7 +199,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.name}
                 helperText={errors.name}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
-                onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'name', attribute2Compass['name'], setErrors)}
               />
             </Grid>
 
@@ -245,7 +215,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 disabled={disabled}
                 error={!!errors.uri}
                 helperText={errors.uri}
-                onBlur={validateURI(form, setErrors)}
+                onBlur={validateURI(state, setErrors)}
               />
             </Grid>
 
@@ -261,7 +231,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 helperText={errors.organization}
                 disabled={disabled || disabledOrganization}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'organization')}
-                onBlur={validateFieldAndURI(form, attriConfig,'organization',attribute2Compass['organization'], setErrors)}
+                onBlur={validateFieldAndURI(state, attriConfig,'organization',attribute2Compass['organization'], setErrors)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -277,7 +247,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.forStakeholderOutcome}
                 helperText={errors.forStakeholderOutcome}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'stakeholdersoutcome')}
-                onBlur={validateField(form, attriConfig, 'stakeholdersoutcome', attriConfig['stakeholdersoutcome'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'stakeholdersoutcome', attriConfig['stakeholdersoutcome'], setErrors)}
 
               />
             </Grid>
@@ -294,7 +264,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.impactScale}
                 helperText={errors.impactScale}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'impactscale')}
-                onBlur={validateField(form, attriConfig, 'impactscale', attriConfig['impactscale'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'impactscale', attriConfig['impactscale'], setErrors)}
               />
             </Grid>
 
@@ -310,7 +280,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.impactDepth}
                 helperText={errors.impactDepth}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'impactdepth')}
-                onBlur={validateField(form, attriConfig, 'impactdepth', attriConfig['impactdepth'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'impactdepth', attriConfig['impactdepth'], setErrors)}
               />
             </Grid>
 
@@ -325,7 +295,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.impactDuration}
                 helperText={errors.impactDuration}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'impactduration')}
-                onBlur={validateField(form, attriConfig, 'impactduration', attriConfig['impactduration'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'impactduration', attriConfig['impactduration'], setErrors)}
               />
             </Grid>
 
@@ -338,7 +308,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 value={state.reportedImpact}
                 disabled={disabled}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'reportedimpact')}
-                onBlur={validateField(form, attriConfig, 'reportedimpact', attriConfig['reportedimpact'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'reportedimpact', attriConfig['reportedimpact'], setErrors)}
               />
             </Grid>
 
@@ -357,7 +327,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.startTime}
                 helperText={errors.startTime}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'startdate')}
-                onBlur={validateField(form, attriConfig, 'startdate', attriConfig['startdate'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'startdate', attriConfig['startdate'], setErrors)}
               />
             </Grid>
 
@@ -374,7 +344,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.endTime}
                 helperText={errors.endTime}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'enddate')}
-                onBlur={validateField(form, attriConfig, 'enddate', attriConfig['enddate'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'enddate', attriConfig['enddate'], setErrors)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -394,7 +364,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 error={!!errors.impactRisks}
                 helperText={errors.impactRisks}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'impactrisk')}
-                onBlur={validateField(form, attriConfig, 'impactrisk', attriConfig['impactrisk'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'impactrisk', attriConfig['impactrisk'], setErrors)}
               />
 
 
@@ -415,7 +385,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 multiline
                 minRows={4}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'expectation')}
-                onBlur={validateField(form, attriConfig, 'expectation', attriConfig['expectation'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'expectation', attriConfig['expectation'], setErrors)}
 
               />
             </Grid>
@@ -435,7 +405,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 multiline
                 minRows={5}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'comment')}
-                onBlur={validateField(form, attriConfig, 'comment', attriConfig['comment'], setErrors)}
+                onBlur={validateField(state, attriConfig, 'comment', attriConfig['comment'], setErrors)}
               />
             </Grid>
 

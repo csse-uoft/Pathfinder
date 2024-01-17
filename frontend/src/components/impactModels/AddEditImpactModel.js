@@ -135,7 +135,7 @@ export default function AddEditImpactModel() {
   
   const attribute2Compass = {
     name: 'cids:hasName',
-    description: 'cids:hasName',
+    description:  'cids:hasDescription',
     organization: 'cids:forOrganization',
     dateCreated:  "schema:dateCreated"
   }
@@ -187,7 +187,7 @@ export default function AddEditImpactModel() {
 
   const validate = () => {
     const error = {};
-    validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri'])
     setErrors(error);
     return Object.keys(error).length === 0;
   };
