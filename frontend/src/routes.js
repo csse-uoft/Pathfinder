@@ -73,6 +73,7 @@ import AddEditHowMuchImpact from "./components/howMuchImpact/AddEditHowMuchImpac
 import HowMuchImpacts from "./components/howMuchImpact/HowMuchImpacts";
 import Characteristics from "./components/characteristics/Characteristics";
 import Organization from "./components/organizations/Organization";
+import Indicator from "./components/indicators/Indicator";
 
 
 const routes = (
@@ -98,8 +99,8 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/organizations`} element={<PrivateRoute element={Organizations}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/organizations/new`}
            element={<PrivateRoute element={AddEditOrganization}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/organization/:uri/view`}
-             element={<PrivateRoute element={Organization}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organization/:uri/view`}
+           element={<PrivateRoute element={Organization}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/organization/:uri/:viewMode`}
            element={<PrivateRoute element={AddEditOrganization}/>}/>
     {/*stakeholders*/}
@@ -117,13 +118,15 @@ const routes = (
     {/*Datasets*/}
     <Route path={`${process.env.PUBLIC_URL}/dataset/new`} element={<PrivateRoute element={AddEditDataset}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/datasets`} element={<PrivateRoute element={Datasets}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/dataset/:uri/:viewMode`} element={<PrivateRoute element={AddEditDataset}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/dataset/:uri/:viewMode`}
+           element={<PrivateRoute element={AddEditDataset}/>}/>
 
     {/*Datasets*/}
-    <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/new`} element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/new`}
+           element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/howMuchImpacts`} element={<PrivateRoute element={HowMuchImpacts}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/:uri/:operationMode`}
-             element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/howMuchImpact/:uri/:operationMode`}
+           element={<PrivateRoute element={AddEditHowMuchImpact}/>}/>
 
     {/*ImpactRisk*/}
     <Route path={`${process.env.PUBLIC_URL}/impactRisks`} element={<PrivateRoute element={ImpactRisks}/>}/>
@@ -164,6 +167,8 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/indicator/:orgUri/new`}
            element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicator/new`} element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicator/:uri/view`}
+           element={<PrivateRoute element={Indicator}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicator/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditIndicator}/>}/>
     {/*outcomes*/}

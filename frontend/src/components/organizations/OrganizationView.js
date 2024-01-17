@@ -42,7 +42,12 @@ export default function OrganizationView({organizationUser, groupUser, superUser
         if (res.success) {
           setState(state => ({...state, loading: false, data: [res.organization]}));
         }
-      })
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setState(state => ({...state, loading: false}));
+        navigate('/dashboard');
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      });
     }
 
   }, [trigger]);
@@ -137,7 +142,6 @@ export default function OrganizationView({organizationUser, groupUser, superUser
             label="Add new Organization"
             variant="outlined"/>:null
         }
-
       />
       <DeleteModal
         objectId={state.selectedId}
