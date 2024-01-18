@@ -58,6 +58,7 @@ export const EnhancedTableToolbar = (props) => {
           variant="h6"
           id="tableTitle"
           component="div"
+          style={{ whiteSpace: 'pre-line'}}
         >
           {title}
         </Typography>
