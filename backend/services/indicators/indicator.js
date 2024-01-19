@@ -132,6 +132,9 @@ const fetchIndicator = async (req, res) => {
   if (!uri)
     throw new Server400Error('Id is not given');
   const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure', 'baseline', 'threshold']});
+  if (!indicator) {
+    throw new Server400Error('No Such Indicator')
+  }
   indicator.unitOfMeasure = indicator.unitOfMeasure?.label;
   indicator.baseline = indicator.baseline?.numericalValue;
   indicator.threshold = indicator.threshold?.numericalValue;

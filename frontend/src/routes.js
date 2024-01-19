@@ -75,6 +75,7 @@ import Characteristics from "./components/characteristics/Characteristics";
 import Organization from "./components/organizations/Organization";
 import Indicator from "./components/indicators/Indicator";
 import Outcome from "./components/outcomes/Outcome";
+import Theme from "./components/theme/Theme";
 
 
 const routes = (
@@ -158,8 +159,10 @@ const routes = (
            element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
     {/*theme*/}
     <Route path={`${process.env.PUBLIC_URL}/themes`} element={<PrivateRoute element={Themes}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/themes/new`} element={<PrivateRoute element={AddEditTheme}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/themes/:uri/:operationMode`}
+    <Route path={`${process.env.PUBLIC_URL}/theme/new`} element={<PrivateRoute element={AddEditTheme}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
+           element={<PrivateRoute element={Theme}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditTheme}/>}/>
     {/*indicators*/}
     <Route path={`${process.env.PUBLIC_URL}/organization-indicators`}
@@ -178,8 +181,8 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/outcomes/:uri`} element={<PrivateRoute element={Outcomes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/:orgUri/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`}
-             element={<PrivateRoute element={Outcome}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`}
+           element={<PrivateRoute element={Outcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditOutcome}/>}/>
 

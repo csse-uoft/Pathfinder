@@ -24,14 +24,6 @@ function Dashboard() {
       textAlign: 'center',
     }}>
 
-      {/*{!organization.id &&*/}
-      {/*  <NavButton to={{pathname: '/providers/organization/new', state: {status: 'Home Agency'}}}*/}
-      {/*             text="Create Organization Profile for Home Agency" icon={<Create/>}/>}*/}
-
-      {/*{organization.id &&*/}
-      {/*  <NavButton to={`/provider/${organization.id}/edit/organization`} icon={<Edit/>}*/}
-      {/*             text="Edit Organization Profile for Home Agency"/>}*/}
-
       {userContext.isSuperuser || userContext.groupAdminOfs.length?
         <NavButton to={`/groups`} icon={<People/>} key={'groups'}
                   text="Manage Groups"/>:null}
