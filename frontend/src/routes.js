@@ -74,6 +74,7 @@ import HowMuchImpacts from "./components/howMuchImpact/HowMuchImpacts";
 import Characteristics from "./components/characteristics/Characteristics";
 import Organization from "./components/organizations/Organization";
 import Indicator from "./components/indicators/Indicator";
+import Outcome from "./components/outcomes/Outcome";
 
 
 const routes = (
@@ -177,6 +178,8 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/outcomes/:uri`} element={<PrivateRoute element={Outcomes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/:orgUri/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`}
+             element={<PrivateRoute element={Outcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditOutcome}/>}/>
 

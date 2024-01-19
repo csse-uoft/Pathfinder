@@ -6,7 +6,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataType, fetchDataTypes} from "../../api/generalAPI";
+import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 
 export default function OutcomeView({multi, single, organizationUser, groupUser, superUser, organizationUri}) {
@@ -24,12 +24,13 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
   });
   const [trigger, setTrigger] = useState(true);
 
+  const [indicatorInterfaces, setIndicatorInterfaces] = useState({})
+
   useEffect(() => {
     if (multi) {
       fetchDataTypes('outcome', encodeURIComponent(organizationUri)).then(res => {
         if (res.success)
           setState(state => ({...state, loading: false, data: res.outcomes, editable: res.editable}));
-        console.log(res.outcomes);
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
@@ -50,17 +51,25 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
   }, [trigger]);
 
+  useEffect(() => {
+    if (single) {
+      fetchDataTypeInterfaces('indicator').then(({interfaces}) => {
+        setIndicatorInterfaces(interfaces);
+      })
+    }
+  }, [])
+
   const indicatorColumns = [
     {
       label: 'Indicator(s) URI',
-      body: ({_uri}) => {
-        return _uri
+      body: (obj) => {
+        return obj?._uri || obj
       }
     },
     {
       label: "Indicator(s) Name",
-      body: ({name}) => {
-        return name
+      body: (obj) => {
+        return obj?.name || indicatorInterfaces[obj]
       }
     }
   ];
@@ -101,11 +110,21 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
         state.data.map(outcome => {
           return (
             <Container>
-              <EnhancedTableToolbar title={
-                `Outcome Name ${outcome.name}\n
-                Outcome URI: ${outcome._uri}\n
-                Outcome Description: ${outcome.description}
-                `}
+              <EnhancedTableToolbar title={(
+                <>
+                  Outcome Name: {outcome.name}
+                  <br />
+                  Outcome URI:{' '}
+                  <Link
+                    colorWithHover
+                    to={`/outcome/${encodeURIComponent(outcome._uri)}/view`}
+                  >
+                    {outcome._uri}
+                  </Link>
+                  <br />
+                  Outcome Description: {outcome.description}
+                </>
+              )}
                                     numSelected={0}
               />
               <DataTable
