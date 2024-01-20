@@ -10,7 +10,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes, fetchDataType} from "../../api/generalAPI";
 
-export default function CodeView({ codeUser, groupUser, superUser, multi, single, uri }) {
+export default function CodeView({ organizationUser, groupUser, superUser, multi, single, uri }) {
     const {enqueueSnackbar} = useSnackbar();
     const navigator = useNavigate();
     const navigate = navigateHelper(navigator)

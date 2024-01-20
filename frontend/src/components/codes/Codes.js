@@ -3,5 +3,5 @@ import React from 'react';
 import CodeView from "./CodeView";
 
 export default function Codes() {
-  return <CodeView codeUser multi/>
+  return <CodeView organizationUser multi/>
 }
