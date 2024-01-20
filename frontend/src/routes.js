@@ -49,6 +49,7 @@ import Stakeholders from "./components/stakeholders/Stakeholders";
 import AddEditStakeholder from "./components/stakeholders/AddEditStakeholder";
 import AddEditCode from "./components/codes/AddEditCode";
 import Codes from "./components/codes/Codes";
+import Code from "./components/codes/Code";
 import AddEditCharacteristic from "./components/characteristics/AddEditCharacteristic";
 import Characteristic_ReportGenerate from "./components/ReportGenerate/CharacteristicReports";
 import Code_ReportGenerate from "./components/ReportGenerate/CodeReports";
@@ -114,6 +115,7 @@ const routes = (
     {/*Codes*/}
     <Route path={`${process.env.PUBLIC_URL}/codes`} element={<PrivateRoute element={Codes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/new`} element={<PrivateRoute element={AddEditCode}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/code/:uri/view`} element={<PrivateRoute element={Code}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/:uri/:viewMode`} element={<PrivateRoute element={AddEditCode}/>}/>
 
 
