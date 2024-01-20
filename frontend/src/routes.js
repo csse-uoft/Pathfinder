@@ -115,7 +115,7 @@ const routes = (
     {/*Codes*/}
     <Route path={`${process.env.PUBLIC_URL}/codes`} element={<PrivateRoute element={Codes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/new`} element={<PrivateRoute element={AddEditCode}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/code/:uri/view`} element={<PrivateRoute element={Code}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/code/:uri/view`} element={<PrivateRoute element={Code}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/code/:uri/:viewMode`} element={<PrivateRoute element={AddEditCode}/>}/>
 
 
