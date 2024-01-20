@@ -6,7 +6,7 @@ const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 const resource = 'Code'
 
 const fetchCodes = async (req, res) => {
-  const codes = await GDBCodeModel.find({});
+  const codes = await GDBCodeModel.find({}, {populates: ['iso72Value']});
   return res.status(200).json({success: true, codes});
 };
 

@@ -76,8 +76,6 @@ export default function CodeView({ organizationUser, groupUser, superUser, multi
 
     };
 
-    console.log(state.data);
-
     const columns = [
         {
             // label: 'Code Name',
@@ -92,12 +90,6 @@ export default function CodeView({ organizationUser, groupUser, superUser, multi
                 return name
             },
             sortBy: ({name}) => name
-        },
-        {
-            label: 'Code Description',
-            body: ({description}) => {
-                return description;
-            }
         },
 
         {
@@ -119,6 +111,12 @@ export default function CodeView({ organizationUser, groupUser, superUser, multi
                 return identifier;
             }
         },
+        {
+            label: 'Code Description',
+            body: ({description}) => {
+                return description;
+            }
+        },
 
         {
             label: 'Defined By',
@@ -131,8 +129,8 @@ export default function CodeView({ organizationUser, groupUser, superUser, multi
 
         { // todo: which value to include? iso72 or codeValue?
             label: 'Value',
-            body: ({value}) => {
-                return value?.value;
+            body: ({codeValue, iso72Value}) => {
+                return codeValue || iso72Value?.numericalValue;
             }
         },
 
