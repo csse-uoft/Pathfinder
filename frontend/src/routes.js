@@ -72,6 +72,7 @@ import Counterfactuals from "./components/counterfactual/Counterfactuals";
 import Datasets from "./components/datasets/Datasets";
 import AddEditHowMuchImpact from "./components/howMuchImpact/AddEditHowMuchImpact";
 import HowMuchImpacts from "./components/howMuchImpact/HowMuchImpacts";
+import Characteristic from './components/characteristics/Characteristic';
 import Characteristics from "./components/characteristics/Characteristics";
 import Organization from "./components/organizations/Organization";
 import Indicator from "./components/indicators/Indicator";
@@ -145,6 +146,7 @@ const routes = (
            element={<PrivateRoute element={AddEditCharacteristic}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/:viewMode`}
            element={<PrivateRoute element={AddEditCharacteristic}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/view`} element={<PrivateRoute element={Characteristic}/>}/>   
 
 
     {/*Groups*/}
