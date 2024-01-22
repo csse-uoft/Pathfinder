@@ -146,7 +146,7 @@ const routes = (
            element={<PrivateRoute element={AddEditCharacteristic}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/:viewMode`}
            element={<PrivateRoute element={AddEditCharacteristic}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/view`} element={<PrivateRoute element={Characteristic}/>}/>   
+    <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/view`} element={<PrivateRoute element={Characteristic}/>}/>
 
 
     {/*Groups*/}

@@ -8,7 +8,7 @@ import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataTypes} from "../../api/generalAPI";
+import {fetchDataTypes, fetchDataType} from "../../api/generalAPI";
 
 export default function CharacteristicView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const navigator = useNavigate();
@@ -37,7 +37,7 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
             enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
           });
     } else if (single){
-        fetchDataTypes('characteristic', encodeURIComponent(uri)).then(res => {
+        fetchDataType('characteristic', encodeURIComponent(uri)).then(res => {
             if(res.success){
                 setState(state => ({...state, loading: false, data: [res.characteristic]}));
             }
@@ -80,23 +80,72 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
 
   const columns = [
     {
-      label: 'Name',
-      body: ({_uri, name}) => {
-        return <Link colorWithHover to={`/characteristic/${encodeURIComponent(_uri)}/view`}>
-          {name || _uri}
-        </Link>
-      },
-      sortBy: ({legalName}) => legalName
+      label: 'Characteristic Name',
+      body: ({name}) => {
+        return name
     },
+    sortBy: ({name}) => name
+    },
+
+    {
+      label: 'Characteristic URI',
+      body: ({_uri}) => {
+        if (multi)
+          return <Link colorWithHover to={`/characteristic/${encodeURIComponent(_uri)}/view`}>
+          {_uri}
+        </Link>;
+        if (single)
+          return _uri
+      },
+      sortBy: ({_uri}) => _uri
+    },
+
+    {
+      label: 'Characteristic Code',
+      body: ({codes}) => {
+          return <Link colorWithHover to={`/code/${encodeURIComponent(codes)}/view`}>
+              {codes}
+          </Link>
+      }
+    },
+
+    { 
+      label: 'Value',
+      body: ({value}) => {
+          return value;
+      }
+    },
+
+    { 
+      label: 'Stakeholder Name',
+      body: ({stakeholders}) => {
+          return stakeholders;
+      }
+    },
+
+    {
+      label: 'Stakeholder URI',
+      body: ({stakeholders}) => {
+          return <Link colorWithHover to={`/stakeholder/${encodeURIComponent(stakeholders)}/view`}>
+              {stakeholders}
+          </Link>
+      }
+    },
+
+
 
     {
       label: ' ',
       body: ({_uri}) => {
-        if (multi)
-            return <DropdownMenu urlPrefix={'characteristic'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        if (multi){
+          return <DropdownMenu urlPrefix={'characteristic'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
             hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
-        if (single)
-            return null
+        }
+            
+        else if (single){
+          return null
+        }
+            
       }
         
     }
