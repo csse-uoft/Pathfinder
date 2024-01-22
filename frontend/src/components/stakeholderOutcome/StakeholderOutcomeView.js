@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Chip, Container } from "@mui/material";
-import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
-import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
+import {Container } from "@mui/material";
+
+import {DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
