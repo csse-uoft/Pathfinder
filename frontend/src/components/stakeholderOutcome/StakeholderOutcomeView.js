@@ -159,6 +159,7 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
                                     numSelected={0}
               />
               <DataTable
+                noHeaderBar
                 title={''}
                 data={state.data}
                 columns={columns}
