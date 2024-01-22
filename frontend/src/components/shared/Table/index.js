@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function EnhancedTable({data, title, columns, height, ...props}) {
+export function EnhancedTable({data, title, columns, height, noHeaderBar, ...props}) {
   const {
     rowsPerPageOptions = [10, 25, 100],
     uriField = '_uri',
@@ -162,9 +162,9 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
 
   return (
     <Paper elevation={5} className={classes.paper}>
-      <EnhancedTableToolbar title={title} numSelected={selected.length} onDelete={handleDelete}
-                            onSearch={handleOnSearch}
-                            customToolbar={customToolbar}/>
+      {noHeaderBar || (!title && !customToolbar)? null : <EnhancedTableToolbar title={title} numSelected={selected.length} onDelete={handleDelete}
+                             onSearch={handleOnSearch}
+                             customToolbar={customToolbar}/>}
       <TableContainer style={{maxHeight: height || 'calc(100vh - 228px)'}}>
         <Table
           stickyHeader
