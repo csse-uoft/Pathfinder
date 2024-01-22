@@ -160,8 +160,9 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
               />
               <DataTable
                 noHeaderBar
+                noPaginationBar
                 title={''}
-                data={state.data}
+                data={[stakeholderOutcome]}
                 columns={columns}
                 uriField="uri"
               />
