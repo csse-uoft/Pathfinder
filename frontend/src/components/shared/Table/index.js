@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function EnhancedTable({data, title, columns, height, noHeaderBar, ...props}) {
+export function EnhancedTable({data, title, columns, height, noHeaderBar, noPaginationBar, ...props}) {
   const {
     rowsPerPageOptions = [10, 25, 100],
     uriField = '_uri',
@@ -263,7 +263,7 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, ...pro
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
+      {!noPaginationBar? <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
         component="div"
         count={data.length}
@@ -271,7 +271,7 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, ...pro
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+      />: <br/>}
     </Paper>
   );
 }
