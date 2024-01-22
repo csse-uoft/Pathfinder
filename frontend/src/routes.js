@@ -77,6 +77,7 @@ import Organization from "./components/organizations/Organization";
 import Indicator from "./components/indicators/Indicator";
 import Outcome from "./components/outcomes/Outcome";
 import Theme from "./components/theme/Theme";
+import StakeholderOutcome from "./components/stakeholderOutcome/stakeholderOutcome";
 
 
 const routes = (
@@ -193,6 +194,8 @@ const routes = (
            element={<PrivateRoute element={Organization_stakeholderOutcomes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/new`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/view`}
+             element={<PrivateRoute element={StakeholderOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcomes/:uri`}
