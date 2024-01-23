@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Chip, Container } from "@mui/material";
-import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
-import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
+import { Add as AddIcon,} from "@mui/icons-material";
+import { DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchImpactReport, fetchImpactReports} from "../../api/impactReportAPI";
 import {fetchDataTypes, fetchDataType} from "../../api/generalAPI";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 export default function ImpactReportView({multi, single, organizationUser, superUser, groupUser}) {
@@ -48,17 +47,6 @@ export default function ImpactReportView({multi, single, organizationUser, super
                 console.log(e)
                 enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
             });
-            // console.log(encodeURIComponent(uri));
-            // fetchImpactReport(uri).then(res => {
-            //     if(res.success)
-            //         setState(state => ({...state, loading: false, data: [res.impactReport], editable: res.editable}));
-            // })
-            //     .catch(e => {
-            //     reportErrorToBackend(e)
-            //     setState(state => ({...state, loading: false}))
-            //     console.log(e)
-            //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-            // });
         }
 
     }, [trigger]);
@@ -94,29 +82,17 @@ export default function ImpactReportView({multi, single, organizationUser, super
         {
             label: 'Impact Scale',
             body: ({impactScale}) => {
-                if (multi) {
-                    return impactScale?._uri
-                } else if (single) {
-                    return impactScale;
-                }
-
+                return impactScale
             },
-            sortBy: ({name}) => name
         },
 
         {
             label: 'Impact Depth',
             body: ({impactDepth}) => {
-                return impactDepth?._uri
+                return impactDepth
             },
             sortBy: ({name}) => name
         },
-        // {
-        //   label: 'value',
-        //   body: ({value}) => {
-        //     return value.numericalValue;
-        //   }
-        // },
         {
             label: 'Stakeholder Outcome(s)',
             body: ({forStakeholderOutcome}) => {
@@ -142,7 +118,6 @@ export default function ImpactReportView({multi, single, organizationUser, super
         <Container>
             {
                 state.data.map(impactReport => {
-                    console.log(impactReport)
                     const hasTime = impactReport?.hasTime;
 
                     return (
