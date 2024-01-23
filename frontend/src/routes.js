@@ -59,6 +59,7 @@ import ImpactReports_ReportGenerate from "./components/ReportGenerate/ImpactRepo
 import AddEditImpactReport from "./components/impactReport/AddEditImpactReport";
 import Organization_impactReports from "./components/impactReport/Organization-impactReports";
 import ImpactReports from "./components/impactReport/ImpactReports";
+import ImpactReport from "./components/impactReport/ImpactReport";
 import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
 import StakeholderOutcomes from "./components/stakeholderOutcome/StakeholderOutcomes";
 import AddEditDataset from "./components/datasets/AddEditDataset";
@@ -205,6 +206,7 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}
            element={<PrivateRoute element={Organization_impactReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReports/:uri`} element={<PrivateRoute element={ImpactReports}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/impactReport/:uri/view`} element={<PrivateRoute element={ImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/new`} element={<PrivateRoute element={AddEditImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/:orgUri/new`}
            element={<PrivateRoute element={AddEditImpactReport}/>}/>
