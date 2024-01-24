@@ -123,19 +123,19 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
 
     { 
       label: 'Stakeholder Name',
+      colSpan: 2,
       body: ({stakeholders}) => {
-        return stakeholders?.map(stakeholdersUri => stakeholderInterfaces[stakeholdersUri])
+        return stakeholders?.map(stakeholderUri => [
+          stakeholderInterfaces[stakeholderUri],
+          <Link colorWithHover to={`/stakeholder/${encodeURIComponent(stakeholderUri)}/view`}>
+            {stakeholderUri}
+          </Link>
+        ])
       },
-      
     },
 
     {
       label: 'Stakeholder URI',
-      body: ({stakeholders}) => {
-          return <Link colorWithHover to={`/stakeholder/${encodeURIComponent(stakeholders)}/view`}>
-              {stakeholders}
-          </Link>
-      }
     },
 
 
