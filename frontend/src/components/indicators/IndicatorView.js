@@ -112,7 +112,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
       }
     },
     {
-      label: 'indicatorReport URI',
+      label: 'IndicatorReport URI',
       colSpan: 3,
       body: ({indicatorReports}) => {
         return indicatorReports?.map(indicatorReportUri => [<Link colorWithHover to={`/indicatorReport/${encodeURIComponent(indicatorReportUri)}/view`}>
