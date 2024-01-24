@@ -79,6 +79,8 @@ import Indicator from "./components/indicators/Indicator";
 import Outcome from "./components/outcomes/Outcome";
 import Theme from "./components/theme/Theme";
 import StakeholderOutcome from "./components/stakeholderOutcome/stakeholderOutcome";
+import TotalReviewPages from "./components/totalReviewPage/TotalReviewPages";
+import TotalReviewPage from "./components/totalReviewPage/TotalReviewPage";
 
 
 const routes = (
@@ -195,8 +197,8 @@ const routes = (
            element={<PrivateRoute element={Organization_stakeholderOutcomes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/new`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/view`}
-             element={<PrivateRoute element={StakeholderOutcome}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/view`}
+           element={<PrivateRoute element={StakeholderOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcomes/:uri`}
@@ -206,7 +208,7 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}
            element={<PrivateRoute element={Organization_impactReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReports/:uri`} element={<PrivateRoute element={ImpactReports}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/impactReport/:uri/view`} element={<PrivateRoute element={ImpactReport}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactReport/:uri/view`} element={<PrivateRoute element={ImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/new`} element={<PrivateRoute element={AddEditImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/:orgUri/new`}
            element={<PrivateRoute element={AddEditImpactReport}/>}/>
@@ -221,6 +223,13 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/impactModel/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditImpactModel}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactModels/:uri`} element={<PrivateRoute element={ImpactModels}/>}/>
+
+    {/*total Review Page*/}
+    <Route path={`${process.env.PUBLIC_URL}/totalReviewPages`}
+           element={<PrivateRoute element={TotalReviewPages}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/totalReviewPage/:uri/view`}
+           element={<PrivateRoute element={TotalReviewPage}/>}/>
+
 
     {/*file uploading page*/}
     <Route path={`${process.env.PUBLIC_URL}/fileUploading`} element={<PrivateRoute element={FileUploadingPage}/>}/>

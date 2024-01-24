@@ -2,7 +2,16 @@ import React, {useContext} from 'react';
 import {Link} from '../shared';
 
 import {Container, Button, Typography} from "@mui/material";
-import {Edit, Create, People, ViewHeadline as Log, CheckCircleOutline as Criteria, FileUpload, Download} from "@mui/icons-material";
+import {
+  Edit,
+  Create,
+  People,
+  ViewHeadline as Log,
+  CheckCircleOutline as Criteria,
+  FileUpload,
+  Download,
+  Summarize
+} from "@mui/icons-material";
 import {UserContext} from "../../context";
 import {NavButton} from "./NavButton";
 import {useNavigate} from "react-router-dom";
@@ -32,6 +41,9 @@ function Dashboard() {
         <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
       null}
+
+      <NavButton to={'/totalReviewPages'} icon={<Summarize/>} key={`totalReviewPages`}
+                 text="Total Review Page"/>
 
       {userContext.isSuperuser?
         <NavButton to={`/stakeholders`} icon={<People/>} key={'stakeholders'}
