@@ -17,7 +17,7 @@ async function fetchDataTypeInterfaces(name, req, res) {
   }
 
   const interfaces = {}
-  objects.map(object => interfaces[object._uri] = object.name || '')
+  objects.map(object => interfaces[object._uri] = object.name || 'Not Given')
   return res.status(200).json({success: true, interfaces});
 }
 
