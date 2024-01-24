@@ -8,7 +8,7 @@ import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataTypes, fetchDataType} from "../../api/generalAPI";
+import {fetchDataTypes, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
 
 export default function CharacteristicView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const navigator = useNavigate();
@@ -24,7 +24,7 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
     showDeleteDialog: false,
   });
   const [trigger, setTrigger] = useState(true);
-
+  const [stakeholderInterfaces, setStakeholderInterfaces] = useState({})
   useEffect(() => {
     if (multi){
         fetchDataTypes('characteristic').then(res => {
@@ -49,6 +49,11 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
           });
     }
   }, [trigger]);
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('stakeholder').then(({interfaces}) => setStakeholderInterfaces(interfaces))
+  }, [])
+
 
   const showDeleteDialog = (uri) => {
     setState(state => ({
@@ -118,9 +123,11 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
 
     { 
       label: 'Stakeholder Name',
+      colSpan: 2,
       body: ({stakeholders}) => {
-          return stakeholders;
-      }
+        return stakeholders?.map(stakeholdersUri => stakeholderInterfaces[stakeholdersUri])
+      },
+      
     },
 
     {
@@ -131,6 +138,16 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
           </Link>
       }
     },
+
+    // {
+    //   label: 'Stakeholder URI',
+    //   colSpan: 2,
+    //   body: ({stakeholders}) => {
+    //     return stakeholders?.map(stakeholdersUri => [<Link colorWithHover to={`/stakeholder/${encodeURIComponent(stakeholdersUri)}/view`}>
+    //       {stakeholdersUri}
+    //     </Link>, stakeholderInterfaces[stakeholdersUri]])
+    //   },
+    // },
 
 
 
