@@ -79,6 +79,7 @@ import Indicator from "./components/indicators/Indicator";
 import Outcome from "./components/outcomes/Outcome";
 import Theme from "./components/theme/Theme";
 import StakeholderOutcome from "./components/stakeholderOutcome/stakeholderOutcome";
+import Stakeholder from "./components/stakeholders/Stakeholder";
 
 
 const routes = (
@@ -111,6 +112,7 @@ const routes = (
     {/*stakeholders*/}
     <Route path={`${process.env.PUBLIC_URL}/stakeholders`} element={<PrivateRoute element={Stakeholders}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholder/new`} element={<PrivateRoute element={AddEditStakeholder}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/stakeholder/:uri/view`} element={<PrivateRoute element={Stakeholder}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/stakeholder/:uri/:viewMode`}
            element={<PrivateRoute element={AddEditStakeholder}/>}/>
 
