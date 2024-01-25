@@ -218,7 +218,7 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, noPagi
 
                                       objects?.map(object => {
                                         return (<TableCell style={{
-                                          width: `${100 / objects.length}%`,
+                                          width: `${100 / cell.colSpan}%`,
                                           wordBreak: 'break-word',
                                           border: index === cell.body(row, extraData).length - 1? 'none' : null
                                         }}>
@@ -230,7 +230,7 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, noPagi
                                   </TableRow>
                                 )
                               } else {
-                                return (<TableRow>
+                                return (<TableRow style={{paddingLeft: 0}}>
                                   {
                                     <TableCell style={{
                                       border:index === cell.body(row, extraData).length - 1? 'none':null,

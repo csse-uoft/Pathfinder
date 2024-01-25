@@ -123,7 +123,8 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
       }
     },
     {
-      label: ["Indicator Report and ", 'Value'],
+      label: ["Indicator Report", 'Value'],
+      colSpan: 2,
       body: ({indicatorReports}) => {
         return indicatorReports?.map(indicatorReportUri => {
           return [indicatorReportDict[indicatorReportUri]?.name || 'Not Given',
