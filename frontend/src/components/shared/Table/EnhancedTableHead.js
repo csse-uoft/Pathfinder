@@ -14,17 +14,17 @@ export function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox" key={0}>
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              'aria-label': 'select all desserts',
-            }}
-          />
-        </TableCell>
+        {/*<TableCell padding="checkbox" key={0}>*/}
+        {/*  <Checkbox*/}
+        {/*    color="primary"*/}
+        {/*    indeterminate={numSelected > 0 && numSelected < rowCount}*/}
+        {/*    checked={rowCount > 0 && numSelected === rowCount}*/}
+        {/*    onChange={onSelectAllClick}*/}
+        {/*    inputProps={{*/}
+        {/*      'aria-label': 'select all desserts',*/}
+        {/*    }}*/}
+        {/*  />*/}
+        {/*</TableCell>*/}
         {columns.map((headCell, idx) => (
           <TableCell
             key={idx + 1}

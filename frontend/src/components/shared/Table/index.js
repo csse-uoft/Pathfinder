@@ -198,13 +198,13 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, noPagi
                     selected={isItemSelected}
                     style={rowStyle && rowStyle(row)}
                   >
-                    <TableCell padding="checkbox" key={0}>
-                      <Checkbox
-                        color="primary"
-                        onClick={(event) => handleClick(event, uri)}
-                        checked={isItemSelected}
-                      />
-                    </TableCell>
+                    {/*<TableCell padding="checkbox" key={0}>*/}
+                    {/*  <Checkbox*/}
+                    {/*    color="primary"*/}
+                    {/*    onClick={(event) => handleClick(event, uri)}*/}
+                    {/*    checked={isItemSelected}*/}
+                    {/*  />*/}
+                    {/*</TableCell>*/}
                     {columns.map((cell, idx) =>{
                       if (cell.body) {
                         return (<TableCell style={cell.style} colSpan={cell.colSpan}

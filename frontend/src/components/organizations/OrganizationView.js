@@ -106,8 +106,8 @@ export default function OrganizationView({organizationUser, groupUser, superUser
     },
     {
       label: 'Legal Status',
-      body: ({hasLegalStatus}) => {
-        return hasLegalStatus?.label;
+      body: ({legalStatus}) => {
+        return legalStatus;
       }
     },
     {

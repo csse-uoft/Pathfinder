@@ -13,6 +13,7 @@ const GDBOrganizationIdModel = createGraphDBModel({
 });
 
 const GDBOrganizationModel = createGraphDBModel({
+  legalStatus: {type: String, internalKey: 'tove_org:hasLegalStatus'},
   comment: {type: String, internalKey: 'rdfs:comment'},
   hasUsers: {type: [GDBUserAccountModel], internalKey: ':hasUser'},
   administrator: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},

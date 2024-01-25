@@ -77,8 +77,8 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
   const themeColumns = [
     {
       label: 'Theme(s) URI',
-      body: ({_uri}) => {
-        return _uri
+      body: (themeUri) => {
+        return themeUri
       }
     },
   ];
