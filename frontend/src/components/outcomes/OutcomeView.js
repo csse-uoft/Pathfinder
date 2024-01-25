@@ -63,7 +63,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     {
       label: 'Indicator(s) URI',
       body: (obj) => {
-        return obj?._uri || obj
+        return <Link
+          colorWithHover
+          to={`/indicator/${encodeURIComponent(obj?._uri || obj)}/view`}
+        > {obj?._uri || obj} </Link>
       }
     },
     {
@@ -78,7 +81,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     {
       label: 'Theme(s) URI',
       body: (themeUri) => {
-        return themeUri
+        return <Link
+          colorWithHover
+          to={`/theme/${encodeURIComponent(themeUri)}/view`}
+        > {themeUri}</Link>
       }
     },
   ];
@@ -87,7 +93,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     {
       label: 'Stakeholder Outcome(s) URI',
       body: (uri) => {
-        return uri
+        return <Link
+          colorWithHover
+          to={`/stakeholderOutcome/${encodeURIComponent(uri)}/view`}
+        > {uri}</Link>
       }
     },
   ];
@@ -96,7 +105,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     {
       label: 'Outcome Code(s) URI',
       body: (uri) => {
-        return uri
+        return <Link
+          colorWithHover
+          to={`/code/${encodeURIComponent(uri)}/view`}
+        > {uri}</Link>
       }
     },
   ];

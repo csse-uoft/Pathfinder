@@ -167,7 +167,7 @@ export default function StakeholderOutcomeView({
                       <>
                         <Link
                           colorWithHover
-                          to={`/stakeholderOutcome/${encodeURIComponent(impactReportUri)}/view`}
+                          to={`/impactReport/${encodeURIComponent(impactReportUri)}/view`}
                         >
                           {impactReportUri}
                         </Link>

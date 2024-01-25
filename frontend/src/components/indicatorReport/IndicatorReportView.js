@@ -117,7 +117,18 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
       {
         state.data.map(indicator =>
           <DataTable
-            title={`Indicator: ${indicator.name}`}
+            title={(
+              <>
+                Indicator:{' '}
+                <Link
+                  colorWithHover
+                  to={`/indicator/${encodeURIComponent(indicator._uri)}/view`}
+                >
+                  {indicator.name}
+                </Link>
+
+              </>
+            )}
             data={indicator.indicatorReports}
             columns={columns}
             uriField="uri"

@@ -103,7 +103,7 @@ export default function StakeholderView({ organizationUser, groupUser, superUser
         {
             label: 'Stakeholder Characteristic(s)',
             body: ({characteristics}) => { //TODO: what if there are multiple characteristics? // solution: give a list.
-                return characteristics
+                return characteristics?.map(characteristicUri => <Link colorWithHover to={`/characteristic/${encodeURIComponent(characteristicUri)}/view`}>{characteristicUri}</Link>)
             }
         },
 
