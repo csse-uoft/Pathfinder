@@ -56,7 +56,7 @@ const fetchIndicators = async (req, res) => {
     // the organizationUri is given, return all indicators belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
       {
-        populates: ['hasIndicators.unitOfMeasure']
+        populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.baseline']
       }
       );
     if (!organization)

@@ -210,7 +210,7 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, noPagi
                         return (<TableCell style={cell.style} colSpan={cell.colSpan}
                                            key={idx + 1}>{
                           Array.isArray(cell.body(row, extraData)) ?
-                            cell.body(row, extraData).map((objects) => {
+                            cell.body(row, extraData).map((objects, index) => {
                               if (Array.isArray(objects)) {
                                 return (
                                   <TableRow>
@@ -219,7 +219,8 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, noPagi
                                       objects?.map(object => {
                                         return (<TableCell style={{
                                           width: `${100 / objects.length}%`,
-                                          wordBreak: 'break-word'
+                                          wordBreak: 'break-word',
+                                          border: index === cell.body(row, extraData).length - 1? 'none' : null
                                         }}>
                                           {object}
                                         </TableCell>)
@@ -231,11 +232,12 @@ export function EnhancedTable({data, title, columns, height, noHeaderBar, noPagi
                               } else {
                                 return (<TableRow>
                                   {
-
-                                    <TableCell>
+                                    <TableCell style={{
+                                      border:index === cell.body(row, extraData).length - 1? 'none':null,
+                                      wordBreak: 'break-word',
+                                    }}>
                                       {objects}
                                     </TableCell>
-
                                   }
                                 </TableRow>)
                               }

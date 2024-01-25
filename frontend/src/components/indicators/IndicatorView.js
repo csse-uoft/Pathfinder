@@ -107,7 +107,8 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     },
     {
       label: 'Indicator Baseline',
-      body: (baseline) => {
+      body: ({baseline}) => {
+        console.log(baseline)
         return baseline?.numericalValue
       }
     },

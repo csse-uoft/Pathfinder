@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
-import {Container } from "@mui/material";
+import React, {useEffect, useState, useContext} from 'react';
+import {Container} from "@mui/material";
 
-import {DropdownMenu, Link, Loading, DataTable } from "../shared";
+import {DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
-import { useSnackbar } from 'notistack';
+import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
@@ -12,11 +12,18 @@ import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 import {fetchDataType} from "../../api/generalAPI";
 
 
-export default function StakeholderOutcomeView({multi, single, organizationUser, superUser, groupUser, organizationUri}) {
+export default function StakeholderOutcomeView({
+                                                 multi,
+                                                 single,
+                                                 organizationUser,
+                                                 superUser,
+                                                 groupUser,
+                                                 organizationUri
+                                               }) {
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
   const navigator = useNavigate();
-  const navigate = navigateHelper(navigator)
+  const navigate = navigateHelper(navigator);
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
@@ -33,7 +40,7 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
       fetchStakeholderOutcomesThroughOrganization(encodeURIComponent(organizationUri)).then(res => {
         if (res.success)
           setState(state => ({...state, loading: false, data: res.stakeholderOutcomes, editable: res.editable}));
-        console.log(res.stakeholderOutcomes)
+        console.log(res.stakeholderOutcomes);
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
@@ -87,7 +94,7 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
       body: ({stakeholder}) => {
         return <Link colorWithHover to={`/stakeholder/${encodeURIComponent(stakeholder)}/view`}>
           {stakeholder}
-        </Link>
+        </Link>;
       },
     },
     {
@@ -95,27 +102,28 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
       body: ({outcome}) => {
         return <Link colorWithHover to={`/outcome/${encodeURIComponent(outcome)}/view`}>
           {outcome}
-        </Link>
+        </Link>;
       }
     },
     {
       label: 'Indicator(s)',
       body: ({indicators}) => {
-        return indicators?.map(indicator => {
+        return indicators?.map(indicator =>
           <Link colorWithHover to={`/indicator/${encodeURIComponent(indicator)}/view`}>
             {indicator}
           </Link>
-          })
+        );
       }
     },
     {
       label: 'Stakeholder Outcome Code(s)',
       body: ({codes}) => {
-        return codes?.map(code => {
+        return codes?.map(code =>
           <Link colorWithHover to={`/code/${encodeURIComponent(code)}/view`}>
             {code}
           </Link>
-        })
+        )
+          ;
       }
     },
 
@@ -123,7 +131,8 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'stakeholderOutcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable} hideDeleteOption
+        <DropdownMenu urlPrefix={'stakeholderOutcome'} objectUri={encodeURIComponent(_uri)}
+                      hideEditOption={!state.editable} hideDeleteOption
                       handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
@@ -140,7 +149,7 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
               <EnhancedTableToolbar title={(
                 <>
                   Stakeholder Outcome: {stakeholderOutcome.name}
-                  <br />
+                  <br/>
                   URI:{' '}
                   <Link
                     colorWithHover
@@ -148,11 +157,11 @@ export default function StakeholderOutcomeView({multi, single, organizationUser,
                   >
                     {stakeholderOutcome._uri}
                   </Link>
-                  <br />
+                  <br/>
                   Description: {stakeholderOutcome.description}
-                  <br />
+                  <br/>
                   Underserved: {stakeholderOutcome.isUnderserved}
-                  <br />
+                  <br/>
                   Impact Report: {}
                 </>
               )}
