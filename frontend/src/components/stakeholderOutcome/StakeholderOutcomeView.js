@@ -162,7 +162,19 @@ export default function StakeholderOutcomeView({
                   <br/>
                   Underserved: {stakeholderOutcome.isUnderserved}
                   <br/>
-                  Impact Report: {}
+                  Impact Report: {stakeholderOutcome.impactReports.map(impactReportUri => {
+                    return (
+                      <>
+                        <Link
+                          colorWithHover
+                          to={`/stakeholderOutcome/${encodeURIComponent(impactReportUri)}/view`}
+                        >
+                          {impactReportUri}
+                        </Link>
+                        <br/>
+                      </>
+                    )
+                })}
                 </>
               )}
                                     numSelected={0}

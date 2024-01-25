@@ -120,7 +120,7 @@ async function addSampleOrganizations() {
     }, {uri: 'http://www.b12give.ca'})
     const org2 = GDBOrganizationModel({
       legalName: 'Org1',
-      legalStatus: 'For Charity'
+      legalStatus: 'Registered Charity'
     }, {uri: 'http://www.demo.ca/Organization/Organization1'})
     const org3 = GDBOrganizationModel({
       legalName: 'Org2'
