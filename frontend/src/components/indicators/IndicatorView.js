@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Chip, Container } from "@mui/material";
+import {Chip, Container, Typography} from "@mui/material";
 import { Add as AddIcon} from "@mui/icons-material";
 import {DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate,} from "react-router-dom";
@@ -146,6 +146,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
 
   return (
     <Container>
+      <Typography variant={'h2'}> Indicator Class View </Typography>
       <DataTable
         title={multi?"Indicators":"Indicator"}
         data={state.data}

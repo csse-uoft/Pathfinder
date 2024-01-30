@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Chip, Container} from "@mui/material";
+import {Chip, Container, Typography} from "@mui/material";
 import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -180,6 +180,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
 
   return (
     <Container>
+      <Typography variant={'h2'}> Total Review Page </Typography>
       {
         state.data.map(organization => {
           return (

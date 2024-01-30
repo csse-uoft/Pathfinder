@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Chip, Container } from "@mui/material";
+import {Chip, Container, Typography} from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
   const [trigger, setTrigger] = useState(true);
   const [stakeholderInterfaces, setStakeholderInterfaces] = useState({})
   useEffect(() => {
-    if (multi){
+    if (multi) {
         fetchDataTypes('characteristic').then(res => {
             if(res.success)
               setState(state => ({...state, loading: false, data: res.characteristics}));
@@ -163,6 +163,7 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
 
   return (
     <Container>
+      <Typography variant={'h2'}> Characteristic Class View </Typography>
       <DataTable
         title={multi?"Characteristics":"Characteristic"}
         data={state.data}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Chip, Container } from "@mui/material";
+import {Chip, Container, Typography} from "@mui/material";
 import { Add as AddIcon} from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useSnackbar } from 'notistack';
@@ -129,6 +129,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
 
   return (
     <Container>
+      <Typography variant={'h2'}> Organization Class View </Typography>
       <DataTable
         title={multi?"Organizations":"Organization"}
         data={state.data}

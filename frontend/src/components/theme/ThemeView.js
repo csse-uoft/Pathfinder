@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Chip, Container } from "@mui/material";
+import {Chip, Container, Typography} from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -146,6 +146,7 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
 
   return (
     <Container>
+      <Typography variant={'h2'}> Theme Class View </Typography>
       <DataTable
         title={multi ? "Themes": 'Theme'}
         data={state.data}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Chip, Container } from "@mui/material";
+import {Chip, Container, Typography} from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
@@ -154,6 +154,7 @@ export default function CodeView({ organizationUser, groupUser, superUser, multi
 
     return (
         <Container>
+            <Typography variant={'h2'}> Code Class View </Typography>
             <DataTable
                 title={multi ? "Codes" : "Code"}
                 data={state.data}

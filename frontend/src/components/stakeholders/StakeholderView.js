@@ -121,6 +121,7 @@ export default function StakeholderView({ organizationUser, groupUser, superUser
 
     return (
         <Container>
+            <Typography variant={'h2'}> Stakeholder Class View </Typography>
             <DataTable
                 title={"Stakeholders"}
                 data={state.data}

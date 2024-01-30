@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Container} from "@mui/material";
+import {Container, Typography} from "@mui/material";
 
 import {DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -146,6 +146,7 @@ export default function StakeholderOutcomeView({
         state.data.map(stakeholderOutcome => {
           return (
             <Container>
+              <Typography variant={'h2'}> Stakeholder Outcome Class View </Typography>
               <EnhancedTableToolbar title={(
                 <>
                   Stakeholder Outcome: {stakeholderOutcome.name}

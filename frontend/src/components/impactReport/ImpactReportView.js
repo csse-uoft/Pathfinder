@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Chip, Container} from "@mui/material";
+import {Chip, Container, Typography} from "@mui/material";
 import {Add as AddIcon,} from "@mui/icons-material";
 import {DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -120,6 +120,7 @@ export default function ImpactReportView({multi, single, organizationUser, super
 
   return (
     <Container>
+      <Typography variant={'h2'}> Impact Report Class View </Typography>
       {
         state.data.map(impactReport => {
           const hasTime = impactReport?.hasTime;
