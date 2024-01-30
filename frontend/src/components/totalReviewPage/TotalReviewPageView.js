@@ -27,6 +27,10 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
 
   const [indicatorDict, setIndicatorDict] = useState({});
 
+  const [themeDict, setThemeDict] = useState({});
+
+  const [themesUnderOrganization, setThemesUnderOrganization] = useState({})
+
   const [indicatorReportDict, setIndicatorReportDict] = useState({});
 
   useEffect(() => {
@@ -36,15 +40,13 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         return fetchDataTypes('indicatorReport', encodeURIComponent(organization._uri)).then(res => {
           if (res.success) {
             res.indicatorReports.map(indicatorReport => {
-              console.log(indicatorReport)
               indicatorReportDict[indicatorReport._uri] = indicatorReport;
-            })
+            });
           }
-        })
+        });
       })).then(() => {
-        console.log(indicatorReportDict)
-        setIndicatorReportDict(indicatorReportDict)
-      })
+        setIndicatorReportDict(indicatorReportDict);
+      });
 
     }
   }, [state]);
@@ -56,6 +58,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
           setState(state => ({...state, loading: false, data: res.organizations, editable: res.editable}));
         // console.log(res.organizations);
       }).catch(e => {
+        console.log(e)
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
         navigate('/dashboard');
@@ -66,6 +69,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         if (success)
           setState(state => ({...state, loading: false, data: [organization]}));
       }).catch(e => {
+        console.log(e)
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
         navigate('/dashboard');
@@ -85,6 +89,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         setOutcomeDict(outcomeDict);
       }
     }).catch(e => {
+      console.log(e)
       reportErrorToBackend(e);
       setState(state => ({...state, loading: false}));
       navigate('/dashboard');
@@ -102,12 +107,52 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         setIndicatorDict(indicatorDict);
       }
     }).catch(e => {
+      console.log(e)
       reportErrorToBackend(e);
       setState(state => ({...state, loading: false}));
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
     });
   }, []);
+
+  useEffect(() => {
+    fetchDataTypes('theme').then(res => {
+      if (res.success) {
+        const themeDict = {};
+        res.themes.map(theme => {
+          themeDict[theme._uri] = theme;
+        });
+        setThemeDict(themeDict);
+      }
+    }).catch(e => {
+      console.log(e)
+      reportErrorToBackend(e);
+      setState(state => ({...state, loading: false}));
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    if (state.data.length && Object.keys(themeDict).length && outcomeDict) {
+      const themes = {}; // key is organizations
+      state.data.map(organization => {
+        const outcomes = organization.hasOutcomes?.map(outcomeUri => outcomeDict[outcomeUri]);
+        console.log(outcomes)
+        outcomes?.map(outcomeObject => {
+          if (outcomeObject) {
+            console.log(outcomeObject)
+            console.log(themeDict)
+            const themesUnderOutcome = outcomeObject.themes?.map(themeUri => themeDict[themeUri]);
+            themes[organization._uri] = [...(themes[organization._uri] || []), ...(themesUnderOutcome || [])];
+          }
+        });
+        console.log(themes);
+      });
+      setThemesUnderOrganization(themes)
+    }
+  }, [themeDict, state.data, outcomeDict]);
+
 
   const indicatorColumns = [
     {
@@ -130,7 +175,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
           return [indicatorReportDict[indicatorReportUri]?.name || 'Not Given',
             indicatorReportDict[indicatorReportUri]?.value?.numericalValue || ''
           ];
-        })
+        });
       }
     },
 
@@ -175,6 +220,27 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
     },
   ];
 
+  const stakeholderColumns = [
+    {
+      label: 'Stakeholder',
+      body: ({legalName}) => {
+        return legalName;
+      }
+    },
+    {
+      label: 'Stakeholder Characteristics',
+      body: ({characteristics}) => {
+        return characteristics;
+      }
+    },
+    {
+      label: 'Stakeholder Outcomes',
+      body: ({stakeholderOutcomes}) => {
+        return stakeholderOutcomes;
+      }
+    },
+  ];
+
   if (state.loading)
     return <Loading message={`Loading outcomes...`}/>;
 
@@ -202,7 +268,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
               />
               <DataTable
                 noHeaderBar
-                data={[]}
+                data={themesUnderOrganization[organization._uri] || []}
                 columns={themeColumns}
                 uriField="uri"
               />
