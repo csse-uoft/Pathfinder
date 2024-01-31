@@ -33,8 +33,14 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
 
   const [indicatorReportDict, setIndicatorReportDict] = useState({});
 
+  const [organization2StakeholderUri, setOrganization2StakeholderUri] = useState({});
+
+  const [stakeholderDict, setStakeholderDict] = useState({});
+
+  const [characteristicDict, setCharacteristicDict] = useState({})
+
   useEffect(() => {
-    if (state.data) {
+    if (state.data.length) {
       const indicatorReportDict = {};
       Promise.all(state.data.map((organization) => {
         return fetchDataTypes('indicatorReport', encodeURIComponent(organization._uri)).then(res => {
@@ -47,7 +53,23 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
       })).then(() => {
         setIndicatorReportDict(indicatorReportDict);
       });
+    }
+  }, [state]);
 
+
+
+  useEffect(() => {
+    if (state.data.length) {
+      const organization2StakeholderUri = {}
+      Promise.all(state.data.map((organization) => {
+        return fetchDataTypes('stakeholder', `organization/${encodeURIComponent(organization._uri)}`).then(res => {
+          if (res.success) {
+            organization2StakeholderUri[organization._uri] = [...(organization2StakeholderUri[organization._uri] || []), ...(res.stakeholders || [])]
+          }
+        });
+      })).then(() => {
+        setOrganization2StakeholderUri(organization2StakeholderUri);
+      });
     }
   }, [state]);
 
@@ -87,6 +109,42 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
           outcomeDict[outcome._uri] = outcome;
         });
         setOutcomeDict(outcomeDict);
+      }
+    }).catch(e => {
+      console.log(e)
+      reportErrorToBackend(e);
+      setState(state => ({...state, loading: false}));
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchDataTypes('stakeholder').then(res => {
+      if (res.success) {
+        const stakeholderDict = {};
+        res.stakeholders.map(stakeholder => {
+          stakeholderDict[stakeholder._uri] = stakeholder;
+        });
+        setStakeholderDict(stakeholderDict);
+      }
+    }).catch(e => {
+      console.log(e)
+      reportErrorToBackend(e);
+      setState(state => ({...state, loading: false}));
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchDataTypes('characteristic').then(res => {
+      if (res.success) {
+        const characteristicDict = {};
+        res.characteristics.map(characteristic => {
+          characteristicDict[characteristic._uri] = characteristic;
+        });
+        setCharacteristicDict(characteristicDict);
       }
     }).catch(e => {
       console.log(e)
@@ -138,16 +196,12 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
       const themes = {}; // key is organizations
       state.data.map(organization => {
         const outcomes = organization.hasOutcomes?.map(outcomeUri => outcomeDict[outcomeUri]);
-        console.log(outcomes)
         outcomes?.map(outcomeObject => {
           if (outcomeObject) {
-            console.log(outcomeObject)
-            console.log(themeDict)
             const themesUnderOutcome = outcomeObject.themes?.map(themeUri => themeDict[themeUri]);
             themes[organization._uri] = [...(themes[organization._uri] || []), ...(themesUnderOutcome || [])];
           }
         });
-        console.log(themes);
       });
       setThemesUnderOrganization(themes)
     }
@@ -230,7 +284,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
     {
       label: 'Stakeholder Characteristics',
       body: ({characteristics}) => {
-        return characteristics;
+        return characteristics?.map(characteristicUri => characteristicDict[characteristicUri]?.name);
       }
     },
     {
@@ -282,6 +336,16 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
                 noHeaderBar
                 data={organization?.hasIndicators?.map(uri => indicatorDict[uri] || {}) || []}
                 columns={indicatorColumns}
+                uriField="uri"
+              />
+
+              <DataTable
+                noHeaderBar
+                data={(() => {
+                  const stakeholderUris = organization2StakeholderUri[organization._uri];
+                  return stakeholderUris?.map(stakeholderUri => stakeholderDict[stakeholderUri]) || [];
+                })()}
+                columns={stakeholderColumns}
                 uriField="uri"
               />
 
