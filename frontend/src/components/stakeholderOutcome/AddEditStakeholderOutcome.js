@@ -12,6 +12,8 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {validateForm} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -67,6 +69,23 @@ export default function AddEditStakeholderOutcome() {
   });
 
   const [loading, setLoading] = useState(true);
+
+  const attriConfig = fullLevelConfig.stakeholderOutcome;
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    codes: 'cids:hasCode',
+    stakeholder: 'cids:forStakeholder',
+    outcome: 'cids:forOutcome',
+    importance: 'cids:hasImportance',
+    inUnderserved: 'cids:isUnderserved',
+    indicators: 'cids:hasIndicator',
+    impactReports: 'cids:hasImpactReport',
+    organization: 'cids:forOrganization',
+    intendedImpact: 'cids:intendedImpact',
+    fromPerspectiveOf: 'cids:fromPerspectiveOf'
+  }
+
 
   useEffect(() => {
     if (mode === 'view') {
@@ -167,10 +186,7 @@ export default function AddEditStakeholderOutcome() {
 
   const validate = () => {
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-    if (form.uri && !isValidURL(form.uri))
-      error.uri = 'Not a valid URI';
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri']);
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -241,6 +257,7 @@ export default function AddEditStakeholderOutcome() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?
