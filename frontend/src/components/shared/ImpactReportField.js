@@ -9,13 +9,13 @@ import {fetchHowMuchImpacts} from "../../api/howMuchImpactApi";
 import {fetchImpactRisks} from "../../api/impactRiskApi";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
-
+import {isFieldRequired, validateField, validateURI, validateFieldAndURI} from "../../helpers";
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 const filterOptions = createFilterOptions({
   ignoreAccents: false,
   matchFrom: 'start'
 });
-
 
 function LoadingAutoComplete({
                                label,
@@ -53,8 +53,8 @@ function LoadingAutoComplete({
   );
 }
 
-export default function ImpactReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled}) {
-
+export default function ImpactReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled,attribute2Compass,}) {
+  
   const [state, setState] = useState(
     defaultValue ||
     {});
@@ -65,11 +65,14 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
   const {enqueueSnackbar} = useSnackbar();
 
+  const attriConfig = fullLevelConfig.impactReport
+
   const [loading, setLoading] = useState(true);
 
   const [errors, setErrors] = useState({...importErrors});
 
   const userContext = useContext(UserContext);
+
 
   useEffect(() => {
     Promise.all([fetchHowMuchImpacts('ImpactScale'), fetchHowMuchImpacts('ImpactDepth'), fetchHowMuchImpacts('ImpactDuration'), fetchImpactRisks()])
@@ -186,28 +189,23 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
             <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
+                key={'name'}
                 fullWidth
                 label="Name"
                 type="text"
                 defaultValue={state.name}
                 onChange={handleChange('name')}
                 disabled={disabled}
-                required={required}
                 error={!!errors.name}
                 helperText={errors.name}
-                onBlur={() => {
-                  if (!state.name) {
-                    setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, name: null}));
-                  }
-                }
-                }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
+                onBlur={validateField(state, attriConfig, 'name', attribute2Compass['name'], setErrors)}
               />
             </Grid>
 
             <Grid item xs={12}>
               <TextField
+                key={'uri'}
                 sx={{mt: 2}}
                 fullWidth
                 label="URI"
@@ -215,9 +213,9 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 defaultValue={state.uri}
                 onChange={handleChange('uri')}
                 disabled={disabled}
-                required={required}
                 error={!!errors.uri}
                 helperText={errors.uri}
+                onBlur={validateURI(state, setErrors)}
               />
             </Grid>
 
@@ -225,25 +223,20 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
             <Grid item xs={4}>
               <LoadingAutoComplete
                 label="Organization"
-                options={options.organization}
+                key={'organization'}
+                options={options.organizations}
                 state={state.organization}
                 onChange={handleChange('organization')}
                 error={!!errors.organization}
                 helperText={errors.organization}
-                required={required}
                 disabled={disabled || disabledOrganization}
-                // onBlur={() => {
-                //   if (!state.organization) {
-                //     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, organization: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'organization')}
+                onBlur={validateFieldAndURI(state, attriConfig,'organization',attribute2Compass['organization'], setErrors)}
               />
             </Grid>
             <Grid item xs={4}>
               <LoadingAutoComplete
+                key={'forStakeholderOutcome'}
                 label={"Stakeholder Outcome"}
                 disabled={disabled}
                 options={options.stakeholderOutcomes}
@@ -253,18 +246,15 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 }
                 error={!!errors.forStakeholderOutcome}
                 helperText={errors.forStakeholderOutcome}
-                required={required}
-                // onBlur={() => {
-                //   if (state.forStakeholderOutcome) {
-                //     setErrors(errors => ({...errors, forStakeholderOutcome: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'forStakeholderOutcome')}
+                onBlur={validateField(state, attriConfig, 'forStakeholderOutcome', attribute2Compass['forStakeholderOutcome'], setErrors)}
+
               />
             </Grid>
 
             <Grid item xs={4}>
               <LoadingAutoComplete
+                key = {'impactScale'}
                 label={"Impact Scale"}
                 options={options.impactScales}
                 state={state.impactScale}
@@ -273,18 +263,14 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 }
                 error={!!errors.impactScale}
                 helperText={errors.impactScale}
-                required={required}
-                // onBlur={() => {
-                //   if (state.impactScale) {
-                //     setErrors(errors => ({...errors, impactScale: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'impactScale')}
+                onBlur={validateField(state, attriConfig, 'impactScale', attribute2Compass['impactScale'], setErrors)}
               />
             </Grid>
 
             <Grid item xs={4}>
               <LoadingAutoComplete
+                key = {'impactDepth'}
                 label={"Impact Depth"}
                 options={options.impactDepths}
                 state={state.impactDepth}
@@ -293,94 +279,77 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 }
                 error={!!errors.impactDepth}
                 helperText={errors.impactDepth}
-                required={required}
-                // onBlur={() => {
-                //   if (state.impactDepth) {
-                //     setErrors(errors => ({...errors, impactDepth: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'impactDepth')}
+                onBlur={validateField(state, attriConfig, 'impactDepth', attribute2Compass['impactDepth'], setErrors)}
               />
             </Grid>
 
             <Grid item xs={4}>
               <LoadingAutoComplete
+                key = {'impactDuration'}
                 sx={{mt: 2}}
                 label={"Impact Duration"}
                 options={options.impactDurations}
                 state={state.impactDuration}
                 onChange={handleChange('impactDuration')}
-                required={required}
                 error={!!errors.impactDuration}
                 helperText={errors.impactDuration}
-                // onBlur={() => {
-                //   if (state.impactDuration) {
-                //     setErrors(errors => ({...errors, impactDuration: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'impactDuration')}
+                onBlur={validateField(state, attriConfig, 'impactDuration', attribute2Compass['impactDuration'], setErrors)}
               />
             </Grid>
 
             <Grid item xs={4}>
               <LoadingAutoComplete
+                key = {'reportedImpact'}
                 label="Reported Impact"
                 options={{"positive": "positive", "negative": "negative", "neutral": "neutral"}}
                 onChange={handleChange('reportedImpact')}
                 value={state.reportedImpact}
-                required={required}
                 disabled={disabled}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'reportedImpact')}
+                onBlur={validateField(state, attriConfig, 'reportedImpact', attribute2Compass['reportedImpact'], setErrors)}
               />
             </Grid>
 
         
             <Grid item xs={3}>
               <GeneralField
+
                 fullWidth
+                key = {'startTime'}
                 type={'datetime'}
                 value={state.startTime}
                 label={'Start Time'}
                 minWidth={187}
                 onChange={handleChange('startTime')}
-                required={required}
                 disabled={disabled}
                 error={!!errors.startTime}
                 helperText={errors.startTime}
-                // onBlur={() => {
-                //   if (!state.startTime) {
-                //     setErrors(errors => ({...errors, startTime: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, startTime: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'startTime')}
+                onBlur={validateField(state, attriConfig, 'startTime', attribute2Compass['startTime'], setErrors)}
               />
             </Grid>
 
             <Grid item xs={3}>
               <GeneralField
                 fullWidth
+                key = {'endTime'}
                 type={'datetime'}
                 value={state.endTime}
                 label={'End Time'}
                 minWidth={187}
                 onChange={handleChange('endTime')}
-                required={required}
                 disabled={disabled}
                 error={!!errors.endTime}
                 helperText={errors.endTime}
-                // onBlur={() => {
-                //   if (!state.endTime) {
-                //     setErrors(errors => ({...errors, endTime: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, endTime: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'endTime')}
+                onBlur={validateField(state, attriConfig, 'endTime', attribute2Compass['endTime'], setErrors)}
               />
             </Grid>
             <Grid item xs={6}>
               <Dropdown
+                key = {'impactRisks'}
                 sx={{mt: 2}}
                 label={"Impact Risk"}
                 options={options.impactRisks}
@@ -394,6 +363,8 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 }
                 error={!!errors.impactRisks}
                 helperText={errors.impactRisks}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'impactRisks')}
+                onBlur={validateField(state, attriConfig, 'impactRisks', attribute2Compass['impactRisks'], setErrors)}
               />
 
 
@@ -403,16 +374,18 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
               <TextField
                 fullWidth
                 sx={{mt: 2}}
+                key={'expectation'}
                 label="Expectation"
                 type="text"
                 defaultValue={state.expectation}
                 onChange={handleChange('expectation')}
-                required={required}
                 disabled={disabled}
                 error={!!errors.expectation}
                 helperText={errors.expectation}
                 multiline
                 minRows={4}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'expectation')}
+                onBlur={validateField(state, attriConfig, 'expectation', attribute2Compass['expectation'], setErrors)}
 
               />
             </Grid>
@@ -420,25 +393,19 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
             <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
+                key={'comment'}
                 fullWidth
                 label="Comment"
                 type="text"
                 defaultValue={state.comment}
                 onChange={handleChange('comment')}
-                required={required}
                 disabled={disabled}
                 error={!!errors.comment}
                 helperText={errors.comment}
                 multiline
                 minRows={5}
-                // onBlur={() => {
-                //   if (!state.comment) {
-                //     setErrors(errors => ({...errors, comment: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, comment: null}));
-                //   }
-                // }
-                // }
+                required={isFieldRequired(attriConfig, attribute2Compass, 'comment')}
+                onBlur={validateField(state, attriConfig, 'comment', attribute2Compass['comment'], setErrors)}
               />
             </Grid>
 
