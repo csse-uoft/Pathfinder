@@ -11,12 +11,12 @@ import {
   updateIndicatorReport
 } from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
+import {isFieldRequired, validateField, validateForm, validateURI, validateFieldAndURI} from "../../helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
-
+import {fullLevelConfig} from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -30,6 +30,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactModel() {
+  const attriConfig = fullLevelConfig.impactNorms
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();
@@ -131,6 +132,13 @@ export default function AddEditImpactModel() {
     }
 
   }, [mode, uri]);
+  
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description:  'cids:hasDescription',
+    organization: 'cids:forOrganization',
+    dateCreated:  "schema:dateCreated"
+  }
 
   const handleSubmit = () => {
     if (validate()) {
@@ -179,6 +187,7 @@ export default function AddEditImpactModel() {
 
   const validate = () => {
     const error = {};
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri'])
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -262,18 +271,12 @@ export default function AddEditImpactModel() {
           key={'name'}
           label={'Name'}
           value={form.name}
-          required
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.name = e.target.value}
           error={!!errors.name}
           helperText={errors.name}
-          onBlur={() => {
-            if (form.name === '') {
-              setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-            } else {
-              setErrors(errors => ({...errors, name: ''}));
-            }
-          }}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
+          onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
         />
 
         <GeneralField
@@ -284,14 +287,7 @@ export default function AddEditImpactModel() {
           onChange={e => form.uri = e.target.value}
           error={!!errors.uri}
           helperText={errors.uri}
-          onBlur={() => {
-            if (form.uri !== '' && !isValidURL(form.uri)) {
-              setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-            } else {
-              setErrors(errors => ({...errors, uri: ''}));
-            }
-
-          }}
+          onBlur={validateURI(form, setErrors)}
         />
 
         <SelectField
@@ -309,6 +305,9 @@ export default function AddEditImpactModel() {
               })
             );
           }}
+
+          required={isFieldRequired(attriConfig, attribute2Compass, 'organization')}
+          onBlur={validateFieldAndURI(form, attriConfig,'organization',attribute2Compass['organization'], setErrors)}
         />
         <GeneralField
           fullWidth
@@ -318,14 +317,8 @@ export default function AddEditImpactModel() {
           onChange={e => form.dateCreated = e.target.value}
           error={!!errors.dateCreated}
           helperText={errors.dateCreated}
-          // onBlur={() => {
-          //     if (!state.dateCreated) {
-          //         setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
-          //     } else {
-          //         setErrors(errors => ({...errors, dateCreated: null}));
-          //     }
-          // }
-          // }
+          required={isFieldRequired(attriConfig, attribute2Compass, 'date')}
+          onBlur={validateField(form, attriConfig,'date',attribute2Compass['date'], setErrors)}
         />
         <GeneralField
           key={'description'}
@@ -336,6 +329,8 @@ export default function AddEditImpactModel() {
           error={!!errors.description}
           helperText={errors.description}
           minRows={4}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
+          onBlur={validateField(form, attriConfig,'description',attribute2Compass['description'], setErrors)}
           multiline
         />
 
