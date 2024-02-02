@@ -20,7 +20,7 @@ const fetchIndicators = async (req, res) => {
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
       const indicators = await GDBIndicatorModel.find({},
-        {populates: ['unitOfMeasure','baseline', 'indicatorReports.value', 'threshold', 'datasets', 'codes', 'indicatorReports.datasets', 'indicatorReports.hasTime']});
+        {populates: ['unitOfMeasure','baseline', 'threshold', 'datasets', 'codes']});
       indicators.map(indicator => indicator.editable = true);
       return res.status(200).json({success: true, indicators});
     }
@@ -56,8 +56,7 @@ const fetchIndicators = async (req, res) => {
     // the organizationUri is given, return all indicators belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
       {
-        populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.indicatorReports.value',
-          'hasIndicators.indicatorReports.hasTime.hasBeginning', 'hasIndicators.indicatorReports.hasTime.hasEnd']
+        populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.baseline']
       }
       );
     if (!organization)
@@ -133,6 +132,9 @@ const fetchIndicator = async (req, res) => {
   if (!uri)
     throw new Server400Error('Id is not given');
   const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure', 'baseline', 'threshold']});
+  if (!indicator) {
+    throw new Server400Error('No Such Indicator')
+  }
   indicator.unitOfMeasure = indicator.unitOfMeasure?.label;
   indicator.baseline = indicator.baseline?.numericalValue;
   indicator.threshold = indicator.threshold?.numericalValue;

@@ -115,10 +115,12 @@ async function addSampleOrganizations() {
   const alreadyHas = await GDBOrganizationModel.findOne({_uri: 'http://www.b12give.ca'});
   if (!alreadyHas) {
     const org1 = GDBOrganizationModel({
-      legalName: 'B12Give'
+      legalName: 'B12Give',
+      legalStatus: 'For Profit'
     }, {uri: 'http://www.b12give.ca'})
     const org2 = GDBOrganizationModel({
-      legalName: 'Org1'
+      legalName: 'Org1',
+      legalStatus: 'Registered Charity'
     }, {uri: 'http://www.demo.ca/Organization/Organization1'})
     const org3 = GDBOrganizationModel({
       legalName: 'Org2'

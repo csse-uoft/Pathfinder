@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function EnhancedTable({data, title, columns, height, ...props}) {
+export function EnhancedTable({data, title, columns, height, noHeaderBar, noPaginationBar, ...props}) {
   const {
     rowsPerPageOptions = [10, 25, 100],
     uriField = '_uri',
@@ -158,33 +158,13 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
 
   };
 
-  const subTable = () => (
-    <Table>
-      <TableBody>
-        <TableRow style={{'border-bottom': '1px solid #000'}}>
-          <TableCell colSpan={2}>
-            12
-          </TableCell>
-          <TableCell>
-            4
-          </TableCell>
-        </TableRow>
-
-        <TableRow>
-          <TableCell>
-            12
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-  );
 
 
   return (
     <Paper elevation={5} className={classes.paper}>
-      <EnhancedTableToolbar title={title} numSelected={selected.length} onDelete={handleDelete}
-                            onSearch={handleOnSearch}
-                            customToolbar={customToolbar}/>
+      {noHeaderBar || (!title && !customToolbar)? null : <EnhancedTableToolbar title={title} numSelected={selected.length} onDelete={handleDelete}
+                             onSearch={handleOnSearch}
+                             customToolbar={customToolbar}/>}
       <TableContainer style={{maxHeight: height || 'calc(100vh - 228px)'}}>
         <Table
           stickyHeader
@@ -218,19 +198,19 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
                     selected={isItemSelected}
                     style={rowStyle && rowStyle(row)}
                   >
-                    <TableCell padding="checkbox" key={0}>
-                      <Checkbox
-                        color="primary"
-                        onClick={(event) => handleClick(event, uri)}
-                        checked={isItemSelected}
-                      />
-                    </TableCell>
+                    {/*<TableCell padding="checkbox" key={0}>*/}
+                    {/*  <Checkbox*/}
+                    {/*    color="primary"*/}
+                    {/*    onClick={(event) => handleClick(event, uri)}*/}
+                    {/*    checked={isItemSelected}*/}
+                    {/*  />*/}
+                    {/*</TableCell>*/}
                     {columns.map((cell, idx) =>{
                       if (cell.body) {
                         return (<TableCell style={cell.style} colSpan={cell.colSpan}
                                            key={idx + 1}>{
                           Array.isArray(cell.body(row, extraData)) ?
-                            cell.body(row, extraData).map((objects) => {
+                            cell.body(row, extraData).map((objects, index) => {
                               if (Array.isArray(objects)) {
                                 return (
                                   <TableRow>
@@ -238,8 +218,9 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
 
                                       objects?.map(object => {
                                         return (<TableCell style={{
-                                          width: `${100 / objects.length}%`,
-                                          wordBreak: 'break-word'
+                                          width: `${100 / cell.colSpan}%`,
+                                          wordBreak: 'break-word',
+                                          border: index === cell.body(row, extraData).length - 1? 'none' : null
                                         }}>
                                           {object}
                                         </TableCell>)
@@ -249,13 +230,14 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
                                   </TableRow>
                                 )
                               } else {
-                                return (<TableRow>
+                                return (<TableRow style={{paddingLeft: 0}}>
                                   {
-
-                                    <TableCell>
+                                    <TableCell style={{
+                                      border:index === cell.body(row, extraData).length - 1? 'none':null,
+                                      wordBreak: 'break-word',
+                                    }}>
                                       {objects}
                                     </TableCell>
-
                                   }
                                 </TableRow>)
                               }
@@ -283,7 +265,7 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
+      {!noPaginationBar? <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
         component="div"
         count={data.length}
@@ -291,7 +273,7 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+      />: <br/>}
     </Paper>
   );
 }

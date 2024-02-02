@@ -21,7 +21,7 @@ const fetchOutcomes = async (req, res) => {
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
       const outcomes = await GDBOutcomeModel.find({},
-        {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value', 'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd', 'themes']});
+        {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value', 'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd']});
       outcomes.map(outcome => outcome.editable = true);
       return res.status(200).json({success: true, outcomes, editable: true});
     }
@@ -45,7 +45,7 @@ const fetchOutcomes = async (req, res) => {
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
       {
         populates: ['hasOutcomes.indicators.unitOfMeasure', 'hasOutcomes.indicators.indicatorReports.value',
-          'hasOutcomes.indicators.indicatorReports.hasTime.hasBeginning', 'hasOutcomes.indicators.indicatorReports.hasTime.hasEnd', 'hasOutcomes.themes']
+          'hasOutcomes.indicators.indicatorReports.hasTime.hasBeginning', 'hasOutcomes.indicators.indicatorReports.hasTime.hasEnd']
       });
     if (!organization)
       throw new Server400Error('No such organization');
@@ -144,19 +144,12 @@ const fetchOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is not given');
-  const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['themes', 'indicators']});
+  const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['indicators']});
   if (!outcome)
     throw new Server400Error('No such outcome');
   outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization});
   outcome.organization = outcome.forOrganization?._uri;
   outcome.organizationName = outcome.forOrganization?.legalName;
-  if (!outcome.themes)
-    outcome.themes = [];
-  outcome.themeNames = {};
-  outcome.themes?.map(theme => {
-    outcome.themeNames[theme._uri] = theme.name;
-  });
-  outcome.themes = outcome.themes?.map(theme => theme._uri);
 
   outcome.indicatorNames = {};
   outcome.indicators?.map(indicator => {
