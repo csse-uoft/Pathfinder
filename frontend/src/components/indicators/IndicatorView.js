@@ -1,25 +1,41 @@
-import React, { useEffect, useState, useContext } from 'react';
-import {Chip, Container, Menu, MenuItem, Typography, FormControl, InputLabel, Select, Input, Checkbox} from "@mui/material";
-import { Add as AddIcon} from "@mui/icons-material";
-import {DropdownMenu, Link, Loading, DataTable } from "../shared";
+import React, {useEffect, useState, useContext} from 'react';
+import {
+  Chip,
+  Container,
+  Menu,
+  MenuItem,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  Input,
+  Checkbox
+} from "@mui/material";
+import {Add as AddIcon} from "@mui/icons-material";
+import {DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate,} from "react-router-dom";
-import { useSnackbar } from 'notistack';
+import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  fetchDataTypesGivenListOfUris
+} from "../../api/generalAPI";
 
 export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
-  const navigate = navigateHelper(navigator)
-  const [outcomeInterfaces, setOutcomeInterfaces] = useState({})
+  const navigate = navigateHelper(navigator);
+  const [outcomeInterfaces, setOutcomeInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
   const [dropDown, setDropDown] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const minSelectedLength = 1; // Set your minimum length here
 
-  const [organizations, setOrganizations] = useState([])
+  const [organizations, setOrganizations] = useState([]);
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -64,55 +80,61 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
 
   const [trigger, setTrigger] = useState(true);
 
-  const [indicatorReportDict, setIndicatorReportDict] = useState({})
+  const [indicatorReportDict, setIndicatorReportDict] = useState({});
 
   useEffect(() => {
-    fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}`: '').then(({success, indicatorReports}) => {
+    fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}` : '').then(({
+                                                                                                    success,
+                                                                                                    indicatorReports
+                                                                                                  }) => {
       if (success) {
         const indicatorReportDict = {};
         indicatorReports.map(indicatorReport => {
-          indicatorReportDict[indicatorReport._uri] = indicatorReport
-        })
-        setIndicatorReportDict(indicatorReportDict)
+          indicatorReportDict[indicatorReport._uri] = indicatorReport;
+        });
+        setIndicatorReportDict(indicatorReportDict);
       }
-    })
-  }, [state])
+    });
+  }, [state]);
 
   useEffect(() => {
-    fetchDataTypeInterfaces('outcome').then(({interfaces}) => setOutcomeInterfaces(interfaces))
-  }, [])
+    fetchDataTypeInterfaces('outcome').then(({interfaces}) => setOutcomeInterfaces(interfaces));
+  }, []);
 
   useEffect(() => {
     if (multi) {
-      fetchDataTypes('indicator').then(res => {
-        if(res.success) {
-          console.log(res.indicators)
-          setState(state => ({...state, loading: false, data: res.indicators}));
+      fetchDataTypesGivenListOfUris('indicator', '', selectedOrganizations, 'indicators').then(objectsDict => {
+        console.log(objectsDict);
+        let indicators = [];
+        for (let organization in objectsDict) {
+          indicators = [...indicators, ...objectsDict[organization]];
         }
+        console.log(indicators)
+        setState(state => ({...state, loading: false, data: indicators}));
       }).catch(e => {
-        setState(state => ({...state, loading: false}))
-        reportErrorToBackend(e)
+        setState(state => ({...state, loading: false}));
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else if (single) {
       fetchDataType('indicator', encodeURIComponent(uri)).then(({success, indicator}) => {
         if (success) {
-          setState(state => ({...state, loading: false, data: [indicator]}))
+          setState(state => ({...state, loading: false, data: [indicator]}));
         }
       }).catch(e => {
-        setState(state => ({...state, loading: false}))
-        reportErrorToBackend(e)
+        setState(state => ({...state, loading: false}));
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-      })
+      });
     }
 
-  }, [trigger]);
+  }, [selectedOrganizations]);
 
   const columns = [
     {
       label: 'Indicator Name',
       body: ({name}) => {
-        return name
+        return name;
 
       },
       sortBy: ({name}) => name
@@ -122,23 +144,24 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
       body: ({_uri}) => {
         return <Link colorWithHover to={`/indicator/${encodeURIComponent(_uri)}/view`}>
           {_uri}
-        </Link>
+        </Link>;
 
       },
     },
     {
       label: 'Indicator Description',
       body: ({description}) => {
-        return description
+        return description;
       },
     },
     {
       label: 'Outcome(s) URI',
       colSpan: 2,
       body: ({forOutcomes}) => {
-        return forOutcomes?.map(outcomeUri => [<Link colorWithHover to={`/outcome/${encodeURIComponent(outcomeUri)}/view`}>
+        return forOutcomes?.map(outcomeUri => [<Link colorWithHover
+                                                     to={`/outcome/${encodeURIComponent(outcomeUri)}/view`}>
           {outcomeUri}
-        </Link>, outcomeInterfaces[outcomeUri]])
+        </Link>, outcomeInterfaces[outcomeUri]]);
       },
     },
     {
@@ -147,19 +170,20 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     {
       label: 'Indicator Baseline',
       body: ({baseline}) => {
-        console.log(baseline)
-        return baseline?.numericalValue
+        console.log(baseline);
+        return baseline?.numericalValue;
       }
     },
     {
       label: 'IndicatorReport URI',
       colSpan: 3,
       body: ({indicatorReports}) => {
-        return indicatorReports?.map(indicatorReportUri => [<Link colorWithHover to={`/indicatorReport/${encodeURIComponent(indicatorReportUri)}/view`}>
+        return indicatorReports?.map(indicatorReportUri => [<Link colorWithHover
+                                                                  to={`/indicatorReport/${encodeURIComponent(indicatorReportUri)}/view`}>
           {indicatorReportUri}
         </Link>,
           indicatorReportDict[indicatorReportUri]?.value?.numericalValue,
-          (indicatorReportDict[indicatorReportUri]?.hasTime?.hasBeginning?.date && indicatorReportDict[indicatorReportUri]?.hasTime?.hasEnd?.date)? `${(new Date(indicatorReportDict[indicatorReportUri]?.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReportDict[indicatorReportUri]?.hasTime.hasEnd.date)).toLocaleString()}` : null
+          (indicatorReportDict[indicatorReportUri]?.hasTime?.hasBeginning?.date && indicatorReportDict[indicatorReportUri]?.hasTime?.hasEnd?.date) ? `${(new Date(indicatorReportDict[indicatorReportUri]?.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReportDict[indicatorReportUri]?.hasTime.hasEnd.date)).toLocaleString()}` : null
         ]);
       }
     },
@@ -187,12 +211,12 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     <Container>
       <Typography variant={'h2'}> Indicator Class View </Typography>
       <DataTable
-        title={multi?"Indicators":"Indicator"}
+        title={multi ? "Indicators" : "Indicator"}
         data={state.data.filter(indicator => selectedOrganizations.includes(indicator.forOrganization))}
         columns={columns}
         uriField="uri"
         customToolbar={
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{display: 'flex', gap: '10px'}}>
             {multi ?
               <Chip
                 disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
@@ -205,13 +229,13 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
             <div>
               <FormControl>
                 <Select
-                  style={{ width: '250px'}}
+                  style={{width: '250px'}}
                   labelId="organization-label"
                   id="organization-select"
                   multiple
                   value={selectedOrganizations}
                   onChange={handleChange}
-                  input={<Input />}
+                  input={<Input/>}
                   renderValue={(selected) => {
                     if (selected.length === 1) {
                       return "Organization Filter";
@@ -225,7 +249,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
                   </MenuItem>
                   {organizations.map((organization) => (
                     <MenuItem key={organization._uri} onClick={() => handleMenuItemClick(organization._uri)}>
-                      <Checkbox checked={selectedOrganizations.includes(organization._uri)} />
+                      <Checkbox checked={selectedOrganizations.includes(organization._uri)}/>
                       {organization.legalName}
                     </MenuItem>
                   ))}
@@ -240,13 +264,13 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
               >
                 {selectedOrganizations.map((organization) => (
                   <MenuItem key={organization} onClick={() => handleMenuItemClick(organization)}>
-                    <Checkbox checked />
+                    <Checkbox checked/>
                     {organization}
                   </MenuItem>
                 ))}
               </Menu>
             </div>
-            </div>
+          </div>
         }
 
       />
