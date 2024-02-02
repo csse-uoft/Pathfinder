@@ -4,5 +4,5 @@ import IndicatorView from "./IndicatorView";
 export default function Indicators() {
   const {uri, viewMode} = useParams();
 
-  return <IndicatorView  multi organizationUri={uri}/>
+  return <IndicatorView  multi />
 }

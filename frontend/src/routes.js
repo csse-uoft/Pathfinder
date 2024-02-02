@@ -173,9 +173,9 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditTheme}/>}/>
     {/*indicators*/}
-    <Route path={`${process.env.PUBLIC_URL}/organization-indicators`}
-           element={<PrivateRoute element={Organization_indicators}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/indicators/:uri`} element={<PrivateRoute element={Indicators}/>}/>
+    {/*<Route path={`${process.env.PUBLIC_URL}/organization-indicators`}*/}
+    {/*       element={<PrivateRoute element={Organization_indicators}/>}/>*/}
+    <Route path={`${process.env.PUBLIC_URL}/indicators`} element={<PrivateRoute element={Indicators}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicator/:orgUri/new`}
            element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicator/new`} element={<PrivateRoute element={AddEditIndicator}/>}/>

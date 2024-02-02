@@ -230,8 +230,6 @@ const fetchIndicatorReportsHandler = async (req, res, next) => {
 
 const fetchIndicatorReports = async (req, res) => {
   const {orgUri, indicatorUri} = req.params;
-  if (!orgUri && !indicatorUri)
-    throw new Server400Error('Wrong input');
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   let editable;
   let indicatorReports;
@@ -253,6 +251,12 @@ const fetchIndicatorReports = async (req, res) => {
     indicatorReports = await GDBIndicatorReportModel.find({forOrganization: orgUri},
       {populates: ['value', 'hasTime.hasEnd', 'hasTime.hasBeginning', 'forIndicator.unitOfMeasure']}
     );
+  } else {
+    if (userAccount.isSuperuser) {
+      indicatorReports = await GDBIndicatorReportModel.find({},
+        {populates: ['value', 'hasTime.hasEnd', 'hasTime.hasBeginning', 'forIndicator.unitOfMeasure']});
+    }
+
   }
 
 

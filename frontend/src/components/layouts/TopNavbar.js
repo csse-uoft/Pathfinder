@@ -126,7 +126,7 @@ function TopNavBar() {
                   <Typography variant="inherit">Users</Typography>
                 </MenuItem>:<div/>}
 
-              <MenuItem onClick={handleLink(`/organization-indicators`)}>
+              <MenuItem onClick={handleLink(`/indicators`)}>
                 <ListItemIcon>
                   <DragIndicatorIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>

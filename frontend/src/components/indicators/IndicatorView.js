@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import {Chip, Container, Typography} from "@mui/material";
+import {Chip, Container, Menu, MenuItem, Typography, FormControl, InputLabel, Select, Input, Checkbox} from "@mui/material";
 import { Add as AddIcon} from "@mui/icons-material";
 import {DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate,} from "react-router-dom";
@@ -9,11 +9,37 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
-export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri, organizationUri}) {
+export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const [outcomeInterfaces, setOutcomeInterfaces] = useState({})
+  const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
+  const [dropDown, setDropDown] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const minSelectedLength = 1; // Set your minimum length here
+
+  const [organizations, setOrganizations] = useState([])
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setDropDown(false);
+  };
+
+  const handleMenuItemClick = (organization) => {
+    if (selectedOrganizations.includes(organization)) {
+      setSelectedOrganizations(selectedOrganizations.filter((org) => org !== organization));
+    } else {
+      setSelectedOrganizations([...selectedOrganizations, organization]);
+    }
+  };
+  const handleChange = (e) => {
+    const selectedValue = e.target.value;
+
+    if (selectedValue.length >= minSelectedLength) {
+      setSelectedOrganizations(selectedValue);
+    }
+  };
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
@@ -23,18 +49,30 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
+
+  useEffect(() => {
+    fetchDataTypes('organization').then(res => {
+      if (res.success) {
+        setOrganizations(res.organizations);
+      }
+    }).catch(e => {
+      setState(state => ({...state, loading: false}));
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    });
+  }, [trigger]);
+
   const [trigger, setTrigger] = useState(true);
 
   const [indicatorReportDict, setIndicatorReportDict] = useState({})
 
   useEffect(() => {
-    fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}`: encodeURIComponent(organizationUri)).then(({success, indicatorReports}) => {
+    fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}`: '').then(({success, indicatorReports}) => {
       if (success) {
         const indicatorReportDict = {};
         indicatorReports.map(indicatorReport => {
           indicatorReportDict[indicatorReport._uri] = indicatorReport
         })
-        console.log(indicatorReportDict)
         setIndicatorReportDict(indicatorReportDict)
       }
     })
@@ -46,8 +84,9 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
 
   useEffect(() => {
     if (multi) {
-      fetchDataTypes('indicator', encodeURIComponent(organizationUri)).then(res => {
+      fetchDataTypes('indicator').then(res => {
         if(res.success) {
+          console.log(res.indicators)
           setState(state => ({...state, loading: false, data: res.indicators}));
         }
       }).catch(e => {
@@ -149,18 +188,65 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
       <Typography variant={'h2'}> Indicator Class View </Typography>
       <DataTable
         title={multi?"Indicators":"Indicator"}
-        data={state.data}
+        data={state.data.filter(indicator => selectedOrganizations.includes(indicator.forOrganization))}
         columns={columns}
         uriField="uri"
         customToolbar={
-        multi?
-          <Chip
-            disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-            onClick={() => navigate(`/indicator/${encodeURIComponent(uri)}/new`)}
-            color="primary"
-            icon={<AddIcon/>}
-            label="Add new Indicator"
-            variant="outlined"/>:null
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {multi ?
+              <Chip
+                disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                onClick={() => navigate(`/indicator/${encodeURIComponent(uri)}/new`)}
+                color="primary"
+                icon={<AddIcon/>}
+                label="Add new Indicator"
+                variant="outlined"/> : null}
+
+            <div>
+              <FormControl>
+                <Select
+                  style={{ width: '250px'}}
+                  labelId="organization-label"
+                  id="organization-select"
+                  multiple
+                  value={selectedOrganizations}
+                  onChange={handleChange}
+                  input={<Input />}
+                  renderValue={(selected) => {
+                    if (selected.length === 1) {
+                      return "Organization Filter";
+                    }
+
+                    return `Selected Organizations (${selected.length - 1})`;
+                  }}
+                >
+                  <MenuItem value={null} disabled>
+                    <em>Select Organizations</em>
+                  </MenuItem>
+                  {organizations.map((organization) => (
+                    <MenuItem key={organization._uri} onClick={() => handleMenuItemClick(organization._uri)}>
+                      <Checkbox checked={selectedOrganizations.includes(organization._uri)} />
+                      {organization.legalName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Dropdown menu for selected organizations */}
+              <Menu
+                open={dropDown}
+                anchorEl={anchorEl}
+                onClose={handleMenuClose}
+              >
+                {selectedOrganizations.map((organization) => (
+                  <MenuItem key={organization} onClick={() => handleMenuItemClick(organization)}>
+                    <Checkbox checked />
+                    {organization}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </div>
+            </div>
         }
 
       />
