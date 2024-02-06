@@ -9,7 +9,8 @@ import {
   InputLabel,
   Select,
   Input,
-  Checkbox
+  Checkbox,
+  MenuList
 } from "@mui/material";
 import {Add as AddIcon} from "@mui/icons-material";
 import {DropdownMenu, Link, Loading, DataTable} from "../shared";
@@ -34,6 +35,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
   const [dropDown, setDropDown] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const minSelectedLength = 1; // Set your minimum length here
+  const [organizationsWithGroups, setOrganizationsWithGroups] = useState({});
 
   const [organizations, setOrganizations] = useState([]);
 
@@ -42,13 +44,43 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     setDropDown(false);
   };
 
-  const handleMenuItemClick = (organization) => {
-    if (selectedOrganizations.includes(organization)) {
-      setSelectedOrganizations(selectedOrganizations.filter((org) => org !== organization));
-    } else {
-      setSelectedOrganizations([...selectedOrganizations, organization]);
-    }
+  useEffect(() => {
+    fetchDataTypes('group').then(res => {
+      if (res.success) {
+        const groups = res.groups;
+        console.log(groups)
+      }
+    })
+  }, [])
+
+  const handleSelectAllClick = () => {
+    const allOrganizationUris = data.reduce((acc, group) => {
+      return [...acc, ...group.organizations.map(org => org._uri)];
+    }, []);
+
+    // If all organizations are already selected, deselect all
+    // Otherwise, select all organizations
+    const updatedSelectedOrganizations = selectedOrganizations.length === allOrganizationUris.length
+      ? []
+      : allOrganizationUris;
+
+    // Update the state with the new selection
+    setSelectedOrganizations(updatedSelectedOrganizations);
   };
+
+  const handleGroupClick = (group) => {
+    const groupOrgs = group.organizations.map((org) => org._uri);
+
+    // If the group is already selected, deselect it and all its organizations;
+    // otherwise, select the group and all its organizations
+    const updatedSelectedOrganizations = areAllGroupOrgsSelected(group)
+      ? selectedOrganizations.filter((org) => !groupOrgs.includes(org))
+      : [...selectedOrganizations, ...groupOrgs];
+
+    // Update the state with the new selection
+    setSelectedOrganizations(updatedSelectedOrganizations);
+  };
+
   const handleChange = (e) => {
     const selectedValue = e.target.value;
 
@@ -76,11 +108,85 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
-  }, [trigger]);
-
-  const [trigger, setTrigger] = useState(true);
+  }, []);
 
   const [indicatorReportDict, setIndicatorReportDict] = useState({});
+
+  const handleOrgClick = (organization) => {
+    // Check if the clicked organization is currently selected
+    const isSelected = selectedOrganizations.includes(organization._uri);
+
+    // Toggle the selection status of the clicked organization
+    let updatedSelectedOrganizations;
+    if (isSelected) {
+      // If the organization is selected, remove it from the selection
+      updatedSelectedOrganizations = selectedOrganizations.filter((org) => org !== organization._uri);
+    } else {
+      // If the organization is not selected, add it to the selection
+      updatedSelectedOrganizations = [...selectedOrganizations, organization._uri];
+    }
+
+    // Update the state with the new selection
+    setSelectedOrganizations(updatedSelectedOrganizations);
+
+    // Find the group to which the organization belongs
+    const group = data.find((grp) => grp.organizations.some((org) => org._uri === organization._uri));
+
+    // If found and the organization was the only one selected in its group, deselect the group automatically
+    if (group && group.organizations.length === 1 && isSelected) {
+      handleGroupClick(group);
+    }
+  };
+
+  const data = [
+    {
+      groupName: "Group A",
+      organizations: [
+        { _uri: "org1", legalName: "Organization 1" },
+        { _uri: "org2", legalName: "Organization 2" },
+      ],
+    },
+    {
+      groupName: "Group B",
+      organizations: [
+        { _uri: "org3", legalName: "Organization 3" },
+        { _uri: "org4", legalName: "Organization 4" },
+        // ... other organizations in Group B
+      ],
+    },
+    // ... other groups
+  ];
+
+  const handleMenuItemClick = (item) => {
+    // If the clicked item is a group, delegate to handleGroupClick
+    if (item.organizations) {
+      handleGroupClick(item);
+    } else {
+      // If the clicked item is an organization, toggle its selection
+      const updatedSelectedOrganizations = selectedOrganizations.includes(item._uri)
+        ? selectedOrganizations.filter((org) => org !== item._uri)
+        : [...selectedOrganizations, item._uri];
+
+      // Update the state with the new selection
+      setSelectedOrganizations(updatedSelectedOrganizations);
+
+      // If the clicked organization is being unselected, check if it belongs to a group
+      if (!updatedSelectedOrganizations.includes(item._uri)) {
+        // Find the group to which the organization belongs
+        const group = data.find((grp) => grp.organizations.some((org) => org._uri === item._uri));
+
+        // If found, deselect the group automatically
+        if (group) {
+          handleGroupClick(group);
+        }
+      }
+    }
+  };
+
+  const areAllGroupOrgsSelected = (group) => {
+    // Check if all organizations in the group are selected
+    return group.organizations.every((org) => selectedOrganizations.includes(org._uri));
+  };
 
   useEffect(() => {
     fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}` : '').then(({
@@ -229,46 +335,50 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
             <div>
               <FormControl>
                 <Select
-                  style={{width: '250px'}}
+                  style={{ width: '250px' }}
                   labelId="organization-label"
                   id="organization-select"
                   multiple
                   value={selectedOrganizations}
                   onChange={handleChange}
-                  input={<Input/>}
-                  renderValue={(selected) => {
-                    if (selected.length === 1) {
-                      return "Organization Filter";
-                    }
-
-                    return `Selected Organizations (${selected.length - 1})`;
-                  }}
+                  input={<Input />}
+                  renderValue={(selected) => "Organization Filter"}
                 >
                   <MenuItem value={null} disabled>
                     <em>Select Organizations</em>
                   </MenuItem>
-                  {organizations.map((organization) => (
-                    <MenuItem key={organization._uri} onClick={() => handleMenuItemClick(organization._uri)}>
-                      <Checkbox checked={selectedOrganizations.includes(organization._uri)}/>
-                      {organization.legalName}
-                    </MenuItem>
+                  <MenuItem key={'selectedAll'} onClick={handleSelectAllClick}>
+                    <Checkbox checked={selectedOrganizations.filter(organization => organization!=='').length === data.reduce((acc, group) => acc + group.organizations.length, 0)} />
+                    Select All
+                  </MenuItem>
+                  {data.map((group) => (
+                    <div key={group.groupName}>
+                      <MenuItem onClick={() => handleGroupClick(group)}>
+                        <Checkbox checked={areAllGroupOrgsSelected(group)} />
+                        {group.groupName}
+                      </MenuItem>
+                      <MenuList style={{ paddingLeft: '20px' }}>
+                        {group.organizations.map((organization) => (
+                          <MenuItem key={organization._uri} onClick={() => handleOrgClick(organization)}>
+                            <Checkbox checked={selectedOrganizations.includes(organization._uri)} />
+                            {organization.legalName}
+                          </MenuItem>
+                        ))}
+                      </MenuList>
+                    </div>
                   ))}
                 </Select>
               </FormControl>
 
-              {/* Dropdown menu for selected organizations */}
-              <Menu
-                open={dropDown}
-                anchorEl={anchorEl}
-                onClose={handleMenuClose}
-              >
-                {selectedOrganizations.map((organization) => (
-                  <MenuItem key={organization} onClick={() => handleMenuItemClick(organization)}>
-                    <Checkbox checked/>
-                    {organization}
-                  </MenuItem>
-                ))}
-              </Menu>
+               {/*Dropdown menu for selected organizations*/}
+              {/*<Menu open={dropDown} anchorEl={anchorEl} onClose={handleMenuClose}>*/}
+              {/*  {selectedOrganizations.map((organization) => (*/}
+              {/*    <MenuItem key={organization} onClick={() => handleMenuItemClick(organization)}>*/}
+              {/*      <Checkbox checked />*/}
+              {/*      {organization}*/}
+              {/*    </MenuItem>*/}
+              {/*  ))}*/}
+              {/*</Menu>*/}
             </div>
           </div>
         }
