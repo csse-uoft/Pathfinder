@@ -2,15 +2,7 @@ import React, {useEffect, useState, useContext} from 'react';
 import {
   Chip,
   Container,
-  Menu,
-  MenuItem,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  Input,
-  Checkbox,
-  MenuList
 } from "@mui/material";
 import {Add as AddIcon} from "@mui/icons-material";
 import {DropdownMenu, Link, Loading, DataTable} from "../shared";
@@ -25,87 +17,26 @@ import {
   fetchDataTypes,
   fetchDataTypesGivenListOfUris
 } from "../../api/generalAPI";
+import DropdownFilter from "../shared/DropdownFilter";
+import {
+  areAllGroupOrgsSelected,
+  handleChange,
+  handleGroupClick,
+  handleOrgClick,
+  handleSelectAllClick
+} from "../../helpers/helpersForDropdownFilter";
 
 export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const [outcomeInterfaces, setOutcomeInterfaces] = useState({});
-  const [organizationInterfaces, setOrganizationInterfaces] = useState({})
+  const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
-  const [dropDown, setDropDown] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const minSelectedLength = 1; // Set your minimum length here
   const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
+  const [indicatorReportDict, setIndicatorReportDict] = useState({});
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setDropDown(false);
-  };
-
-  useEffect(() => {
-    fetchDataTypeInterfaces('organization')
-      .then(({interfaces}) => {
-        setOrganizationInterfaces(interfaces)
-      }).catch(e => {
-      if (e.json)
-        setErrors(e.json);
-      reportErrorToBackend(e);
-      setLoading(false);
-      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
-    })
-  }, [])
-
-  useEffect(() => {
-    fetchDataTypes('group').then(({groups, success}) => {
-      if (success) {
-        const organizationsWithGroups = groups?.map(groupObject => {
-          return {
-            groupName: groupObject.label,
-            organizations: groupObject.organizations.map(organizationUri => ({_uri: organizationUri, legalName: organizationInterfaces?.[organizationUri]}))
-          };
-        });
-        console.log(organizationsWithGroups)
-        setOrganizationsWithGroups(organizationsWithGroups);
-      }
-    });
-  }, [organizationInterfaces]);
-
-  const handleSelectAllClick = () => {
-    const allOrganizationUris = organizationsWithGroups.reduce((acc, group) => {
-      return [...acc, ...group.organizations.map(org => org._uri)];
-    }, []);
-
-    // If all organizations are already selected, deselect all
-    // Otherwise, select all organizations
-    const updatedSelectedOrganizations = selectedOrganizations.length === allOrganizationUris.length
-      ? []
-      : allOrganizationUris;
-
-    // Update the state with the new selection
-    setSelectedOrganizations(updatedSelectedOrganizations);
-  };
-
-  const handleGroupClick = (group) => {
-    const groupOrgs = group.organizations.map((org) => org._uri);
-
-    // If the group is already selected, deselect it and all its organizations;
-    // otherwise, select the group and all its organizations
-    const updatedSelectedOrganizations = areAllGroupOrgsSelected(group)
-      ? selectedOrganizations.filter((org) => !groupOrgs.includes(org))
-      : [...selectedOrganizations, ...groupOrgs];
-
-    // Update the state with the new selection
-    setSelectedOrganizations(updatedSelectedOrganizations);
-  };
-
-  const handleChange = (e) => {
-    const selectedValue = e.target.value;
-
-    if (selectedValue.length >= minSelectedLength) {
-      setSelectedOrganizations(selectedValue);
-    }
-  };
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
@@ -116,83 +47,36 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     showDeleteDialog: false,
   });
 
-  const [indicatorReportDict, setIndicatorReportDict] = useState({});
+  useEffect(() => {
+    fetchDataTypeInterfaces('organization')
+      .then(({interfaces}) => {
+        setOrganizationInterfaces(interfaces);
+      }).catch(e => {
+      if (e.json)
+        setErrors(e.json);
+      reportErrorToBackend(e);
+      setLoading(false);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    });
+  }, []);
 
-  const handleOrgClick = (organization) => {
-    // Check if the clicked organization is currently selected
-    const isSelected = selectedOrganizations.includes(organization._uri);
-
-    // Toggle the selection status of the clicked organization
-    let updatedSelectedOrganizations;
-    if (isSelected) {
-      // If the organization is selected, remove it from the selection
-      updatedSelectedOrganizations = selectedOrganizations.filter((org) => org !== organization._uri);
-    } else {
-      // If the organization is not selected, add it to the selection
-      updatedSelectedOrganizations = [...selectedOrganizations, organization._uri];
-    }
-
-    // Update the state with the new selection
-    setSelectedOrganizations(updatedSelectedOrganizations);
-
-    // Find the group to which the organization belongs
-    const group = organizationsWithGroups.find((grp) => grp.organizations.some((org) => org._uri === organization._uri));
-
-    // If found and the organization was the only one selected in its group, deselect the group automatically
-    if (group && group.organizations.length === 1 && isSelected) {
-      handleGroupClick(group);
-    }
-  };
-
-  // const data = [
-  //   {
-  //     groupName: "Group A",
-  //     organizations: [
-  //       {_uri: "org1", legalName: "Organization 1"},
-  //       {_uri: "org2", legalName: "Organization 2"},
-  //     ],
-  //   },
-  //   {
-  //     groupName: "Group B",
-  //     organizations: [
-  //       {_uri: "org3", legalName: "Organization 3"},
-  //       {_uri: "org4", legalName: "Organization 4"},
-  //       // ... other organizations in Group B
-  //     ],
-  //   },
-  //   // ... other groups
-  // ];
-
-  const handleMenuItemClick = (item) => {
-    // If the clicked item is a group, delegate to handleGroupClick
-    if (item.organizations) {
-      handleGroupClick(item);
-    } else {
-      // If the clicked item is an organization, toggle its selection
-      const updatedSelectedOrganizations = selectedOrganizations.includes(item._uri)
-        ? selectedOrganizations.filter((org) => org !== item._uri)
-        : [...selectedOrganizations, item._uri];
-
-      // Update the state with the new selection
-      setSelectedOrganizations(updatedSelectedOrganizations);
-
-      // If the clicked organization is being unselected, check if it belongs to a group
-      if (!updatedSelectedOrganizations.includes(item._uri)) {
-        // Find the group to which the organization belongs
-        const group = organizationsWithGroups.find((grp) => grp.organizations.some((org) => org._uri === item._uri));
-
-        // If found, deselect the group automatically
-        if (group) {
-          handleGroupClick(group);
-        }
+  useEffect(() => {
+    fetchDataTypes('group').then(({groups, success}) => {
+      if (success) {
+        const organizationsWithGroups = groups?.map(groupObject => {
+          return {
+            groupName: groupObject.label,
+            organizations: groupObject.organizations.map(organizationUri => ({
+              _uri: organizationUri,
+              legalName: organizationInterfaces?.[organizationUri]
+            }))
+          };
+        });
+        console.log(organizationsWithGroups);
+        setOrganizationsWithGroups(organizationsWithGroups);
       }
-    }
-  };
-
-  const areAllGroupOrgsSelected = (group) => {
-    // Check if all organizations in the group are selected
-    return group.organizations.every((org) => selectedOrganizations.includes(org._uri));
-  };
+    });
+  }, [organizationInterfaces]);
 
   useEffect(() => {
     fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}` : '').then(({
@@ -337,61 +221,12 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
                 icon={<AddIcon/>}
                 label="Add new Indicator"
                 variant="outlined"/> : null}
-
-            <div>
-              <FormControl>
-                <Select
-                  style={{width: '250px'}}
-                  labelId="organization-label"
-                  id="organization-select"
-                  multiple
-                  value={selectedOrganizations}
-                  onChange={handleChange}
-                  input={<Input/>}
-                  renderValue={(selected) => {
-                    if (selected.filter(org => org !== '').length === 0) {
-                      return "Organization Filter";
-                    }
-                    return `Selected Organizations (${selected.filter(org => org !== '').length})`;
-                  }}
-                >
-                  <MenuItem value={null} disabled>
-                    <em>Select Organizations</em>
-                  </MenuItem>
-                  <MenuItem key={'selectedAll'} onClick={handleSelectAllClick}>
-                    <Checkbox
-                      checked={selectedOrganizations.filter(organization => organization !== '').length === organizationsWithGroups.reduce((acc, group) => acc + group.organizations.length, 0)}/>
-                    Select All
-                  </MenuItem>
-                  {organizationsWithGroups.map((group) => (
-                    <div key={group.groupName}>
-                      <MenuItem onClick={() => handleGroupClick(group)}>
-                        <Checkbox checked={areAllGroupOrgsSelected(group)}/>
-                        {group.groupName}
-                      </MenuItem>
-                      <MenuList style={{paddingLeft: '20px'}}>
-                        {group.organizations.map((organization) => (
-                          <MenuItem key={organization._uri} onClick={() => handleOrgClick(organization)}>
-                            <Checkbox checked={selectedOrganizations.includes(organization._uri)}/>
-                            {organization.legalName}
-                          </MenuItem>
-                        ))}
-                      </MenuList>
-                    </div>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/*Dropdown menu for selected organizations*/}
-              {/*<Menu open={dropDown} anchorEl={anchorEl} onClose={handleMenuClose}>*/}
-              {/*  {selectedOrganizations.map((organization) => (*/}
-              {/*    <MenuItem key={organization} onClick={() => handleMenuItemClick(organization)}>*/}
-              {/*      <Checkbox checked />*/}
-              {/*      {organization}*/}
-              {/*    </MenuItem>*/}
-              {/*  ))}*/}
-              {/*</Menu>*/}
-            </div>
+            <DropdownFilter selectedOrganizations={selectedOrganizations}
+                            areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
+                            handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                            handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                            handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                            handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
           </div>
         }
 
