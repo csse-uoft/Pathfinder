@@ -7,14 +7,29 @@ import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataType, fetchDataTypes} from "../../api/generalAPI";
+import {
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  fetchDataTypesGivenListOfUris
+} from "../../api/generalAPI";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
+import {
+  areAllGroupOrgsSelected,
+  fetchOrganizationsWithGroups, handleChange, handleGroupClick, handleOrgClick,
+  handleSelectAllClick
+} from "../../helpers/helpersForDropdownFilter";
+import DropdownFilter from "../shared/DropdownFilter";
 
 export default function IndicatorReportView({single, multi, organizationUser, groupUser, superUser, organizationUri}) {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const {uri} = useParams();
+  const [organizationInterfaces, setOrganizationInterfaces] = useState({});
+  const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
+  const minSelectedLength = 1; // Set your minimum length here
+  const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
@@ -28,8 +43,29 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
+    fetchDataTypeInterfaces('organization')
+      .then(({interfaces}) => {
+        setOrganizationInterfaces(interfaces);
+      }).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchOrganizationsWithGroups(setOrganizationsWithGroups, organizationInterfaces).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    })
+  }, [organizationInterfaces]);
+
+  useEffect(() => {
     if (state.data?.length) {
-      fetchDataTypes('indicatorReport', encodeURIComponent(organizationUri)).then(({indicatorReports, success}) => {
+      fetchDataTypes('indicatorReport').then(({indicatorReports, success}) => {
         if (success) {
           const indicatorReportDict = {}
           indicatorReports.map(indicatorReport => {
@@ -43,20 +79,24 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
 
   useEffect(() => {
     if (multi) {
-      fetchDataTypes('indicator', encodeURIComponent(organizationUri)).then(res => {
-        if (res.success) {
-          setState(state => ({...state, loading: false, data: res.indicators}));
+      fetchDataTypesGivenListOfUris('indicator', '', selectedOrganizations, 'indicators').then(objectsDict => {
+        console.log(objectsDict);
+        let indicators = [];
+        for (let organization in objectsDict) {
+          indicators = [...indicators, ...objectsDict[organization]];
         }
+        console.log(indicators);
+        setState(state => ({...state, loading: false, data: indicators}));
       }).catch(e => {
         setState(state => ({...state, loading: false}));
         reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if (single) {
+    }  else if (single) {
 
     }
 
-  }, [trigger]);
+  }, [selectedOrganizations]);
 
   const columns = [
     {
@@ -101,20 +141,34 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
   if (state.loading)
     return <Loading message={`Loading indicators...`}/>;
 
+  console.log(state.data)
+
   return (
     <Container>
       <Typography variant={'h2'}> Indicator Report Class View </Typography>
       <EnhancedTableToolbar title={'Indicators'}
                             numSelected={0}
                             customToolbar={
-        multi ?
-                              <Chip
-                                disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                                onClick={() => navigate(`/indicatorReport/${encodeURIComponent(uri)}/new`)}
-                                color="primary"
-                                icon={<AddIcon/>}
-                                label="Add new Indicator Report"
-                                variant="outlined"/> : null}/>
+                              <div style={{display: 'flex', gap: '10px'}}>
+                                {multi ?
+                                  <Chip
+                                    disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                                    onClick={() => navigate(`/indicatorReport/${encodeURIComponent(uri)}/new`)}
+                                    color="primary"
+                                    icon={<AddIcon/>}
+                                    label="Add new Indicator Report"
+                                    variant="outlined"/> : null}
+                                <DropdownFilter selectedOrganizations={selectedOrganizations}
+                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
+                                                handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                                handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                                handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                                handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
+                              </div>
+                                }
+
+                                />
+
       {
         state.data.map(indicator =>
           <DataTable
@@ -130,7 +184,7 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
 
               </>
             )}
-            data={indicator.indicatorReports}
+            data={indicator.indicatorReports || []}
             columns={columns}
             uriField="uri"
           />

@@ -239,9 +239,7 @@ const routes = (
            element={<PrivateRoute element={FileUploadingPage}/>}/>
 
 
-    <Route path={`${process.env.PUBLIC_URL}/organization-indicatorReports`}
-           element={<PrivateRoute element={Organization_indicatorReports}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/indicatorReports/:uri`}
+    <Route path={`${process.env.PUBLIC_URL}/indicatorReports`}
            element={<PrivateRoute element={IndicatorReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicatorReport/new`}
            element={<PrivateRoute element={AddEditIndicatorReport}/>}/>

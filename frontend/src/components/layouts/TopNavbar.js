@@ -147,7 +147,7 @@ function TopNavBar() {
                 <Typography variant="inherit">Stakeholder Outcomes</Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleLink(`/organization-indicatorReports`)}>
+              <MenuItem onClick={handleLink(`/indicatorReports`)}>
                 <ListItemIcon>
                   <SummarizeIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
