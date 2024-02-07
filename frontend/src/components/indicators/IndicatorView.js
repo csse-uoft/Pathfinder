@@ -19,7 +19,7 @@ import {
 } from "../../api/generalAPI";
 import DropdownFilter from "../shared/DropdownFilter";
 import {
-  areAllGroupOrgsSelected,
+  areAllGroupOrgsSelected, fetchOrganizationsWithGroups,
   handleChange,
   handleGroupClick,
   handleOrgClick,
@@ -53,29 +53,19 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
         setOrganizationInterfaces(interfaces);
       }).catch(e => {
       if (e.json)
-        setErrors(e.json);
+        console.error(e.json);
       reportErrorToBackend(e);
-      setLoading(false);
       enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
     });
   }, []);
 
   useEffect(() => {
-    fetchDataTypes('group').then(({groups, success}) => {
-      if (success) {
-        const organizationsWithGroups = groups?.map(groupObject => {
-          return {
-            groupName: groupObject.label,
-            organizations: groupObject.organizations.map(organizationUri => ({
-              _uri: organizationUri,
-              legalName: organizationInterfaces?.[organizationUri]
-            }))
-          };
-        });
-        console.log(organizationsWithGroups);
-        setOrganizationsWithGroups(organizationsWithGroups);
-      }
-    });
+    fetchOrganizationsWithGroups(setOrganizationsWithGroups, organizationInterfaces).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    })
   }, [organizationInterfaces]);
 
   useEffect(() => {

@@ -1,3 +1,5 @@
+import {fetchDataTypeInterfaces, fetchDataTypes} from "../api/generalAPI";
+
 export function handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations) {
 
   return () => {
@@ -73,8 +75,24 @@ export function areAllGroupOrgsSelected(selectedOrganizations) {
     // Check if all organizations in the group are selected
     return group.organizations.every((org) => selectedOrganizations.includes(org._uri));
   }
-
 };
+
+export async function fetchOrganizationsWithGroups(setOrganizationsWithGroups, organizationInterfaces) {
+  const {groups, success} = await fetchDataTypes('group');
+  if (success) {
+    const organizationsWithGroups = groups?.map(groupObject => {
+      return {
+        groupName: groupObject.label,
+        organizations: groupObject.organizations.map(organizationUri => ({
+          _uri: organizationUri,
+          legalName: organizationInterfaces?.[organizationUri]
+        }))
+      };
+    });
+    console.log(organizationsWithGroups);
+    setOrganizationsWithGroups(organizationsWithGroups);
+  }
+}
 
 
 
