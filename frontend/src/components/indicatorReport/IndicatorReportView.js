@@ -8,7 +8,6 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {
-  fetchDataType,
   fetchDataTypeInterfaces,
   fetchDataTypes,
   fetchDataTypesGivenListOfUris

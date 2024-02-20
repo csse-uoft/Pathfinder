@@ -154,7 +154,7 @@ function TopNavBar() {
                 <Typography variant="inherit">Indicator Reports</Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleLink(`/organization-impactReports`)}>
+              <MenuItem onClick={handleLink(`/impactReports`)}>
                 <ListItemIcon>
                   <SummarizeIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>

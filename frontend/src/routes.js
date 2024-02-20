@@ -207,9 +207,9 @@ const routes = (
            element={<PrivateRoute element={StakeholderOutcomes}/>}/>
 
     {/*impactReport*/}
-    <Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}
-           element={<PrivateRoute element={Organization_impactReports}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/impactReports/:uri`} element={<PrivateRoute element={ImpactReports}/>}/>
+    {/*<Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}*/}
+    {/*       element={<PrivateRoute element={Organization_impactReports}/>}/>*/}
+    <Route path={`${process.env.PUBLIC_URL}/impactReports`} element={<PrivateRoute element={ImpactReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/:uri/view`} element={<PrivateRoute element={ImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/new`} element={<PrivateRoute element={AddEditImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/:orgUri/new`}
