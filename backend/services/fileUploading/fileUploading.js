@@ -432,6 +432,7 @@ const fileUploading = async (req, res, next) => {
       if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1]) && !object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1]) ) {
         // check whether the uri belongs to other objects
         // duplicated uri in database
+        // todo: on this part, future changing is needed, the object is being updated, flags can be used to show those items should be changed
         addTrace('        Error: Duplicated URI');
         addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in the sandbox`);
         addMessage(8, 'duplicatedURIInDataBase', {
