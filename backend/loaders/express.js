@@ -32,7 +32,7 @@ const app = express();
 app.set('trust proxy', ['::ffff:172.31.12.233', '172.31.12.233']);
 
 app.use(logger('dev'));
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({extended: false}));
 app.use(cors({
   credentials: true,
