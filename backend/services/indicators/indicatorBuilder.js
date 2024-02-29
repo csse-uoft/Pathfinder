@@ -44,7 +44,10 @@ async function indicatorBuilder(environment, object, organization, error, {
 
     if (!organization.hasIndicators)
       organization.hasIndicators = [];
-    organization.hasIndicators = [...organization.hasIndicators, uri];
+    if (!organization.hasIndicators.includes(uri)) {
+      organization.hasIndicators = [...organization.hasIndicators, uri];
+    }
+
 
     if (environment === 'interface') {
       await organization.save();
@@ -157,7 +160,9 @@ async function indicatorBuilder(environment, object, organization, error, {
           } else {
             if (!outcome.indicators)
               outcome.indicators = [];
-            outcome.indicators.push(uri);
+            if (!outcome.indicators.includes(uri)) {
+              outcome.indicators.push(uri);
+            }
             await outcome.save();
           }
 
@@ -166,7 +171,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     }
 
     // add indicator report, in this case, indicator reports will not be in the form
-    if (environment !== 'interface') {
+    if (environment === 'fileUploading') {
       if (object[getFullPropertyURI(mainModel, 'indicatorReports')]) {
         if (!mainObject.indicatorReports)
           mainObject.indicatorReports = [];

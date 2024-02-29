@@ -58,6 +58,7 @@ const fileUploadingHandler = async (req, res, next) => {
 const fileUploading = async (req, res, next) => {
   try {
     const objectDict = {};
+    const modifiedList = [];
     const impactNormsDict = {};
     const outcomeDict = {};
     const themeDict = {};
@@ -388,7 +389,7 @@ const fileUploading = async (req, res, next) => {
     }
 
 
-    const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
+    const organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
 
     if (!organization) {
       addTrace('        Error: Incorrect organization URI: No such Organization');
@@ -433,14 +434,15 @@ const fileUploading = async (req, res, next) => {
         // check whether the uri belongs to other objects
         // duplicated uri in database
         // todo: on this part, future changing is needed, the object is being updated, flags can be used to show those items should be changed
-        addTrace('        Error: Duplicated URI');
-        addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in the sandbox`);
-        addMessage(8, 'duplicatedURIInDataBase', {
-          uri,
-          type: getPrefixedURI(object['@type'][0])
-        }, {ignoreInstance: true});
-        error += 1
-        continue;
+        // addTrace('        Error: Duplicated URI');
+        // addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in the sandbox`);
+        // addMessage(8, 'duplicatedURIInDataBase', {
+        //   uri,
+        //   type: getPrefixedURI(object['@type'][0])
+        // }, {ignoreInstance: true});
+        // error += 1
+        // continue;
+        modifiedList.push(uri);
       }
 
       objectDict[uri] = object;

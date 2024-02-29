@@ -40,7 +40,10 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
   mainObject.forOrganization = organization._uri;
   if (!organization.hasOutcomes)
     organization.hasOutcomes = [];
-  organization.hasOutcomes = [...organization.hasOutcomes, uri]
+  if (!organization.hasOutcomes.includes(uri)){
+    organization.hasOutcomes = [...organization.hasOutcomes, uri]
+  }
+
 
   if (environment === 'interface') {
     await organization.save();
@@ -149,7 +152,9 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
           } else {
             if (!indicator.forOutcomes)
               indicator.forOutcomes = [];
-            indicator.forOutcomes = [...indicator.forOutcomes, uri]
+            if (!indicator.forOutcomes.includes(uri)) {
+              indicator.forOutcomes = [...indicator.forOutcomes, uri]
+            }
             await indicator.save();
           }
 

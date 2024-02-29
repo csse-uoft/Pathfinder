@@ -36,7 +36,9 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
         throw new Server400Error('For ImpactNorms, Organization is Mandatory');
       if (!organization.impactModels)
         organization.impactModels = [];
-      organization.impactModels = [...organization.impactModels, uri]
+      if (!organization.impactModels.includes(uri)) {
+        organization.impactModels = [...organization.impactModels, uri]
+      }
       await organization.save();
     }
     if (!mainObject.organization && config["cids:forOrganization"]) {

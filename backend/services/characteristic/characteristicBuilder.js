@@ -2,8 +2,7 @@ const {baseLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {assignValue, assignValues} = require("../helpers");
-const {Transaction} = require("graphdb-utils");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function characteristicBuilder(environment, object, error, {characteristicDict}, {
   addMessage,

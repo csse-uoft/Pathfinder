@@ -46,7 +46,9 @@ async function stakeholderOrganizationBuilder(environment, object, organization,
           const impactNorms = await GDBImpactNormsModel.findOne({_uri: impactNormsUri});
           if (!impactNorms.stakeholders)
             impactNorms.stakeholders = []
-          impactNorms.stakeholders = [...impactNorms.stakeholders, uri]
+          if (!impactNorms.stakeholders.includes(uri)) {
+            impactNorms.stakeholders = [...impactNorms.stakeholders, uri];
+          }
           await impactNorms.save();
         }
       }
