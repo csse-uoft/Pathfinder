@@ -22,7 +22,7 @@ const fetchCode = async (req, res) => {
   const code = await GDBCodeModel.findOne({_uri: uri}, {populates: ['iso72Value']});
   if (!code)
     throw Server400Error('No such code');
-  code.iso72Value = code.iso72Value.numericalValue;
+  code.iso72Value = code.iso72Value?.numericalValue;
   return res.status(200).json({success: true, code});
 }
 
@@ -57,21 +57,30 @@ const updateCodeHandler = async (req, res, next) => {
 };
 
 const updateCode = async (req, res) => {
-  const {form} = req.body;
-  const {uri} = req.params;
-  if (!form || !form.definedBy || !form.specification || !form.identifier || !form.name || !form.description || !form.codeValue || !form.iso72Value){
-    throw new Server400Error('Invalid input');
+  try {
+    const {form} = req.body;
+    const {uri} = req.params;
+    await Transaction.beginTransaction();
+    form.uri = uri;
+    if (await codeBuilder('interface', null,
+      null, null, {}, {}, form)) {
+      await Transaction.commit();
+      return res.status(200).json({success: true})
+    }
+    // const code = await GDBCodeModel.findOne({_uri: uri}, {populates: ['iso72Value']});
+    // code.definedBy = form.definedBy;
+    // code.specification = form.specification
+    // code.identifier = form.identifier
+    // code.name = form.name
+    // code.description = form.description
+    // code.codeValue = form.codeValue
+    // code.iso72Value.numericalValue = form.iso72Value
+    // await code.save();
+    // return res.status(200).json({success: true});
+  } catch (e) {
+
   }
-  const code = await GDBCodeModel.findOne({_uri: uri}, {populates: ['iso72Value']});
-  code.definedBy = form.definedBy;
-  code.specification = form.specification
-  code.identifier = form.identifier
-  code.name = form.name
-  code.description = form.description
-  code.codeValue = form.codeValue
-  code.iso72Value.numericalValue = form.iso72Value
-  await code.save();
-  return res.status(200).json({success: true});
+
 }
 
 async function createCode(req, res){

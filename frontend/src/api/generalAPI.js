@@ -1,4 +1,4 @@
-import {getJson, postJson} from "./index";
+import {getJson, postJson, putJson} from "./index";
 import {isValidURL} from "../helpers/validation_helpers";
 
 export async function fetchDataTypes(dataType, extra) {
@@ -33,6 +33,10 @@ export async function fetchDataTypeInterfaces(dataType, extra) {
 
 export async function createDataType(dataType, params, level) {
   return postJson(`/api/${dataType}`, params);
+}
+
+export async function updateDataType(dataType, uri, params) {
+  return putJson(`/api/${dataType}/${uri}`, params);
 }
 
 export async function fetchDataType(dataType, uri) {

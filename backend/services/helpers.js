@@ -164,6 +164,10 @@ function assignTimeInterval(environment, config, object, mainModel, mainObject, 
 
 function assignValue(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error) {
   let ignore;
+  if (mainObject[propertyName]) {
+    // if the mode is updating
+    mainObject[propertyName] = '';
+  }
   if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
     mainObject[propertyName] = environment === 'fileUploading' ? getValue(object, mainModel, propertyName) : form[propertyName];
   }
