@@ -1,5 +1,5 @@
 const {GDBCodeModel} = require("../models/code");
-const {GDBOrganizationModel} = require("../models/organization");
+const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../models/organization");
 const {GDBOutcomeModel} = require("../models/outcome");
 const {GDBIndicatorModel} = require("../models/indicator");
 const {GDBIndicatorReportModel} = require("../models/indicatorReport");
@@ -31,7 +31,7 @@ const name2Model = {
   HowMuchImpact: GDBHowMuchImpactModel,
   ImpactReport: GDBImpactReportModel,
   StakeholderOutcome: GDBStakeholderOutcomeModel,
-  Stakeholder: GDBStakeholderModel,
+  Stakeholder: GDBStakeholderOrganizationModel,
   Theme: GDBThemeModel
 }
 

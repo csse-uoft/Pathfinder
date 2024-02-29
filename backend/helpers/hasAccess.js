@@ -148,6 +148,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'updateCharacteristic':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     // characteristic
     case 'fetchCharacteristics':
       return true;

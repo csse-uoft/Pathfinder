@@ -13,7 +13,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {updateCharacteristic} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces,} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType,} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
@@ -67,6 +67,7 @@ export default function AddEditCharacteristic() {
     stakeholders: {},
     codes: {}
   });
+  console.log(options.stakeholders)
 
 
   useEffect(() => {
@@ -150,7 +151,7 @@ export default function AddEditCharacteristic() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateCharacteristic(encodeURIComponent(uri), {form},).then((res) => {
+      updateDataType('characteristic', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/characteristics');
