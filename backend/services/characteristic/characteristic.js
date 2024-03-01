@@ -69,7 +69,6 @@ const updateCharacteristic = async (req, res) => {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }
-
 };
 
 

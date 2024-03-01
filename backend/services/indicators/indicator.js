@@ -8,6 +8,7 @@ const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {characteristicBuilder} = require("../characteristic/characteristicBuilder");
 
 
 const fetchIndicators = async (req, res) => {
@@ -187,70 +188,12 @@ function cacheListOfOrganizations(organizations, organizationDict) {
 const updateIndicator = async (req, res) => {
   const {form} = req.body;
   const {uri} = req.params;
-  if (!uri)
-    throw new Server400Error('Uri is needed');
-  if (!form || !form.description || !form.name || !form.organization || !form.unitOfMeasure)
-    throw new Server400Error('Invalid input');
-  const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure']});
-  if (!indicator)
-    throw new Server400Error('No such indicator');
-  indicator.name = form.name;
-  indicator.description = form.description;
-  indicator.unitOfMeasure.label = form.unitOfMeasure;
-  if (indicator.forOrganization !== form.organization) {
-
-    indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization});
-    form.organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-    // remove the indicator from previous organization
-    indicator.forOrganization.hasIndicators = indicator.forOrganization.hasIndicators.filter(
-      indicatorUri => indicatorUri !== uri
-    )
-    await indicator.forOrganization.save();
-    // add the indicator to the new organization
-    if (!form.organization.hasIndicators)
-      form.organization.hasIndicators = []
-    form.organization.hasIndicators.push(uri);
-    await form.organization.save();
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await indicatorBuilder('interface', null, null,null, {}, {}, form)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
   }
-  // const organizationDict = {};
-  // // fetch indicator.forOrganizations from database
-  // indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(organizationURI =>
-  //   GDBOrganizationModel.findOne({_uri: organizationURI})
-  // ));
-  // // cache indicator.forOrganizations into dict
-  // cacheListOfOrganizations(indicator.forOrganizations, organizationDict);
-  // // fetch form.organizations from database
-  // form.organizations = await Promise.all(form.organizations.map(organizationUri => {
-  //     // if the organization already in the dict, simply get from dict
-  //     if (organizationDict[organizationUri])
-  //       return organizationDict[organizationUri];
-  //     // otherwise, fetch
-  //     return GDBOrganizationModel.findOne({_uri: organizationUri});
-  //   }
-  // ));
-  // // cache organizations which is not in dict
-  // cacheListOfOrganizations(form.organizations, organizationDict);
-  //
-  //
-  // // remove the indicator from every organizations in indicator.forOrganizations
-  // await Promise.all(indicator.forOrganizations.map(organization => {
-  //   const index = organization.hasIndicators.indexOf(uri);
-  //   organization.hasIndicators.splice(index, 1);
-  //   organization.markModified('hasIndicators');
-  //   return organization.save();
-  // }));
-  //
-  // // add the indicator to every organizations in form.organizations
-  // await Promise.all(form.organizations.map(organization => {
-  //   if (!organization.hasIndicators)
-  //     organization.hasIndicators = [];
-  //   organization.hasIndicators.push(indicator._uri);
-  //   return organization.save();
-  // }));
-  //
-  indicator.forOrganization = form.organization;
-  await indicator.save();
-  return res.status(200).json({success: true});
 
 };
 
@@ -258,8 +201,10 @@ const updateIndicatorHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'updateIndicator'))
       return await updateIndicator(req, res);
-    return res.status(400).json({success: false, message: 'Wrong auth'});
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };

@@ -1,5 +1,5 @@
 const express = require('express');
-const {fetchIndicatorHandler, createIndicatorHandler, updateIndicatorHandler, fetchIndicatorInterfacesHandler} = require("../services/indicators/indicator");
+const {fetchIndicatorHandler, createIndicatorHandler, updateIndicatorHandler} = require("../services/indicators/indicator");
 
 
 

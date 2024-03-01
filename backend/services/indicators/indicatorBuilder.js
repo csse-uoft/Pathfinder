@@ -21,7 +21,7 @@ async function indicatorBuilder(environment, object, organization, error, {
   let hasError = false;
   let ret;
   let impactNorms;
-  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;

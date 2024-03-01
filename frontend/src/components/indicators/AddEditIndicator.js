@@ -11,7 +11,7 @@ import {updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
@@ -60,6 +60,7 @@ export default function AddEditIndicator() {
     access: [],
     datasets: []
   });
+
   const [loading, setLoading] = useState(true);
   const [indicatorReportInterfaces, setIndicatorReportInterfaces] = useState({});
 
@@ -176,10 +177,10 @@ export default function AddEditIndicator() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicator({form}, encodeURIComponent(uri)).then((res) => {
+      updateDataType('indicator',encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/organization-indicators');
+          navigate('/indicators');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
