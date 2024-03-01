@@ -67,7 +67,7 @@ async function codeBuilder(environment, object, organization, error, {codeDict},
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 

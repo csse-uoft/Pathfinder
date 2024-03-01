@@ -87,11 +87,11 @@ async function indicatorBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'threshold', 'cids:hasThreshold', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'threshold', 'cids:hasThreshold', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 

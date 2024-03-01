@@ -199,6 +199,10 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
 }
 
 function assignValues(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error, getListOfValue) {
+  if (mainObject[propertyName]) {
+    // if the mode is updating
+    mainObject[propertyName] = [];
+  }
   if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
     mainObject[propertyName] = environment === 'fileUploading' ? getListOfValue(object, mainModel, propertyName) : form[propertyName];
   }
@@ -224,7 +228,11 @@ function assignValues(environment, config, object, mainModel, mainObject, proper
   return {hasError, error};
 }
 
-function assignMeasure(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, uri, hasError, error, form) {
+async function assignMeasure(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, uri, hasError, error, form) {
+  if (mainObject[propertyName]) {
+    // if the mode is updating, deleting the previous object
+    await GDBMeasureModel.findOneAndDelete({_uri: mainObject[propertyName]});
+  }
   let measureURI = environment === 'interface' ? null : getValue(object, mainModel, propertyName);
   let measureObject = environment === 'interface' ? null : getObjectValue(object, mainModel, propertyName);
 
