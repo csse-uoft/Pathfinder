@@ -6,8 +6,20 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  fetchDataTypesGivenListOfUris
+} from "../../api/generalAPI";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
+import DropdownFilter from "../shared/DropdownFilter";
+import {
+  areAllGroupOrgsSelected,
+  handleChange,
+  handleGroupClick, handleOrgClick,
+  handleSelectAllClick
+} from "../../helpers/helpersForDropdownFilter";
 
 export default function totalReviewPageView({multi, single, organizationUser, groupUser, superUser}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -37,7 +49,13 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
 
   const [stakeholderDict, setStakeholderDict] = useState({});
 
-  const [characteristicDict, setCharacteristicDict] = useState({})
+  const [characteristicDict, setCharacteristicDict] = useState({});
+
+  const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
+
+  const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
+
+  const minSelectedLength = 1; // Set your minimum length here
 
   useEffect(() => {
     if (state.data.length) {
@@ -73,19 +91,22 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
     }
   }, [state]);
 
+
+
   useEffect(() => {
     if (multi) {
-      fetchDataTypes('organization').then(res => {
-        if (res.success)
-          setState(state => ({...state, loading: false, data: res.organizations, editable: res.editable}));
-        // console.log(res.organizations);
-      }).catch(e => {
-        console.log(e)
-        reportErrorToBackend(e);
-        setState(state => ({...state, loading: false}));
-        navigate('/dashboard');
-        enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
-      });
+      // fetchDataTypes('organization').then(res => {
+      //   if (res.success)
+      //     setState(state => ({...state, loading: false, data: res.organizations, editable: res.editable}));
+      //   console.log("HELOL")
+      //   console.log(res.organizations);
+      // }).catch(e => {
+      //   console.log(e)
+      //   reportErrorToBackend(e);
+      //   setState(state => ({...state, loading: false}));
+      //   navigate('/dashboard');
+      //   enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+      // });
     } else if (single) {
       fetchDataType('organization', encodeURIComponent(uri)).then(({success, organization}) => {
         if (success)
@@ -100,6 +121,31 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
     }
 
   }, [trigger]);
+
+  useEffect(() => {
+    if (multi) {
+      fetchDataTypes('organization').then(res => {
+        if (res.success)
+          var filteredOrganization = res.organizations.filter(o => {
+            return selectedOrganizations.includes(o._uri);
+          })
+
+
+
+          setState(state => ({...state, loading: false, data: filteredOrganization, editable: res.editable}));
+        console.log("HELOL")
+        console.log(res.organizations);
+      }).catch(e => {
+        console.log(e)
+        reportErrorToBackend(e);
+        setState(state => ({...state, loading: false}));
+        navigate('/dashboard');
+        enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+      });
+    } else if (single) {
+
+    }
+  }, [selectedOrganizations]);
 
   useEffect(() => {
     fetchDataTypes('outcome', 'all').then(res => {
@@ -232,6 +278,15 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         });
       }
     },
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'indicatorReport'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                                                                             hideDeleteOption
+                                                                             handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
 
   ];
 
@@ -248,6 +303,15 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         return description;
       }
     },
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'theme'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                              hideDeleteOption
+                              handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
   ];
 
   const stakeholderOutcomeColumns = [
@@ -257,6 +321,15 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         return uri;
       }
     },
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'stakeholderOutcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                              hideDeleteOption
+                              handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
   ];
 
   const outcomeColumns = [
@@ -272,6 +345,15 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         return description;
       }
     },
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                              hideDeleteOption
+                              handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
   ];
 
   const stakeholderColumns = [
@@ -293,6 +375,15 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         return stakeholderOutcomes;
       }
     },
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'stakeholder'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                              hideDeleteOption
+                              handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
   ];
 
   if (state.loading)
@@ -301,6 +392,21 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
   return (
     <Container>
       <Typography variant={'h2'}> Total Review Page </Typography>
+      <EnhancedTableToolbar numSelected={0}
+                            title={'Total Review'}
+                            customToolbar={
+                              <DropdownFilter selectedOrganizations={selectedOrganizations}
+                                              areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
+                                              organizationInterfaces
+                                              handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                              handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                              handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                              handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}
+                              />
+                            }
+      />
+
+
       {
         state.data.map(organization => {
           return (
@@ -319,6 +425,8 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
                 </>
               )}
                                     numSelected={0}
+
+
               />
               <DataTable
                 noHeaderBar
