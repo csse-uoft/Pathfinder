@@ -321,8 +321,10 @@ const updateOutcomeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'updateOutcome'))
       return await updateOutcome(req, res);
-    return res.status(400).json({success: false, message: 'Wrong auth'});
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };

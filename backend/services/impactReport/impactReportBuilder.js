@@ -105,7 +105,7 @@ async function impactReportBuilder(environment, object, organization, error, {
       if (environment === 'interface' || (!ignore && !stakeholderOutcomeDict[mainObject.forStakeholderOutcome])) {
         // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
         const stakeholderOutcomeURI = mainObject.forStakeholderOutcome;
-        const stakeholderOutcome = await GDBStakeholderOutcomeModel.findOne({_uri: stakeholderOutcomeDict});
+        const stakeholderOutcome = await GDBStakeholderOutcomeModel.findOne({_uri: stakeholderOutcomeURI});
         if (!stakeholderOutcome) {
           if (environment === 'fileUploading') {
             addTrace('        Error: bad reference');
