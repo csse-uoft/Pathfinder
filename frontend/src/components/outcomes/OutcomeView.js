@@ -1,12 +1,25 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Chip, Container, Typography} from "@mui/material";
+import {Chip, Container} from "@mui/material";
 import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  fetchDataTypesGivenListOfUris
+} from "../../api/generalAPI";
+import DropdownFilter from "../shared/DropdownFilter";
+import {
+  areAllGroupOrgsSelected,
+  handleChange,
+  handleGroupClick,
+  handleOrgClick,
+  handleSelectAllClick
+} from "../../helpers/helpersForDropdownFilter";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 
 export default function OutcomeView({multi, single, organizationUser, groupUser, superUser, organizationUri}) {
@@ -23,33 +36,57 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     editable: false,
   });
   const [trigger, setTrigger] = useState(true);
-
+  const [organizationInterfaces, setOrganizationInterfaces] = useState({});
+  const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
+  const minSelectedLength = 1;
+  const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
   const [indicatorInterfaces, setIndicatorInterfaces] = useState({})
 
   useEffect(() => {
+    fetchDataTypeInterfaces('organization')
+      .then(({interfaces}) => {
+        setOrganizationInterfaces(interfaces);
+      }).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchOrganizationsWithGroups(setOrganizationsWithGroups, organizationInterfaces).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    })
+  }, [organizationInterfaces]);
+
+  
+  useEffect(() => {
     if (multi) {
-      fetchDataTypes('outcome', encodeURIComponent(organizationUri)).then(res => {
-        if (res.success)
-          setState(state => ({...state, loading: false, data: res.outcomes, editable: res.editable}));
+          fetchDataTypesGivenListOfUris('outcome', '', selectedOrganizations, 'outcomes').then(objectsDict => {
+            console.log(objectsDict);
+            let outcomes = [];
+            for (let organization in objectsDict) {
+              outcomes = [...outcomes, ...objectsDict[organization]];
+            }
+            console.log(outcomes);
+            setState(state => ({...state, loading: false, data: outcomes}));
+
+        
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
         navigate('/dashboard');
         enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
       });
-    } else if (single) {
-      fetchDataType('outcome', encodeURIComponent(uri)).then(({success, outcome}) => {
-        if (success)
-          setState(state => ({...state, loading: false, data: [outcome]}));
-      }).catch(e => {
-        reportErrorToBackend(e);
-        setState(state => ({...state, loading: false}));
-        navigate('/dashboard');
-        enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
-      });
+    }  else if (single) {
+
     }
 
-  }, [trigger]);
+  }, [selectedOrganizations]);
 
   useEffect(() => {
     if (single) {
@@ -63,10 +100,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     {
       label: 'Indicator(s) URI',
       body: (obj) => {
-        return <Link
-          colorWithHover
-          to={`/indicator/${encodeURIComponent(obj?._uri || obj)}/view`}
-        > {obj?._uri || obj} </Link>
+        return obj?._uri || obj
       }
     },
     {
@@ -74,43 +108,73 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
       body: (obj) => {
         return obj?.name || indicatorInterfaces[obj]
       }
+    },
+
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+                             hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                             handleDelete={() => showDeleteDialog(_uri)}/>;
+      }
     }
   ];
 
   const themeColumns = [
     {
       label: 'Theme(s) URI',
-      body: (themeUri) => {
-        return <Link
-          colorWithHover
-          to={`/theme/${encodeURIComponent(themeUri)}/view`}
-        > {themeUri}</Link>
+      body: ({_uri}) => {
+        return _uri
       }
     },
+
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'theme'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                              hideDeleteOption
+                              handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
   ];
 
   const stakeholderOutcomeColumns = [
     {
       label: 'Stakeholder Outcome(s) URI',
       body: (uri) => {
-        return <Link
-          colorWithHover
-          to={`/stakeholderOutcome/${encodeURIComponent(uri)}/view`}
-        > {uri}</Link>
+        return uri
       }
     },
+
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'stakeholderOutcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                              hideDeleteOption
+                              handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
   ];
 
   const codeColumns = [
     {
       label: 'Outcome Code(s) URI',
       body: (uri) => {
-        return <Link
-          colorWithHover
-          to={`/code/${encodeURIComponent(uri)}/view`}
-        > {uri}</Link>
+        return uri
       }
     },
+
+    {
+      label: ' ',
+      body: ({_uri}) => {
+        return  <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+                              hideDeleteOption
+                              handleDelete={() => showDeleteDialog(_uri)}/>
+      }
+
+    }
   ];
 
   if (state.loading)
@@ -118,7 +182,6 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
   return (
     <Container>
-      <Typography variant={'h2'}> Outcome Class View </Typography>
       {
         state.data.map(outcome => {
           return (
@@ -139,6 +202,26 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                 </>
               )}
                                     numSelected={0}
+                                    customToolbar={    <div style={{display: 'flex', gap: '10px'}}>
+
+                                      {multi ?           
+                                      <Chip
+                                      disabled={!userContext.isSuperuser && !userContext.editorOfs.length}
+                                      onClick={() => navigate('/outcome/new')}
+                                      color="primary"
+                                      icon={<AddIcon/>}
+                                      label="Add a new Outcome"
+                                      variant="outlined"/>: null}
+
+                                      <DropdownFilter selectedOrganizations={selectedOrganizations}
+                                    areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
+                                    handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                    handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                    handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                    handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
+                                    </div>               
+                                    }              
+                                    
               />
               <DataTable
                 title={'Indicator(s)'}
