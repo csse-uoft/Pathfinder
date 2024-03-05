@@ -126,22 +126,38 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
     if (multi) {
       fetchDataTypes('organization').then(res => {
         if (res.success)
-          var filteredOrganization = res.organizations.filter(o => {
-            return selectedOrganizations.includes(o._uri);
-          })
-
-
-
-          setState(state => ({...state, loading: false, data: filteredOrganization, editable: res.editable}));
-        console.log("HELOL")
-        console.log(res.organizations);
+          setState(state => ({...state, loading: false, data: res.organizations}));
+        console.log(res.organizations)
       }).catch(e => {
-        console.log(e)
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
         navigate('/dashboard');
-        enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
+      // fetchDataTypesGivenListOfUris('organization', '', selectedOrganizations, 'organizations').then(objectsDict => {
+      //   console.log(objectsDict)
+      //     // var filteredOrganization = res.organizations.filter(o => {
+      //     //   return selectedOrganizations.includes(o._uri);
+      //     // })
+      //   let organizations = [];
+      //   for (let organization in objectsDict) {
+      //     organizations = [...organizations, ...objectsDict[organization]];
+      //   }
+      //   setState(state => ({...state, loading: false, data: organizations}));
+      //   // setState(state => ({...state, loading: false, data: objectsDict, editable: res.editable}));
+      //
+      //
+      //
+      //     // setState(state => ({...state, loading: false, data: filteredOrganization, editable: res.editable}));
+      //   console.log("HELOL")
+      //   // console.log(res.organizations);
+      // }).catch(e => {
+      //   console.log(e)
+      //   reportErrorToBackend(e);
+      //   setState(state => ({...state, loading: false}));
+      //   navigate('/dashboard');
+      //   enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+      // });
     } else if (single) {
 
     }
@@ -408,7 +424,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
 
 
       {
-        state.data.map(organization => {
+        state.data.filter(org => selectedOrganizations?.includes(org._uri)).map(organization => {
           return (
             <Container>
               <EnhancedTableToolbar title={(
