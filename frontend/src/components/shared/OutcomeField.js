@@ -90,7 +90,7 @@ export default function OutcomeField({
       fetchDataTypeInterfaces('theme')
         .then(res => {
           if (res.success)
-            options.themes = res.interfaces;
+            setOptions(op => ({...op, themes: res.interfaces}));
         }),
       fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
         if (success) {

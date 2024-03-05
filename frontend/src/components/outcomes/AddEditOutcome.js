@@ -60,6 +60,7 @@ export default function AddEditOutcome() {
     locatedIns: [],
     partOf: null,
   });
+  console.log(form.themes)
   const [loading, setLoading] = useState(true);
 
   const attriConfig = fullLevelConfig.outcome;
