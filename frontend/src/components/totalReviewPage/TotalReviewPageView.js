@@ -15,7 +15,7 @@ import {
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 import DropdownFilter from "../shared/DropdownFilter";
 import {
-  areAllGroupOrgsSelected,
+  areAllGroupOrgsSelected, fetchOrganizationsWithGroups,
   handleChange,
   handleGroupClick, handleOrgClick,
   handleSelectAllClick
@@ -35,7 +35,6 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
     showDeleteDialog: false,
     editable: false,
   });
-  const [trigger, setTrigger] = useState(true);
 
   const [indicatorDict, setIndicatorDict] = useState({});
 
@@ -55,13 +54,36 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
 
   const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
 
+  const [organizationInterfaces, setOrganizationInterfaces] = useState({});
+
   const minSelectedLength = 1; // Set your minimum length here
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('organization')
+      .then(({interfaces}) => {
+        setOrganizationInterfaces(interfaces);
+      }).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchOrganizationsWithGroups(setOrganizationsWithGroups, organizationInterfaces).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    })
+  }, [organizationInterfaces]);
 
   useEffect(() => {
     if (state.data.length) {
       const indicatorReportDict = {};
       Promise.all(state.data.map((organization) => {
-        return fetchDataTypes('indicatorReport', encodeURIComponent(organization._uri)).then(res => {
+        return fetchDataTypes('indicatorReport').then(res => {
           if (res.success) {
             res.indicatorReports.map(indicatorReport => {
               indicatorReportDict[indicatorReport._uri] = indicatorReport;
@@ -93,34 +115,34 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
 
 
 
-  useEffect(() => {
-    if (multi) {
-      // fetchDataTypes('organization').then(res => {
-      //   if (res.success)
-      //     setState(state => ({...state, loading: false, data: res.organizations, editable: res.editable}));
-      //   console.log("HELOL")
-      //   console.log(res.organizations);
-      // }).catch(e => {
-      //   console.log(e)
-      //   reportErrorToBackend(e);
-      //   setState(state => ({...state, loading: false}));
-      //   navigate('/dashboard');
-      //   enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
-      // });
-    } else if (single) {
-      fetchDataType('organization', encodeURIComponent(uri)).then(({success, organization}) => {
-        if (success)
-          setState(state => ({...state, loading: false, data: [organization]}));
-      }).catch(e => {
-        console.log(e)
-        reportErrorToBackend(e);
-        setState(state => ({...state, loading: false}));
-        navigate('/dashboard');
-        enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
-      });
-    }
-
-  }, [trigger]);
+  // useEffect(() => {
+  //   if (multi) {
+  //     // fetchDataTypes('organization').then(res => {
+  //     //   if (res.success)
+  //     //     setState(state => ({...state, loading: false, data: res.organizations, editable: res.editable}));
+  //     //   console.log("HELOL")
+  //     //   console.log(res.organizations);
+  //     // }).catch(e => {
+  //     //   console.log(e)
+  //     //   reportErrorToBackend(e);
+  //     //   setState(state => ({...state, loading: false}));
+  //     //   navigate('/dashboard');
+  //     //   enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+  //     // });
+  //   } else if (single) {
+  //     fetchDataType('organization', encodeURIComponent(uri)).then(({success, organization}) => {
+  //       if (success)
+  //         setState(state => ({...state, loading: false, data: [organization]}));
+  //     }).catch(e => {
+  //       console.log(e)
+  //       reportErrorToBackend(e);
+  //       setState(state => ({...state, loading: false}));
+  //       navigate('/dashboard');
+  //       enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+  //     });
+  //   }
+  //
+  // }, [trigger]);
 
   useEffect(() => {
     if (multi) {
