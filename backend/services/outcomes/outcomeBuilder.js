@@ -20,8 +20,9 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
   let ret;
   const mainModel = GDBOutcomeModel;
   let impactNorms;
-  const mainObject = environment === 'fileUploading' ? outcomeDict[uri] : mainModel({
+  const mainObject = environment === 'fileUploading' ? outcomeDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({
   }, {uri: form.uri});
+
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
@@ -32,7 +33,9 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     impactNorms = await GDBImpactNormsModel.findOne({_uri: form.partOf, organization: organization._uri})
     if (!impactNorms.outcomes)
       impactNorms.outcomes = [];
-    impactNorms.outcomes = [...impactNorms.outcomes, uri]
+    if (!impactNorms.outcomes.includes(uri)) {
+      impactNorms.outcomes = [...impactNorms.outcomes, uri]
+    }
     await impactNorms.save();
     mainObject.partOf = impactNorms._uri
   }
@@ -96,7 +99,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
 
 
     // add indicator to outcome
-    if (((environment === 'fileUploading' && !object[getFullPropertyURI(mainModel, 'indicators')]) || (environment !== 'fileUploading' && (!form.indicators || !form.indicators.length))) && config['cids:hasIndicator']) {
+    if (((environment === 'fileUploading' && !object[getFullPropertyURI(mainModel, 'indicators')]) || (environment === 'interface' && (!form.indicators || !form.indicators.length))) && config['cids:hasIndicator']) {
       if (config['cids:hasIndicator'].rejectFile) {
         if (environment === 'fileUploading') {
           error += 1;
@@ -120,7 +123,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
       for (const indicatorURI of environment === 'fileUploading'? getListOfValue(object, mainModel, 'indicators') : form.indicators) {
         mainObject.indicators = [...mainObject.indicators, indicatorURI]
         // add outcome to indicator
-        if (environment !== 'fileUploading' || !objectDict[indicatorURI]) {
+        if (environment === 'interface' || !objectDict[indicatorURI]) {
           //in this case, the indicator is not in the file, get the indicator from database and add the outcome to it
           const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
           if (!indicator) {

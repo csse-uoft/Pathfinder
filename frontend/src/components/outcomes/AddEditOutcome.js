@@ -8,7 +8,6 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
-import {updateOutcome} from "../../api/outcomeApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
@@ -153,7 +152,7 @@ export default function AddEditOutcome() {
       updateDataType('outcome', encodeURIComponent(uri),{form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
+          // navigate(-1);
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
