@@ -23,7 +23,8 @@ async function indicatorReportBuilder(environment, object, organization, error, 
   let ret;
   let ignore;
   const mainModel = GDBIndicatorReportModel;
-  const mainObject = environment === 'fileUploading' ? indicatorReportDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
+  // todo: await mainModel.findOne({_uri: uri}) || should be also good for fileUploading mode, there is bugs in graphdb utils
+  const mainObject = environment === 'fileUploading' ?  indicatorReportDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
