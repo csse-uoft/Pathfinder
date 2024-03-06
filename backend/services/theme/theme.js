@@ -1,5 +1,8 @@
 const {GDBThemeModel} = require("../../models/theme");
 const {hasAccess} = require("../../helpers/hasAccess");
+const {Transaction} = require("graphdb-utils");
+const {indicatorBuilder} = require("../indicators/indicatorBuilder");
+const {themeBuilder} = require("./themeBuilder");
 
 const createTheme = async (req, res) => {
     const form = req.body;
@@ -28,24 +31,14 @@ const fetchTheme = async (req, res) => {
 };
 
 const updateTheme = async (req, res) => {
+  const {form} = req.body;
   const {uri} = req.params;
-  const form = req.body;
-  if (!uri)
-    return res.status(400).json({success: false, message: 'Uri is needed'});
-  const theme = await GDBThemeModel.findOne({_uri: uri});
-  if (!theme)
-    return res.status(400).json({success: false, message: 'No such theme'});
-  if (!form.name || !form.description)
-    return res.status(400).json({success: false, message: 'Invalid input'});
-  theme.name = form.name;
-  theme.description = form.description;
-  // if (theme.hasIdentifier !== form.identifier) {
-  //   if (await GDBThemeModel.findOne({hasIdentifier: form.identifier}))
-  //     return res.status(400).json({success: false, message: 'Duplicated Identifier'});
-  //   theme.hasIdentifier = form.identifier;
-  // }
-  await theme.save();
-  return res.status(200).json({success: true, message: 'Successfully update the theme'});
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await themeBuilder('interface', null,null, {}, {}, form)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
+  }
 };
 
 const deleteTheme = async (req, res, next) => {
@@ -86,6 +79,8 @@ const updateThemeHandler = async (req, res, next) => {
       return await updateTheme(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };

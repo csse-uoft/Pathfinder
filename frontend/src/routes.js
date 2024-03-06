@@ -168,7 +168,7 @@ const routes = (
     {/*theme*/}
     <Route path={`${process.env.PUBLIC_URL}/themes`} element={<PrivateRoute element={Themes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/theme/new`} element={<PrivateRoute element={AddEditTheme}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
+    <Route path={`${process.env.PUBLIC_URL}/theme/:uri/view`}
            element={<PrivateRoute element={Theme}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditTheme}/>}/>

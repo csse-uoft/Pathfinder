@@ -136,7 +136,7 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'themes'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'theme'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
