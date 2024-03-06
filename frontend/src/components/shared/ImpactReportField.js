@@ -57,21 +57,21 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
   
   const [state, setState] = useState(
     defaultValue ||
-    {});
+    {})
 
   const [options, setOptions] = useState({
-    organizations : {},stakeholderOutcomes: {}, indicators: {}, impactScales: {}, impactDepths: {}, impactDurations: {}, impactRisks: {}
+    organizations : {}, stakeholderOutcomes: {}, indicators: {}, impactScales: {}, impactDepths: {}, impactDurations: {}, impactRisks: {}
   });
 
   const {enqueueSnackbar} = useSnackbar();
 
   const attriConfig = fullLevelConfig.impactReport
 
-  const [loading, setLoading] = useState(true);
-
   const [errors, setErrors] = useState({...importErrors});
 
   const userContext = useContext(UserContext);
+
+  console.log(state)
 
 
   useEffect(() => {
@@ -109,8 +109,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
   useEffect(() => {
     fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
       if (success) {
-        setOptions(op => ({...op, organization: interfaces}));
-        setLoading(false);
+        setOptions(op => ({...op, organizations: interfaces}));
       }
     }).catch(e => {
       if (e.json) {
@@ -119,7 +118,6 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
       reportErrorToBackend(e)
       console.log(e);
       enqueueSnackbar(e.json?.message || 'Error occurs when fetching organizations', {variant: "error"});
-      setLoading(false);
     });
 
   }, []);
@@ -127,7 +125,6 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
   useEffect(() => {
     if (state.organization) {
       fetchDataTypeInterfaces('stakeholderOutcome', encodeURIComponent(state.organization)).then(({interfaces}) => {
-        console.log(interfaces)
         setOptions(ops => ({...ops, stakeholderOutcomes: interfaces}))
       }).catch(e => {
         if (e.json) {
@@ -181,9 +178,9 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
       <Typography variant="h5">
-        {loading && <CircularProgress color="inherit" size={20}/>} {label}
+        {label}
       </Typography>
-      {!loading &&
+      {
         <>
           <Grid container columnSpacing={2}>
             <Grid item xs={12}>
@@ -305,7 +302,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 label="Reported Impact"
                 options={{"positive": "positive", "negative": "negative", "neutral": "neutral"}}
                 onChange={handleChange('reportedImpact')}
-                value={state.reportedImpact}
+                state={state.reportedImpact}
                 disabled={disabled}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'reportedImpact')}
                 onBlur={validateField(state, attriConfig, 'reportedImpact', attribute2Compass['reportedImpact'], setErrors)}
@@ -353,7 +350,7 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
                 sx={{mt: 2}}
                 label={"Impact Risk"}
                 options={options.impactRisks}
-                state={state.impactRisk}
+                value={state.impactRisks}
                 onChange={(e) => {
                   setState(state => ({...state, impactRisks: e.target.value}));
                   const st = state;

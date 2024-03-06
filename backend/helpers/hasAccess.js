@@ -132,6 +132,12 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'updateImpactReport':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+
     case 'fetchImpactReport':
       if (userAccount.isSuperuser)
         return true;
