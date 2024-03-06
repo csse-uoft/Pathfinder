@@ -129,10 +129,10 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
 
     {
       label: ' ',
-      body: ({_uri}) => {
-        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+      body: (indicatorReportUri) => {
+        return <DropdownMenu urlPrefix={'indicatorReport'} objectUri={encodeURIComponent(indicatorReportUri)} hideDeleteOption
                              hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                             handleDelete={() => showDeleteDialog(_uri)}/>;
+                             handleDelete={() => showDeleteDialog(indicatorReportUri)}/>;
       }
     }
   ];

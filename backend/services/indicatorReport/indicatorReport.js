@@ -9,6 +9,7 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {indicatorReportBuilder} = require("./indicatorReportBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
 
 const resource = 'IndicatorReport';
 
@@ -144,7 +145,7 @@ const fetchIndicatorReport = async (req, res) => {
     comment: indicatorReport.comment,
     organization: indicatorReport.forOrganization?._uri,
     indicator: indicatorReport.forIndicator?._uri,
-    numericalValue: indicatorReport.value.numericalValue,
+    numericalValue: indicatorReport.value?.numericalValue,
     startTime: indicatorReport.hasTime?.hasBeginning.date,
     endTime: indicatorReport.hasTime?.hasEnd.date,
     dateCreated: indicatorReport.dateCreated,
@@ -152,17 +153,20 @@ const fetchIndicatorReport = async (req, res) => {
     datasets: indicatorReport.datasets,
     unitOfMeasure: indicatorReport.forIndicator?.unitOfMeasure?.label,
     indicatorName: indicatorReport.forIndicator?.name,
-    organizationName: indicatorReport.forOrganization?.legalName
+    organizationName: indicatorReport.forOrganization?.legalName,
+    hasAccesss: indicatorReport.hasAccesss
   };
   return res.status(200).json({indicatorReport: form, success: true});
 };
 
 const updateIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'update' + resource))
+    if (await hasAccess(req, 'updateIndicatorReport'))
       return await updateIndicatorReport(req, res);
-    return res.status(400).json({success: false, message: 'Wrong auth'});
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };
@@ -170,52 +174,60 @@ const updateIndicatorReportHandler = async (req, res, next) => {
 const updateIndicatorReport = async (req, res) => {
   const {form} = req.body;
   const {uri} = req.params;
-  if (!uri || !form || !form.name || !form.comment || !form.organization || !form.indicator
-    || !form.numericalValue || !form.startTime || !form.endTime || !form.dateCreated)
-    throw new Server400Error('Wrong input');
-
-  const indicatorReport = await GDBIndicatorReportModel.findOne({_uri: uri},
-    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value']});
-  if (!indicatorReport)
-    throw new Server400Error('No such Indicator Report');
-
-  indicatorReport.name = form.name;
-  indicatorReport.comment = form.comment;
-
-  // update organization and indicator
-  if (indicatorReport.forOrganization !== form.organization) {
-    const organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-    if (!organization)
-      throw new Server400Error('No such organization');
-    indicatorReport.forOrganization = organization;
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await indicatorReportBuilder('interface', null, null,null, {}, {}, form)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
   }
-  if (indicatorReport.forIndicator !== form.indicator) {
-    const indicator = await GDBIndicatorModel.findOne({_uri: form.indicator});
-    if (!indicator)
-      throw new Server400Error('No such indicator');
-    // todo: romove the indicator report from previous indicator and add the indicator report to new indicator
-    indicatorReport.forIndicator = await GDBIndicatorModel.findOne({_uri: indicatorReport.forIndicator});
-    const index = indicatorReport.forIndicator.indicatorReports.indexOf(uri);
-    indicatorReport.forIndicator.indicatorReports.splice(index, 1);
-    if (!indicator.indicatorReports)
-      indicator.indicatorReports = [];
-    indicator.indicatorReports.push(uri);
-    await indicatorReport.forIndicator.save();
-    await indicator.save();
-    indicatorReport.forIndicator = indicator;
-
-  }
-
-  if (form.startTime > form.endTime)
-    throw new Server400Error('Start time must be earlier than end time');
-  indicatorReport.hasTime.hasBeginning.date = new Date(form.startTime);
-  indicatorReport.hasTime.hasEnd.date = new Date(form.endTime);
-  indicatorReport.dateCreated = new Date(form.dateCreated);
-
-  indicatorReport.value.numericalValue = form.numericalValue;
-
-  await indicatorReport.save();
-  return res.status(200).json({success: true});
+  // const {form} = req.body;
+  // const {uri} = req.params;
+  // if (!uri || !form || !form.name || !form.comment || !form.organization || !form.indicator
+  //   || !form.numericalValue || !form.startTime || !form.endTime || !form.dateCreated)
+  //   throw new Server400Error('Wrong input');
+  //
+  // const indicatorReport = await GDBIndicatorReportModel.findOne({_uri: uri},
+  //   {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value']});
+  // if (!indicatorReport)
+  //   throw new Server400Error('No such Indicator Report');
+  //
+  // indicatorReport.name = form.name;
+  // indicatorReport.comment = form.comment;
+  //
+  // // update organization and indicator
+  // if (indicatorReport.forOrganization !== form.organization) {
+  //   const organization = await GDBOrganizationModel.findOne({_uri: form.organization});
+  //   if (!organization)
+  //     throw new Server400Error('No such organization');
+  //   indicatorReport.forOrganization = organization;
+  // }
+  // if (indicatorReport.forIndicator !== form.indicator) {
+  //   const indicator = await GDBIndicatorModel.findOne({_uri: form.indicator});
+  //   if (!indicator)
+  //     throw new Server400Error('No such indicator');
+  //   // todo: romove the indicator report from previous indicator and add the indicator report to new indicator
+  //   indicatorReport.forIndicator = await GDBIndicatorModel.findOne({_uri: indicatorReport.forIndicator});
+  //   const index = indicatorReport.forIndicator.indicatorReports.indexOf(uri);
+  //   indicatorReport.forIndicator.indicatorReports.splice(index, 1);
+  //   if (!indicator.indicatorReports)
+  //     indicator.indicatorReports = [];
+  //   indicator.indicatorReports.push(uri);
+  //   await indicatorReport.forIndicator.save();
+  //   await indicator.save();
+  //   indicatorReport.forIndicator = indicator;
+  //
+  // }
+  //
+  // if (form.startTime > form.endTime)
+  //   throw new Server400Error('Start time must be earlier than end time');
+  // indicatorReport.hasTime.hasBeginning.date = new Date(form.startTime);
+  // indicatorReport.hasTime.hasEnd.date = new Date(form.endTime);
+  // indicatorReport.dateCreated = new Date(form.dateCreated);
+  //
+  // indicatorReport.value.numericalValue = form.numericalValue;
+  //
+  // await indicatorReport.save();
+  // return res.status(200).json({success: true});
 };
 
 const fetchIndicatorReportsHandler = async (req, res, next) => {

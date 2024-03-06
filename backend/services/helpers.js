@@ -95,8 +95,12 @@ async function assignImpactNorms(config, object, mainModel, mainObject, property
 
 }
 
-function assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error) {
+async function assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error) {
   let ignore;
+  if (mainObject.hasTime) {
+    // todo: bug, looks like timeInstant will not be removed
+    await GDBDateTimeIntervalModel.findOneAndDelete({_uri: mainObject.hasTime});
+  }
   if (environment === 'fileUploading' && object[getFullURI('time:hasTime')]) {
     mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
       GDBDateTimeIntervalModel({
