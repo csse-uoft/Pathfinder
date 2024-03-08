@@ -1,5 +1,9 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Chip, Container} from "@mui/material";
+import {
+  Chip,
+  Container,
+  Typography,
+} from "@mui/material";
 import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -35,12 +39,11 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     showDeleteDialog: false,
     editable: false,
   });
-  const [trigger, setTrigger] = useState(true);
+  const [outcomeInterfaces, setOutcomeInterfaces] = useState({});
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
-  const minSelectedLength = 1;
+  const minSelectedLength = 1; // Set your minimum length here
   const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
-  const [indicatorInterfaces, setIndicatorInterfaces] = useState({})
 
   useEffect(() => {
     fetchDataTypeInterfaces('organization')
@@ -63,7 +66,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     })
   }, [organizationInterfaces]);
 
-  
+
   useEffect(() => {
     if (multi) {
           fetchDataTypesGivenListOfUris('outcome', '', selectedOrganizations, 'outcomes').then(objectsDict => {
@@ -79,23 +82,33 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
-        navigate('/dashboard');
         enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
       });
     }  else if (single) {
-
+      fetchDataType('outcome', encodeURIComponent(uri)).then(({success, outcome}) => {
+        if (success) {
+          setState(state => ({...state, loading: false, data: [outcome]}));
+        }
+      }).catch(e => {
+        setState(state => ({...state, loading: false}));
+        reportErrorToBackend(e);
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      });
+    
     }
 
   }, [selectedOrganizations]);
 
   useEffect(() => {
-    if (single) {
+    
       fetchDataTypeInterfaces('indicator').then(({interfaces}) => {
         setIndicatorInterfaces(interfaces);
       })
-    }
-  }, [])
+    
+  }, []);
 
+
+  
   const indicatorColumns = [
     {
       label: 'Indicator(s) URI',
@@ -182,8 +195,22 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
   return (
     <Container>
+      <Typography variant={'h2'}> Outcome Class Page </Typography>
+      <EnhancedTableToolbar numSelected={0}
+                            title={'Outcome'}
+                            customToolbar={
+                              <DropdownFilter selectedOrganizations={selectedOrganizations}
+                                              areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
+                                              organizationInterfaces
+                                              handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                              handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                              handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                              handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}
+                              />
+                            }
+      />
       {
-        state.data.map(outcome => {
+        state.data.filter(outcome => selectedOrganizations?.includes(outcome._uri)).map(outcome => {
           return (
             <Container>
               <EnhancedTableToolbar title={(
@@ -201,28 +228,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                   Outcome Description: {outcome.description}
                 </>
               )}
-                                    numSelected={0}
-                                    customToolbar={    <div style={{display: 'flex', gap: '10px'}}>
-
-                                      {multi ?           
-                                      <Chip
-                                      disabled={!userContext.isSuperuser && !userContext.editorOfs.length}
-                                      onClick={() => navigate('/outcome/new')}
-                                      color="primary"
-                                      icon={<AddIcon/>}
-                                      label="Add a new Outcome"
-                                      variant="outlined"/>: null}
-
-                                      <DropdownFilter selectedOrganizations={selectedOrganizations}
-                                    areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
-                                    handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
-                                    handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
-                                    handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
-                                    handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
-                                    </div>               
-                                    }              
+              
+              numSelected={0}           
                                     
-              />
+              /> 
               <DataTable
                 title={'Indicator(s)'}
                 data={outcome.indicators || []}
