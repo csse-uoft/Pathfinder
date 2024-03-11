@@ -174,6 +174,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'updateStakeholderOutcome':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     case 'fetchStakeholderOutcomes':
       if (userAccount.isSuperuser)
         return true;

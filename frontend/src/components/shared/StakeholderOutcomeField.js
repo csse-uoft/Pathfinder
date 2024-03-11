@@ -80,10 +80,10 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
 
   useEffect(() => {
     Promise.all([
-      fetchDataTypeInterfaces('code'), fetchDataTypeInterfaces('organization')
-    ]).then(([codeRet, organizationRet]) => {
+      fetchDataTypeInterfaces('code'), fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('stakeholder')
+    ]).then(([codeRet, organizationRet, stakeholderRet]) => {
 
-      setOptions(op => ({...op, stakeholders: organizationRet.interfaces, codes: codeRet.interfaces, organizations: organizationRet.interfaces}));
+      setOptions(op => ({...op, stakeholders: stakeholderRet.interfaces, codes: codeRet.interfaces, organizations: organizationRet.interfaces}));
       setLoading(false)
     }).catch(([e1, e2, e3]) => {
       const errorJson = e1.json || e2.json || e3.json
@@ -167,7 +167,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
               />
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid item xs={6}>
               <LoadingAutoComplete
                 label="Stakeholder"
                 options={options.stakeholders}
@@ -179,7 +179,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 onBlur={validateField(defaultValue, attriConfig, 'stakeholder', attribute2Compass['stakeholder'], setErrors)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6}>
               <LoadingAutoComplete
                 label="From Perspective Of"
                 options={options.stakeholders}
@@ -207,7 +207,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
 
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <Dropdown
                 label="Indicators"
                 options={options.indicators}
@@ -225,7 +225,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
               />
             </Grid>
 
-            <Grid item xs={3}>
+            <Grid item xs={6}>
               <LoadingAutoComplete
                 label="Intended Impact"
                 options={{'Positive': 'positive', 'negative': 'negative', 'neutral': 'neutral'}}
@@ -237,7 +237,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 onBlur={validateField(defaultValue, attriConfig, 'intendedImpact', attribute2Compass['intendedImpact'], setErrors)}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={6}>
               <Dropdown
                 label="Codes"
                 options={options.codes}
@@ -249,12 +249,11 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                   onChange(st);
                 }
                 }
-                minWidth={188}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
                 onBlur={validateField(defaultValue, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={6}>
               <LoadingAutoComplete
                 label={"Importance"}
                 options={{'high importance': 'high importance', 'moderate': 'moderate'}}

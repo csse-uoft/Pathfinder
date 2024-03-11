@@ -11,7 +11,13 @@ import {updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  updateDataType
+} from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 
@@ -167,10 +173,10 @@ export default function AddEditStakeholderOutcome() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateOutcome({form}, encodeURIComponent(uri)).then((res) => {
+      updateDataType('stakeholderOutcome',encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
+          // navigate(-1);
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
