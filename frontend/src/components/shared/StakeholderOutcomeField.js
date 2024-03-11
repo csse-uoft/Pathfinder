@@ -65,6 +65,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
     defaultValue ||
     {});
 
+  console.log(state)
   const [options, setOptions] = useState({stakeholders: {}, codes: {}, organizations: {}, outcomes: {}, indicators: {}});
   const {enqueueSnackbar} = useSnackbar();
 
@@ -79,10 +80,10 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
 
   useEffect(() => {
     Promise.all([
-      fetchDataTypeInterfaces('stakeholderOutcome'), fetchDataTypeInterfaces('code'), fetchDataTypeInterfaces('organization')
-    ]).then(([stakeholderOutcomeRet, codeRet, organizationRet]) => {
+      fetchDataTypeInterfaces('code'), fetchDataTypeInterfaces('organization')
+    ]).then(([codeRet, organizationRet]) => {
 
-      setOptions(op => ({...op, stakeholders: stakeholderOutcomeRet.interfaces, codes: codeRet.interfaces, organizations: organizationRet.interfaces}));
+      setOptions(op => ({...op, stakeholders: organizationRet.interfaces, codes: codeRet.interfaces, organizations: organizationRet.interfaces}));
       setLoading(false)
     }).catch(([e1, e2, e3]) => {
       const errorJson = e1.json || e2.json || e3.json
@@ -97,14 +98,12 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
   }, [])
 
   useEffect(() => {
-    if (state.organization) {
       Promise.all([
-        fetchDataTypeInterfaces('outcome', encodeURIComponent(state.organization)), fetchDataTypeInterfaces('indicator', encodeURIComponent(state.organization))
+        fetchDataTypeInterfaces('outcome'), fetchDataTypeInterfaces('indicator')
       ]).then(([outcomeRet, indicatorRet]) => {
         setOptions(op => ({...op, outcomes: outcomeRet.interfaces, indicators: indicatorRet.interfaces}));
       });
-    }
-  }, [state.organization])
+  }, [])
 
   useEffect(() => {
     setErrors({...importErrors});
@@ -165,19 +164,6 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 error={!!errors.uri}
                 helperText={errors.uri}
                 onBlur={validateURI(defaultValue, setErrors)}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <LoadingAutoComplete
-                label="Organization"
-                options={options.organizations}
-                state={state.organization}
-                onChange={handleChange('organization')}
-                error={!!errors.organization}
-                helperText={errors.organization}
-                required={isFieldRequired(attriConfig, attribute2Compass, 'organization')}
-                onBlur={validateField(defaultValue, attriConfig, 'organization', attribute2Compass['organization'], setErrors)}
-
               />
             </Grid>
 
