@@ -236,6 +236,7 @@ async function assignMeasure(environment, config, object, mainModel, mainObject,
   if (mainObject[propertyName]) {
     // if the mode is updating, deleting the previous object
     await GDBMeasureModel.findOneAndDelete({_uri: mainObject[propertyName]});
+    delete mainObject[propertyName];
   }
   let measureURI = environment === 'interface' ? null : getValue(object, mainModel, propertyName);
   let measureObject = environment === 'interface' ? null : getObjectValue(object, mainModel, propertyName);
