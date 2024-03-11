@@ -100,6 +100,7 @@ async function assignTimeInterval(environment, config, object, mainModel, mainOb
   if (mainObject.hasTime) {
     // todo: bug, looks like timeInstant will not be removed
     await GDBDateTimeIntervalModel.findOneAndDelete({_uri: mainObject.hasTime});
+    delete mainObject.hasTime;
   }
   if (environment === 'fileUploading' && object[getFullURI('time:hasTime')]) {
     mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
@@ -170,7 +171,7 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
   let ignore;
   if (mainObject[propertyName]) {
     // if the mode is updating
-    mainObject[propertyName] = '';
+    mainObject[propertyName] = null;
   }
   if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
     mainObject[propertyName] = environment === 'fileUploading' ? getValue(object, mainModel, propertyName) : form[propertyName];

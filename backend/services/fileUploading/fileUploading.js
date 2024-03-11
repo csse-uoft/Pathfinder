@@ -450,7 +450,7 @@ const fileUploading = async (req, res, next) => {
       let hasError = false;
       let hasName = null;
       if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
-        outcomeDict[uri] = {_uri: uri};
+        outcomeDict[uri] = await GDBOutcomeModel.findOne({_uri: uri})|| {_uri: uri};
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
       } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
@@ -500,7 +500,7 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        indicatorDict[uri] = {_uri: uri};
+        indicatorDict[uri] = await GDBIndicatorModel.findOne({_uri: uri}) || {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
@@ -514,7 +514,7 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage',
           {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        indicatorReportDict[uri] = {_uri: uri};
+        indicatorReportDict[uri] = await GDBIndicatorReportModel.findOne({_uri: uri})|| {_uri: uri};
 
       } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
@@ -531,21 +531,21 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        codeDict[uri] = {_uri: uri};
+        codeDict[uri] = await GDBCodeModel.findOne({_uri: uri})|| {_uri: uri};
 
       } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        characteristicDict[uri] = {_uri: uri};
+        characteristicDict[uri] = await GDBCharacteristicModel.findOne({_uri: uri}) || {_uri: uri};
 
       } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        stakeholderOutcomeDict[uri] = {_uri: uri};
+        stakeholderOutcomeDict[uri] = await GDBStakeholderOutcomeModel.findOne({_uri: uri}) || {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        impactReportDict[uri] = {_uri: uri};
+        impactReportDict[uri] = await GDBImpactReportModel.findOne({_uri: uri})||  {_uri: uri};
       } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});

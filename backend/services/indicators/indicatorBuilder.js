@@ -21,6 +21,18 @@ async function indicatorBuilder(environment, object, organization, error, {
   let hasError = false;
   let ret;
   let impactNorms;
+  // let mainObject;
+  // if (environment === 'fileUploading') {
+  //   const prevObject = await mainModel.findOne({_uri: uri});
+  //   if (prevObject) {
+  //     mainObject = prevObject;
+  //     indicatorDict[uri] = prevObject;
+  //   } else {
+  //     mainObject = indicatorDict[uri];
+  //   }
+  // } else if (environment === 'interface') {
+  //   mainObject = await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
+  // }
   const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();

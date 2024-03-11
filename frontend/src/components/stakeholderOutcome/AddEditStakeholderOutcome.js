@@ -150,7 +150,6 @@ export default function AddEditStakeholderOutcome() {
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log(form);
       setState(state => ({...state, submitDialog: true}));
     }
   };
