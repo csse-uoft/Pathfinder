@@ -1,11 +1,16 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Chip, Container} from "@mui/material";
+import {
+  Chip,
+  Container,
+  Typography,
+} from "@mui/material";
 import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {UserContext} from "../../context";
 import {
   fetchDataType,
   fetchDataTypeInterfaces,
@@ -14,7 +19,7 @@ import {
 } from "../../api/generalAPI";
 import DropdownFilter from "../shared/DropdownFilter";
 import {
-  areAllGroupOrgsSelected,
+  areAllGroupOrgsSelected, fetchOrganizationsWithGroups,
   handleChange,
   handleGroupClick,
   handleOrgClick,
@@ -27,6 +32,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
   const {uri} = useParams();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
+  const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
@@ -35,12 +41,11 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     showDeleteDialog: false,
     editable: false,
   });
-  const [trigger, setTrigger] = useState(true);
+  const [outcomeInterfaces, setOutcomeInterfaces] = useState({});
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
-  const minSelectedLength = 1;
+  const minSelectedLength = 1; // Set your minimum length here
   const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
-  const [indicatorInterfaces, setIndicatorInterfaces] = useState({})
 
   useEffect(() => {
     fetchDataTypeInterfaces('organization')
@@ -63,7 +68,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     })
   }, [organizationInterfaces]);
 
-  
+
   useEffect(() => {
     if (multi) {
           fetchDataTypesGivenListOfUris('outcome', '', selectedOrganizations, 'outcomes').then(objectsDict => {
@@ -79,23 +84,35 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
-        navigate('/dashboard');
         enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
       });
     }  else if (single) {
-
+      fetchDataType('outcome', encodeURIComponent(uri)).then(({success, outcome}) => {
+        if (success) {
+          setState(state => ({...state, loading: false, data: [outcome]}));
+        }
+      }).catch(e => {
+        setState(state => ({...state, loading: false}));
+        reportErrorToBackend(e);
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      });
+    
     }
 
   }, [selectedOrganizations]);
 
   useEffect(() => {
-    if (single) {
-      fetchDataTypeInterfaces('indicator').then(({interfaces}) => {
-        setIndicatorInterfaces(interfaces);
-      })
-    }
-  }, [])
+      if (single){
+        fetchDataTypeInterfaces('indicator').then(({interfaces}) => {
+          setIndicatorInterfaces(interfaces);
+        })
+      }
 
+    
+  }, []);
+
+
+  
   const indicatorColumns = [
     {
       label: 'Indicator(s) URI',
@@ -169,7 +186,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     {
       label: ' ',
       body: ({_uri}) => {
-        return  <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+        return  <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
                               hideDeleteOption
                               handleDelete={() => showDeleteDialog(_uri)}/>
       }
@@ -180,81 +197,87 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
   if (state.loading)
     return <Loading message={`Loading outcomes...`}/>;
 
-  return (
-    <Container>
-      {
-        state.data.map(outcome => {
-          return (
-            <Container>
-              <EnhancedTableToolbar title={(
-                <>
-                  Outcome Name: {outcome.name}
-                  <br />
-                  Outcome URI:{' '}
-                  <Link
-                    colorWithHover
-                    to={`/outcome/${encodeURIComponent(outcome._uri)}/view`}
-                  >
-                    {outcome._uri}
-                  </Link>
-                  <br />
-                  Outcome Description: {outcome.description}
-                </>
-              )}
-                                    numSelected={0}
-                                    customToolbar={    <div style={{display: 'flex', gap: '10px'}}>
-
-                                      {multi ?           
-                                      <Chip
-                                      disabled={!userContext.isSuperuser && !userContext.editorOfs.length}
-                                      onClick={() => navigate('/outcome/new')}
-                                      color="primary"
-                                      icon={<AddIcon/>}
-                                      label="Add a new Outcome"
-                                      variant="outlined"/>: null}
-
-                                      <DropdownFilter selectedOrganizations={selectedOrganizations}
-                                    areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
-                                    handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
-                                    handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
-                                    handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
-                                    handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
-                                    </div>               
-                                    }              
-                                    
-              />
-              <DataTable
-                title={'Indicator(s)'}
-                data={outcome.indicators || []}
-                columns={indicatorColumns}
-                uriField="uri"
-              />
-              <DataTable
-                title={'Theme(s)'}
-                data={outcome.themes || []}
-                columns={themeColumns}
-                uriField="uri"
-              />
-              <DataTable
-                title={'Stakeholder Outcome(s)'}
-                data={outcome.stakeholderOutcomes || []}
-                columns={stakeholderOutcomeColumns}
-                uriField="uri"
-              />
-              <DataTable
-                title={'Outcome Code(s)'}
-                data={outcome.codes || []}
-                columns={codeColumns}
-                uriField="uri"
-              />
-
-            </Container>
-
-
-          );
-        })
-      }
-
-    </Container>
-  );
-}
+    return (
+      <Container>
+        <Typography variant={'h2'}> Outcome Class Page </Typography>
+        <EnhancedTableToolbar numSelected={0}
+                              title={'Outcome'}
+                              customToolbar={
+                                <div style={{display: 'flex', gap: '10px'}}>
+                                {multi ?
+                                  <Chip
+                                    disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                                    onClick={() => navigate(`/outcome/${encodeURIComponent(uri)}/new`)}
+                                    color="primary"
+                                    icon={<AddIcon/>}
+                                    label="Add new Outcome"
+                                    variant="outlined"/> : null}
+                                <DropdownFilter selectedOrganizations={selectedOrganizations}
+                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
+                                                organizationInterfaces
+                                                handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                                handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                                handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                                handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}
+                                />
+                                </div>
+                              }
+        />
+        {
+          state.data.filter(outcome => selectedOrganizations?.includes(outcome._uri)).map(outcome => {
+            return (
+              <Container>
+                <EnhancedTableToolbar title={(
+                  <>
+                    Outcome Name: {outcome.name}
+                    <br />
+                    Outcome URI:{' '}
+                    <Link
+                      colorWithHover
+                      to={`/outcome/${encodeURIComponent(outcome._uri)}/view`}
+                    >
+                      {outcome._uri}
+                    </Link>
+                    <br />
+                    Outcome Description: {outcome.description}
+                  </>
+                )}
+                
+                numSelected={0}           
+                                      
+                /> 
+                <DataTable
+                  title={'Indicator(s)'}
+                  data={outcome.indicators || []}
+                  columns={indicatorColumns}
+                  uriField="uri"
+                />
+                <DataTable
+                  title={'Theme(s)'}
+                  data={outcome.themes || []}
+                  columns={themeColumns}
+                  uriField="uri"
+                />
+                <DataTable
+                  title={'Stakeholder Outcome(s)'}
+                  data={outcome.stakeholderOutcomes || []}
+                  columns={stakeholderOutcomeColumns}
+                  uriField="uri"
+                />
+                <DataTable
+                  title={'Outcome Code(s)'}
+                  data={outcome.codes || []}
+                  columns={codeColumns}
+                  uriField="uri"
+                />
+  
+              </Container>
+  
+  
+            );
+          })
+        }
+  
+      </Container>
+    );
+  }
