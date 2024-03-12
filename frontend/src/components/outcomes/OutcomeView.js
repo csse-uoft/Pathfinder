@@ -72,12 +72,11 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
   useEffect(() => {
     if (multi) {
           fetchDataTypesGivenListOfUris('outcome', '', selectedOrganizations, 'outcomes').then(objectsDict => {
-            console.log(objectsDict);
             let outcomes = [];
             for (let organization in objectsDict) {
               outcomes = [...outcomes, ...objectsDict[organization]];
             }
-            console.log(outcomes);
+
             setState(state => ({...state, loading: false, data: outcomes}));
 
         
@@ -223,8 +222,9 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                                 </div>
                               }
         />
+
         {
-          state.data.filter(outcome => selectedOrganizations?.includes(outcome._uri)).map(outcome => {
+          state.data.map(outcome => {
             return (
               <Container>
                 <EnhancedTableToolbar title={(
