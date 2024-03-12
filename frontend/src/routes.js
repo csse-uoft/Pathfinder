@@ -184,13 +184,13 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/indicator/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditIndicator}/>}/>
     {/*outcomes*/}
-    <Route path={`${process.env.PUBLIC_URL}/organization-outcomes`}
-           element={<PrivateRoute element={Organization_outcomes}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/outcomes/:uri`} element={<PrivateRoute element={Outcomes}/>}/>
+    {/* <Route path={`${process.env.PUBLIC_URL}/organization-outcomes`}
+           element={<PrivateRoute element={Organization_outcomes}/>}/> */}
+    <Route path={`${process.env.PUBLIC_URL}/outcomes`} element={<PrivateRoute element={Outcomes}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`} element={<PrivateRoute element={Outcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/:orgUri/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`}
-           element={<PrivateRoute element={Outcome}/>}/>
+    
     <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditOutcome}/>}/>
 

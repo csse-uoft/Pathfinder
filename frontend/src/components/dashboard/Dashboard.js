@@ -70,7 +70,7 @@ function Dashboard() {
       <NavButton to={`/indicators`} icon={<Edit/>} key={'organization-indicators'}
                  text="Manage Indicators"/>
 
-      <NavButton to={`/organization-outcomes`} icon={<Edit/>} key={'organization-outcomes'}
+      <NavButton to={`/outcomes`} icon={<Edit/>} key={'organization-outcomes'}
                  text="Manage Outcomes"/>
 
       <NavButton to={`/indicatorReports`} icon={<Edit/>} key={'indicatorReports'}
