@@ -508,7 +508,7 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        counterfactualDict[uri] = {_uri: uri};
+        counterfactualDict[uri] = await GDBCounterfactualModel.findOne({_uri: uri})|| {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);

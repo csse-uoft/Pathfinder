@@ -128,6 +128,21 @@ export default function CounterFactualField({
                 onBlur={validateField(state, attriConfig, 'locatedIns', attribute2Compass['locatedIns'], setErrors)}
               />
             </Grid>
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="URI"
+                type="text"
+                defaultValue={state.uri}
+                onChange={handleChange('uri')}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
+                disabled={disabled}
+                error={!!errors.uri}
+                helperText={errors.uri}
+                onBlur={validateField(state, attriConfig, 'uri', attribute2Compass['uri'], setErrors)}
+              />
+            </Grid>
 
             <Grid item xs={4}>
               <GeneralField

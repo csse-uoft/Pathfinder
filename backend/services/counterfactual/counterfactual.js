@@ -3,6 +3,7 @@ const {Transaction} = require("graphdb-utils");
 const {counterfactualBuilder} = require("./counterfactualBuilder");
 const {Server400Error} = require("../../utils");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
+const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
 
 
 const RESOURCE = 'Counterfactual'
@@ -16,6 +17,30 @@ const fetchCounterfactualHandler = async (req, res, next) => {
     next(e);
   }
 };
+
+const updateCounterfactualHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'updateCounterfactual'))
+      return await updateCounterfactual(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
+    next(e);
+  }
+};
+
+const updateCounterfactual = async (req, res) => {
+  const {form} = req.body;
+  const {uri} = req.params;
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  form.iso72Value = form.value;
+  if (await counterfactualBuilder('interface', null, null,null, {}, {}, form)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
+  }
+}
 
 const fetchCounterfactual = async (req, res) => {
   const {uri} = req.params;
@@ -50,4 +75,4 @@ const createCounterfactualHandler = async (req, res, next) => {
   }
 };
 
-module.exports = {createCounterfactualHandler, fetchCounterfactualHandler}
+module.exports = {createCounterfactualHandler, fetchCounterfactualHandler, updateCounterfactualHandler}
