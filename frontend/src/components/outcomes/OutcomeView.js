@@ -41,7 +41,6 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     showDeleteDialog: false,
     editable: false,
   });
-  const [outcomeInterfaces, setOutcomeInterfaces] = useState({});
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
   const minSelectedLength = 1; // Set your minimum length here
@@ -139,17 +138,17 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
   const themeColumns = [
     {
       label: 'Theme(s) URI',
-      body: ({_uri}) => {
-        return _uri
+      body: (uri) => {
+        return uri
       }
     },
 
     {
       label: ' ',
-      body: ({_uri}) => {
-        return  <DropdownMenu urlPrefix={'theme'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+      body: (uri) => {
+        return  <DropdownMenu urlPrefix={'theme'} objectUri={encodeURIComponent(uri)} hideEditOption={!state.editable}
                               hideDeleteOption
-                              handleDelete={() => showDeleteDialog(_uri)}/>
+                              handleDelete={() => showDeleteDialog(uri)}/>
       }
 
     }
@@ -195,6 +194,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
   if (state.loading)
     return <Loading message={`Loading outcomes...`}/>;
+  console.log(state.data)
 
     return (
       <Container>
