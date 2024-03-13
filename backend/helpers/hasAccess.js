@@ -74,6 +74,14 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'fetchDataset':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'updateDataset':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
     case 'fetchDatasets':
       if (userAccount.isSuperuser)
