@@ -41,6 +41,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     showDeleteDialog: false,
     editable: false,
   });
+  const [indicatorInterfaces, setIndicatorInterfaces] = useState({});
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
   const minSelectedLength = 1; // Set your minimum length here

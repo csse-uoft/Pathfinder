@@ -7,13 +7,11 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createDataType, fetchDataType} from "../../api/generalAPI";
+import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
@@ -46,19 +44,19 @@ export default function AddEditImpactRisk() {
     {}
   );
 
-  const [ops, setOps] = useState({
+  const ops = {
 
-    EvidenceRisk: 'EvidenceRisk',
-    ExternalRisk: 'ExternalRisk',
-    StakeholderParticipationRisk: 'StakeholderParticipationRisk',
-    DropOffRisk: 'DropOffRisk',
-    EfficiencyRisk: 'EfficiencyRisk',
-    ExecutionRisk: 'ExecutionRisk',
-    AlignmentRisk: 'AlignmentRisk',
-    EnduranceRisk: 'EnduranceRisk',
-    UnexpectedImpactRisk: 'UnexpectedImpactRisk'
+    'Evidence Risk': 'Evidence Risk',
+    'External Risk': 'External Risk',
+    'Stakeholder Participation Risk': 'Stakeholder Participation Risk',
+    'Drop Off Risk': 'Drop Off Risk',
+    'Efficiency Risk': 'Efficiency Risk',
+    'Execution Risk': 'Execution Risk',
+    'Alignment Risk': 'Alignment Risk',
+    'Endurance Risk': 'Endurance Risk',
+    'Unexpected Impact Risk': 'Unexpected Impact Risk'
 
-  });
+  }
 
   const [form, setForm] = useState({
     hasIdentifier: '',
@@ -72,6 +70,7 @@ export default function AddEditImpactRisk() {
       fetchDataType('impactRisk', encodeURIComponent(uri)).then(({success, impactRisk}) => {
         if (success) {
           impactRisk.uri = impactRisk._uri;
+          console.log(impactRisk)
           setForm(impactRisk);
           setLoading(false);
         }
@@ -129,11 +128,10 @@ export default function AddEditImpactRisk() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('impactRisk', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {
@@ -194,7 +192,6 @@ export default function AddEditImpactRisk() {
               })
             );
           }}
-
           required={isFieldRequired(attriConfig, attribute2Compass, 'hasIdentifier')}
           onBlur={validateField(form, attriConfig, 'hasIdentifier', attribute2Compass['hasIdentifier'], setErrors)}
         />
