@@ -141,6 +141,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'updateImpactModel':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
 
     // impactReport
