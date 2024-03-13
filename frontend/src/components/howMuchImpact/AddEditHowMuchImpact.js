@@ -14,7 +14,7 @@ import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import Dropdown from "../shared/fields/MultiSelectField";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
@@ -70,7 +70,7 @@ export default function AddEditHowMuchImpact() {
         options["counterfactuals"] = counterfactualRet.interfaces
         options["indicators"] = indicatorRet.interfaces
         setOps(ops => ({...ops, options}));
-        setLoading(false);
+        // setLoading(false);
       }
     ).catch(([e]) => {
       reportErrorToBackend(e);
@@ -85,6 +85,7 @@ export default function AddEditHowMuchImpact() {
       fetchDataType('howMuchImpact', encodeURIComponent(uri)).then(({success, howMuchImpact}) => {
         if (success) {
           howMuchImpact.uri = howMuchImpact._uri;
+          console.log(howMuchImpact)
           setForm(howMuchImpact);
           setLoading(false);
         }
@@ -139,7 +140,7 @@ export default function AddEditHowMuchImpact() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('howMuchImpact', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
@@ -150,7 +151,7 @@ export default function AddEditHowMuchImpact() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating outcome', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating howMuchImpact', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -201,7 +202,7 @@ export default function AddEditHowMuchImpact() {
 
         </Paper>
       ) : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
-        <Typography variant={'h4'}> Impact Model </Typography>
+        <Typography variant={'h4'}> How Much Impact </Typography>
 
         <GeneralField
           key={'uri'}
