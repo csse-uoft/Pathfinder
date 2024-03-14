@@ -1,7 +1,7 @@
 const {createGraphDBModel, Types, DeleteType} = require("graphdb-utils");
 
 const GDBInstant = createGraphDBModel({
-  date: {type: Date, internalKey: 'time:inXSDDate'}
+  date: {type: Date, internalKey: 'time:inXSDDate', onDelete: DeleteType.CASCADE}
 }, {
   rdfTypes: ['time:Instant'], name: 'timeInstant'
 })

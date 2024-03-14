@@ -99,6 +99,9 @@ async function assignTimeInterval(environment, config, object, mainModel, mainOb
   let ignore;
   if (mainObject.hasTime) {
     // todo: bug, looks like timeInstant will not be removed
+    const timeInterval = await GDBDateTimeIntervalModel.findOne({_uri: mainObject.hasTime});
+    await GDBInstant.findOneAndDelete({_uri: timeInterval.hasBeginning});
+    await GDBInstant.findOneAndDelete({_uri: timeInterval.hasEnd});
     await GDBDateTimeIntervalModel.findOneAndDelete({_uri: mainObject.hasTime});
     delete mainObject.hasTime;
   }
