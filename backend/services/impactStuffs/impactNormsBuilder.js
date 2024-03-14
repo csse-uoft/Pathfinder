@@ -15,7 +15,7 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
 }, form) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBImpactNormsModel
-  const mainObject = environment === 'fileUploading' ? impactNormsDict[uri] : await mainModel.findOne({_uri: form?.uri}) || mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? impactNormsDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
 
   if (environment !== 'fileUploading') {
     await mainObject.save();

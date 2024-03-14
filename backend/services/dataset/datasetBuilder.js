@@ -17,7 +17,7 @@ async function datasetBuilder(environment, object, organization, error, {
   const mainModel = GDBDataSetModel;
   let hasError = false;
   let ret;
-  const mainObject = environment === 'fileUploading' ? datasetDict[uri] : await GDBDataSetModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? datasetDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
