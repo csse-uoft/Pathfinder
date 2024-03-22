@@ -15,7 +15,13 @@ import {isFieldRequired, validateField, validateForm, validateURI, validateField
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  updateDataType
+} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
@@ -105,6 +111,8 @@ export default function AddEditImpactModel() {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
       fetchDataType('impactModel', encodeURIComponent(uri)).then(({success, impactNorms}) => {
         if (success) {
+          impactNorms.uri = impactNorms._uri;
+          console.log(impactNorms)
           setForm(impactNorms);
           setLoading(false);
         }
@@ -167,11 +175,11 @@ export default function AddEditImpactModel() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('impactModel', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
+          // navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {

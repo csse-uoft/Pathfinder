@@ -2,8 +2,7 @@ const {baseLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {assignValue, assignValues} = require("../helpers");
-const {Transaction} = require("graphdb-utils");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function characteristicBuilder(environment, object, error, {characteristicDict}, {
   addMessage,
@@ -15,7 +14,7 @@ async function characteristicBuilder(environment, object, error, {characteristic
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCharacteristicModel;
   let ret;
-  const mainObject = environment === 'fileUploading' ? characteristicDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? characteristicDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
     await mainObject.save();
     uri = mainObject._uri;

@@ -4,6 +4,7 @@ const {impactRiskBuilder} = require("./impactRiskBuilder");
 const {Server400Error} = require("../../utils");
 const {GDBImpactRiskModel} = require("../../models/impactRisk");
 const {fetchDatasetInterfacesHandler} = require("../dataset/datasets");
+const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
 
 const resource = 'ImpactRisk'
 
@@ -52,6 +53,29 @@ const fetchImpactRisks = async (req, res) => {
   return res.status(200).json({success: true, impactRisks});
 }
 
+const updateImpactRisk = async (req, res) => {
+  const {form} = req.body;
+  const {uri} = req.params;
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await impactRiskBuilder('interface', (form.hasIdentifier.charAt(0).toLowerCase() + form.hasIdentifier.slice(1)).replace(/\s/g, "")
+    , null, null, null,{}, {}, form)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
+  }
+}
+
+const updateImpactRiskHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'update' + resource))
+      return await updateImpactRisk(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
+    next(e);
+  }
+};
 
 const fetchImpactRiskHandler = async (req, res, next) => {
   try {
@@ -74,4 +98,4 @@ const fetchImpactRisk = async (req, res) => {
 }
 
 
-module.exports = {createImpactRiskHandler, fetchImpactRisksHandler, fetchImpactRiskHandler, fetchImpactRiskInterfacesHandler}
+module.exports = {createImpactRiskHandler, fetchImpactRisksHandler, fetchImpactRiskHandler, fetchImpactRiskInterfacesHandler, updateImpactRiskHandler}

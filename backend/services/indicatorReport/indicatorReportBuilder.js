@@ -23,8 +23,9 @@ async function indicatorReportBuilder(environment, object, organization, error, 
   let ret;
   let ignore;
   const mainModel = GDBIndicatorReportModel;
-  const mainObject = environment === 'fileUploading' ? indicatorReportDict[uri] : mainModel({}, {uri: form.uri});
-  if (environment !== 'fileUploading') {
+  // todo: await mainModel.findOne({_uri: uri}) || should be also good for fileUploading mode, there is bugs in graphdb utils
+  const mainObject = environment === 'fileUploading' ?  indicatorReportDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
+  if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
   }
@@ -33,7 +34,7 @@ async function indicatorReportBuilder(environment, object, organization, error, 
 
   if (mainObject) {
 
-    if (environment !== 'fileUploading') {
+    if (environment === 'interface') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
       // impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
     }
@@ -64,16 +65,22 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, uri, hasError, error, form);
+    if (environment === 'interface') {
+      form.value = form.numericalValue;
+    }
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, uri, hasError, error, form);
     error = ret.error;
     hasError = ret.hasError;
 
-    ret = assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error);
+    ret = await assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error);
     error = ret.error
     hasError = ret.hasError
 
     // add indicator to the indicatorReport
 
+    if (environment === 'interface') {
+      form.forIndicator = form.indicator
+    }
     ret = assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
     error = ret.error;
     hasError = ret.hasError;

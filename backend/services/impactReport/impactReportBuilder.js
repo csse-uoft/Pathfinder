@@ -3,7 +3,7 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {assignValue, getFullObjectURI, assignValues} = require("../helpers");
+const {assignValue, getFullObjectURI, assignValues, assignTimeInterval} = require("../helpers");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
@@ -27,7 +27,7 @@ async function impactReportBuilder(environment, object, organization, error, {
   let ret;
   let ignore;
   const mainModel = GDBImpactReportModel;
-  const mainObject = environment === 'fileUploading' ? impactReportDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? impactReportDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
     await mainObject.save();
     uri = mainObject._uri;
@@ -97,6 +97,10 @@ async function impactReportBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
+    ret = await assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error);
+    error = ret.error
+    hasError = ret.hasError
+
     ret = assignValue(environment, config, object, mainModel, mainObject, 'forStakeholderOutcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
@@ -105,7 +109,7 @@ async function impactReportBuilder(environment, object, organization, error, {
       if (environment === 'interface' || (!ignore && !stakeholderOutcomeDict[mainObject.forStakeholderOutcome])) {
         // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
         const stakeholderOutcomeURI = mainObject.forStakeholderOutcome;
-        const stakeholderOutcome = await GDBStakeholderOutcomeModel.findOne({_uri: stakeholderOutcomeDict});
+        const stakeholderOutcome = await GDBStakeholderOutcomeModel.findOne({_uri: stakeholderOutcomeURI});
         if (!stakeholderOutcome) {
           if (environment === 'fileUploading') {
             addTrace('        Error: bad reference');
@@ -134,47 +138,49 @@ async function impactReportBuilder(environment, object, organization, error, {
           if (!stakeholderOutcome.impactReports) {
             stakeholderOutcome.impactReports = [];
           }
-          stakeholderOutcome.impactReports = [...stakeholderOutcome.impactReports, uri];
+          if (!stakeholderOutcome.impactReports.includes(uri)) {
+            stakeholderOutcome.impactReports = [...stakeholderOutcome.impactReports, uri];
+          }
           await stakeholderOutcome.save();
         }
       }
     }
 
-    if (environment === 'fileUploading' && object[getFullURI("time:hasTime")]) {
-      mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
-        GDBDateTimeIntervalModel({
-          hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
-              GDBDateTimeIntervalModel, 'hasBeginning') ||
-            GDBInstant({
-              date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
-            }, {
-              uri: getFullObjectURI(
-                object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                  [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
-              )
-            }),
-
-          hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
-              GDBDateTimeIntervalModel, 'hasEnd') ||
-            GDBInstant({
-              date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
-            }, {
-              uri: getFullObjectURI(
-                object[getFullPropertyURI(mainModel, 'hasTime')][0]
-                  [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
-              )
-            })
-        }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])});
-    }
+    // if (environment === 'fileUploading' && object[getFullURI("time:hasTime")]) {
+    //   mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
+    //     GDBDateTimeIntervalModel({
+    //       hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //           GDBDateTimeIntervalModel, 'hasBeginning') ||
+    //         GDBInstant({
+    //           date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+    //         }, {
+    //           uri: getFullObjectURI(
+    //             object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+    //           )
+    //         }),
+    //
+    //       hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //           GDBDateTimeIntervalModel, 'hasEnd') ||
+    //         GDBInstant({
+    //           date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+    //         }, {
+    //           uri: getFullObjectURI(
+    //             object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+    //           )
+    //         })
+    //     }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])});
+    // }
 
     if (environment === 'interface') {
-      if (form.startTime && form.endTime)
-        mainObject.hasTime = GDBDateTimeIntervalModel({
-          hasBeginning: {date: new Date(form.startTime)},
-          hasEnd: {date: new Date(form.endTime)}
-        });
+      // if (form.startTime && form.endTime)
+      //   mainObject.hasTime = GDBDateTimeIntervalModel({
+      //     hasBeginning: {date: new Date(form.startTime)},
+      //     hasEnd: {date: new Date(form.endTime)}
+      //   });
       await mainObject.save();
       return true;
     }

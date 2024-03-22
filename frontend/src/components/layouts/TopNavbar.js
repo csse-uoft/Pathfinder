@@ -126,7 +126,7 @@ function TopNavBar() {
                   <Typography variant="inherit">Users</Typography>
                 </MenuItem>:<div/>}
 
-              <MenuItem onClick={handleLink(`/organization-indicators`)}>
+              <MenuItem onClick={handleLink(`/indicators`)}>
                 <ListItemIcon>
                   <DragIndicatorIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
@@ -147,14 +147,14 @@ function TopNavBar() {
                 <Typography variant="inherit">Stakeholder Outcomes</Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleLink(`/organization-indicatorReports`)}>
+              <MenuItem onClick={handleLink(`/indicatorReports`)}>
                 <ListItemIcon>
                   <SummarizeIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
                 <Typography variant="inherit">Indicator Reports</Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleLink(`/organization-impactReports`)}>
+              <MenuItem onClick={handleLink(`/impactReports`)}>
                 <ListItemIcon>
                   <SummarizeIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>

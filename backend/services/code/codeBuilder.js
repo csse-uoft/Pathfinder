@@ -14,7 +14,7 @@ async function codeBuilder(environment, object, organization, error, {codeDict},
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCodeModel;
   let ret;
-  const mainObject = environment === 'fileUploading' ? codeDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? codeDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
     await mainObject.save();
     uri = mainObject._uri;
@@ -67,7 +67,7 @@ async function codeBuilder(environment, object, organization, error, {codeDict},
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 

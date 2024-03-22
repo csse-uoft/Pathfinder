@@ -10,7 +10,7 @@ import {UserContext} from "../../context";
 import CounterFactualField from "../shared/CounterFactualField";
 import {updateOutcome} from "../../api/outcomeApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType} from "../../api/generalAPI";
+import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {validateForm} from "../../helpers";
 
@@ -60,6 +60,7 @@ export default function AddEditCounterfactual() {
     description: '',
     locatedIns: [],
     value:'',
+    uri: ''
   });
   const [loading, setLoading] = useState(true);
 
@@ -120,10 +121,10 @@ export default function AddEditCounterfactual() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateOutcome({form}, encodeURIComponent(uri)).then((res) => {
+      updateDataType('counterfactual', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
+          // navigate(-1);
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {

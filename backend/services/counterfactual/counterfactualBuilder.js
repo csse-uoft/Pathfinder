@@ -17,7 +17,7 @@ async function counterfactualBuilder(environment, object, organization, error, {
   const mainModel = GDBCounterfactualModel;
   let hasError = false;
   let ret;
-  const mainObject = environment === 'fileUploading' ? counterfactualDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? counterfactualDict[uri] : await mainModel.findOne({_uri: uri})|| mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
@@ -28,16 +28,15 @@ async function counterfactualBuilder(environment, object, organization, error, {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
 
-
     ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'sch:description', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error)
+    ret = await assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error)
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 

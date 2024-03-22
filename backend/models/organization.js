@@ -1,7 +1,6 @@
 const {createGraphDBModel, Types, DeleteType} = require("graphdb-utils");
 const {GDBUserAccountModel} = require("./userAccount");
 const {GDBIndicatorModel} = require("./indicator");
-const {GDBOutcomeModel} = require("./outcome");
 const {GDBPhoneNumberModel} = require("./phoneNumber");
 
 const GDBOrganizationIdModel = createGraphDBModel({
@@ -23,7 +22,7 @@ const GDBOrganizationModel = createGraphDBModel({
   legalName:{type: String, internalKey:'tove_org:hasLegalName'},
   hasIds: {type: [GDBOrganizationIdModel], internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE},
   hasIndicators: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
-  hasOutcomes: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
+  hasOutcomes: {type: [() => require("./outcome").GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
   email: {type: String, internalKey: ':hasEmail'},
@@ -44,7 +43,7 @@ const GDBStakeholderOrganizationModel = createGraphDBModel({
   legalName:{type: String, internalKey:'tove_org:hasLegalName'},
   hasIds: {type: [GDBOrganizationIdModel], internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE},
   hasIndicators: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
-  hasOutcomes: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
+  hasOutcomes: {type: [require("./outcome").GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
   email: {type: String, internalKey: ':hasEmail'},

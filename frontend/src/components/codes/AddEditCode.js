@@ -12,7 +12,13 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  updateDataType
+} from "../../api/generalAPI";
 import {  baseLevelConfig, fullLevelConfig } from "../../helpers/attributeConfig"
 import {isFieldRequired, validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
@@ -150,7 +156,7 @@ export default function AddEditCode() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateCode(encodeURIComponent(uri), {form},).then((res) => {
+      updateDataType('code', encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');

@@ -1,4 +1,4 @@
-const {createGraphDBModel, Types} = require("graphdb-utils");
+const {createGraphDBModel, Types, DeleteType} = require("graphdb-utils");
 const {GDBOrganizationModel} = require("./organization");
 const {GDBStakeholderModel} = require("./stakeholder");
 const {GDBOutcomeModel} = require("./outcome");
@@ -24,7 +24,8 @@ const GDBImpactNormsModel = createGraphDBModel({
   outcomes: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome'},
   stakeholderOutcomes: {type: [require('./stakeholderOutcome').GDBStakeholderOutcomeModel], internalKey: 'cids:hasStakeholderOutcome'},
   indicators: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
-  impactReports: {type: [require('./impactReport').GDBImpactReportModel], internalKey: 'cids:hasImpactReport'},
+  impactReports: {type: [() => require('./impactReport').GDBImpactReportModel], internalKey: 'cids:hasImpactReport', onDelete: DeleteType.CASCADE
+  },
   indicatorReports: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'}
 }, {
   rdfTypes: ['cids:ImpactModel', "cids:ImpactNorms"], name: 'impactNorms'

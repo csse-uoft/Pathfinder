@@ -11,7 +11,13 @@ import ImpactReportField from "../shared/ImpactReportField";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  updateDataType
+} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {validateForm} from "../../helpers";
 
@@ -68,6 +74,8 @@ export default function AddEditImpactReport() {
   });
   const [loading, setLoading] = useState(true);
 
+  console.log(form.reportedImpact)
+
   useEffect(() => {
     Promise.all([fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('howMuchImpact'), fetchDataTypes('impactRisk')]).then(
       ([organizationRet, howMuchImpactRet, {impactRisks}]) => {
@@ -76,7 +84,6 @@ export default function AddEditImpactReport() {
           impactRiskInterfaces[impactRisk._uri] = impactRisk.hasIdentifier
         })
         setOps(ops => ({...ops, organization: organizationRet.interfaces, howMuchImpact: howMuchImpactRet.interfaces, impactRisk: impactRiskInterfaces}));
-        setLoading(false);
       }
     ).catch(([e]) => {
       reportErrorToBackend(e);
@@ -92,7 +99,9 @@ export default function AddEditImpactReport() {
         if (success) {
           impactReport.uri = impactReport._uri;
           impactReport.organization = impactReport.forOrganization;
-
+          impactReport.forStakeholderOutcome = impactReport.forStakeholderOutcome?._uri || impactReport.forStakeholderOutcome
+          impactReport.startTime = impactReport.hasTime?.hasBeginning?.date;
+          impactReport.endTime = impactReport.hasTime?.hasEnd?.date;
           setForm(impactReport);
           setLoading(false);
         }
@@ -165,11 +174,11 @@ export default function AddEditImpactReport() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('impactReport', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
+          // navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {

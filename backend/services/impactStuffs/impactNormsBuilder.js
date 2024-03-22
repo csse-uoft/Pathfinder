@@ -15,7 +15,7 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
 }, form) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBImpactNormsModel
-  const mainObject = environment === 'fileUploading' ? impactNormsDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? impactNormsDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
 
   if (environment !== 'fileUploading') {
     await mainObject.save();
@@ -36,7 +36,9 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
         throw new Server400Error('For ImpactNorms, Organization is Mandatory');
       if (!organization.impactModels)
         organization.impactModels = [];
-      organization.impactModels = [...organization.impactModels, uri]
+      if (!organization.impactModels.includes(uri)) {
+        organization.impactModels = [...organization.impactModels, uri]
+      }
       await organization.save();
     }
     if (!mainObject.organization && config["cids:forOrganization"]) {

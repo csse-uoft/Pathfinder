@@ -4,7 +4,6 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
-const {GDBOrganizationModel} = require("../../models/organization");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function stakeholderOutcomeBuilder(environment, object, organization, error, {
@@ -12,19 +11,19 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
   stakeholderOutcomeDict,
   objectDict
 }, {
-                                        addMessage,
-                                        addTrace,
-                                        getFullPropertyURI,
-                                        getValue,
-                                        getListOfValue
-                                      }, form) {
+                                           addMessage,
+                                           addTrace,
+                                           getFullPropertyURI,
+                                           getValue,
+                                           getListOfValue
+                                         }, form) {
 
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
   let ret;
   let ignore;
   const mainModel = GDBStakeholderOutcomeModel;
-  const mainObject = environment === 'fileUploading' ? stakeholderOutcomeDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? stakeholderOutcomeDict[uri] : await mainModel.findOne({_uri: uri}) || mainModel({}, {uri: form.uri});
 
   if (environment !== 'fileUploading') {
     await mainObject.save();
@@ -34,8 +33,8 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
 
 
   if (mainObject) {
-    if (environment !== 'fileUploading') {
-      organization = await GDBOrganizationModel.findOne({_uri: form.organization});
+    if (environment === 'interface') {
+      // organization = await GDBOrganizationModel.findOne({_uri: form.organization});
       // impactNorms = await GDBImpactNormsModel.findOne({organization: organization._uri}) || GDBImpactNormsModel({organization});
     }
 
@@ -92,11 +91,11 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
     hasError = ret.hasError;
     error = ret.error;
 
-    if (mainObject.outcome && (environment === 'interface' || !outcomeDict[mainObject.outcome])){
+    if (mainObject.outcome && (environment === 'interface' || !outcomeDict[mainObject.outcome])) {
       const outcomeURI = mainObject.outcome;
       const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
       if (!outcome) {
-        if (environment === 'fileUploading'){
+        if (environment === 'fileUploading') {
           addTrace('        Error: bad reference');
           addTrace(`            Outcome ${outcomeURI} appears neither in the file nor in the sandbox`);
           addMessage(8, 'badReference',
@@ -106,22 +105,25 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
         } else if (environment === 'interface') {
           throw new Server400Error('No such Outcome');
         }
-      } else if (outcome.forOrganization !== organization._uri) {
-        if (environment === 'fileUploading') {
-          addTrace('        Error:');
-          addTrace(`            Outcome ${outcomeURI} doesn't belong to this organization`);
-          addMessage(8, 'subjectDoesNotBelong',
-            {uri, type: 'Outcome', subjectURI: outcomeURI}, {rejectFile: true});
-          error += 1;
-          hasError = true;
-        } else if (environment === 'interface') {
-          throw new Server400Error('The indicator is not under the organization');
-        }
-      } else {
+      } // else if (outcome.forOrganization !== organization._uri) {
+        // if (environment === 'fileUploading') {
+        //   addTrace('        Error:');
+        //   addTrace(`            Outcome ${outcomeURI} doesn't belong to this organization`);
+        //   addMessage(8, 'subjectDoesNotBelong',
+        //     {uri, type: 'Outcome', subjectURI: outcomeURI}, {rejectFile: true});
+        //   error += 1;
+        //   hasError = true;
+        // } else if (environment === 'interface') {
+        //   throw new Server400Error('The indicator is not under the organization');
+        // }
+      // }
+      else {
         if (!outcome.stakeholderOutcomes) {
           outcome.stakeholderOutcomes = [];
         }
-        outcome.stakeholderOutcomes = [...outcome.stakeholderOutcomes, uri]
+        if (!outcome.stakeholderOutcomes.includes(uri)) {
+          outcome.stakeholderOutcomes = [...outcome.stakeholderOutcomes, uri];
+        }
         await outcome.save();
       }
     }
@@ -143,4 +145,4 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
 
 }
 
-module.exports = {stakeholderOutcomeBuilder}
+module.exports = {stakeholderOutcomeBuilder};

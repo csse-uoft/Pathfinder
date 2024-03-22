@@ -168,14 +168,14 @@ const routes = (
     {/*theme*/}
     <Route path={`${process.env.PUBLIC_URL}/themes`} element={<PrivateRoute element={Themes}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/theme/new`} element={<PrivateRoute element={AddEditTheme}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
+    <Route path={`${process.env.PUBLIC_URL}/theme/:uri/view`}
            element={<PrivateRoute element={Theme}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditTheme}/>}/>
     {/*indicators*/}
-    <Route path={`${process.env.PUBLIC_URL}/organization-indicators`}
-           element={<PrivateRoute element={Organization_indicators}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/indicators/:uri`} element={<PrivateRoute element={Indicators}/>}/>
+    {/*<Route path={`${process.env.PUBLIC_URL}/organization-indicators`}*/}
+    {/*       element={<PrivateRoute element={Organization_indicators}/>}/>*/}
+    <Route path={`${process.env.PUBLIC_URL}/indicators`} element={<PrivateRoute element={Indicators}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicator/:orgUri/new`}
            element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicator/new`} element={<PrivateRoute element={AddEditIndicator}/>}/>
@@ -184,13 +184,13 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/indicator/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditIndicator}/>}/>
     {/*outcomes*/}
-    <Route path={`${process.env.PUBLIC_URL}/organization-outcomes`}
-           element={<PrivateRoute element={Organization_outcomes}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/outcomes/:uri`} element={<PrivateRoute element={Outcomes}/>}/>
+    {/* <Route path={`${process.env.PUBLIC_URL}/organization-outcomes`}
+           element={<PrivateRoute element={Organization_outcomes}/>}/> */}
+    <Route path={`${process.env.PUBLIC_URL}/outcomes`} element={<PrivateRoute element={Outcomes}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`} element={<PrivateRoute element={Outcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/:orgUri/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`}
-           element={<PrivateRoute element={Outcome}/>}/>
+    
     <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditOutcome}/>}/>
 
@@ -207,9 +207,9 @@ const routes = (
            element={<PrivateRoute element={StakeholderOutcomes}/>}/>
 
     {/*impactReport*/}
-    <Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}
-           element={<PrivateRoute element={Organization_impactReports}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/impactReports/:uri`} element={<PrivateRoute element={ImpactReports}/>}/>
+    {/*<Route path={`${process.env.PUBLIC_URL}/organization-impactReports`}*/}
+    {/*       element={<PrivateRoute element={Organization_impactReports}/>}/>*/}
+    <Route path={`${process.env.PUBLIC_URL}/impactReports`} element={<PrivateRoute element={ImpactReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/:uri/view`} element={<PrivateRoute element={ImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/new`} element={<PrivateRoute element={AddEditImpactReport}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/impactReport/:orgUri/new`}
@@ -239,9 +239,7 @@ const routes = (
            element={<PrivateRoute element={FileUploadingPage}/>}/>
 
 
-    <Route path={`${process.env.PUBLIC_URL}/organization-indicatorReports`}
-           element={<PrivateRoute element={Organization_indicatorReports}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/indicatorReports/:uri`}
+    <Route path={`${process.env.PUBLIC_URL}/indicatorReports`}
            element={<PrivateRoute element={IndicatorReports}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/indicatorReport/new`}
            element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
