@@ -278,6 +278,11 @@ async function hasAccess(req, operationType) {
         return true;
 
       break;
+
+    case 'deleteOrganization':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'fetchOrganizations':
       // every users should be able to fetch organizations,
       // however, the ret they got are different depends on their role

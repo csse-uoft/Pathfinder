@@ -1,4 +1,4 @@
-const {createGraphDBModel, Types} = require("graphdb-utils");
+const {createGraphDBModel, Types, DeleteType} = require("graphdb-utils");
 const {GDBDateTimeIntervalModel} = require("./time");
 
 const GDBImpactReportModel = createGraphDBModel({
@@ -9,7 +9,7 @@ const GDBImpactReportModel = createGraphDBModel({
   impactScale: {type: () => require('./howMuchImpact').GDBImpactScaleModel, internalKey: 'cids:hasImpactScale'},
   impactDepth: {type: () => require('./howMuchImpact').GDBImpactDepthModel, internalKey: 'cids:hasImpactDepth'},
   impactDuration: {type: () => require('./howMuchImpact').GDBImpactDurationModel, internalKey: 'cids:hasImpactDuration'},
-  hasTime: {type: GDBDateTimeIntervalModel, internalKey: 'time:hasTime'},
+  hasTime: {type: GDBDateTimeIntervalModel, internalKey: 'time:hasTime', onDelete: DeleteType.CASCADE},
   reportedImpact: {type: String, internalKey: 'cids:hasReportedImpact'},
   expectation: {type: String, internalKey: 'cids:hasExpectation'},
   impactRisks: {type: [() => require('./impactRisk').GDBImpactRiskModel], internalKey: 'cids:hasImpactRisk'}
