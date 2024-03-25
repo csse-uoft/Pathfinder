@@ -262,16 +262,16 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                       <TableRow>
                         <TableCell sx={style} variant="head">Outcome
                           URI</TableCell>
-                        <TableCell>
+                        <TableCell sx={{display: 'flex', justifyContent: 'space-between'}}>
                         <Link
                             colorWithHover
                             to={`/outcome/${encodeURIComponent(outcome._uri)}/view`}
                         >{outcome._uri}
                         
                         </Link>
-                        <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
-                        hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
-                        
+                        <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(outcome._uri)} hideDeleteOption
+                        hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(outcome._uri)}/>
+
                         </TableCell>
 
 
