@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {
   Chip,
-  Container,
+  Container, Paper, Table, TableContainer,
   Typography,
 } from "@mui/material";
 import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
@@ -26,6 +26,9 @@ import {
   handleSelectAllClick
 } from "../../helpers/helpersForDropdownFilter";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+
 
 export default function OutcomeView({multi, single, organizationUser, groupUser, superUser, organizationUri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -197,11 +200,13 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     return <Loading message={`Loading outcomes...`}/>;
   console.log(state.data)
 
+  const style = {backgroundColor: 'rgb(39, 44, 52)', color: 'white', width: '9rem'}
+
     return (
       <Container>
-        <Typography variant={'h2'}> Outcome Class Page </Typography>
+        <Typography variant={'h2'}> Outcomes </Typography>
         <EnhancedTableToolbar numSelected={0}
-                              title={'Outcome'}
+                              title={''}
                               customToolbar={
                                 <div style={{display: 'flex', gap: '10px'}}>
                                 {multi ?
@@ -227,54 +232,92 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
         {
           state.data.map(outcome => {
             return (
-              <Container>
-                <EnhancedTableToolbar title={(
-                  <>
-                    Outcome Name: {outcome.name}
-                    <br />
-                    Outcome URI:{' '}
-                    <Link
-                      colorWithHover
-                      to={`/outcome/${encodeURIComponent(outcome._uri)}/view`}
-                    >
-                      {outcome._uri}
-                    </Link>
-                    <br />
-                    Outcome Description: {outcome.description}
-                  </>
-                )}
-                
-                numSelected={0}           
-                                      
-                /> 
-                <DataTable
-                  title={'Indicator(s)'}
-                  data={outcome.indicators || []}
-                  columns={indicatorColumns}
-                  uriField="uri"
-                />
-                <DataTable
-                  title={'Theme(s)'}
-                  data={outcome.themes || []}
-                  columns={themeColumns}
-                  uriField="uri"
-                />
-                <DataTable
-                  title={'Stakeholder Outcome(s)'}
-                  data={outcome.stakeholderOutcomes || []}
-                  columns={stakeholderOutcomeColumns}
-                  uriField="uri"
-                />
-                <DataTable
-                  title={'Outcome Code(s)'}
-                  data={outcome.codes || []}
-                  columns={codeColumns}
-                  uriField="uri"
-                />
-  
-              </Container>
-  
-  
+                <Container>
+                  {/*<EnhancedTableToolbar title={(*/}
+                  {/*  <>*/}
+                  {/*    Outcome Name: {outcome.name}*/}
+                  {/*    <br />*/}
+                  {/*    Outcome URI:{' '}*/}
+                  {/*    <Link*/}
+                  {/*      colorWithHover*/}
+                  {/*      to={`/outcome/${encodeURIComponent(outcome._uri)}/view`}*/}
+                  {/*    >*/}
+                  {/*      {outcome._uri}*/}
+                  {/*    </Link>*/}
+                  {/*    <br />*/}
+                  {/*    Outcome Description: {outcome.description}*/}
+                  {/*  </>*/}
+                  {/*)}*/}
+
+                  {/*numSelected={0}           */}
+                  {/*                      */}
+
+                  {/*/> */}
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableRow>
+                        <TableCell sx={style} variant="head">Outcome
+                          Name</TableCell>
+                        <TableCell>{outcome.name}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={style} variant="head">Outcome
+                          URI</TableCell>
+                        <TableCell sx={{display: 'flex', justifyContent: 'space-between'}}>
+                        <Link
+                            colorWithHover
+                            to={`/outcome/${encodeURIComponent(outcome._uri)}/view`}
+                        >{outcome._uri}
+                        
+                        </Link>
+                        <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(outcome._uri)} hideDeleteOption
+                        hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(outcome._uri)}/>
+
+                        </TableCell>
+
+
+
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={style} variant="head">Outcome
+                          Description</TableCell>
+                        <TableCell>{outcome.description}</TableCell>
+                      </TableRow>
+                    </Table>
+                  </TableContainer>
+
+
+                  <DataTable
+                      title={'Indicator(s)'}
+                      data={outcome.indicators || []}
+                      columns={indicatorColumns}
+                      uriField="uri"
+                  />
+                  <DataTable
+                      title={'Theme(s)'}
+                      data={outcome.themes || []}
+                      columns={themeColumns}
+                      uriField="uri"
+                  />
+                  <DataTable
+                      title={'Stakeholder Outcome(s)'}
+                      data={outcome.stakeholderOutcomes || []}
+                      columns={stakeholderOutcomeColumns}
+                      uriField="uri"
+                  />
+                  <DataTable
+                      title={'Outcome Code(s)'}
+                      data={outcome.codes || []}
+                      columns={codeColumns}
+                      uriField="uri"
+                  />
+
+                  <br/>
+                  <br/>
+
+                </Container>
+
+
             );
           })
         }
