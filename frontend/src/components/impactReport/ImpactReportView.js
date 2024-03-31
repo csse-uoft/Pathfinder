@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Chip, Container, Typography} from "@mui/material";
+import {Container, Chip,Paper, Table, TableContainer, Typography} from "@mui/material";
 import {Add as AddIcon,} from "@mui/icons-material";
 import {DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -7,6 +7,8 @@ import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
 import {
   fetchDataTypes,
   fetchDataType,
@@ -177,10 +179,12 @@ export default function ImpactReportView({multi, single, organizationUser, super
   if (state.loading)
     return <Loading message={`Loading Impact Reports...`}/>;
 
+  const style = {backgroundColor: 'rgb(39, 44, 52)', color: 'white', width: '12rem'}
+
   return (
     <Container>
-      <Typography variant={'h2'}> Impact Report Class View </Typography>
-      <EnhancedTableToolbar title={'Impact Reports'}
+      <Typography variant={'h2'}> Impact Reports </Typography>
+      <EnhancedTableToolbar title={''}
                             numSelected={0}
                             customToolbar={
                               <div style={{display: 'flex', gap: '10px'}}>
@@ -204,59 +208,80 @@ export default function ImpactReportView({multi, single, organizationUser, super
       />
       {
         state.data.map(impactReport => {
-          const hasTime = impactReport?.hasTime;
-          return (
-            <Container>
-              <EnhancedTableToolbar numSelected={0} title={(
-                <>
-                  Impact Report: {impactReport?.name}
-                  <br/>
-                  Organization: {''}
-                  <Link
-                    colorWithHover
-                    to={`/organization/${encodeURIComponent(impactReport?.forOrganization)}/view`}
-                  >
-                    {impactReport?.forOrganization}
-                  </Link>
-                  <br/>
-                  Impact Report URI: {''}
-                  <Link
-                    colorWithHover
-                    to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`}
-                  >
-                    {impactReport?._uri}
-                  </Link>
-                  <br/>
-                  Time Interval of Report: {(hasTime?.hasBeginning?.date && hasTime?.hasEnd?.date) ?
-                  `${(new Date(hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(hasTime.hasEnd.date)).toLocaleString()}`
-                  : null
-                }
-                  <br/>
-                  Comment: {impactReport.comment}
-                </>
-              )}/>
+        const hasTime = impactReport?.hasTime;
+        return (
 
+        <Container>
+        <TableContainer component={Paper}>
+          <Table>
 
-              <DataTable
-                noHeaderBar
-                noPaginationBar
-                title={""}
-                data={[impactReport]}
-                columns={columns}
-                uriField="uri"
-              />
-            </Container>
-          );
-        })
-      }
+            <TableRow>
+              <TableCell sx={style} variant="head">Impact Report</TableCell>
+              <TableCell>{impactReport?.name}</TableCell>
+            </TableRow>
 
-      {/*<DeleteModal*/}
-      {/*  objectId={state.selectedId}*/}
-      {/*  title={state.deleteDialogTitle}*/}
-      {/*  show={state.showDeleteDialog}*/}
-      {/*  onHide={() => setState(state => ({...state, showDeleteDialog: false}))}*/}
-      {/*  delete={handleDelete}*/}
-      {/*/>*/}
-    </Container>
+            <TableRow>
+              <TableCell sx={style} variant="head">Organization</TableCell>
+              <TableCell>
+                <Link
+                  colorWithHover
+                  to={`/organization/${encodeURIComponent(impactReport?.forOrganization)}/view`}
+                >
+                  {impactReport?.forOrganization}
+                </Link>
+              </TableCell>
+            </TableRow>
+
+          <TableRow>
+            <TableCell sx={style} variant="head">Impact Report URI</TableCell>
+            <TableCell>
+              <Link
+                colorWithHover
+                to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`}
+              >
+                {impactReport?._uri}
+              </Link>
+
+              <DropdownMenu urlPrefix={'impactReport'}
+                                        objectUri={encodeURIComponent(impactReport._uri)} hideDeleteOption
+                                        hideEditOption={!userContext.isSuperuser}
+                                        handleDelete={() => showDeleteDialog(impactReport._uri)}/>
+            </TableCell>
+          </TableRow>
+
+        <TableRow>
+          <TableCell sx={style} variant="head">Time Interval of Report</TableCell>
+          <TableCell>
+            {(hasTime?.hasBeginning?.date && hasTime?.hasEnd?.date) ?
+              `${(new Date(hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(hasTime.hasEnd.date)).toLocaleString()}`
+              : null}
+          </TableCell>
+        </TableRow>
+
+          <TableRow>
+            <TableCell sx={style} variant="head">Comment</TableCell>
+            <TableCell>{impactReport.comment}</TableCell>
+          </TableRow>
+
+        </Table>
+      </TableContainer>
+
+          <DataTable
+            noHeaderBar
+            noPaginationBar
+            title={""}
+            data={[impactReport]}
+            columns={columns}
+            uriField="uri"
+          />
+
+          <br/>
+          <br/>
+      </Container>
+
+      );
+    })
+  }
+</Container>
   );
 }
