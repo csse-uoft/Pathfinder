@@ -5,11 +5,11 @@ const {GDBOrganizationModel} = require("../models/organization");
 const {GDBUserAccountModel} = require("../models/userAccount");
 const {GDBIndicatorReportModel} = require("../models/indicatorReport");
 const {GDBStakeholderOutcomeModel} = require("../models/stakeholderOutcome");
-const {Transaction, DeleteType} = require("graphdb-utils");
+const {Transaction} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBImpactReportModel} = require("../models/impactReport");
 
-async function deleteOrganizationWithAllData(organization) {
+async function deleteOrganizationWithAllData(organization, keepOrg) {
   if (!organization) {
     throw new Server400Error('Organization is not given');
   }
@@ -40,7 +40,15 @@ async function deleteOrganizationWithAllData(organization) {
 
   }
 
-  storeItem(organization, GDBOrganizationModel);
+  if (!keepOrg) {
+    storeItem(organization, GDBOrganizationModel);
+  } else {
+    organization.hasIndicators = [];
+    organization.hasOutcomes = [];
+    organization.impactModels = [];
+    organization.characteristics = [];
+  }
+
 
   // cache users, securityQuestions will be deleted with them
   organization.hasUsers?.map(user => {
@@ -55,6 +63,10 @@ async function deleteOrganizationWithAllData(organization) {
     indicator.indicatorReports?.map(indicatorReportUri => {
       storeItem(indicatorReportUri, GDBIndicatorReportModel);
     });
+    // if (indicator.baseLine)
+    //   storeItem(indicator.baseLine, GDBMeasureModel);
+    // if (indicator.threshold)
+    //   storeItem(indicator.threshold, GDBMeasureModel);
   });
 
   // cache outcomes
@@ -79,7 +91,9 @@ async function deleteOrganizationWithAllData(organization) {
     });
   });
 
-  await Transaction.beginTransaction();
+  // await Transaction.beginTransaction();
+
+  await organization.save();
 
   for (let uri in objectDict) {
     await objectDict[uri].findOneAndDelete({_uri: uri});

@@ -533,14 +533,14 @@ async function deleteOrganizationHandler(req, res, next) {
 
 
 async function superuserDeleteOrganization(req, res) {
-  const {uri} = req.params;
+  const {uri, keepOrg} = req.params;
   if (!uri)
     return res.status(400).json({success: false, message: 'Organization uri is needed'});
   const organization = await GDBOrganizationModel.findOne({_uri: uri});
   if (!organization)
     return res.status(400).json({success: false, message: 'No such organization'});
-  if (await deleteOrganizationWithAllData(organization)) {
-    await Transaction.commit();
+  if (await deleteOrganizationWithAllData(organization, keepOrg)) {
+    // await Transaction.commit();
     return res.status(200).json({success: true, message: 'Success'});
   } else {
     return res.status(400).json({success: true, message: 'Error occur when deleting all data'});

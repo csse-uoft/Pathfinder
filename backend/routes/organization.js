@@ -9,6 +9,6 @@ const router = express.Router({mergeParams: true});
 router.post('/', createOrganizationHandler)
 router.get('/:uri', fetchOrganizationHandler)
 router.put('/:uri', updateOrganizationHandler)
-router.delete('/:uri', deleteOrganizationHandler)
+router.delete('/:uri/:keepOrg', deleteOrganizationHandler)
 
 module.exports = router;
