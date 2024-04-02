@@ -234,14 +234,13 @@ export default function ImpactReportView({multi, single, organizationUser, super
 
           <TableRow>
             <TableCell sx={style} variant="head">Impact Report URI</TableCell>
-            <TableCell>
+            <TableCell sx={{display: 'flex', justifyContent: 'space-between'}}>
               <Link
                 colorWithHover
                 to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`}
               >
                 {impactReport?._uri}
               </Link>
-
               <DropdownMenu urlPrefix={'impactReport'}
                                         objectUri={encodeURIComponent(impactReport._uri)} hideDeleteOption
                                         hideEditOption={!userContext.isSuperuser}
