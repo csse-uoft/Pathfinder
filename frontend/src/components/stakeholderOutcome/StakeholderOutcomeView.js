@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Container, Typography} from "@mui/material";
+import {Container, Paper, Table, TableContainer, Typography} from "@mui/material";
 
 import {DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -10,6 +10,8 @@ import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchStakeholderOutcomesThroughOrganization} from "../../api/stakeholderOutcomeAPI";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 import {fetchDataType} from "../../api/generalAPI";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
 
 
 export default function StakeholderOutcomeView({
@@ -140,59 +142,87 @@ export default function StakeholderOutcomeView({
   if (state.loading)
     return <Loading message={`Loading Stakeholder Outcomes...`}/>;
 
-  return (
-    <Container>
-      {
-        state.data.map(stakeholderOutcome => {
-          return (
-            <Container>
-              <Typography variant={'h2'}> Stakeholder Outcome Class View </Typography>
-              <EnhancedTableToolbar title={(
-                <>
-                  Stakeholder Outcome: {stakeholderOutcome.name}
-                  <br/>
-                  URI:{' '}
-                  <Link
-                    colorWithHover
-                    to={`/stakeholderOutcome/${encodeURIComponent(stakeholderOutcome._uri)}/view`}
-                  >
-                    {stakeholderOutcome._uri}
-                  </Link>
-                  <br/>
-                  Description: {stakeholderOutcome.description}
-                  <br/>
-                  Underserved: {stakeholderOutcome.isUnderserved}
-                  <br/>
-                  Impact Report: {stakeholderOutcome.impactReports.map(impactReportUri => {
-                    return (
-                      <>
-                        <Link
-                          colorWithHover
-                          to={`/impactReport/${encodeURIComponent(impactReportUri)}/view`}
-                        >
-                          {impactReportUri}
-                        </Link>
-                        <br/>
-                      </>
-                    )
-                })}
-                </>
-              )}
-                                    numSelected={0}
-              />
-              <DataTable
-                noHeaderBar
-                noPaginationBar
-                title={''}
-                data={[stakeholderOutcome]}
-                columns={columns}
-                uriField="uri"
-              />
+  const style = {backgroundColor: 'rgb(39, 44, 52)', color: 'white', width: '12rem'}
 
-            </Container>
-          );
-        })
-      }
-    </Container>
+
+  return (
+      <Container>
+        <Typography variant={'h2'}> Stakeholder Outcomes </Typography>
+        <br/>
+        {
+          state.data.map(stakeholderOutcome => {
+            return (
+                <Container>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableRow>
+                        <TableCell sx={style} variant="head">Stakeholder Outcome Name</TableCell>
+                        <TableCell>{stakeholderOutcome.name}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={style} variant="head">Stakeholder Outcome
+                          URI</TableCell>
+                        <TableCell sx={{display: 'flex', justifyContent: 'space-between'}}>
+                          <Link
+                              colorWithHover
+                              to={`/outcome/${encodeURIComponent(stakeholderOutcome._uri)}/view`}
+                          >{stakeholderOutcome._uri}
+
+                          </Link>
+                          <DropdownMenu urlPrefix={'stakeholderOutcome'}
+                                        objectUri={encodeURIComponent(stakeholderOutcome._uri)} hideDeleteOption
+                                        hideEditOption={!userContext.isSuperuser}
+                                        handleDelete={() => showDeleteDialog(stakeholderOutcome._uri)}/>
+
+                        </TableCell>
+
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={style} variant="head">
+                          Description</TableCell>
+                        <TableCell>{stakeholderOutcome.description}</TableCell>
+                      </TableRow>
+
+                      <TableRow>
+                        <TableCell sx={style} variant="head">Underserved</TableCell>
+                        <TableCell>{stakeholderOutcome.isUnderserved}</TableCell>
+                      </TableRow>
+
+                      <TableRow>
+                        <TableCell sx={style} variant="head">Impact Report</TableCell>
+                        <TableCell> {stakeholderOutcome.impactReports.map(impactReportUri => {
+                          return (
+                              <>
+                                <Link
+                                    colorWithHover
+                                    to={`/impactReport/${encodeURIComponent(impactReportUri)}/view`}
+                                >
+                                  {impactReportUri}
+                                </Link>
+                                <br/>
+                              </>
+                          )
+                        })}</TableCell>
+                      </TableRow>
+                    </Table>
+                  </TableContainer>
+
+                  <DataTable
+                      noHeaderBar
+                      noPaginationBar
+                      title={''}
+                      data={[stakeholderOutcome]}
+                      columns={columns}
+                      uriField="uri"
+                  />
+                  <br/>
+                  <br/>
+                </Container>
+
+            );
+          })
+
+        }
+      </Container>
   );
 }
