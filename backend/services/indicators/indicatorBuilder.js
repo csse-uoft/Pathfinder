@@ -117,6 +117,8 @@ async function indicatorBuilder(environment, object, organization, error, {
     }
 
 
+
+
     // add outcomes
     if (((environment === 'fileUploading' && !object[getFullPropertyURI(mainModel, 'forOutcomes')]) ||
       (environment === 'interface' && (!form.outcomes || !form.outcomes.length)) && config['cids:forOutcome'])
