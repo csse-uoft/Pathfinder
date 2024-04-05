@@ -5,7 +5,6 @@ const {GDBOrganizationModel} = require("../models/organization");
 const {GDBUserAccountModel} = require("../models/userAccount");
 const {GDBIndicatorReportModel} = require("../models/indicatorReport");
 const {GDBStakeholderOutcomeModel} = require("../models/stakeholderOutcome");
-const {Transaction} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBImpactReportModel} = require("../models/impactReport");
 

@@ -51,45 +51,73 @@ async function transSave(trans, object) {
     .setTimeout(5));
 }
 
-async function assignImpactNorms(config, object, mainModel, mainObject, propertyName, internalKey, addMessage, organizationUri, uri, hasError, error, impactNormsDict, mainModelType) {
+async function assignImpactNorms(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, organizationUri, uri, hasError, error, impactNormsDict, mainModelType) {
   let ignore;
   if (object && object[getFullPropertyURI(mainModel, propertyName)]) {
     mainObject[propertyName] = getValue(object, mainModel, propertyName)
   }
-  if (!mainObject[propertyName]) {
-    error += 1;
-    addMessage(8, 'propertyMissing',
-      {
-        uri,
-        type: getPrefixedURI(object['@type'][0]),
-        property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
-      },
-      config[internalKey]
-    )
-    ignore = true;
+  if (!mainObject[propertyName] && config[internalKey]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      } else if (environment === 'interface') {
+        Transaction.rollback();
+        throw new Server400Error(`hasTime is mandatory`);
+      }
+    } else if (config[internalKey].ignoreInstance) {
+      if (environment === 'fileUploading') {
+        ignore = true;
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, internalKey))
+        },
+        config[internalKey]
+      );
+
+
+
+    // error += 1;
+    // addMessage(8, 'propertyMissing',
+    //   {
+    //     uri,
+    //     type: getPrefixedURI(object['@type'][0]),
+    //     property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+    //   },
+    //   config[internalKey]
+    // )
+    // ignore = true;
   }
-  const impactNormsInDatabase = await GDBImpactNormsModel.findOne({_uri: mainObject[propertyName], organization: organizationUri})
-  const impactNormsInFile = impactNormsDict[mainObject[propertyName]];
-  if (impactNormsInDatabase) {
-    // add the outcome to the impactNorms
-    if (!impactNormsInDatabase[mainModelType])
-      impactNormsInDatabase[mainModelType] = []
-    impactNormsInDatabase[mainModelType] = [...impactNormsInDatabase[mainModelType], uri]
-    await impactNormsInDatabase.save();
+  if (mainObject[propertyName]) {
+    const impactNormsInDatabase = await GDBImpactNormsModel.findOne({_uri: mainObject[propertyName], organization: organizationUri})
+    const impactNormsInFile = impactNormsDict[mainObject[propertyName]];
+    if (impactNormsInDatabase) {
+      // add the outcome to the impactNorms
+      if (!impactNormsInDatabase[mainModelType])
+        impactNormsInDatabase[mainModelType] = []
+      impactNormsInDatabase[mainModelType] = [...impactNormsInDatabase[mainModelType], uri]
+      await impactNormsInDatabase.save();
+    }
+    if (!impactNormsInDatabase && !impactNormsInFile) {
+      error += 1;
+      addMessage(8, 'NoSuchImpactNorms',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName)),
+          impactNormsURI: mainObject[propertyName]
+        },
+        config[internalKey]
+      )
+      ignore = true;
+    }
   }
-  if (!impactNormsInDatabase && !impactNormsInFile) {
-    error += 1;
-    addMessage(8, 'NoSuchImpactNorms',
-      {
-        uri,
-        type: getPrefixedURI(object['@type'][0]),
-        property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName)),
-        impactNormsURI: mainObject[propertyName]
-      },
-      config[internalKey]
-    )
-    ignore = true;
-  }
+
 
   return {hasError, error, ignore};
 

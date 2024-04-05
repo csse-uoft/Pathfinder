@@ -38,6 +38,7 @@ const {impactRiskBuilder} = require("../impactRisk/impactRiskBuilder");
 const {stakeholderOrganizationBuilder} = require("../stakeholder/stakeholderOrganizationBuilder");
 const {GDBDataSetModel} = require("../../models/dataset");
 const {datasetBuilder} = require("../dataset/datasetBuilder");
+const {configLevel} = require('../../config')
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -687,7 +688,7 @@ const fileUploading = async (req, res, next) => {
 
     for (let [uri, object] of Object.entries(objectDict)) {
       if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
-        error = await outcomeBuilder('fileUploading', object, organization, error, {objectDict, outcomeDict, impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue}, null);
+        error = await outcomeBuilder('fileUploading', object, organization, error, {objectDict, outcomeDict, impactNormsDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
       } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
         error = await counterfactualBuilder('fileUploading', object, organization, error, {counterfactualDict, objectDict}, {addMessage, addTrace, getFullPropertyURI, getValue, getListOfValue});
       } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
@@ -702,7 +703,7 @@ const fileUploading = async (req, res, next) => {
           getFullPropertyURI,
           getValue,
           getListOfValue
-        }, null);
+        }, null, configLevel);
       } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
         error = await indicatorReportBuilder('fileUploading', object, organization, error, {
           indicatorDict,

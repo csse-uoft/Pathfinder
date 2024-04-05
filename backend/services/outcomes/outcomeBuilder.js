@@ -1,13 +1,11 @@
-const {fullLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBIndicatorModel} = require("../../models/indicator");
-const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, assignValues, assignImpactNorms, assignInvertValues} = require("../helpers");
-const {Transaction} = require("graphdb-utils");
 
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function outcomeBuilder(environment, object, organization, error, {outcomeDict, objectDict, impactNormsDict}, {
   addMessage,
@@ -15,7 +13,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   let ret;
   const mainModel = GDBOutcomeModel;
@@ -51,7 +49,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     await organization.save();
   }
 
-  const config = fullLevelConfig['outcome'];
+  const config = configs[configLevel]['outcome'];
   let hasError = false;
   if (mainObject) {
 
@@ -60,7 +58,7 @@ async function outcomeBuilder(environment, object, organization, error, {outcome
     error = ret.error;
 
     if (environment === 'fileUploading')
-      ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error, impactNormsDict, 'outcomes');
+      ret = await assignImpactNorms(environment, config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error, impactNormsDict, 'outcomes');
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;

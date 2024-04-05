@@ -8,7 +8,7 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {outcomeBuilder} = require("./outcomeBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-const {indicatorBuilder} = require("../indicators/indicatorBuilder");
+const {configLevel} = require('../../config')
 
 const resource = 'Outcome'
 
@@ -160,7 +160,7 @@ const createOutcomeHandler = async (req, res, next) => {
     if (await hasAccess(req, 'createOutcome')) {
       const {form} = req.body;
       await Transaction.beginTransaction();
-      if (await outcomeBuilder('interface', null, null, null, {}, {}, form)){
+      if (await outcomeBuilder('interface', null, null, null, {}, {}, form, configLevel)){
         await Transaction.commit();
         return res.status(200).json({success: true});
       }
@@ -188,7 +188,7 @@ const updateOutcome = async (req, res) => {
   const {uri} = req.params;
   await Transaction.beginTransaction();
   form.uri = uri;
-  if (await outcomeBuilder('interface', null, null,null, {}, {}, form)) {
+  if (await outcomeBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }
