@@ -4,6 +4,7 @@ const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, assignValues} = require("../helpers");
 const {GDBOrganizationModel} = require("../../models/organization");
+const configs = require("../fileUploading/configs");
 
 async function impactNormsBuilder(environment, object, organization, error, {impactNormsDict}, {
   addMessage,
@@ -12,7 +13,7 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBImpactNormsModel
   const mainObject = environment === 'fileUploading' ? impactNormsDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
@@ -23,7 +24,7 @@ async function impactNormsBuilder(environment, object, organization, error, {imp
   }
 
 
-  const config = fullLevelConfig['impactNorms'];
+  const config = configs[configLevel]['impactNorms'];
   let hasError = false;
   let ret;
   if (mainObject) {

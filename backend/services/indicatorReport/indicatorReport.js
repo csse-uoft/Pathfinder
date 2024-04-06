@@ -9,7 +9,7 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {indicatorReportBuilder} = require("./indicatorReportBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
+const {configLevel} = require('../../config');
 
 const resource = 'IndicatorReport';
 
@@ -24,24 +24,24 @@ const fetchIndicatorReportInterfacesHandler = async (req, res, next) => {
   }
 };
 
-const fetchIndicatorReportInterfaces = async (req, res) => {
-  const {organizationUri} = req.params;
-  let indicatorReports;
-  if (organizationUri === 'undefined' || !organizationUri) {
-    // return all indicator Interfaces
-    indicatorReports = await GDBIndicatorReportModel.find({});
-  } else {
-    // return outcomes based on their organization
-    indicatorReports = await GDBIndicatorReportModel.find({forOrganization: organizationUri});
-  }
-
-  const indicatorReportInterfaces = {};
-  indicatorReports.map(indicatorReport => {
-    indicatorReportInterfaces[indicatorReport._uri] = indicatorReport.name || indicatorReport._uri;
-  });
-  return res.status(200).json({success: true, indicatorReportInterfaces});
-
-};
+// const fetchIndicatorReportInterfaces = async (req, res) => {
+//   const {organizationUri} = req.params;
+//   let indicatorReports;
+//   if (organizationUri === 'undefined' || !organizationUri) {
+//     // return all indicator Interfaces
+//     indicatorReports = await GDBIndicatorReportModel.find({});
+//   } else {
+//     // return outcomes based on their organization
+//     indicatorReports = await GDBIndicatorReportModel.find({forOrganization: organizationUri});
+//   }
+//
+//   const indicatorReportInterfaces = {};
+//   indicatorReports.map(indicatorReport => {
+//     indicatorReportInterfaces[indicatorReport._uri] = indicatorReport.name || indicatorReport._uri;
+//   });
+//   return res.status(200).json({success: true, indicatorReportInterfaces});
+//
+// };
 
 const createIndicatorReportHandler = async (req, res, next) => {
   try {
@@ -50,7 +50,7 @@ const createIndicatorReportHandler = async (req, res, next) => {
       form.value = form.numericalValue;
       form.forIndicator = form.indicator;
       await Transaction.beginTransaction();
-      if (await indicatorReportBuilder('interface', null, null, null, {}, {}, form))
+      if (await indicatorReportBuilder('interface', null, null, null, {}, {}, form, configLevel))
         await Transaction.commit();
       return res.status(200).json({success: true});
     }
@@ -176,7 +176,7 @@ const updateIndicatorReport = async (req, res) => {
   const {uri} = req.params;
   await Transaction.beginTransaction();
   form.uri = uri;
-  if (await indicatorReportBuilder('interface', null, null,null, {}, {}, form)) {
+  if (await indicatorReportBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }

@@ -8,7 +8,7 @@ const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-const {characteristicBuilder} = require("../characteristic/characteristicBuilder");
+const {configLevel} = require('../../config');
 
 
 const fetchIndicators = async (req, res) => {
@@ -160,7 +160,7 @@ const createIndicatorHandler = async (req, res, next) => {
     if (await hasAccess(req, 'createIndicator')){
       const {form} = req.body;
       await Transaction.beginTransaction();
-      if (await indicatorBuilder('interface',  null, null, null, {}, {}, form)){
+      if (await indicatorBuilder('interface',  null, null, null, {}, {}, form, configLevel)){
         await Transaction.commit();
         return res.status(200).json({success: true})
       }
@@ -190,7 +190,7 @@ const updateIndicator = async (req, res) => {
   const {uri} = req.params;
   await Transaction.beginTransaction();
   form.uri = uri;
-  if (await indicatorBuilder('interface', null, null,null, {}, {}, form)) {
+  if (await indicatorBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }

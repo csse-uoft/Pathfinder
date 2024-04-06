@@ -8,7 +8,7 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {outcomeBuilder} = require("./outcomeBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-const {configLevel} = require('../../config')
+const {configLevel} = require('../../config');
 
 const resource = 'Outcome'
 

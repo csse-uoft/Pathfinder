@@ -1,4 +1,4 @@
-const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {assignValue, assignValues,
   assignMeasure, assignTimeInterval
 } = require("../helpers");
@@ -16,7 +16,7 @@ async function indicatorReportBuilder(environment, object, organization, error, 
                                         getFullPropertyURI,
                                         getValue,
                                         getListOfValue
-                                      }, form) {
+                                      }, form, configLevel) {
 
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
@@ -29,7 +29,7 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = fullLevelConfig.indicatorReport;
+  const config = configs[configLevel].indicatorReport;
 
 
   if (mainObject) {
