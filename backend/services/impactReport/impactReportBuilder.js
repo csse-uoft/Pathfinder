@@ -1,14 +1,9 @@
-const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBImpactReportModel} = require("../../models/impactReport");
-const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, getFullObjectURI, assignValues, assignTimeInterval} = require("../helpers");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
-const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
-const {Transaction} = require("graphdb-utils");
-const {GDBImpactScaleModel, GDBImpactDepthModel} = require("../../models/howMuchImpact");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function impactReportBuilder(environment, object, organization, error, {
@@ -21,7 +16,7 @@ async function impactReportBuilder(environment, object, organization, error, {
                                      getFullPropertyURI,
                                      getValue,
                                      getListOfValue
-                                   }, form) {
+                                   }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
   let ret;
@@ -32,7 +27,7 @@ async function impactReportBuilder(environment, object, organization, error, {
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = fullLevelConfig.impactReport;
+  const config = configs[configLevel].impactReport;
 
   if (mainObject) {
     if (environment !== 'fileUploading') {

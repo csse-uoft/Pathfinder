@@ -1,6 +1,6 @@
 const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval} = require("../helpers");
-const {Transaction} = require("graphdb-utils");
+const configs = require("../fileUploading/configs");
 const {
   GDBImpactRiskModel,
   GDBEvidenceRiskModel,
@@ -33,7 +33,7 @@ async function impactRiskBuilder(environment, subType, object, organization, err
                                    getFullPropertyURI,
                                    getValue,
                                    getListOfValue
-                                 }, form) {
+                                 }, form, configLevel) {
 
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
@@ -70,7 +70,7 @@ async function impactRiskBuilder(environment, subType, object, organization, err
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = fullLevelConfig[subType];
+  const config = configs[configLevel][subType];
 
   if (mainObject) {
 

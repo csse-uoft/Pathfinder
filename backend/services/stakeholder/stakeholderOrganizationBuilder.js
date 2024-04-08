@@ -2,8 +2,7 @@ const {fullLevelConfig} = require("../fileUploading/configs");
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, assignValues, assignImpactNorms} = require("../helpers");
-const {GraphDB} = require("graphdb-utils");
-
+const configs = require("../fileUploading/configs");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function stakeholderOrganizationBuilder(environment, object, organization, error, {stakeholderDict, objectDict, impactNormsDict}, {
@@ -12,7 +11,7 @@ async function stakeholderOrganizationBuilder(environment, object, organization,
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object? object['@id'] : undefined;
   let ret;
   const mainModel = GDBStakeholderOrganizationModel;
@@ -32,7 +31,7 @@ async function stakeholderOrganizationBuilder(environment, object, organization,
     await organization.save();
   }
 
-  const config = fullLevelConfig['stakeholder'];
+  const config = configs[configLevel]['stakeholder'];
   let hasError = false;
   if (mainObject) {
 

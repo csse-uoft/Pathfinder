@@ -2,7 +2,7 @@ const {fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
 const {GDBDataSetModel} = require("../../models/dataset");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
-
+const configs = require("../fileUploading/configs");
 async function datasetBuilder(environment, object, organization, error, {
   datasetDict,
   objectDict
@@ -12,7 +12,7 @@ async function datasetBuilder(environment, object, organization, error, {
                                        getFullPropertyURI,
                                        getValue,
                                        getListOfValue
-                                     }, form) {
+                                     }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBDataSetModel;
   let hasError = false;
@@ -23,7 +23,7 @@ async function datasetBuilder(environment, object, organization, error, {
     uri = mainObject._uri;
   }
 
-  const config = fullLevelConfig['dataset'];
+  const config = configs[configLevel]['dataset'];
   if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
