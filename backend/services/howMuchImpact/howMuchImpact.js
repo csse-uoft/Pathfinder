@@ -4,6 +4,7 @@ const {Server400Error} = require("../../utils");
 const {Transaction} = require("graphdb-utils");
 const {howMuchImpactBuilder} = require("./howMuchImpactBuilder");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {configLevel} = require('../../config');
 
 
 const HowMuchImpactModelDict = {
@@ -63,7 +64,7 @@ const createHowMuchImpactHandler = async (req, res, next) => {
     await Transaction.beginTransaction();
     if (await hasAccess(req, 'create' + resource)) {
       if (await howMuchImpactBuilder('interface', form.subtype
-        , null, null, null,{}, {}, form)){
+        , null, null, null,{}, {}, form, configLevel)){
         await Transaction.commit();
         return res.status(200).json({success: true})
       }

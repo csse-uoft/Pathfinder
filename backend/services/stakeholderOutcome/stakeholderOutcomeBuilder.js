@@ -1,4 +1,4 @@
-const {assignValue, assignValues} = require("../helpers");
+const {assignValue, assignValues, assignInvertValues, assignInvertValue} = require("../helpers");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
@@ -86,7 +86,19 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
     error = ret.error;
     // todo: add stakeholderOutcome to impactReport if needed
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'outcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
+    // ret = assignValue(environment, config, object, mainModel, mainObject, 'outcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
+    ret = assignInvertValue(environment, config, object, mainModel, mainObject, {
+        propertyName: 'outcome',
+        internalKey: 'cids:forOutcome'
+      }, objectDict, organization,
+      {
+        objectModel: GDBOutcomeModel,
+        invertProperty: 'stakeholderOutcomes',
+        invertPropertyMultiply: true,
+        propertyToOrganization: 'forOrganization',
+        objectType: 'Outcome'
+      }, addMessage, form, uri, hasError, error, getListOfValue
+    );
     hasError = ret.hasError;
     error = ret.error;
 

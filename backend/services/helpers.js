@@ -510,5 +510,6 @@ module.exports = {
   getFullObjectURI,
   assignImpactNorms,
   assignTimeInterval,
-  assignInvertValues
+  assignInvertValues,
+  assignInvertValue
 };

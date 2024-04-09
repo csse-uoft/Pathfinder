@@ -800,7 +800,7 @@ const fileUploading = async (req, res, next) => {
           getFullPropertyURI,
           getValue,
           getListOfValue
-        }, null);
+        }, null, configLevel);
       }
     }
 

@@ -1,4 +1,3 @@
-const {fullLevelConfig} = require("../fileUploading/configs");
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, assignValues, assignImpactNorms} = require("../helpers");

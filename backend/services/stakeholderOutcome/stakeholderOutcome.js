@@ -6,7 +6,7 @@ const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
+const {configLevel} = require('../../config');
 
 const resource = 'StakeholderOutcome'
 
@@ -15,7 +15,7 @@ const createStakeholderOutcomeHandler = async (req, res, next) => {
     const {form} = req.body;
     if (await hasAccess(req, 'create' + resource)) {
       await Transaction.beginTransaction();
-      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form)) {
+      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form, configLevel)) {
         await Transaction.commit();
         return res.status(200).json({success: true});
       }
@@ -86,7 +86,7 @@ const updateStakeholderOutcome = async (req, res) => {
   const {uri} = req.params;
   await Transaction.beginTransaction();
   form.uri = uri;
-  if (await stakeholderOutcomeBuilder('interface', null, null,null, {}, {}, form)) {
+  if (await stakeholderOutcomeBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }

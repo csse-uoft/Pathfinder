@@ -4,14 +4,14 @@ const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {GDBCodeModel} = require("../../models/code");
 const {characteristicBuilder} = require("./characteristicBuilder");
 const {Transaction} = require("graphdb-utils");
-const {codeBuilder} = require("../code/codeBuilder");
+const {configLevel} = require('../../config');
 
 const createCharacteristicHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createCharacteristic')) {
       const {form} = req.body;
       await Transaction.beginTransaction();
-      if (await characteristicBuilder('interface', null, null, {}, {}, form)){
+      if (await characteristicBuilder('interface', null, null, {}, {}, form, configLevel)){
         await Transaction.commit();
         return res.status(200).json({success: true});
       }
@@ -65,7 +65,7 @@ const updateCharacteristic = async (req, res) => {
   const {uri} = req.params;
   await Transaction.beginTransaction();
   form.uri = uri;
-  if (await characteristicBuilder('interface', null, null, {}, {}, form)) {
+  if (await characteristicBuilder('interface', null, null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }

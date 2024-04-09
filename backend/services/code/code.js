@@ -4,6 +4,7 @@ const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
 const {codeBuilder} = require("./codeBuilder");
 const {Transaction} = require("graphdb-utils");
+const {configLevel} = require('../../config');
 
 const fetchCodeHandler = async (req, res, next) => {
   try {
@@ -33,7 +34,7 @@ const createCodeHandler = async (req, res, next) => {
       const {form} = req.body;
       await Transaction.beginTransaction();
       if (await codeBuilder('interface', null,
-        null, null, {}, {}, form)) {
+        null, null, {}, {}, form, configLevel)) {
         await Transaction.commit();
         return res.status(200).json({success: true});
       }
@@ -64,7 +65,7 @@ const updateCode = async (req, res) => {
   await Transaction.beginTransaction();
   form.uri = uri;
   if (await codeBuilder('interface', null,
-    null, null, {}, {}, form)) {
+    null, null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }
