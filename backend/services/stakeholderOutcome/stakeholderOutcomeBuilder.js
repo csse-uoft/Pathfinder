@@ -89,7 +89,6 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
     // ret = assignValue(environment, config, object, mainModel, mainObject, 'outcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
 
 
-    // todo: there are error inside here!!!
     ret = assignInvertValue(environment, config, object, mainModel, mainObject, {
         propertyName: 'outcome',
         internalKey: 'cids:forOutcome'
