@@ -87,6 +87,9 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
     // todo: add stakeholderOutcome to impactReport if needed
 
     // ret = assignValue(environment, config, object, mainModel, mainObject, 'outcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
+
+
+    // todo: there are error inside here!!!
     ret = assignInvertValue(environment, config, object, mainModel, mainObject, {
         propertyName: 'outcome',
         internalKey: 'cids:forOutcome'
@@ -95,7 +98,7 @@ async function stakeholderOutcomeBuilder(environment, object, organization, erro
         objectModel: GDBOutcomeModel,
         invertProperty: 'stakeholderOutcomes',
         invertPropertyMultiply: true,
-        propertyToOrganization: 'forOrganization',
+        propertyToOrganization: environment === 'fileUploading'? 'forOrganization' : null,
         objectType: 'Outcome'
       }, addMessage, form, uri, hasError, error, getListOfValue
     );
