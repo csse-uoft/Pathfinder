@@ -11,10 +11,10 @@ import {useSnackbar} from "notistack";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {updateCharacteristic} from "../../api/characteristicApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType,} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditCharacteristic() {
 
-  const attriConfig = fullLevelConfig.characteristic
+  const attriConfig = configs[CONFIGLEVEL].characteristic
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();

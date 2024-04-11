@@ -6,12 +6,12 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {updateTheme} from "../../api/themeApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isFieldRequired, validateField, validateURI, validateForm} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
 
@@ -37,7 +37,7 @@ export default function AddEditTheme() {
   const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
 
-  const attriConfig = fullLevelConfig.theme
+  const attriConfig = configs[CONFIGLEVEL].theme
 
 
   const [state, setState] = useState({

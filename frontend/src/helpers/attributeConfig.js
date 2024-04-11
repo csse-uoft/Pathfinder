@@ -61,6 +61,8 @@ const fullLevelConfig = {
   group: {}
 }
 
+const CONFIGLEVEL = 'baseLevelConfig' || 'fullLevelConfig';
+
 module.exports = {
-  baseLevelConfig, fullLevelConfig
+  baseLevelConfig, fullLevelConfig, CONFIGLEVEL
 };

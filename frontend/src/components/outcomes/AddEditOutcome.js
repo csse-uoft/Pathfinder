@@ -11,7 +11,8 @@ import OutcomeField from "../shared/OutcomeField";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -62,7 +63,7 @@ export default function AddEditOutcome() {
   console.log(form.themes)
   const [loading, setLoading] = useState(true);
 
-  const attriConfig = fullLevelConfig.outcome;
+  const attriConfig = configs[CONFIGLEVEL].outcome;
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',

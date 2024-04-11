@@ -13,7 +13,8 @@ import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -27,7 +28,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactRisk() {
-  const attriConfig = fullLevelConfig.impactRisk
+  const attriConfig = configs[CONFIGLEVEL].impactRisk
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();

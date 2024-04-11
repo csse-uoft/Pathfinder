@@ -7,13 +7,13 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -64,7 +64,7 @@ export default function AddEditIndicator() {
   const [loading, setLoading] = useState(true);
   const [indicatorReportInterfaces, setIndicatorReportInterfaces] = useState({});
 
-  const attriConfig = fullLevelConfig.indicator;
+  const attriConfig = configs[CONFIGLEVEL].indicator;
 
   const attribute2Compass = {
     name: 'cids:hasName',

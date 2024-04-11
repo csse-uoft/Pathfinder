@@ -13,7 +13,8 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
     root: {
@@ -35,7 +36,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditDataset() {
 
-    const attriConfig = fullLevelConfig.dataset
+    const attriConfig = configs[CONFIGLEVEL].dataset
 
     const classes = useStyles();
     const userContext = useContext(UserContext);

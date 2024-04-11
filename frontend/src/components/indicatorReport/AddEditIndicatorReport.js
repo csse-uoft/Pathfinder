@@ -11,7 +11,8 @@ import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {validateForm} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
@@ -34,7 +35,7 @@ export default function AddEditIndicatorReport() {
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
 
-  const attriConfig = fullLevelConfig.indicatorReport;
+  const attriConfig = configs[CONFIGLEVEL].indicatorReport;
 
   const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
