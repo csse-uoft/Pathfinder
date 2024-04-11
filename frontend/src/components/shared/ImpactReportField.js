@@ -10,7 +10,8 @@ import {fetchImpactRisks} from "../../api/impactRiskApi";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {isFieldRequired, validateField, validateURI, validateFieldAndURI} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 
 const filterOptions = createFilterOptions({
   ignoreAccents: false,
@@ -65,13 +66,12 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
 
   const {enqueueSnackbar} = useSnackbar();
 
-  const attriConfig = fullLevelConfig.impactReport
+  const attriConfig = configs[CONFIGLEVEL].impactReport
 
   const [errors, setErrors] = useState({...importErrors});
 
   const userContext = useContext(UserContext);
 
-  console.log(state)
 
 
   useEffect(() => {

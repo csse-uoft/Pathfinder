@@ -16,6 +16,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
+import {isFieldRequired, validateField, validateURI} from "../../helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -158,6 +159,14 @@ export default function AddEditHowMuchImpact() {
 
   };
 
+  const attribute2Compass = {
+    indicator: 'cids:forIndicator',
+    value: 'iso21972:value',
+    counterfactuals: 'cids:hasCounterfactual',
+    startTime: 'cids:hasTime',
+    endTime: 'cids:hasTime'
+  }
+
   const validate = () => {
     const error = {};
     setErrors(error);
@@ -212,14 +221,7 @@ export default function AddEditHowMuchImpact() {
           onChange={e => form.uri = e.target.value}
           error={!!errors.uri}
           helperText={errors.uri}
-          onBlur={() => {
-            if (form.uri !== '' && !isValidURL(form.uri)) {
-              setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-            } else {
-              setErrors(errors => ({...errors, uri: ''}));
-            }
-
-          }}
+          onBlur={validateURI(form, setErrors)}
         />
 
         <GeneralField
@@ -230,6 +232,8 @@ export default function AddEditHowMuchImpact() {
           onChange={e => form.value = e.target.value}
           error={!!errors.value}
           helperText={errors.value}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'value')}
+          onBlur={validateField(state, attriConfig, 'value', attribute2Compass['value'], setErrors)}
         />
 
 
@@ -248,6 +252,8 @@ export default function AddEditHowMuchImpact() {
               })
             );
           }}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'indicator')}
+          onBlur={validateField(state, attriConfig, 'indicator', attribute2Compass['indicator'], setErrors)}
         />
 
         <Dropdown
@@ -261,6 +267,8 @@ export default function AddEditHowMuchImpact() {
           value={state.counterfactuals}
           error={!!errors.counterfactuals}
           helperText={errors.counterfactuals}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'counterfactuals')}
+          onBlur={validateField(state, attriConfig, 'counterfactuals', attribute2Compass['counterfactuals'], setErrors)}
         />
 
         <SelectField
@@ -294,6 +302,8 @@ export default function AddEditHowMuchImpact() {
               })
             );
           }}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'startTime')}
+          onBlur={validateField(state, attriConfig, 'startTime', attribute2Compass['startTime'], setErrors)}
         />
 
         <GeneralField
@@ -310,6 +320,8 @@ export default function AddEditHowMuchImpact() {
               })
             );
           }}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'endTime')}
+          onBlur={validateField(state, attriConfig, 'endTime', attribute2Compass['endTime'], setErrors)}
         />
 
 

@@ -108,7 +108,6 @@ export default function AddEditImpactRisk() {
   };
   const attribute2Compass = {
     hasIdentifier:'tove_org:hasIdentifier',
- 
   }
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
