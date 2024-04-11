@@ -42,10 +42,10 @@ async function deleteOrganizationWithAllData(organization, keepOrg) {
   if (!keepOrg) {
     storeItem(organization, GDBOrganizationModel);
   } else {
-    organization.hasIndicators = [];
-    organization.hasOutcomes = [];
-    organization.impactModels = [];
-    organization.characteristics = [];
+    // organization.hasIndicators = [];
+    // organization.hasOutcomes = [];
+    // organization.impactModels = [];
+    // organization.characteristics = [];
   }
 
 
@@ -98,6 +98,11 @@ async function deleteOrganizationWithAllData(organization, keepOrg) {
     await objectDict[uri].findOneAndDelete({_uri: uri});
   }
 
+  organization.hasIndicators = [];
+  organization.hasOutcomes = [];
+  organization.impactModels = [];
+  organization.characteristics = [];
+  await organization.save();
   return true;
 
 }
