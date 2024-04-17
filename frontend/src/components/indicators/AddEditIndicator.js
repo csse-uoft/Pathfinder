@@ -57,7 +57,7 @@ export default function AddEditIndicator() {
     threshold: '',
     codes: [],
     dateCreated: '',
-    access: [],
+    accesss: [],
     datasets: []
   });
 
@@ -76,7 +76,7 @@ export default function AddEditIndicator() {
     threshold: 'cids:hasThreshold',
     codes: 'cids:hasCode',
     dateCreated: 'schema:dateCreated',
-    access: 'cids:hasAccess',
+    accesss: 'cids:hasAccess',
     datasets: 'dcat:dataset'
   }
 

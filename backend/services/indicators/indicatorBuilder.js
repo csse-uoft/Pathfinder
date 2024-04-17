@@ -78,7 +78,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     error = ret.error;
 
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error);
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 

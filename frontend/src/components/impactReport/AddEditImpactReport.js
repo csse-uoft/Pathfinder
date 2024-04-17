@@ -74,8 +74,6 @@ export default function AddEditImpactReport() {
   });
   const [loading, setLoading] = useState(true);
 
-  console.log(form.reportedImpact)
-
   useEffect(() => {
     Promise.all([fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('howMuchImpact'), fetchDataTypes('impactRisk')]).then(
       ([organizationRet, howMuchImpactRet, {impactRisks}]) => {

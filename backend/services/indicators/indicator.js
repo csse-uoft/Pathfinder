@@ -139,6 +139,7 @@ const fetchIndicator = async (req, res) => {
   indicator.unitOfMeasure = indicator.unitOfMeasure?.label;
   indicator.baseline = indicator.baseline?.numericalValue;
   indicator.threshold = indicator.threshold?.numericalValue;
+  indicator.accesss = indicator.hasAccesss;
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization})
@@ -190,6 +191,7 @@ const updateIndicator = async (req, res) => {
   const {uri} = req.params;
   await Transaction.beginTransaction();
   form.uri = uri;
+  form.hasAccesss = form.accesss;
   if (await indicatorBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});

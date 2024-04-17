@@ -48,12 +48,26 @@ const fetchHowMuchImpact = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw Server400Error('A howMuchImpact is needed');
-  const howMuchImpact = await GDBHowMuchImpactModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+  let howMuchImpact;
+  // howMuchImpact = await GDBHowMuchImpactModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']})
+  if (!howMuchImpact) {
+    howMuchImpact = await GDBImpactDurationModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+  }
+  if (!howMuchImpact) {
+    howMuchImpact = await GDBImpactScaleModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+  }
+  if (!howMuchImpact) {
+    howMuchImpact = await GDBImpactDepthModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+  }
+
+
+
   if (!howMuchImpact)
     throw Server400Error('No such code');
   howMuchImpact.startTime = howMuchImpact.hasTime?.startTime;
   howMuchImpact.endTime = howMuchImpact.hasTime?.endTime;
   howMuchImpact.value = howMuchImpact.value.numericalValue;
+  howMuchImpact.subtype = howMuchImpact.schemaOptions.name.substring(1);
   return res.status(200).json({success: true, howMuchImpact});
 }
 
