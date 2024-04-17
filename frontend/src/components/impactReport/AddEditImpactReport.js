@@ -8,7 +8,6 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import ImpactReportField from "../shared/ImpactReportField";
-import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {
@@ -18,7 +17,8 @@ import {
   fetchDataTypes,
   updateDataType
 } from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {validateForm} from "../../helpers";
 
 const useStyles = makeStyles(() => ({
@@ -33,7 +33,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 export default function AddEditImpactReport() {
-  const attriConfig = fullLevelConfig.impactReport
+  const attriConfig = configs[CONFIGLEVEL].impactReport
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -73,8 +73,6 @@ export default function AddEditImpactReport() {
     uri: '',
   });
   const [loading, setLoading] = useState(true);
-
-  console.log(form.reportedImpact)
 
   useEffect(() => {
     Promise.all([fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('howMuchImpact'), fetchDataTypes('impactRisk')]).then(

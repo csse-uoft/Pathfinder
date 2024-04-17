@@ -1,4 +1,4 @@
-const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {GDBThemeModel} = require("../../models/theme");
 const {Server400Error} = require("../../utils");
 const {assignValue, assignValues} = require("../helpers");
@@ -10,7 +10,7 @@ async function themeBuilder(environment, object, error, {themeDict}, {
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
   const mainModel = GDBThemeModel;
@@ -22,7 +22,7 @@ async function themeBuilder(environment, object, error, {themeDict}, {
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = fullLevelConfig['theme'];
+  const config = configs[configLevel]['theme'];
 
   if (mainObject) {
 

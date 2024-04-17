@@ -7,9 +7,6 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {
-  updateIndicatorReport
-} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isFieldRequired, validateField, validateForm, validateURI, validateFieldAndURI} from "../../helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
@@ -22,7 +19,8 @@ import {
   fetchDataTypes,
   updateDataType
 } from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -36,7 +34,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactModel() {
-  const attriConfig = fullLevelConfig.impactNorms
+  const attriConfig = configs[CONFIGLEVEL].impactNorms
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();

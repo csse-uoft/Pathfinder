@@ -2,6 +2,7 @@ const {fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
+const configs = require("../fileUploading/configs");
 
 async function counterfactualBuilder(environment, object, organization, error, {
   counterfactualDict,
@@ -12,7 +13,7 @@ async function counterfactualBuilder(environment, object, organization, error, {
                                   getFullPropertyURI,
                                   getValue,
                                   getListOfValue
-                                }, form) {
+                                }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCounterfactualModel;
   let hasError = false;
@@ -23,7 +24,7 @@ async function counterfactualBuilder(environment, object, organization, error, {
     uri = mainObject._uri;
   }
 
-  const config = fullLevelConfig['counterfactual'];
+  const config = configs[configLevel]['counterfactual'];
   if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 

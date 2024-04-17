@@ -3,7 +3,7 @@ const {Transaction} = require("graphdb-utils");
 const {counterfactualBuilder} = require("./counterfactualBuilder");
 const {Server400Error} = require("../../utils");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
-const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
+const {configLevel} = require('../../config');
 
 
 const RESOURCE = 'Counterfactual'
@@ -36,7 +36,7 @@ const updateCounterfactual = async (req, res) => {
   await Transaction.beginTransaction();
   form.uri = uri;
   form.iso72Value = form.value;
-  if (await counterfactualBuilder('interface', null, null,null, {}, {}, form)) {
+  if (await counterfactualBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }
@@ -62,7 +62,7 @@ const createCounterfactualHandler = async (req, res, next) => {
       await Transaction.beginTransaction();
       form.iso72Value = form.value
       if(await counterfactualBuilder('interface', null,
-        null, null, {}, {}, form)) {
+        null, null, {}, {}, form, configLevel)) {
         await Transaction.commit();
         return res.status(200).json({success: true})
       }

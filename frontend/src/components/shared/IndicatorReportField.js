@@ -5,10 +5,10 @@ import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
 import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateURI} from "../../helpers";
 
 
@@ -72,7 +72,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
 
   const userContext = useContext(UserContext);
 
-  const attriConfig = fullLevelConfig.indicatorReport;
+  const attriConfig = configs[CONFIGLEVEL].indicatorReport;
 
 
   useEffect(() => {

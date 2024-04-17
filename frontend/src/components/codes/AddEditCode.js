@@ -10,16 +10,15 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {
   createDataType,
   fetchDataType,
   fetchDataTypeInterfaces,
-  fetchDataTypes,
   updateDataType
 } from "../../api/generalAPI";
-import {  baseLevelConfig, fullLevelConfig } from "../../helpers/attributeConfig"
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
@@ -41,7 +40,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditCode() {
 
-  const attriConfig = fullLevelConfig.code
+  const attriConfig = configs[CONFIGLEVEL].code
   const classes = useStyles();
   const userContext = useContext(UserContext);
   const navigator = useNavigate();

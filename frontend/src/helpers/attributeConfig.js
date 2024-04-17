@@ -16,10 +16,25 @@ const baseLevelConfig = {
   stakeholderOutcome: {},
   characteristic: {},
   impactScale:{},
+  impactReport: {},
+  dataset: {},
   impactDepth: {},
   code: {
     'cids:hasName': {flag: true}
-  }
+  },
+  impactRisk: {},
+  evidenceRisk: {},
+  externalRisk: {},
+  stakeholderParticipationRisk: {},
+  dropOffRisk: {},
+  efficiencyRisk: {},
+  executionRisk: {},
+  alignmentRisk: {},
+  enduranceRisk: {},
+  unexpectedImpactRisk: {},
+  counterfactual: {},
+  impactDuration: {},
+  howMuchImpact: {},
 };
 
 const fullLevelConfig = {
@@ -58,9 +73,12 @@ const fullLevelConfig = {
   impactDuration: {},
   dataset: {},
   stakeholder: {},
-  group: {}
+  group: {},
+  howMuchImpact: {},
 }
 
+const CONFIGLEVEL = 'baseLevelConfig' || 'fullLevelConfig';
+
 module.exports = {
-  baseLevelConfig, fullLevelConfig
+  baseLevelConfig, fullLevelConfig, CONFIGLEVEL
 };

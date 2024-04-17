@@ -5,7 +5,7 @@ const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("./impactReportBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-const {themeBuilder} = require("../theme/themeBuilder");
+const {configLevel} = require('../../config');
 
 
 const resource = 'ImpactReport';
@@ -27,7 +27,7 @@ const updateImpactReport = async (req, res) => {
   const {uri} = req.params;
   await Transaction.beginTransaction();
   form.uri = uri;
-  if (await impactReportBuilder('interface', null,null,null, {}, {}, form)) {
+  if (await impactReportBuilder('interface', null,null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
   }
@@ -38,7 +38,7 @@ const createImpactReportHandler = async (req, res, next) => {
     const {form} = req.body;
     await Transaction.beginTransaction();
     if (await hasAccess(req, 'create' + resource)) {
-      if (await impactReportBuilder('interface',null, null, null, {}, {}, form)){
+      if (await impactReportBuilder('interface',null, null, null, {}, {}, form, configLevel)){
         await Transaction.commit();
         return res.status(200).json({success: true})
       }

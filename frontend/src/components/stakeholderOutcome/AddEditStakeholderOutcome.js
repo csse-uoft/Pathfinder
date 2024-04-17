@@ -7,19 +7,17 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {updateOutcome} from "../../api/outcomeApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
 import {
   createDataType,
   fetchDataType,
   fetchDataTypeInterfaces,
-  fetchDataTypes,
   updateDataType
 } from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -76,7 +74,7 @@ export default function AddEditStakeholderOutcome() {
 
   const [loading, setLoading] = useState(true);
 
-  const attriConfig = fullLevelConfig.stakeholderOutcome;
+  const attriConfig = configs[CONFIGLEVEL].stakeholderOutcome;
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',

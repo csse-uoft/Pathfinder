@@ -1,16 +1,15 @@
-const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
-const {getObjectValue, assignValue, assignMeasure} = require("../helpers");
-
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {assignValue, assignMeasure} = require("../helpers");
+const configs = require("../fileUploading/configs");
 async function codeBuilder(environment, object, organization, error, {codeDict}, {
   addMessage,
   addTrace,
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCodeModel;
   let ret;
@@ -20,7 +19,7 @@ async function codeBuilder(environment, object, organization, error, {codeDict},
     uri = mainObject._uri;
   }
 
-  const config = fullLevelConfig['code'];
+  const config = configs[configLevel]['code'];
   let hasError = false;
   if (mainObject) {
 

@@ -63,6 +63,7 @@ const config = {
     },
   },
 
+  configLevel:  'fullLevelConfig' || 'baseLevelConfig'
 };
 
 // Environment Variables Override

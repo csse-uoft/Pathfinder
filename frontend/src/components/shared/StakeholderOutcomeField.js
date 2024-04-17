@@ -1,19 +1,13 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
-import {fetchIndicatorInterfaces, fetchIndicators} from "../../api/indicatorApi";
-import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
-import {fetchCodesInterfaces} from "../../api/codeAPI";
-import {fetchOutcomeInterfaces} from "../../api/outcomeApi";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateURI} from "../../helpers";
 
 
@@ -65,7 +59,6 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
     defaultValue ||
     {});
 
-  console.log(state)
   const [options, setOptions] = useState({stakeholders: {}, codes: {}, organizations: {}, outcomes: {}, indicators: {}});
   const {enqueueSnackbar} = useSnackbar();
 
@@ -75,7 +68,7 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
 
   const userContext = useContext(UserContext);
 
-  const attriConfig = fullLevelConfig.stakeholderOutcome;
+  const attriConfig = configs[CONFIGLEVEL].stakeholderOutcome;
 
 
   useEffect(() => {
@@ -299,7 +292,6 @@ export default function StakeholderOutcomeField({defaultValue, required, onChang
                 multiline
                 minRows={2}
                 onBlur={validateField(defaultValue, attriConfig, 'description', attribute2Compass['description'], setErrors)}
-
               />
             </Grid>
 

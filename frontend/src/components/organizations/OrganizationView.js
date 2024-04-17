@@ -3,7 +3,6 @@ import {Chip, Container, Typography} from "@mui/material";
 import {Add as AddIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useSnackbar} from 'notistack';
-import {deleteOrganization} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
@@ -95,7 +94,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
   const handleDelete = async (uri, form) => {
     console.log(uri)
 
-    deleteDataType('organization', uri).then(({success, message}) => {
+    deleteDataType('organization', uri, true).then(({success, message}) => {
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,

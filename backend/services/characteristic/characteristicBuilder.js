@@ -1,5 +1,4 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
-const {Server400Error} = require("../../utils");
+const configs = require("../fileUploading/configs");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {assignValue, assignValues} = require("../helpers");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
@@ -10,7 +9,7 @@ async function characteristicBuilder(environment, object, error, {characteristic
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCharacteristicModel;
   let ret;
@@ -21,7 +20,7 @@ async function characteristicBuilder(environment, object, error, {characteristic
   }
 
 
-  const config = baseLevelConfig['characteristic'];
+  const config = configs[configLevel]['characteristic'];
   let hasError = false;
   if (mainObject) {
 

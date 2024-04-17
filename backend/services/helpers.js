@@ -51,45 +51,73 @@ async function transSave(trans, object) {
     .setTimeout(5));
 }
 
-async function assignImpactNorms(config, object, mainModel, mainObject, propertyName, internalKey, addMessage, organizationUri, uri, hasError, error, impactNormsDict, mainModelType) {
+async function assignImpactNorms(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, organizationUri, uri, hasError, error, impactNormsDict, mainModelType) {
   let ignore;
   if (object && object[getFullPropertyURI(mainModel, propertyName)]) {
     mainObject[propertyName] = getValue(object, mainModel, propertyName)
   }
-  if (!mainObject[propertyName]) {
-    error += 1;
-    addMessage(8, 'propertyMissing',
-      {
-        uri,
-        type: getPrefixedURI(object['@type'][0]),
-        property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
-      },
-      config[internalKey]
-    )
-    ignore = true;
+  if (!mainObject[propertyName] && config[internalKey]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      } else if (environment === 'interface') {
+        Transaction.rollback();
+        throw new Server400Error(`hasTime is mandatory`);
+      }
+    } else if (config[internalKey].ignoreInstance) {
+      if (environment === 'fileUploading') {
+        ignore = true;
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, internalKey))
+        },
+        config[internalKey]
+      );
+
+
+
+    // error += 1;
+    // addMessage(8, 'propertyMissing',
+    //   {
+    //     uri,
+    //     type: getPrefixedURI(object['@type'][0]),
+    //     property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+    //   },
+    //   config[internalKey]
+    // )
+    // ignore = true;
   }
-  const impactNormsInDatabase = await GDBImpactNormsModel.findOne({_uri: mainObject[propertyName], organization: organizationUri})
-  const impactNormsInFile = impactNormsDict[mainObject[propertyName]];
-  if (impactNormsInDatabase) {
-    // add the outcome to the impactNorms
-    if (!impactNormsInDatabase[mainModelType])
-      impactNormsInDatabase[mainModelType] = []
-    impactNormsInDatabase[mainModelType] = [...impactNormsInDatabase[mainModelType], uri]
-    await impactNormsInDatabase.save();
+  if (mainObject[propertyName]) {
+    const impactNormsInDatabase = await GDBImpactNormsModel.findOne({_uri: mainObject[propertyName], organization: organizationUri})
+    const impactNormsInFile = impactNormsDict[mainObject[propertyName]];
+    if (impactNormsInDatabase) {
+      // add the outcome to the impactNorms
+      if (!impactNormsInDatabase[mainModelType])
+        impactNormsInDatabase[mainModelType] = []
+      impactNormsInDatabase[mainModelType] = [...impactNormsInDatabase[mainModelType], uri]
+      await impactNormsInDatabase.save();
+    }
+    if (!impactNormsInDatabase && !impactNormsInFile) {
+      error += 1;
+      addMessage(8, 'NoSuchImpactNorms',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName)),
+          impactNormsURI: mainObject[propertyName]
+        },
+        config[internalKey]
+      )
+      ignore = true;
+    }
   }
-  if (!impactNormsInDatabase && !impactNormsInFile) {
-    error += 1;
-    addMessage(8, 'NoSuchImpactNorms',
-      {
-        uri,
-        type: getPrefixedURI(object['@type'][0]),
-        property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName)),
-        impactNormsURI: mainObject[propertyName]
-      },
-      config[internalKey]
-    )
-    ignore = true;
-  }
+
 
   return {hasError, error, ignore};
 
@@ -206,6 +234,194 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
   return {hasError, error, ignore};
 }
 
+async function assignInvertValue(environment, config, object, mainModel, mainObject, {propertyName, internalKey}, objectDict, organization, {
+  objectModel,
+  objectType,
+  propertyToOrganization,
+  invertProperty,
+  invertPropertyMultiply
+}, addMessage, form, uri, hasError, error, getListOfValue) {
+  // add the object to the mainObject
+  let ignore;
+  if (mainObject[propertyName]) {
+    // have to remove the mainObject from the object
+    const previousObject = await objectModel.findOne({_uri: mainObject[propertyName]});
+    if (invertPropertyMultiply) {
+      previousObject[invertProperty] = previousObject[invertProperty].filter(item => item !== uri);
+    } else {
+      previousObject[invertProperty] = null;
+    }
+    await previousObject.save();
+  }
+
+
+  if (((environment === 'fileUploading' && !object[getFullPropertyURI(mainModel, propertyName)]) || (environment === 'interface' && !form[propertyName])) && config[internalKey]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      } else {
+        throw new Server400Error(`Property ${propertyName} are mandatory`);
+      }
+    } else if (config[internalKey].ignoreInstance) {
+      if (environment === 'fileUploading') {
+        ignore = true;
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+        },
+        config[internalKey]
+      );
+  } else if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || (form[propertyName])) {
+    mainObject[propertyName] = environment === 'fileUploading' ? getValue(object, mainModel, propertyName) : form[propertyName];
+    if (environment === 'interface' || !objectDict[mainObject[propertyName]]) {
+      // in this case, the object is not in the file, get the object from database and add the mainObject to it
+      const object = await objectModel.findOne({_uri: mainObject[propertyName]});
+      if (!object) {
+        if (environment === 'fileUploading') {
+          addTrace('        Error: bad reference');
+          addTrace(`            ${objectType} ${mainObject[propertyName]} appears neither in the file nor in the sandbox`);
+          addMessage(8, 'badReference',
+            {uri, referenceURI: mainObject[propertyName], type: objectType}, {rejectFile: true});
+          hasError = true;
+          error += 1;
+        } else {
+          throw new Server400Error(`${objectType} ${objectURI} is not in the database`)
+        }
+
+      } else if (propertyToOrganization && object[propertyToOrganization] !== organization._uri) {
+        if (environment === 'fileUploading') {
+          addTrace('        Error:');
+          addTrace(`            ${objectType} ${mainObject[propertyName]} does not belong to this organization`);
+          addMessage(8, 'subjectDoesNotBelong', {
+            uri,
+            type: objectType,
+            subjectURI: mainObject[propertyName]
+          }, {rejectFile: true});
+          error += 1;
+          hasError = true;
+        } else {
+          throw new Server400Error(`${objectType} ${mainObject[propertyName]} does not belong to this organization`)
+        }
+      } else {
+        if (invertPropertyMultiply) {
+          if (!object[invertProperty])
+            object[invertProperty] = [];
+          if (!object[invertProperty].includes(uri)) {
+            object[invertProperty] = [...object[invertProperty], uri]
+          }
+        }
+
+        await object.save();
+      }
+
+    } // if the object is in the file, don't have to worry about adding the mainObject to the it
+
+  }
+  return {hasError, error, ignore};
+}
+
+async function assignInvertValues(environment, config, object, mainModel, mainObject, {propertyName, internalKey}, objectDict, organization, {
+  objectModel,
+  objectType,
+  propertyToOrganization,
+  invertProperty,
+  invertPropertyMultiply
+}, addMessage, form, uri, hasError, error, getListOfValue) {
+  // add the object to the mainObject
+  let ignore;
+  if (mainObject[propertyName] && mainObject[propertyName].length) {
+    // have to remove the mainObject from the objects
+    for (const objectUri of mainObject[propertyName]) {
+      const previousObject = await objectModel.findOne({_uri: objectUri});
+      if (invertPropertyMultiply) {
+        previousObject[invertProperty] = previousObject[invertProperty].filter(item => item !== uri);
+      } else {
+        previousObject[invertProperty] = null;
+      }
+      await previousObject.save();
+    }
+  }
+
+
+  if (((environment === 'fileUploading' && !object[getFullPropertyURI(mainModel, propertyName)]) || (environment === 'interface' && (!form[propertyName] || !form[propertyName].length))) && config[internalKey]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      } else {
+        throw new Server400Error(`Property ${propertyName} are mandatory`);
+      }
+    } else if (config[internalKey].ignoreInstance) {
+      if (environment === 'fileUploading') {
+        ignore = true;
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+        },
+        config[internalKey]
+      );
+  } else if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || (form[propertyName])) {
+    mainObject[propertyName] = [];
+    for (const objectURI of environment === 'fileUploading'? getListOfValue(object, mainModel, propertyName) : form[propertyName]) {
+      mainObject[propertyName] = [...mainObject[propertyName], objectURI]
+      // add mainObject to object
+      if (environment === 'interface' || !objectDict[objectURI]) {
+        // in this case, the object is not in the file, get the object from database and add the mainObject to it
+        const object = await objectModel.findOne({_uri: objectURI});
+        if (!object) {
+          if (environment === 'fileUploading') {
+            addTrace('        Error: bad reference');
+            addTrace(`            ${objectType} ${objectURI} appears neither in the file nor in the sandbox`);
+            addMessage(8, 'badReference',
+              {uri, referenceURI: objectURI, type: objectType}, {rejectFile: true});
+            hasError = true;
+            error += 1;
+          } else {
+            throw new Server400Error(`${objectType} ${objectURI} is not in the database`)
+          }
+
+        } else if (propertyToOrganization && object[propertyToOrganization] !== organization._uri) {
+          if (environment === 'fileUploading') {
+            addTrace('        Error:');
+            addTrace(`            ${objectType} ${objectURI} does not belong to this organization`);
+            addMessage(8, 'subjectDoesNotBelong', {
+              uri,
+              type: objectType,
+              subjectURI: objectURI
+            }, {rejectFile: true});
+            error += 1;
+            hasError = true;
+          } else {
+            throw new Server400Error(`${objectType} ${objectURI} does not belong to this organization`)
+          }
+        } else {
+          if (invertPropertyMultiply) {
+            if (!object[invertProperty])
+              object[invertProperty] = [];
+            if (!object[invertProperty].includes(uri)) {
+              object[invertProperty] = [...object[invertProperty], uri]
+            }
+          }
+          await object.save();
+        }
+
+      } // if the object is in the file, don't have to worry about adding the mainObject to the it
+    }
+  }
+  return {hasError, error, ignore};
+}
+
 function assignValues(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error, getListOfValue) {
   if (mainObject[propertyName]) {
     // if the mode is updating
@@ -293,5 +509,7 @@ module.exports = {
   assignMeasure,
   getFullObjectURI,
   assignImpactNorms,
-  assignTimeInterval
+  assignTimeInterval,
+  assignInvertValues,
+  assignInvertValue
 };

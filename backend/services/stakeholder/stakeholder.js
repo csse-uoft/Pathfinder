@@ -3,7 +3,7 @@ const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
 const {GDBStakeholderModel} = require("../../models/stakeholder");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-
+const {configLevel} = require('../../config');
 const resource = 'Stakeholder'
 
 const fetchStakeholderHandler = async (req, res, next) => {

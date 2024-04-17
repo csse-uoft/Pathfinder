@@ -8,10 +8,10 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import CounterFactualField from "../shared/CounterFactualField";
-import {updateOutcome} from "../../api/outcomeApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {validateForm} from "../../helpers";
 
 const useStyles = makeStyles(() => ({
@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditCounterfactual() {
-  const attriConfig = fullLevelConfig.counterfactual
+  const attriConfig = configs[CONFIGLEVEL].counterfactual
 
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)

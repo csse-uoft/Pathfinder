@@ -6,7 +6,7 @@ const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
-const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
+const {configLevel} = require('../../config');
 
 const resource = 'StakeholderOutcome'
 
@@ -15,7 +15,7 @@ const createStakeholderOutcomeHandler = async (req, res, next) => {
     const {form} = req.body;
     if (await hasAccess(req, 'create' + resource)) {
       await Transaction.beginTransaction();
-      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form)) {
+      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form, configLevel)) {
         await Transaction.commit();
         return res.status(200).json({success: true});
       }
@@ -75,8 +75,8 @@ const updateStakeholderOutcomeHandler = async (req, res, next) => {
       return await updateStakeholderOutcome(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
-    if (Transaction.isActive())
-      Transaction.rollback();
+    // if (Transaction.isActive())
+    //   Transaction.rollback();
     next(e);
   }
 };
@@ -84,10 +84,10 @@ const updateStakeholderOutcomeHandler = async (req, res, next) => {
 const updateStakeholderOutcome = async (req, res) => {
   const {form} = req.body;
   const {uri} = req.params;
-  await Transaction.beginTransaction();
+  // await Transaction.beginTransaction();
   form.uri = uri;
-  if (await stakeholderOutcomeBuilder('interface', null, null,null, {}, {}, form)) {
-    await Transaction.commit();
+  if (await stakeholderOutcomeBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
+    // await Transaction.commit();
     return res.status(200).json({success: true});
   }
 }

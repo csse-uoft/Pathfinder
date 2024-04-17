@@ -6,7 +6,8 @@ import Dropdown from "./fields/MultiSelectField";
 import GeneralField from "./fields/GeneralField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {isFieldRequired, validateField} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 
 
 const filterOptions = createFilterOptions({
@@ -63,7 +64,7 @@ export default function CounterFactualField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const attriConfig = fullLevelConfig.counterfactual
+  const attriConfig = configs[CONFIGLEVEL].counterfactual
 
   const [options, setOptions] = useState({features: {}});
 

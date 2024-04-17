@@ -1,4 +1,4 @@
-const {fullLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
@@ -15,7 +15,7 @@ async function indicatorBuilder(environment, object, organization, error, {
                                   getFullPropertyURI,
                                   getValue,
                                   getListOfValue
-                                }, form) {
+                                }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBIndicatorModel;
   let hasError = false;
@@ -39,7 +39,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     uri = mainObject._uri;
   }
 
-  const config = fullLevelConfig['indicator'];
+  const config = configs[configLevel]['indicator'];
   if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
@@ -78,7 +78,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     error = ret.error;
 
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error);
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -115,6 +115,8 @@ async function indicatorBuilder(environment, object, organization, error, {
       await mainObject.save();
       return true
     }
+
+
 
 
     // add outcomes
