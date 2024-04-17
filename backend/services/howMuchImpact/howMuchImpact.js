@@ -44,6 +44,26 @@ const fetchHowMuchImpactHandler = async (req, res, next) => {
   }
 };
 
+const updateHowMuchImpactHandler = async (req, res, next) => {
+  try {
+    const {form} = req.body;
+    await Transaction.beginTransaction();
+    if (await hasAccess(req, 'update' + resource)) {
+      if (await howMuchImpactBuilder('interface', form.subtype
+        , null, null, null,{}, {}, form, configLevel)){
+        await Transaction.commit();
+        return res.status(200).json({success: true})
+      }
+    } else {
+      throw new Server400Error('Wrong Auth')
+    }
+  } catch (e) {
+    if (Transaction.isActive())
+      await Transaction.rollback();
+    next(e);
+  }
+}
+
 const fetchHowMuchImpact = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
@@ -51,21 +71,21 @@ const fetchHowMuchImpact = async (req, res) => {
   let howMuchImpact;
   // howMuchImpact = await GDBHowMuchImpactModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']})
   if (!howMuchImpact) {
-    howMuchImpact = await GDBImpactDurationModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+    howMuchImpact = await GDBImpactDurationModel.findOne({_uri: uri}, {populates: ['hasTime.hasBeginning','hasTime.hasEnd', 'value']});
   }
   if (!howMuchImpact) {
-    howMuchImpact = await GDBImpactScaleModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+    howMuchImpact = await GDBImpactScaleModel.findOne({_uri: uri}, {populates: ['value']});
   }
   if (!howMuchImpact) {
-    howMuchImpact = await GDBImpactDepthModel.findOne({_uri: uri}, {populates: ['hasTime', 'value']});
+    howMuchImpact = await GDBImpactDepthModel.findOne({_uri: uri}, {populates: ['value']});
   }
 
 
 
   if (!howMuchImpact)
     throw Server400Error('No such code');
-  howMuchImpact.startTime = howMuchImpact.hasTime?.startTime;
-  howMuchImpact.endTime = howMuchImpact.hasTime?.endTime;
+  howMuchImpact.startTime = howMuchImpact.hasTime?.hasBeginning?.date;
+  howMuchImpact.endTime = howMuchImpact.hasTime?.hasEnd?.date;
   howMuchImpact.value = howMuchImpact.value.numericalValue;
   howMuchImpact.subtype = howMuchImpact.schemaOptions.name.substring(1);
   return res.status(200).json({success: true, howMuchImpact});
@@ -117,5 +137,5 @@ const fetchHowMuchImpacts = async (req, res) => {
 
 
 module.exports = {
-  fetchHowMuchImpactsHandler, createHowMuchImpactHandler, fetchHowMuchImpactHandler, fetchHowMuchImpactInterfaceHandler
+  fetchHowMuchImpactsHandler, createHowMuchImpactHandler, fetchHowMuchImpactHandler, fetchHowMuchImpactInterfaceHandler, updateHowMuchImpactHandler
 }
