@@ -204,7 +204,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
     return (
       <Container>
-        <Typography variant={'h2'}> Outcomes </Typography>
+        <Typography variant={'h2'}> Outcome </Typography>
         <EnhancedTableToolbar numSelected={0}
                               title={''}
                               customToolbar={

@@ -2,7 +2,7 @@ const baseLevelConfig = {
 
   theme: {},
   outcome: {
-    'cids:hasIndicator': {flag: true},
+    // 'cids:hasIndicator': {flag: true},
   },
   indicator: {
     'cids:forOutcome': {flag: true},
@@ -10,7 +10,7 @@ const baseLevelConfig = {
   },
   indicatorReport: {
     'cids:hasName': {flag: true},
-    'cids:forIndicator': {ignoreInstance: true},
+    'cids:forIndicator': {flag: true},
     'iso21972:value': {flag: true}
   },
   stakeholderOutcome: {},

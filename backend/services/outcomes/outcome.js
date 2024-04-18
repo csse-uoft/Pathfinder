@@ -186,10 +186,10 @@ function cacheListOfObjects(objs, objDict) {
 const updateOutcome = async (req, res) => {
   const {form} = req.body;
   const {uri} = req.params;
-  await Transaction.beginTransaction();
+  // await Transaction.beginTransaction();
   form.uri = uri;
   if (await outcomeBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
-    await Transaction.commit();
+    // await Transaction.commit();
     return res.status(200).json({success: true});
   }
 }
@@ -315,8 +315,8 @@ const updateOutcomeHandler = async (req, res, next) => {
       return await updateOutcome(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
-    if (Transaction.isActive())
-      Transaction.rollback();
+    // if (Transaction.isActive())
+    //   Transaction.rollback();
     next(e);
   }
 };
