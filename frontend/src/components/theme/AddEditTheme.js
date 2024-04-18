@@ -89,7 +89,7 @@ export default function AddEditTheme() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createDataType('theme', form).then((ret) => {
+      createDataType('theme', {form}).then((ret) => {
           if (ret.success) {
             setState({loadingButton: false, submitDialog: false,});
             navigate('/themes');

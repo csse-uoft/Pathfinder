@@ -3,7 +3,6 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {Transaction} = require("graphdb-utils");
 const {themeBuilder} = require("./themeBuilder");
 const {configLevel} = require('../../config');
-const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
 
 const createTheme = async (req, res) => {
     const form = req.body;

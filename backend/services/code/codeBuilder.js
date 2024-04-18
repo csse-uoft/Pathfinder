@@ -13,7 +13,7 @@ async function codeBuilder(environment, object, organization, error, {codeDict},
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCodeModel;
   let ret;
-  const mainObject = environment === 'fileUploading' ? codeDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? codeDict[uri] : (form?.uri? (await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri})) : mainModel({}));
   if (environment !== 'fileUploading') {
     await mainObject.save();
     uri = mainObject._uri;

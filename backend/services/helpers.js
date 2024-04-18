@@ -247,7 +247,7 @@ async function assignInvertValue(environment, config, object, mainModel, mainObj
     // have to remove the mainObject from the object
     const previousObject = await objectModel.findOne({_uri: mainObject[propertyName]});
     if (invertPropertyMultiply) {
-      previousObject[invertProperty] = previousObject[invertProperty].filter(item => item !== uri);
+      previousObject[invertProperty] = previousObject[invertProperty]?.filter(item => item !== uri) || [];
     } else {
       previousObject[invertProperty] = null;
     }
