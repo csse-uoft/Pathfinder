@@ -1,9 +1,10 @@
 const configs = require("../fileUploading/configs");
 const {assignValue, assignValues,
-  assignMeasure, assignTimeInterval
+  assignMeasure, assignTimeInterval, assignInvertValue
 } = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBOrganizationModel} = require("../../models/organization");
+const {GDBIndicatorModel} = require("../../models/indicator");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorReportBuilder(environment, object, organization, error, {
@@ -81,7 +82,13 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     if (environment === 'interface') {
       form.forIndicator = form.indicator
     }
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
+
+    ret = await assignInvertValue(environment, config, object, mainModel, mainObject, {
+      propertyName: 'forIndicator', internalKey: 'cids:forIndicator'
+    }, objectDict, organization, {
+      objectModel: GDBIndicatorModel, objectType: 'Indicator', invertProperty: 'indicatorReports', invertPropertyMultiply: true, propertyToOrganization: 'forOrganization'
+    }, addMessage, form, uri, hasError, error, getListOfValue);
+    // ret = assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
     error = ret.error;
     hasError = ret.hasError;
     ignore = ret.ignore;

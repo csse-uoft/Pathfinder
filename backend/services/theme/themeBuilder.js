@@ -15,9 +15,7 @@ async function themeBuilder(environment, object, error, {themeDict}, {
   let hasError = false;
   const mainModel = GDBThemeModel;
   let ret;
-  const mainObject = environment === 'fileUploading' ? themeDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({
-    // name: form.name
-  }, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? themeDict[uri] : (form?.uri? (await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri})) : mainModel({}));
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
