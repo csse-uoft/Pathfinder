@@ -198,7 +198,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
       <Typography variant={'h2'}> Indicator Class View </Typography>
       <DataTable
         title={multi ? "Indicators" : "Indicator"}
-        data={state.data.filter(indicator => selectedOrganizations.includes(indicator.forOrganization))}
+        data={single? state.data : state.data.filter(indicator => selectedOrganizations.includes(indicator.forOrganization))}
         columns={columns}
         uriField="uri"
         customToolbar={
@@ -211,12 +211,13 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
                 icon={<AddIcon/>}
                 label="Add new Indicator"
                 variant="outlined"/> : null}
-            <DropdownFilter selectedOrganizations={selectedOrganizations}
-                            areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
-                            handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
-                            handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
-                            handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
-                            handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
+            {multi? <DropdownFilter selectedOrganizations={selectedOrganizations}
+                             areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
+                             organizationInterfaces
+                             handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                             handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                             handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                             handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>: null}
           </div>
         }
 
