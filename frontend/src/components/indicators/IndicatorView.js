@@ -195,7 +195,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
 
   return (
     <Container>
-      <Typography variant={'h2'}> Indicator </Typography>
+      <Typography variant={'h2'}> Indicators </Typography>
       <DataTable
         title={multi ? "Indicators" : "Indicator"}
         data={single? state.data : state.data.filter(indicator => selectedOrganizations.includes(indicator.forOrganization))}

@@ -146,7 +146,7 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
 
   return (
     <Container>
-      <Typography variant={'h2'}> Theme Class View </Typography>
+      <Typography variant={'h2'}> Themes </Typography>
       <DataTable
         title={multi ? "Themes": 'Theme'}
         data={state.data}

@@ -163,7 +163,7 @@ export default function CharacteristicView({organizationUser, groupUser, superUs
 
   return (
     <Container>
-      <Typography variant={'h2'}> Characteristic Class View </Typography>
+      <Typography variant={'h2'}> Characteristics </Typography>
       <DataTable
         title={multi?"Characteristics":"Characteristic"}
         data={state.data}

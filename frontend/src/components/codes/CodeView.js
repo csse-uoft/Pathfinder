@@ -154,7 +154,7 @@ export default function CodeView({ organizationUser, groupUser, superUser, multi
 
     return (
         <Container>
-            <Typography variant={'h2'}> Code Class View </Typography>
+            <Typography variant={'h2'}> Codes </Typography>
             <DataTable
                 title={multi ? "Codes" : "Code"}
                 data={state.data}

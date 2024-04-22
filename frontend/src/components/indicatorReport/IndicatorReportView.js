@@ -144,7 +144,7 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
 
   return (
     <Container>
-      <Typography variant={'h2'}> Indicator Report </Typography>
+      <Typography variant={'h2'}> Indicator Reports </Typography>
       <EnhancedTableToolbar title={'Indicators'}
                             numSelected={0}
                             customToolbar={
