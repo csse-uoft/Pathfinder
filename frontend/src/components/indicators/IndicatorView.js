@@ -27,6 +27,13 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
 
   const [indicatorReportDict, setIndicatorReportDict] = useState({})
 
+  const showDeleteDialog = (uri) => {
+    setState(state => ({
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete code ' + uri + ' ?'
+    }));
+  };
+
   useEffect(() => {
     fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}`: encodeURIComponent(organizationUri)).then(({success, indicatorReports}) => {
       if (success) {
@@ -134,7 +141,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     {
       label: ' ',
       body: ({_uri}) => {
-        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
                              hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
                              handleDelete={() => showDeleteDialog(_uri)}/>;
       }

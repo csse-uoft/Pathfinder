@@ -8,6 +8,7 @@ const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {dataReferredBySubjects, messageGeneratorDeletingChecker} = require("../helpers");
 
 
 const fetchIndicators = async (req, res) => {
@@ -263,6 +264,34 @@ const updateIndicatorHandler = async (req, res, next) => {
     next(e);
   }
 };
+
+
+const deleteIndicatorHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteIndicator'))
+      return await deleteIndicator(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteIndicator = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+
+  } else {
+    const indicatorReports = await dataReferredBySubjects('cids:IndicatorReport', uri, 'cids:forIndicator');
+    if (indicatorReports.length) {
+      const message = messageGeneratorDeletingChecker({IndicatorReport: indicatorReports});
+      return res.status(200).json({message, success: false});
+    }
+  }
+}
 
 const createIndicator = async (req, res) => {
   const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
