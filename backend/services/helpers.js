@@ -296,6 +296,15 @@ function messageGeneratorDeletingChecker(dict) {
   return message
 }
 
+async function checkAllReferees(objectUri, subjectType2Predicate) {
+
+  const dict = {}
+  for (let subjectType in subjectType2Predicate) {
+    dict[subjectType] = await dataReferredBySubjects(subjectType, objectUri, subjectType2Predicate[subjectType]);
+  }
+  return dict
+}
+
 
 
 module.exports = {
@@ -312,5 +321,6 @@ module.exports = {
   assignTimeInterval,
   dataReferredBySubjects,
   messageGeneratorDeletingChecker,
-  deleteDataAndAllReferees
+  deleteDataAndAllReferees,
+  checkAllReferees
 };

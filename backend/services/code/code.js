@@ -4,7 +4,7 @@ const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
 const {codeBuilder} = require("./codeBuilder");
 const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
-const {dataReferredBySubjects, messageGeneratorDeletingChecker, deleteDataAndAllReferees} = require("../helpers");
+const {messageGeneratorDeletingChecker, deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const fetchCodeHandler = async (req, res, next) => {
   try {
@@ -78,19 +78,26 @@ const deleteCode = async (req, res) => {
     return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
   } else {
 
-    const indicators = await dataReferredBySubjects('cids:Indicator', uri, 'cids:hasCode');
-    const outcomes = await dataReferredBySubjects('cids:Outcome', uri, 'cids:hasCode');
-    const themes = await dataReferredBySubjects('cids:Theme', uri, 'cids:hasCode');
-    const stakeholderOutcomes = await dataReferredBySubjects('cids:StakeholderOutcome', uri, 'cids:hasCode');
-    const characteristic = await dataReferredBySubjects('cids:Characteristic', uri, 'cids:hasCode');
-
-    const dict = {
-      Indicator: indicators,
-      Outcome: outcomes,
-      Theme: themes,
-      StakeholderOutcome: stakeholderOutcomes,
-      Characteristic: characteristic
-    };
+    // const indicators = await dataReferredBySubjects('cids:Indicator', uri, 'cids:hasCode');
+    // const outcomes = await dataReferredBySubjects('cids:Outcome', uri, 'cids:hasCode');
+    // const themes = await dataReferredBySubjects('cids:Theme', uri, 'cids:hasCode');
+    // const stakeholderOutcomes = await dataReferredBySubjects('cids:StakeholderOutcome', uri, 'cids:hasCode');
+    // const characteristic = await dataReferredBySubjects('cids:Characteristic', uri, 'cids:hasCode');
+    //
+    // const dict = {
+    //   Indicator: indicators,
+    //   Outcome: outcomes,
+    //   Theme: themes,
+    //   StakeholderOutcome: stakeholderOutcomes,
+    //   Characteristic: characteristic
+    // };
+    const dict = await checkAllReferees(uri, {
+      'cids:Indicator': 'cids:hasCode',
+      'cids:Outcome': 'cids:hasCode',
+      'cids:Theme': 'cids:hasCode',
+      'cids:StakeholderOutcome': 'cids:hasCode',
+      'cids:Characteristic': 'cids:hasCode'
+    })
     const message = messageGeneratorDeletingChecker(dict);
     return res.status(200).json({message, success: true});
   }
@@ -116,27 +123,27 @@ const updateCode = async (req, res) => {
   return res.status(200).json({success: true});
 };
 
-async function createCode(req, res) {
-  const {form} = req.body;
-  if (!form || !form.definedBy || !form.specification || !form.identifier || !form.name || !form.description || !form.codeValue || !form.iso72Value) {
-    throw new Server400Error('Invalid input');
-  }
-  const code = GDBCodeModel({
-    definedBy: form.definedBy,
-    specification: form.specification,
-    identifier: form.identifier,
-    name: form.name,
-    description: form.description,
-    codeValue: form.codeValue,
-    iso72Value: GDBMeasureModel({
-      numericalValue: form.iso72Value
-    })
-  }, {uri: form.uri});
-  await code.save();
-  return res.status(200).json({success: true});
-
-
-}
+// async function createCode(req, res) {
+//   const {form} = req.body;
+//   if (!form || !form.definedBy || !form.specification || !form.identifier || !form.name || !form.description || !form.codeValue || !form.iso72Value) {
+//     throw new Server400Error('Invalid input');
+//   }
+//   const code = GDBCodeModel({
+//     definedBy: form.definedBy,
+//     specification: form.specification,
+//     identifier: form.identifier,
+//     name: form.name,
+//     description: form.description,
+//     codeValue: form.codeValue,
+//     iso72Value: GDBMeasureModel({
+//       numericalValue: form.iso72Value
+//     })
+//   }, {uri: form.uri});
+//   await code.save();
+//   return res.status(200).json({success: true});
+//
+//
+// }
 
 module.exports = {
   createCodeHandler, fetchCodeHandler, updateCodeHandler, deleteCodeHandler
