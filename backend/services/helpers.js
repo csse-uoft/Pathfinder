@@ -1,6 +1,6 @@
 const {Server400Error} = require("../utils");
 const {GDBMeasureModel} = require("../models/measure");
-const {Transaction} = require("graphdb-utils");
+const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../models/time");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
@@ -259,6 +259,43 @@ function assignMeasure(environment, config, object, mainModel, mainObject, prope
   return {hasError, error};
 }
 
+async function dataReferredBySubjects(subjectType, objectUri, predicate) {
+  const query = `${SPARQL.getSPARQLPrefixes()} 
+  select * where {
+  ?subject rdf:type ${subjectType} .
+  ?subject ${predicate} <${objectUri}> .
+  }`;
+  let subjects = []
+  await GraphDB.sendSelectQuery(query, false, ({subject}) => {
+    subjects = [...subjects, subject.id]
+  })
+  return subjects
+}
+
+async function deleteDataAndAllReferees(objectUri) {
+  let query = `${SPARQL.getSPARQLPrefixes()} 
+        delete where {
+            ?subject cids:hasCode <${objectUri}> .
+        }`;
+  await GraphDB.sendUpdateQuery(query, false);
+
+  query = `
+        delete where {
+            <${objectUri}> ?p ?o.
+        }`
+  await GraphDB.sendUpdateQuery(query, false);
+}
+
+
+function messageGeneratorDeletingChecker(dict) {
+  let message = ''
+  for (let dataType in dict) {
+    for (let uri of dict[dataType])
+      message += `DataType: ${dataType}, URI: ${uri} \n`
+  }
+  return message
+}
+
 
 
 module.exports = {
@@ -272,5 +309,8 @@ module.exports = {
   assignMeasure,
   getFullObjectURI,
   assignImpactNorms,
-  assignTimeInterval
+  assignTimeInterval,
+  dataReferredBySubjects,
+  messageGeneratorDeletingChecker,
+  deleteDataAndAllReferees
 };

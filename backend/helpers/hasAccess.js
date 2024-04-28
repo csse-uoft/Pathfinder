@@ -185,6 +185,9 @@ async function hasAccess(req, operationType) {
     case 'fetchCodes':
       if (userAccount.isSuperuser)
         return true;
+    case 'deleteCode':
+      if (userAccount.isSuperuser)
+        return true;
 
 
     // stakeholder

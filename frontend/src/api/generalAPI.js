@@ -1,4 +1,4 @@
-import {getJson, postJson} from "./index";
+import {deleteJson, getJson, postJson} from "./index";
 
 export async function fetchDataTypes(dataType, extra) {
   return getJson(`/api/${dataType}s/` + (extra? extra:''));
@@ -14,5 +14,10 @@ export async function createDataType(dataType, params, level) {
 
 export async function fetchDataType(dataType, uri) {
   return getJson(`/api/${dataType}/${uri}/`);
+}
+
+
+export async function deleteDataType(dataType, uri, params) {
+  return deleteJson(`/api/${dataType}/${encodeURIComponent(uri)}/`, params);
 }
 
