@@ -9,6 +9,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes, fetchDataType, deleteDataType} from "../../api/generalAPI";
 import DeleteDialog from "../shared/DeleteDialog";
+import {messageGeneratorDeletingChecker} from "../../helpers/messageGeneratorDeletingChecker";
 
 export default function CodeView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -22,9 +23,6 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
     selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
-    // confirmDialog: '',
-    // loadingButton: false,
-    // continueButton: false
   });
   const [deleteDialog, setDeleteDialog] = useState({
     continueButton: false,
@@ -63,14 +61,14 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
     }));
   };
 
-  function messageGeneratorDeletingChecker(dict) {
-    let message = ''
-    for (let dataType in dict) {
-      for (let uri of dict[dataType])
-        message += `DataType: ${dataType}, URI: ${uri} \n`
-    }
-    return message
-  }
+  // function messageGeneratorDeletingChecker(dict) {
+  //   let message = ''
+  //   for (let dataType in dict) {
+  //     for (let uri of dict[dataType])
+  //       message += `DataType: ${dataType}, URI: ${uri} \n`
+  //   }
+  //   return message
+  // }
 
   const handleDelete = async (uri, form) => {
     if (!deleteDialog.confirmDialog) {
