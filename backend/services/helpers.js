@@ -3,9 +3,19 @@ const {GDBMeasureModel} = require("../models/measure");
 const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../models/time");
+const {fullLevelConfig} = require("./fileUploading/configs");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
+
+
+const rdfType2DataType = {
+  'cids:Indicator': 'indicator',
+  'cids:Outcome': 'outcome',
+  'cids:Theme': 'theme',
+  'cids:StakeholderOutcome': 'stakeholderOutcome',
+  'cids:Characteristic': 'characteristic'
+}
 /**
  * return the first URI belongs to the object[property]
  * @param object
@@ -287,22 +297,30 @@ async function deleteDataAndAllReferees(objectUri) {
 }
 
 
-function messageGeneratorDeletingChecker(dict) {
-  let message = ''
-  for (let dataType in dict) {
-    for (let uri of dict[dataType])
-      message += `DataType: ${dataType}, URI: ${uri} \n`
-  }
-  return message
-}
+// function messageGeneratorDeletingChecker(mandatoryReferee, regularReferee) {
+//   let message = ''
+//   for (let dataType in regularReferee) {
+//     for (let uri of dict[dataType])
+//       message += `DataType: ${dataType}, URI: ${uri} \n`
+//   }
+//
+//   return message
+// }
 
 async function checkAllReferees(objectUri, subjectType2Predicate) {
 
-  const dict = {}
+  const regularReferee = {}
+  const mandatoryReferee = {};
   for (let subjectType in subjectType2Predicate) {
-    dict[subjectType] = await dataReferredBySubjects(subjectType, objectUri, subjectType2Predicate[subjectType]);
+    const subjects = await dataReferredBySubjects(subjectType, objectUri, subjectType2Predicate[subjectType]);
+    if (fullLevelConfig[rdfType2DataType[subjectType]]?.[subjectType2Predicate[subjectType]] && subjects?.length){
+      // there are mandatory predicate being affected
+      mandatoryReferee[subjectType] = subjects
+    } else {
+      regularReferee[subjectType] = subjects
+    }
   }
-  return dict
+  return {mandatoryReferee, regularReferee}
 }
 
 
@@ -320,7 +338,6 @@ module.exports = {
   assignImpactNorms,
   assignTimeInterval,
   dataReferredBySubjects,
-  messageGeneratorDeletingChecker,
   deleteDataAndAllReferees,
   checkAllReferees
 };

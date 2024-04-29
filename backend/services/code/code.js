@@ -1,9 +1,8 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
-const {GDBMeasureModel} = require("../../models/measure");
 const {codeBuilder} = require("./codeBuilder");
-const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
+const {Transaction} = require("graphdb-utils");
 const {messageGeneratorDeletingChecker, deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const fetchCodeHandler = async (req, res, next) => {
@@ -91,15 +90,15 @@ const deleteCode = async (req, res) => {
     //   StakeholderOutcome: stakeholderOutcomes,
     //   Characteristic: characteristic
     // };
-    const dict = await checkAllReferees(uri, {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
       'cids:Indicator': 'cids:hasCode',
       'cids:Outcome': 'cids:hasCode',
       'cids:Theme': 'cids:hasCode',
       'cids:StakeholderOutcome': 'cids:hasCode',
       'cids:Characteristic': 'cids:hasCode'
     })
-    const message = messageGeneratorDeletingChecker(dict);
-    return res.status(200).json({message, success: true});
+    // const message = messageGeneratorDeletingChecker(mandatoryReferee, regularReferee);
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
 
 

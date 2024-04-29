@@ -1,16 +1,14 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Button, Chip, Container, Typography} from "@mui/material";
-import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
+import {Chip, Container, Typography} from "@mui/material";
+import {Add as AddIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
-import {deleteTheme} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes, fetchDataType, deleteDataType} from "../../api/generalAPI";
-import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import DeleteDialog from "../shared/DeleteDialog";
 
 export default function CodeView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -24,8 +22,14 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
     selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
-    confirmDialog: '',
+    // confirmDialog: '',
+    // loadingButton: false,
+    // continueButton: false
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
     loadingButton: false,
+    confirmDialog: '',
   });
   const [trigger, setTrigger] = useState(true);
 
@@ -59,13 +63,36 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
     }));
   };
 
+  function messageGeneratorDeletingChecker(dict) {
+    let message = ''
+    for (let dataType in dict) {
+      for (let uri of dict[dataType])
+        message += `DataType: ${dataType}, URI: ${uri} \n`
+    }
+    return message
+  }
+
   const handleDelete = async (uri, form) => {
-    if (!state.confirmDialog) {
-      deleteDataType('code', uri).then(({success, message}) => {
+    if (!deleteDialog.confirmDialog) {
+      deleteDataType('code', uri).then(({success, mandatoryReferee, regularReferee}) => {
         if (success) {
-          setState(state => ({
-            ...state, showDeleteDialog: false, confirmDialog: message
-          }));
+          console.log(mandatoryReferee, regularReferee)
+          if (Object.keys(mandatoryReferee)?.length) {
+            setState(state => ({
+              ...state, showDeleteDialog: false
+            }));
+            setDeleteDialog(state => ({
+              ...state, confirmDialog: messageGeneratorDeletingChecker(mandatoryReferee), continueButton: false
+            }))
+          } else {
+            setState(state => ({
+              ...state, showDeleteDialog: false,
+            }));
+            setDeleteDialog(state => ({
+              ...state, confirmDialog: messageGeneratorDeletingChecker(regularReferee), continueButton: true
+            }))
+          }
+
           // setTrigger(!trigger);
           // enqueueSnackbar(message || "Success", {variant: 'success'})
         }
@@ -78,12 +105,12 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else {
-      setState(state => ({
+      setDeleteDialog(state => ({
         ...state, loadingButton: true
       }))
       deleteDataType('code', uri, {checked: true}).then(({success, message}) => {
         if (success) {
-          setState(state => ({
+          setDeleteDialog(state => ({
             ...state, confirmDialog: '', loadingButton: false
           }));
           setTrigger(!trigger);
@@ -181,7 +208,7 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
 
   return (
     <Container>
-      <Typography variant={'h2'}> Code Class View </Typography>
+      <Typography variant={'h2'}> Codes </Typography>
       <DataTable
         title={multi ? "Codes" : "Code"}
         data={state.data}
@@ -205,14 +232,15 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
         delete={handleDelete}
       />
-      <AlertDialog dialogContentText={state.confirmDialog}
-                   dialogTitle={'The Code is referred by these subjects, are you sure you would like to delete it?'}
-                   buttons={[<Button onClick={() => setState(state => ({...state, confirmDialog: ''}))}
-                                     key={'cancel'}>{'cancel'}</Button>,
-                     <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                    key={'confirm'}
-                                    onClick={() => handleDelete(state.selectedUri)} children="confirm" autoFocus/>]}
-                   open={!!state.confirmDialog}/>
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete}
+        selectedUri={state.selectedUri}
+      >
+
+      </DeleteDialog>
+
     </Container>
   );
 }
