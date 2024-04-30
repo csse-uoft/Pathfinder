@@ -617,6 +617,10 @@ async function hasAccess(req, operationType) {
         //   return true;
       }
       break;
+
+    case 'deleteOutcome':
+      if (userAccount.isSuperuser)
+        return true;
     case 'fetchOutcome':
       if (userAccount.isSuperuser)
         return true;
