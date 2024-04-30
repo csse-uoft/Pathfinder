@@ -83,6 +83,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'deleteDataset':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     case 'fetchDatasets':
       if (userAccount.isSuperuser)
         return true;

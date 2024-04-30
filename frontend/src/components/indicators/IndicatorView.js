@@ -81,7 +81,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
   const showDeleteDialog = (uri) => {
     setState(state => ({
       ...state, selectedUri: uri, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete code ' + uri + ' ?'
+      deleteDialogTitle: 'Delete Indicator ' + uri + ' ?'
     }));
   };
 
