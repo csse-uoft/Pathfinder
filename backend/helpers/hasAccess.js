@@ -732,6 +732,9 @@ async function hasAccess(req, operationType) {
       return true;
 
 
+    case 'deleteIndicatorReport':
+      if (userAccount.isSuperuser)
+        return true;
     case 'createIndicatorReport':
       if (userAccount.isSuperuser)
         return true;
