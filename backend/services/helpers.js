@@ -282,10 +282,10 @@ async function dataReferredBySubjects(subjectType, objectUri, predicate) {
   return subjects
 }
 
-async function deleteDataAndAllReferees(objectUri) {
+async function deleteDataAndAllReferees(objectUri, predicate) {
   let query = `${SPARQL.getSPARQLPrefixes()} 
         delete where {
-            ?subject cids:hasCode <${objectUri}> .
+            ?subject ${predicate} <${objectUri}> .
         }`;
   await GraphDB.sendUpdateQuery(query, false);
 
@@ -296,16 +296,6 @@ async function deleteDataAndAllReferees(objectUri) {
   await GraphDB.sendUpdateQuery(query, false);
 }
 
-
-// function messageGeneratorDeletingChecker(mandatoryReferee, regularReferee) {
-//   let message = ''
-//   for (let dataType in regularReferee) {
-//     for (let uri of dict[dataType])
-//       message += `DataType: ${dataType}, URI: ${uri} \n`
-//   }
-//
-//   return message
-// }
 
 async function checkAllReferees(objectUri, subjectType2Predicate) {
 

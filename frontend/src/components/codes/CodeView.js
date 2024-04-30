@@ -5,11 +5,10 @@ import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
-import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes, fetchDataType, deleteDataType} from "../../api/generalAPI";
 import DeleteDialog from "../shared/DeleteDialog";
-import {messageGeneratorDeletingChecker} from "../../helpers/messageGeneratorDeletingChecker";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
 
 export default function CodeView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -61,71 +60,62 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
     }));
   };
 
-  // function messageGeneratorDeletingChecker(dict) {
-  //   let message = ''
-  //   for (let dataType in dict) {
-  //     for (let uri of dict[dataType])
-  //       message += `DataType: ${dataType}, URI: ${uri} \n`
+  // const handleDelete = async (uri, form) => {
+  //   if (!deleteDialog.confirmDialog) {
+  //     deleteDataType('code', uri).then(({success, mandatoryReferee, regularReferee}) => {
+  //       if (success) {
+  //         console.log(mandatoryReferee, regularReferee)
+  //         if (Object.keys(mandatoryReferee)?.length) {
+  //           setState(state => ({
+  //             ...state, showDeleteDialog: false
+  //           }));
+  //           setDeleteDialog(state => ({
+  //             ...state, confirmDialog: deletingObjectHelper(mandatoryReferee), continueButton: false
+  //           }))
+  //         } else {
+  //           setState(state => ({
+  //             ...state, showDeleteDialog: false,
+  //           }));
+  //           setDeleteDialog(state => ({
+  //             ...state, confirmDialog: deletingObjectHelper(regularReferee), continueButton: true
+  //           }))
+  //         }
+  //
+  //         // setTrigger(!trigger);
+  //         // enqueueSnackbar(message || "Success", {variant: 'success'})
+  //       }
+  //     }).catch((e) => {
+  //       setState(state => ({
+  //         ...state, showDeleteDialog: false,
+  //       }));
+  //       reportErrorToBackend(e);
+  //       setTrigger(!trigger);
+  //       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+  //     });
+  //   } else {
+  //     setDeleteDialog(state => ({
+  //       ...state, loadingButton: true
+  //     }))
+  //     deleteDataType('code', uri, {checked: true}).then(({success, message}) => {
+  //       if (success) {
+  //         setDeleteDialog(state => ({
+  //           ...state, confirmDialog: '', loadingButton: false
+  //         }));
+  //         setTrigger(!trigger);
+  //         enqueueSnackbar(message || "Success", {variant: 'success'})
+  //       }
+  //     }).catch((e) => {
+  //       setState(state => ({
+  //         ...state, showDeleteDialog: false,
+  //       }));
+  //       reportErrorToBackend(e);
+  //       setTrigger(!trigger);
+  //       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+  //     });
   //   }
-  //   return message
-  // }
-
-  const handleDelete = async (uri, form) => {
-    if (!deleteDialog.confirmDialog) {
-      deleteDataType('code', uri).then(({success, mandatoryReferee, regularReferee}) => {
-        if (success) {
-          console.log(mandatoryReferee, regularReferee)
-          if (Object.keys(mandatoryReferee)?.length) {
-            setState(state => ({
-              ...state, showDeleteDialog: false
-            }));
-            setDeleteDialog(state => ({
-              ...state, confirmDialog: messageGeneratorDeletingChecker(mandatoryReferee), continueButton: false
-            }))
-          } else {
-            setState(state => ({
-              ...state, showDeleteDialog: false,
-            }));
-            setDeleteDialog(state => ({
-              ...state, confirmDialog: messageGeneratorDeletingChecker(regularReferee), continueButton: true
-            }))
-          }
-
-          // setTrigger(!trigger);
-          // enqueueSnackbar(message || "Success", {variant: 'success'})
-        }
-      }).catch((e) => {
-        setState(state => ({
-          ...state, showDeleteDialog: false,
-        }));
-        reportErrorToBackend(e);
-        setTrigger(!trigger);
-        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-      });
-    } else {
-      setDeleteDialog(state => ({
-        ...state, loadingButton: true
-      }))
-      deleteDataType('code', uri, {checked: true}).then(({success, message}) => {
-        if (success) {
-          setDeleteDialog(state => ({
-            ...state, confirmDialog: '', loadingButton: false
-          }));
-          setTrigger(!trigger);
-          enqueueSnackbar(message || "Success", {variant: 'success'})
-        }
-      }).catch((e) => {
-        setState(state => ({
-          ...state, showDeleteDialog: false,
-        }));
-        reportErrorToBackend(e);
-        setTrigger(!trigger);
-        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-      });
-    }
-
-
-  };
+  //
+  //
+  // };
 
   const columns = [
     {
@@ -228,16 +218,15 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
-        delete={handleDelete}
+        delete={handleDelete('code', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
       />
       <DeleteDialog
         state={deleteDialog}
         setState={setDeleteDialog}
-        handleDelete={handleDelete}
+        handleDelete={handleDelete('code', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
         selectedUri={state.selectedUri}
-      >
+      />
 
-      </DeleteDialog>
 
     </Container>
   );

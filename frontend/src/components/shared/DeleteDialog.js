@@ -8,8 +8,8 @@ export default function DeleteDialog({state, setState, handleDelete, selectedUri
 
   return (
     <AlertDialog dialogContentText={state.confirmDialog}
-                 dialogTitle={state.continueButton?
-                   ' The Object is referred by these subjects, are you sure you would like to delete it? ':
+                 dialogTitle={state.continueButton ?
+                   (state.safe? 'The object can be safely removed': ' The object is referred by these subjects, are you sure you would like to delete it? '):
                    'The Object is referred by these subjects by mandatory predicate, you cannot delete it.'
                  }
                  buttons={[<Button onClick={() => setState(state => ({...state, confirmDialog: ''}))}

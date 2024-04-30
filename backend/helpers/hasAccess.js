@@ -156,6 +156,9 @@ async function hasAccess(req, operationType) {
     case 'fetchCharacteristic':
       return true;
       break;
+    case 'deleteCharacteristic':
+      return true;
+      break;
 
     // stakeholderOutcomes
     case 'createStakeholderOutcome':

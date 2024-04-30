@@ -3,7 +3,7 @@ const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
 const {codeBuilder} = require("./codeBuilder");
 const {Transaction} = require("graphdb-utils");
-const {messageGeneratorDeletingChecker, deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const fetchCodeHandler = async (req, res, next) => {
   try {
@@ -73,23 +73,9 @@ const deleteCode = async (req, res) => {
     throw new Server400Error('uri is required');
 
   if (checked) {
-    await deleteDataAndAllReferees(uri);
+    await deleteDataAndAllReferees(uri, 'cids:hasCode');
     return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
   } else {
-
-    // const indicators = await dataReferredBySubjects('cids:Indicator', uri, 'cids:hasCode');
-    // const outcomes = await dataReferredBySubjects('cids:Outcome', uri, 'cids:hasCode');
-    // const themes = await dataReferredBySubjects('cids:Theme', uri, 'cids:hasCode');
-    // const stakeholderOutcomes = await dataReferredBySubjects('cids:StakeholderOutcome', uri, 'cids:hasCode');
-    // const characteristic = await dataReferredBySubjects('cids:Characteristic', uri, 'cids:hasCode');
-    //
-    // const dict = {
-    //   Indicator: indicators,
-    //   Outcome: outcomes,
-    //   Theme: themes,
-    //   StakeholderOutcome: stakeholderOutcomes,
-    //   Characteristic: characteristic
-    // };
     const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
       'cids:Indicator': 'cids:hasCode',
       'cids:Outcome': 'cids:hasCode',
@@ -97,11 +83,9 @@ const deleteCode = async (req, res) => {
       'cids:StakeholderOutcome': 'cids:hasCode',
       'cids:Characteristic': 'cids:hasCode'
     })
-    // const message = messageGeneratorDeletingChecker(mandatoryReferee, regularReferee);
+    // const message = deletingObjectHelper(mandatoryReferee, regularReferee);
     return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
-
-
 };
 
 const updateCode = async (req, res) => {
