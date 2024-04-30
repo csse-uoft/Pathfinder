@@ -86,8 +86,7 @@ const deleteCode = async (req, res) => {
       'cids:Theme': 'cids:hasCode',
       'cids:StakeholderOutcome': 'cids:hasCode',
       'cids:Characteristic': 'cids:hasCode'
-    })
-    // const message = deletingObjectHelper(mandatoryReferee, regularReferee);
+    }, configLevel)
     return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
 };
