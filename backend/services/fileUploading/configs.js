@@ -23,7 +23,8 @@ const baseLevelConfig = {
 const fullLevelConfig = {
   outcome: {
     'cids:hasIndicator': {flag: true},
-    'oep:partOf': {ignoreInstance: true}
+    'oep:partOf': {ignoreInstance: true},
+    'cids:hasCode': {flag: true},
   },
   impactNorms: {},
   indicator: {

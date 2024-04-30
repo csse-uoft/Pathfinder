@@ -5,6 +5,8 @@ const {GDBCodeModel} = require("../../models/code");
 const {characteristicBuilder} = require("./characteristicBuilder");
 const {Transaction} = require("graphdb-utils");
 const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
+
 
 const createCharacteristicHandler = async (req, res, next) => {
   try {
@@ -24,6 +26,34 @@ const createCharacteristicHandler = async (req, res, next) => {
     }
 
     next(e);
+  }
+};
+
+const deleteCharacteristicHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteCharacteristic'))
+      return await deleteCharacteristic(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteCharacteristic = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasCharacteristic');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:Organization': 'cids:hasCharacteristic',
+      'cids:Stakeholder': 'cids:hasCharacteristic',
+    })
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
 };
 
@@ -106,5 +136,5 @@ async function createCharacteristic({form, codeDict, errorProcessor, environment
 
 
 module.exports = {
-  createCharacteristicHandler, fetchCharacteristicHandler, updateCharacteristicHandler
+  createCharacteristicHandler, fetchCharacteristicHandler, updateCharacteristicHandler, deleteCharacteristicHandler
 }

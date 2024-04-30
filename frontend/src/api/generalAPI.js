@@ -1,5 +1,7 @@
+
 import {deleteJson, getJson, postJson, putJson} from "./index";
 import {isValidURL} from "../helpers/validation_helpers";
+
 
 export async function fetchDataTypes(dataType, extra) {
   return getJson(`/api/${dataType}s/` + (extra? extra:''));
@@ -43,7 +45,7 @@ export async function fetchDataType(dataType, uri) {
   return getJson(`/api/${dataType}/${uri}/`);
 }
 
-export async function deleteDataType(dataType, uri, extra) {
-  return deleteJson(`/api/${dataType}/${encodeURIComponent(uri)}/${extra}`);
+export async function deleteDataType(dataType, uri, params, extra) {
+  return deleteJson(`/api/${dataType}/${encodeURIComponent(uri)}/${extra}`, params);
 }
 

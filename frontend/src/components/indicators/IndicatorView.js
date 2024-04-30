@@ -1,11 +1,9 @@
-import React, {useEffect, useState, useContext} from 'react';
-import {
-  Chip,
-  Container,
-  Typography,
-} from "@mui/material";
-import {Add as AddIcon} from "@mui/icons-material";
-import {DropdownMenu, Link, Loading, DataTable} from "../shared";
+
+import React, { useEffect, useState, useContext } from 'react';
+import {Chip, Container, Typography} from "@mui/material";
+import { Add as AddIcon} from "@mui/icons-material";
+import {DropdownMenu, Link, Loading, DataTable, DeleteModal} from "../shared";
+
 import {useNavigate,} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
@@ -25,6 +23,10 @@ import {
   handleOrgClick,
   handleSelectAllClick
 } from "../../helpers/helpersForDropdownFilter";
+
+
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 
 export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -67,6 +69,22 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
       enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
     })
   }, [organizationInterfaces]);
+  
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
+  });
+
+  const [indicatorReportDict, setIndicatorReportDict] = useState({})
+
+  const showDeleteDialog = (uri) => {
+    setState(state => ({
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete code ' + uri + ' ?'
+    }));
+  };
 
   useEffect(() => {
     fetchDataTypes('indicatorReport', single ? `indicator/${encodeURIComponent(uri)}` : '').then(({
@@ -183,7 +201,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     {
       label: ' ',
       body: ({_uri}) => {
-        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
                              hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
                              handleDelete={() => showDeleteDialog(_uri)}/>;
       }
@@ -220,6 +238,19 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
           </div>
         }
 
+      />
+      <DeleteModal
+        objectUri={state.selectedUri}
+        title={state.deleteDialogTitle}
+        show={state.showDeleteDialog}
+        onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
+        delete={handleDelete('indicator', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('indicator', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
       />
     </Container>
   );

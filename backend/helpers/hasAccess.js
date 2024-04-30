@@ -193,6 +193,9 @@ async function hasAccess(req, operationType) {
     case 'fetchCharacteristic':
       return true;
       break;
+    case 'deleteCharacteristic':
+      return true;
+      break;
 
     // stakeholderOutcomes
     case 'createStakeholderOutcome':
@@ -225,6 +228,9 @@ async function hasAccess(req, operationType) {
         return true;
       break;
     case 'fetchCodes':
+      if (userAccount.isSuperuser)
+        return true;
+    case 'deleteCode':
       if (userAccount.isSuperuser)
         return true;
 
@@ -513,6 +519,10 @@ async function hasAccess(req, operationType) {
 
 
       break;
+    case 'deleteIndicator':
+      if (userAccount.isSuperuser)
+        return true;
+
     case 'updateIndicator':
       if (userAccount.isSuperuser)
         return true;

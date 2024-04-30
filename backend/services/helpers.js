@@ -1,11 +1,21 @@
 const {Server400Error} = require("../utils");
 const {GDBMeasureModel} = require("../models/measure");
-const {Transaction} = require("graphdb-utils");
+const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../models/time");
+const {fullLevelConfig} = require("./fileUploading/configs");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
+
+
+const rdfType2DataType = {
+  'cids:Indicator': 'indicator',
+  'cids:Outcome': 'outcome',
+  'cids:Theme': 'theme',
+  'cids:StakeholderOutcome': 'stakeholderOutcome',
+  'cids:Characteristic': 'characteristic'
+}
 /**
  * return the first URI belongs to the object[property]
  * @param object
@@ -496,6 +506,50 @@ async function assignMeasure(environment, config, object, mainModel, mainObject,
   return {hasError, error};
 }
 
+async function dataReferredBySubjects(subjectType, objectUri, predicate) {
+  const query = `${SPARQL.getSPARQLPrefixes()} 
+  select * where {
+  ?subject rdf:type ${subjectType} .
+  ?subject ${predicate} <${objectUri}> .
+  }`;
+  let subjects = []
+  await GraphDB.sendSelectQuery(query, false, ({subject}) => {
+    subjects = [...subjects, subject.id]
+  })
+  return subjects
+}
+
+async function deleteDataAndAllReferees(objectUri, predicate) {
+  let query = `${SPARQL.getSPARQLPrefixes()} 
+        delete where {
+            ?subject ${predicate} <${objectUri}> .
+        }`;
+  await GraphDB.sendUpdateQuery(query, false);
+
+  query = `
+        delete where {
+            <${objectUri}> ?p ?o.
+        }`
+  await GraphDB.sendUpdateQuery(query, false);
+}
+
+
+async function checkAllReferees(objectUri, subjectType2Predicate) {
+
+  const regularReferee = {}
+  const mandatoryReferee = {};
+  for (let subjectType in subjectType2Predicate) {
+    const subjects = await dataReferredBySubjects(subjectType, objectUri, subjectType2Predicate[subjectType]);
+    if (fullLevelConfig[rdfType2DataType[subjectType]]?.[subjectType2Predicate[subjectType]] && subjects?.length){
+      // there are mandatory predicate being affected
+      mandatoryReferee[subjectType] = subjects
+    } else {
+      regularReferee[subjectType] = subjects
+    }
+  }
+  return {mandatoryReferee, regularReferee}
+}
+
 
 
 module.exports = {
@@ -511,5 +565,9 @@ module.exports = {
   assignImpactNorms,
   assignTimeInterval,
   assignInvertValues,
-  assignInvertValue
+  assignInvertValue,
+  dataReferredBySubjects,
+  deleteDataAndAllReferees,
+  checkAllReferees
+
 };
