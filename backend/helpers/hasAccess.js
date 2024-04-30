@@ -724,6 +724,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'deleteTheme': // only superuser can create theme
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'updateTheme': // only superuser can update theme
       if (userAccount.isSuperuser)
         return true;
