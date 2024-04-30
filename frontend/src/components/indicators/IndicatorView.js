@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
 import {Chip, Container, Typography} from "@mui/material";
 import { Add as AddIcon} from "@mui/icons-material";
-import {DropdownMenu, Link, Loading, DataTable } from "../shared";
+import {DropdownMenu, Link, Loading, DataTable, DeleteModal} from "../shared";
 import {useNavigate,} from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 
 export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri, organizationUri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -24,6 +26,13 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     showDeleteDialog: false,
   });
   const [trigger, setTrigger] = useState(true);
+
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
+  });
 
   const [indicatorReportDict, setIndicatorReportDict] = useState({})
 
@@ -170,6 +179,19 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
             variant="outlined"/>:null
         }
 
+      />
+      <DeleteModal
+        objectUri={state.selectedUri}
+        title={state.deleteDialogTitle}
+        show={state.showDeleteDialog}
+        onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
+        delete={handleDelete('indicator', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('indicator', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
       />
     </Container>
   );

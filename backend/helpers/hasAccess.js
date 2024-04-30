@@ -472,6 +472,10 @@ async function hasAccess(req, operationType) {
 
 
       break;
+    case 'deleteIndicator':
+      if (userAccount.isSuperuser)
+        return true;
+
     case 'updateIndicator':
       if (userAccount.isSuperuser)
         return true;

@@ -1,6 +1,5 @@
 const express = require('express');
 const {createCharacteristicHandler, fetchCharacteristicHandler, deleteCharacteristicHandler} = require("../services/characteristic/characteristic");
-const {fetchCharacteristicsHandler} = require("../services/characteristic/characteristics");
 
 
 

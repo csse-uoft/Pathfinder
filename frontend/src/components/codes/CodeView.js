@@ -27,6 +27,7 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
     continueButton: false,
     loadingButton: false,
     confirmDialog: '',
+    safe: false
   });
   const [trigger, setTrigger] = useState(true);
 
