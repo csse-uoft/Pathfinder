@@ -54,6 +54,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'updateCounterfactual':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     case 'fetchCounterfactual':
       if (userAccount.isSuperuser)
         return true;
@@ -66,6 +71,14 @@ async function hasAccess(req, operationType) {
 
     // dataset
     case 'createDataset':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'fetchDataset':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'updateDataset':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -93,8 +106,17 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'updateHowMuchImpact':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     // ImpactRisk
     case 'createImpactRisk':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'updateImpactRisk':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -124,6 +146,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'updateImpactModel':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
 
     // impactReport
@@ -131,6 +157,12 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+
+    case 'updateImpactReport':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
 
     case 'fetchImpactReport':
       if (userAccount.isSuperuser)
@@ -144,6 +176,11 @@ async function hasAccess(req, operationType) {
 
     // characteristic
     case 'createCharacteristic':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+    case 'updateCharacteristic':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -162,6 +199,11 @@ async function hasAccess(req, operationType) {
 
     // stakeholderOutcomes
     case 'createStakeholderOutcome':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+    case 'updateStakeholderOutcome':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -246,6 +288,11 @@ async function hasAccess(req, operationType) {
       if (checkerList.length)
         return true;
 
+      break;
+
+    case 'deleteOrganization':
+      if (userAccount.isSuperuser)
+        return true;
       break;
     case 'fetchOrganizations':
       // every users should be able to fetch organizations,

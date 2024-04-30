@@ -6,6 +6,7 @@ const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {configLevel} = require('../../config');
 
 const resource = 'StakeholderOutcome'
 
@@ -14,7 +15,7 @@ const createStakeholderOutcomeHandler = async (req, res, next) => {
     const {form} = req.body;
     if (await hasAccess(req, 'create' + resource)) {
       await Transaction.beginTransaction();
-      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form)) {
+      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form, configLevel)) {
         await Transaction.commit();
         return res.status(200).json({success: true});
       }
@@ -67,6 +68,29 @@ const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next)
     next(e);
   }
 };
+
+const updateStakeholderOutcomeHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'updateStakeholderOutcome'))
+      return await updateStakeholderOutcome(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    // if (Transaction.isActive())
+    //   Transaction.rollback();
+    next(e);
+  }
+};
+
+const updateStakeholderOutcome = async (req, res) => {
+  const {form} = req.body;
+  const {uri} = req.params;
+  // await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await stakeholderOutcomeBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
+    // await Transaction.commit();
+    return res.status(200).json({success: true});
+  }
+}
 
 const fetchStakeholderOutcomeHandler = async (req, res, next) => {
   try {
@@ -131,5 +155,5 @@ const fetchStakeholderOutcomesThroughStakeholder = async (req, res) => {
 
 
 module.exports = {createStakeholderOutcomeHandler,
-  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomeHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler
+  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomeHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler, updateStakeholderOutcomeHandler
 }

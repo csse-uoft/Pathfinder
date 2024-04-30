@@ -1,36 +1,68 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {Chip, Container, Typography} from "@mui/material";
-import { Add as AddIcon} from "@mui/icons-material";
-import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
-import { useSnackbar } from 'notistack';
-import {deleteOrganization} from "../../api/organizationApi";
+import {Add as AddIcon} from "@mui/icons-material";
+import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
+import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {useNavigate} from "react-router-dom";
-import {fetchDataTypes, fetchDataType} from "../../api/generalAPI";
+import {fetchDataTypes, fetchDataType, fetchDataTypeInterfaces, deleteDataType} from "../../api/generalAPI";
+import {
+  areAllGroupOrgsSelected, fetchOrganizationsWithGroups,
+  handleChange,
+  handleGroupClick, handleOrgClick,
+  handleSelectAllClick
+} from "../../helpers/helpersForDropdownFilter";
+import DropdownFilter from "../shared/DropdownFilter";
 
 export default function OrganizationView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
+  const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
+  const [organizationInterfaces, setOrganizationInterfaces] = useState({});
+  const minSelectedLength = 1; // Set your minimum length here
+  const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
 
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
+    fetchDataTypeInterfaces('organization')
+      .then(({interfaces}) => {
+        setOrganizationInterfaces(interfaces);
+      }).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchOrganizationsWithGroups(setOrganizationsWithGroups, organizationInterfaces).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    })
+  }, [organizationInterfaces]);
+
+  useEffect(() => {
     if (multi) {
       fetchDataTypes('organization').then(res => {
         if (res.success)
           setState(state => ({...state, loading: false, data: res.organizations}));
+        console.log(res.organizations)
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
@@ -52,16 +84,17 @@ export default function OrganizationView({organizationUser, groupUser, superUser
 
   }, [trigger]);
 
-  const showDeleteDialog = (id) => {
+  const showDeleteDialog = (uri) => {
     setState(state => ({
-      ...state, selectedId: id, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete organization ' + id + ' ?'
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete organization ' + uri + ' ?'
     }));
   };
 
-  const handleDelete = async (id, form) => {
+  const handleDelete = async (uri, form) => {
+    console.log(uri)
 
-    deleteOrganization(id).then(({success, message}) => {
+    deleteDataType('organization', uri, true).then(({success, message}) => {
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -92,10 +125,10 @@ export default function OrganizationView({organizationUser, groupUser, superUser
       body: ({_uri}) => {
         if (multi)
           return <Link colorWithHover to={`/organization/${encodeURIComponent(_uri)}/view`}>
-          {_uri}
-        </Link>;
+            {_uri}
+          </Link>;
         if (single)
-          return _uri
+          return _uri;
       },
     },
     { // todo
@@ -114,10 +147,10 @@ export default function OrganizationView({organizationUser, groupUser, superUser
       label: ' ',
       body: ({_uri}) => {
         if (multi)
-          return <DropdownMenu urlPrefix={'organization'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
-                               hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
+          return <DropdownMenu urlPrefix={'organization'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser}
+                               hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>;
         if (single)
-          return null
+          return null;
       }
 
 
@@ -131,21 +164,31 @@ export default function OrganizationView({organizationUser, groupUser, superUser
     <Container>
       <Typography variant={'h2'}> Organization Class View </Typography>
       <DataTable
-        title={multi?"Organizations":"Organization"}
-        data={state.data}
+        title={multi ? "Organizations" : "Organization"}
+        data={state.data.filter(org => selectedOrganizations?.includes(org._uri))}
         columns={columns}
-        customToolbar={multi?
-          <Chip
-            disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/organizations/new')}
-            color="primary"
-            icon={<AddIcon/>}
-            label="Add new Organization"
-            variant="outlined"/>:null
+        customToolbar={
+          <div style={{display: 'flex', gap: '10px'}}>
+            {multi ?
+              <Chip
+                disabled={!userContext.isSuperuser}
+                onClick={() => navigate('/organizations/new')}
+                color="primary"
+                icon={<AddIcon/>}
+                label="Add new Organization"
+                variant="outlined"/> : null}
+            <DropdownFilter selectedOrganizations={selectedOrganizations}
+                            areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
+                            organizationInterfaces
+                            handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                            handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                            handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                            handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
+          </div>
         }
       />
       <DeleteModal
-        objectId={state.selectedId}
+        objectUri={state.selectedUri}
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}

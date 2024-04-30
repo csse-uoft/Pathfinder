@@ -67,19 +67,19 @@ function Dashboard() {
         <NavButton to={userContext.isSuperuser?`/users`:`/organizationUsers`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:null}
 
-      <NavButton to={`/organization-indicators`} icon={<Edit/>} key={'organization-indicators'}
+      <NavButton to={`/indicators`} icon={<Edit/>} key={'organization-indicators'}
                  text="Manage Indicators"/>
 
-      <NavButton to={`/organization-outcomes`} icon={<Edit/>} key={'organization-outcomes'}
+      <NavButton to={`/outcomes`} icon={<Edit/>} key={'organization-outcomes'}
                  text="Manage Outcomes"/>
 
-      <NavButton to={`/organization-indicatorReports`} icon={<Edit/>} key={'indicatorReports'}
+      <NavButton to={`/indicatorReports`} icon={<Edit/>} key={'indicatorReports'}
                  text="Manage Indicator Reports"/>
 
       <NavButton to={`/themes`} icon={<Edit/>} key={'themes'}
                  text="Manage Themes"/>
 
-      <NavButton to={`/organization-impactReports`} icon={<Edit/>} key={'impactReports'}
+      <NavButton to={`/impactReports`} icon={<Edit/>} key={'impactReports'}
                  text="Manage Impact Reports"/>
 
       <NavButton to={`/organization-stakeholderOutcomes`} icon={<Edit/>} key={'stakeholderOutcomes'}

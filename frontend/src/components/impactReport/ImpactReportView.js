@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Chip, Container, Typography} from "@mui/material";
+import {Container, Chip,Paper, Table, TableContainer, Typography} from "@mui/material";
 import {Add as AddIcon,} from "@mui/icons-material";
 import {DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
@@ -7,8 +7,22 @@ import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchDataTypes, fetchDataType} from "../../api/generalAPI";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import {
+  fetchDataTypes,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypesGivenListOfUris
+} from "../../api/generalAPI";
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
+import DropdownFilter from "../shared/DropdownFilter";
+import {
+  areAllGroupOrgsSelected, fetchOrganizationsWithGroups,
+  handleChange,
+  handleGroupClick, handleOrgClick,
+  handleSelectAllClick
+} from "../../helpers/helpersForDropdownFilter";
 
 export default function ImpactReportView({multi, single, organizationUser, superUser, groupUser}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -16,6 +30,10 @@ export default function ImpactReportView({multi, single, organizationUser, super
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const userContext = useContext(UserContext);
+  const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
+  const minSelectedLength = 1; // Set your minimum length here
+  const [organizationInterfaces, setOrganizationInterfaces] = useState({});
+  const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
   const [state, setState] = useState({
     loading: true,
     data: [],
@@ -27,16 +45,37 @@ export default function ImpactReportView({multi, single, organizationUser, super
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    if (multi) {
-      fetchDataTypes('impactReport', encodeURIComponent(uri)).then(res => {
-        if (res.success)
-          setState(state => ({...state, loading: false, data: res.impactReports, editable: res.editable}));
+    fetchDataTypeInterfaces('organization')
+      .then(({interfaces}) => {
+        setOrganizationInterfaces(interfaces);
       }).catch(e => {
-        reportErrorToBackend(e);
-        setState(state => ({...state, loading: false}));
-        console.log(e);
-        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-      });
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchOrganizationsWithGroups(setOrganizationsWithGroups, organizationInterfaces).catch(e => {
+      if (e.json)
+        console.error(e.json);
+      reportErrorToBackend(e);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+    })
+  }, [organizationInterfaces]);
+
+  useEffect(() => {
+    if (multi) {
+      // fetchDataTypes('impactReport', 'all').then(res => {
+      //   if (res.success)
+      //     setState(state => ({...state, loading: false, data: res.impactReports, editable: res.editable}));
+      // }).catch(e => {
+      //   reportErrorToBackend(e);
+      //   setState(state => ({...state, loading: false}));
+      //   console.log(e);
+      //   enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      // });
     } else if (single) {
       fetchDataType('impactReport', encodeURIComponent(uri)).then(res => {
         if (res.success)
@@ -51,6 +90,28 @@ export default function ImpactReportView({multi, single, organizationUser, super
     }
 
   }, [trigger]);
+
+
+  useEffect(() => {
+    if (multi) {
+      fetchDataTypesGivenListOfUris('impactReport', '', selectedOrganizations, 'impactReports').then(objectsDict => {
+        console.log(objectsDict);
+        let impactReports = [];
+        for (let organization in objectsDict) {
+          impactReports = [...impactReports, ...objectsDict[organization]];
+        }
+        console.log(impactReports);
+        setState(state => ({...state, loading: false, data: impactReports}));
+      }).catch(e => {
+        setState(state => ({...state, loading: false}));
+        reportErrorToBackend(e);
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      });
+    }  else if (single) {
+
+    }
+
+  }, [selectedOrganizations]);
 
   // const showDeleteDialog = (id) => {
   //   setState(state => ({
@@ -118,75 +179,108 @@ export default function ImpactReportView({multi, single, organizationUser, super
   if (state.loading)
     return <Loading message={`Loading Impact Reports...`}/>;
 
+  const style = {backgroundColor: 'rgb(39, 44, 52)', color: 'white', width: '12rem'}
+
   return (
     <Container>
-      <Typography variant={'h2'}> Impact Report Class View </Typography>
+      <Typography variant={'h2'}> Impact Reports </Typography>
+      <EnhancedTableToolbar title={''}
+                            numSelected={0}
+                            customToolbar={
+                              <div style={{display: 'flex', gap: '10px'}}>
+                                {multi ?
+                                  <Chip
+                                    disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                                    onClick={() => navigate(`/impactReport/${encodeURIComponent(uri)}/new`)}
+                                    color="primary"
+                                    icon={<AddIcon/>}
+                                    label="Add new Impact Report"
+                                    variant="outlined"/> : null}
+                                <DropdownFilter selectedOrganizations={selectedOrganizations}
+                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
+                                                handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                                handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                                handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                                handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}/>
+                              </div>
+                            }
+
+      />
       {
         state.data.map(impactReport => {
-          const hasTime = impactReport?.hasTime;
+        const hasTime = impactReport?.hasTime;
+        return (
 
-          return (
-            <Container>
-              <EnhancedTableToolbar numSelected={0} title={(
-                <>
-                  Impact Report: {impactReport?.name}
-                  <br/>
-                  Organization: {''}
-                  <Link
-                    colorWithHover
-                    to={`/organization/${encodeURIComponent(impactReport?.forOrganization)}/view`}
-                  >
-                    {impactReport?.forOrganization}
-                  </Link>
-                  <br/>
-                  Impact Report URI: {''}
-                  <Link
-                    colorWithHover
-                    to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`}
-                  >
-                    {impactReport?._uri}
-                  </Link>
-                  <br/>
-                  Time Interval of Report: {(hasTime?.hasBeginning?.date && hasTime?.hasEnd?.date) ?
-                  `${(new Date(hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(hasTime.hasEnd.date)).toLocaleString()}`
-                  : null
-                }
-                  <br/>
-                  Comment: {impactReport.comment}
-                </>
-              )}/>
+        <Container>
+        <TableContainer component={Paper}>
+          <Table>
 
+            <TableRow>
+              <TableCell sx={style} variant="head">Impact Report</TableCell>
+              <TableCell>{impactReport?.name}</TableCell>
+            </TableRow>
 
-              <DataTable
-                noHeaderBar
-                noPaginationBar
-                title={""}
-                data={[impactReport]}
-                columns={columns}
-                uriField="uri"
-                customToolbar={
-                  <Chip
-                    disabled={!state.editable}
-                    onClick={() => navigate(`/impactReport/${encodeURIComponent(uri)}/new`)}
-                    color="primary"
-                    icon={<AddIcon/>}
-                    label="Add new ImpactReports"
-                    variant="outlined"/>
-                }
+            <TableRow>
+              <TableCell sx={style} variant="head">Organization</TableCell>
+              <TableCell>
+                <Link
+                  colorWithHover
+                  to={`/organization/${encodeURIComponent(impactReport?.forOrganization)}/view`}
+                >
+                  {impactReport?.forOrganization}
+                </Link>
+              </TableCell>
+            </TableRow>
 
-              />
-            </Container>
-          );
-        })
-      }
+          <TableRow>
+            <TableCell sx={style} variant="head">Impact Report URI</TableCell>
+            <TableCell sx={{display: 'flex', justifyContent: 'space-between'}}>
+              <Link
+                colorWithHover
+                to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`}
+              >
+                {impactReport?._uri}
+              </Link>
+              <DropdownMenu urlPrefix={'impactReport'}
+                                        objectUri={encodeURIComponent(impactReport._uri)} hideDeleteOption
+                                        hideEditOption={!userContext.isSuperuser}
+                                        handleDelete={() => showDeleteDialog(impactReport._uri)}/>
+            </TableCell>
+          </TableRow>
 
-      {/*<DeleteModal*/}
-      {/*  objectId={state.selectedId}*/}
-      {/*  title={state.deleteDialogTitle}*/}
-      {/*  show={state.showDeleteDialog}*/}
-      {/*  onHide={() => setState(state => ({...state, showDeleteDialog: false}))}*/}
-      {/*  delete={handleDelete}*/}
-      {/*/>*/}
-    </Container>
+        <TableRow>
+          <TableCell sx={style} variant="head">Time Interval of Report</TableCell>
+          <TableCell>
+            {(hasTime?.hasBeginning?.date && hasTime?.hasEnd?.date) ?
+              `${(new Date(hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(hasTime.hasEnd.date)).toLocaleString()}`
+              : null}
+          </TableCell>
+        </TableRow>
+
+          <TableRow>
+            <TableCell sx={style} variant="head">Comment</TableCell>
+            <TableCell>{impactReport.comment}</TableCell>
+          </TableRow>
+
+        </Table>
+      </TableContainer>
+
+          <DataTable
+            noHeaderBar
+            noPaginationBar
+            title={""}
+            data={[impactReport]}
+            columns={columns}
+            uriField="uri"
+          />
+
+          <br/>
+          <br/>
+      </Container>
+
+      );
+    })
+  }
+</Container>
   );
 }

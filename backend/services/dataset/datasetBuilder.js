@@ -1,8 +1,7 @@
-const {fullLevelConfig} = require("../fileUploading/configs");
-const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
+const {assignValue} = require("../helpers");
 const {GDBDataSetModel} = require("../../models/dataset");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
-
+const configs = require("../fileUploading/configs");
 async function datasetBuilder(environment, object, organization, error, {
   datasetDict,
   objectDict
@@ -12,18 +11,18 @@ async function datasetBuilder(environment, object, organization, error, {
                                        getFullPropertyURI,
                                        getValue,
                                        getListOfValue
-                                     }, form) {
+                                     }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBDataSetModel;
   let hasError = false;
   let ret;
-  const mainObject = environment === 'fileUploading' ? datasetDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? datasetDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
   }
 
-  const config = fullLevelConfig['dataset'];
+  const config = configs[configLevel]['dataset'];
   if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
@@ -42,9 +41,11 @@ async function datasetBuilder(environment, object, organization, error, {
     if (environment === 'interface') {
       form.dateCreated = new Date(form.dateCreated)
     }
+
     ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
+
 
 
 

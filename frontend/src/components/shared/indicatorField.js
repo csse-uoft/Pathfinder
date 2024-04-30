@@ -216,19 +216,19 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                       key={'Access'}
                       options={options}
                       onChange={(e) => {
-                          setState(state => ({...state, access: e.target.value}));
+                          setState(state => ({...state, accesss: e.target.value}));
                           const st = state;
-                          st.access = e.target.value;
+                          st.accesss = e.target.value;
                           onChange(st);
                       }
                       }
                       fullWidth
-                      value={state.access}
-                      error={!!errors.access}
-                      helperText={errors.access}
-                      required={isFieldRequired(attriConfig, attribute2Compass, 'access')}
+                      value={state.accesss}
+                      error={!!errors.accesss}
+                      helperText={errors.accesss}
+                      required={isFieldRequired(attriConfig, attribute2Compass, 'accesss')}
                       disabled={disabled}
-                      onBlur={validateField(defaultValue, attriConfig, 'access', attribute2Compass['access'], setErrors)}
+                      onBlur={validateField(defaultValue, attriConfig, 'accesss', attribute2Compass['accesss'], setErrors)}
 
                   />
               </Grid>
@@ -279,22 +279,22 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
-                label="Unit of Measure"
-                type="text"
-                defaultValue={state.unitOfMeasure}
-                onChange={handleChange('unitOfMeasure')}
-                disabled={disabled}
-                required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}
-                error={!!errors.unitOfMeasure}
-                helperText={errors.unitOfMeasure}
-                onBlur={validateField(defaultValue, attriConfig, 'unitOfMeasure', attribute2Compass['unitOfMeasure'], setErrors)}
+            {/*<Grid item xs={12}>*/}
+            {/*  <TextField*/}
+            {/*    sx={{mt: 2}}*/}
+            {/*    fullWidth*/}
+            {/*    label="Unit of Measure"*/}
+            {/*    type="text"*/}
+            {/*    defaultValue={state.unitOfMeasure}*/}
+            {/*    onChange={handleChange('unitOfMeasure')}*/}
+            {/*    disabled={disabled}*/}
+            {/*    required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}*/}
+            {/*    error={!!errors.unitOfMeasure}*/}
+            {/*    helperText={errors.unitOfMeasure}*/}
+            {/*    onBlur={validateField(defaultValue, attriConfig, 'unitOfMeasure', attribute2Compass['unitOfMeasure'], setErrors)}*/}
 
-              />
-            </Grid>
+            {/*  />*/}
+            {/*</Grid>*/}
 
             <Grid item xs={12}>
               <TextField

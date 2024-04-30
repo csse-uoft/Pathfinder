@@ -2,6 +2,7 @@ const {fullLevelConfig} = require("../fileUploading/configs");
 const {assignValue, assignValues, assignMeasure, assignTimeInterval} = require("../helpers");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
+const configs = require("../fileUploading/configs");
 
 async function counterfactualBuilder(environment, object, organization, error, {
   counterfactualDict,
@@ -12,32 +13,31 @@ async function counterfactualBuilder(environment, object, organization, error, {
                                   getFullPropertyURI,
                                   getValue,
                                   getListOfValue
-                                }, form) {
+                                }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCounterfactualModel;
   let hasError = false;
   let ret;
-  const mainObject = environment === 'fileUploading' ? counterfactualDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? counterfactualDict[uri] : await mainModel.findOne({_uri: uri})|| mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
   }
 
-  const config = fullLevelConfig['counterfactual'];
+  const config = configs[configLevel]['counterfactual'];
   if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-
 
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'sch:description', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error)
+    ret = await assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error)
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 

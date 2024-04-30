@@ -1,6 +1,5 @@
 const express = require('express');
 const {fileUploadingHandler} = require("../services/fileUploading/fileUploading");
-const {newFileUploadingHandler} = require("../services/fileUploading/newFileUploading");
 
 
 

@@ -6,14 +6,14 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {updateTheme} from "../../api/themeApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isFieldRequired, validateField, validateURI, validateForm} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType} from "../../api/generalAPI";
+import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -37,7 +37,7 @@ export default function AddEditTheme() {
   const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
 
-  const attriConfig = fullLevelConfig.theme
+  const attriConfig = configs[CONFIGLEVEL].theme
 
 
   const [state, setState] = useState({
@@ -89,7 +89,7 @@ export default function AddEditTheme() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createDataType('theme', form).then((ret) => {
+      createDataType('theme', {form}).then((ret) => {
           if (ret.success) {
             setState({loadingButton: false, submitDialog: false,});
             navigate('/themes');
@@ -105,7 +105,7 @@ export default function AddEditTheme() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateTheme(encodeURIComponent(uri), form).then((res) => {
+      updateDataType('theme', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/themes');

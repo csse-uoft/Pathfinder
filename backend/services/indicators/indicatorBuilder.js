@@ -1,4 +1,4 @@
-const {fullLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
@@ -15,19 +15,31 @@ async function indicatorBuilder(environment, object, organization, error, {
                                   getFullPropertyURI,
                                   getValue,
                                   getListOfValue
-                                }, form) {
+                                }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBIndicatorModel;
   let hasError = false;
   let ret;
   let impactNorms;
-  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
+  // let mainObject;
+  // if (environment === 'fileUploading') {
+  //   const prevObject = await mainModel.findOne({_uri: uri});
+  //   if (prevObject) {
+  //     mainObject = prevObject;
+  //     indicatorDict[uri] = prevObject;
+  //   } else {
+  //     mainObject = indicatorDict[uri];
+  //   }
+  // } else if (environment === 'interface') {
+  //   mainObject = await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
+  // }
+  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
   }
 
-  const config = fullLevelConfig['indicator'];
+  const config = configs[configLevel]['indicator'];
   if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
@@ -44,7 +56,10 @@ async function indicatorBuilder(environment, object, organization, error, {
 
     if (!organization.hasIndicators)
       organization.hasIndicators = [];
-    organization.hasIndicators = [...organization.hasIndicators, uri];
+    if (!organization.hasIndicators.includes(uri)) {
+      organization.hasIndicators = [...organization.hasIndicators, uri];
+    }
+
 
     if (environment === 'interface') {
       await organization.save();
@@ -63,7 +78,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     error = ret.error;
 
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error);
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -84,11 +99,11 @@ async function indicatorBuilder(environment, object, organization, error, {
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'threshold', 'cids:hasThreshold', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'threshold', 'cids:hasThreshold', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -100,6 +115,8 @@ async function indicatorBuilder(environment, object, organization, error, {
       await mainObject.save();
       return true
     }
+
+
 
 
     // add outcomes
@@ -157,7 +174,9 @@ async function indicatorBuilder(environment, object, organization, error, {
           } else {
             if (!outcome.indicators)
               outcome.indicators = [];
-            outcome.indicators.push(uri);
+            if (!outcome.indicators.includes(uri)) {
+              outcome.indicators.push(uri);
+            }
             await outcome.save();
           }
 
@@ -166,7 +185,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     }
 
     // add indicator report, in this case, indicator reports will not be in the form
-    if (environment !== 'interface') {
+    if (environment === 'fileUploading') {
       if (object[getFullPropertyURI(mainModel, 'indicatorReports')]) {
         if (!mainObject.indicatorReports)
           mainObject.indicatorReports = [];

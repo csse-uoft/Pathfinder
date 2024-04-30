@@ -1,5 +1,5 @@
 const express = require('express');
-const {createImpactRiskHandler, fetchImpactRiskHandler} = require("../services/impactRisk/impactRisk");
+const {createImpactRiskHandler, fetchImpactRiskHandler, updateImpactRiskHandler} = require("../services/impactRisk/impactRisk");
 
 
 
@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/:uri', fetchImpactRiskHandler);
 router.post('/', createImpactRiskHandler);
-// router.put('/:uri', updateIndicatorReportHandler);
+router.put('/:uri', updateImpactRiskHandler);
 
 
 module.exports = router;

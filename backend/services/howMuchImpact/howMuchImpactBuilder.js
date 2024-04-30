@@ -1,10 +1,6 @@
-const {baseLevelConfig, fullLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
-const {assignValue, getObjectValue, assignValues, getFullObjectURI, assignTimeInterval, assignMeasure} = require("../helpers");
-const {GDBMeasureModel} = require("../../models/measure");
-const {Server400Error} = require("../../utils");
-const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
-const {Transaction} = require("graphdb-utils");
+const {assignValue, assignValues, assignTimeInterval, assignMeasure} = require("../helpers");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function howMuchImpactBuilder(environment, subType, object, organization, error, {
@@ -18,7 +14,7 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
                                            getFullPropertyURI,
                                            getValue,
                                            getListOfValue
-                                         }, form) {
+                                         }, form, configLevel) {
 
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
@@ -35,7 +31,7 @@ async function howMuchImpactBuilder(environment, subType, object, organization, 
     await mainObject.save();
     uri = mainObject._uri;
   }
-  const config = fullLevelConfig[subType];
+  const config = configs[configLevel][subType];
 
   if (mainObject) {
 

@@ -4,8 +4,9 @@ const {impactRiskBuilder} = require("./impactRiskBuilder");
 const {Server400Error} = require("../../utils");
 const {GDBImpactRiskModel} = require("../../models/impactRisk");
 const {fetchDatasetInterfacesHandler} = require("../dataset/datasets");
+const {configLevel} = require('../../config');
 
-const resource = 'ImpactRisk'
+const resource = 'ImpactRisk';
 
 const createImpactRiskHandler = async (req, res, next) => {
   try {
@@ -13,19 +14,19 @@ const createImpactRiskHandler = async (req, res, next) => {
     await Transaction.beginTransaction();
     if (await hasAccess(req, 'create' + resource)) {
       if (await impactRiskBuilder('interface', form.hasIdentifier.charAt(0).toLowerCase() + form.hasIdentifier.slice(1)
-        , null, null, null,{}, {}, form)){
+        , null, null, null, {}, {}, form, configLevel)) {
         await Transaction.commit();
-        return res.status(200).json({success: true})
+        return res.status(200).json({success: true});
       }
     } else {
-      throw new Server400Error('Wrong Auth')
+      throw new Server400Error('Wrong Auth');
     }
   } catch (e) {
     if (Transaction.isActive())
       await Transaction.rollback();
     next(e);
   }
-}
+};
 
 const fetchImpactRisksHandler = async (req, res, next) => {
   try {
@@ -50,8 +51,31 @@ const fetchImpactRiskInterfacesHandler = async (req, res, next) => {
 const fetchImpactRisks = async (req, res) => {
   const impactRisks = await GDBImpactRiskModel.find({});
   return res.status(200).json({success: true, impactRisks});
-}
+};
 
+const updateImpactRisk = async (req, res) => {
+  const {form} = req.body;
+  const {uri} = req.params;
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await impactRiskBuilder('interface', (form.hasIdentifier.charAt(0).toLowerCase() + form.hasIdentifier.slice(1)).replace(/\s/g, "")
+    , null, null, null, {}, {}, form, configLevel)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
+  }
+};
+
+const updateImpactRiskHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'update' + resource))
+      return await updateImpactRisk(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
+    next(e);
+  }
+};
 
 const fetchImpactRiskHandler = async (req, res, next) => {
   try {
@@ -71,7 +95,13 @@ const fetchImpactRisk = async (req, res) => {
   if (!impactRisk)
     throw new Server400Error('No such Impact Risk');
   return res.status(200).json({success: true, impactRisk});
-}
+};
 
 
-module.exports = {createImpactRiskHandler, fetchImpactRisksHandler, fetchImpactRiskHandler, fetchImpactRiskInterfacesHandler}
+module.exports = {
+  createImpactRiskHandler,
+  fetchImpactRisksHandler,
+  fetchImpactRiskHandler,
+  fetchImpactRiskInterfacesHandler,
+  updateImpactRiskHandler
+};

@@ -6,7 +6,8 @@ import Dropdown from "./fields/MultiSelectField";
 import GeneralField from "./fields/GeneralField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {isFieldRequired, validateField} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 
 
 const filterOptions = createFilterOptions({
@@ -63,7 +64,7 @@ export default function CounterFactualField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const attriConfig = fullLevelConfig.counterfactual
+  const attriConfig = configs[CONFIGLEVEL].counterfactual
 
   const [options, setOptions] = useState({features: {}});
 
@@ -126,6 +127,21 @@ export default function CounterFactualField({
                 helperText={errors.locatedIns}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'locatedIns')}
                 onBlur={validateField(state, attriConfig, 'locatedIns', attribute2Compass['locatedIns'], setErrors)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="URI"
+                type="text"
+                defaultValue={state.uri}
+                onChange={handleChange('uri')}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
+                disabled={disabled}
+                error={!!errors.uri}
+                helperText={errors.uri}
+                onBlur={validateField(state, attriConfig, 'uri', attribute2Compass['uri'], setErrors)}
               />
             </Grid>
 

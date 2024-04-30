@@ -7,13 +7,17 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {updateOutcome} from "../../api/outcomeApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  updateDataType
+} from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -70,7 +74,7 @@ export default function AddEditStakeholderOutcome() {
 
   const [loading, setLoading] = useState(true);
 
-  const attriConfig = fullLevelConfig.stakeholderOutcome;
+  const attriConfig = configs[CONFIGLEVEL].stakeholderOutcome;
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',
@@ -144,7 +148,6 @@ export default function AddEditStakeholderOutcome() {
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log(form);
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -167,10 +170,10 @@ export default function AddEditStakeholderOutcome() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateOutcome({form}, encodeURIComponent(uri)).then((res) => {
+      updateDataType('stakeholderOutcome',encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
+          // navigate(-1);
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
