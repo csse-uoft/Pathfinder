@@ -46,6 +46,8 @@ export async function fetchDataType(dataType, uri) {
 }
 
 export async function deleteDataType(dataType, uri, params, extra) {
-  return deleteJson(`/api/${dataType}/${encodeURIComponent(uri)}/${extra}`, params);
+  if (extra)
+    return deleteJson(`/api/${dataType}/${encodeURIComponent(uri)}/${extra}`, params);
+  return deleteJson(`/api/${dataType}/${encodeURIComponent(uri)}`, params);
 }
 
