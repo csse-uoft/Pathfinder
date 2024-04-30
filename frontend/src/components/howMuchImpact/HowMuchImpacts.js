@@ -9,6 +9,8 @@ import {deleteTheme} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes} from "../../api/generalAPI";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 export default function HowMuchImpacts() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -21,6 +23,12 @@ export default function HowMuchImpacts() {
     selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
   });
   const [trigger, setTrigger] = useState(true);
 
@@ -38,29 +46,8 @@ export default function HowMuchImpacts() {
   const showDeleteDialog = (uri) => {
     setState(state => ({
       ...state, selectedUri: uri, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete codes ' + uri + ' ?'
+      deleteDialogTitle: 'Delete HowMuchImpact ' + uri + ' ?'
     }));
-  };
-
-  const handleDelete = async (uri, form) => {
-
-    deleteTheme(uri).then(({success, message})=>{
-      if (success) {
-        setState(state => ({
-          ...state, showDeleteDialog: false,
-        }));
-        setTrigger(!trigger);
-        enqueueSnackbar(message || "Success", {variant: 'success'})
-      }
-    }).catch((e)=>{
-      setState(state => ({
-        ...state, showDeleteDialog: false,
-      }));
-      reportErrorToBackend(e)
-      setTrigger(!trigger);
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    });
-
   };
 
   const columns = [
@@ -83,7 +70,8 @@ export default function HowMuchImpacts() {
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'howMuchImpact'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'howMuchImpact'} objectUri={encodeURIComponent(_uri)}
+                      hideDeleteOption={!userContext.isSuperuser}
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
@@ -114,7 +102,13 @@ export default function HowMuchImpacts() {
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
-        delete={handleDelete}
+        delete={handleDelete('howMuchImpact', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('howMuchImpact', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
       />
     </Container>
   );

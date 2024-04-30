@@ -520,11 +520,14 @@ async function dataReferredBySubjects(subjectType, objectUri, predicate) {
 }
 
 async function deleteDataAndAllReferees(objectUri, predicate) {
-  let query = `${SPARQL.getSPARQLPrefixes()} 
+  let query;
+  if (predicate) {
+    query = `${SPARQL.getSPARQLPrefixes()} 
         delete where {
             ?subject ${predicate} <${objectUri}> .
         }`;
-  await GraphDB.sendUpdateQuery(query, false);
+    await GraphDB.sendUpdateQuery(query, false);
+  }
 
   query = `
         delete where {
