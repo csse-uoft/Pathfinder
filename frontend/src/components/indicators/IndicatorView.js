@@ -45,7 +45,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
