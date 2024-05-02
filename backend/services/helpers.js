@@ -3,7 +3,7 @@ const {GDBMeasureModel} = require("../models/measure");
 const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../models/time");
-const {fullLevelConfig} = require("./fileUploading/configs");
+const configs = require("./fileUploading/configs");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
@@ -520,11 +520,14 @@ async function dataReferredBySubjects(subjectType, objectUri, predicate) {
 }
 
 async function deleteDataAndAllReferees(objectUri, predicate) {
-  let query = `${SPARQL.getSPARQLPrefixes()} 
+  let query;
+  if (predicate) {
+    query = `${SPARQL.getSPARQLPrefixes()} 
         delete where {
             ?subject ${predicate} <${objectUri}> .
         }`;
-  await GraphDB.sendUpdateQuery(query, false);
+    await GraphDB.sendUpdateQuery(query, false);
+  }
 
   query = `
         delete where {
@@ -534,13 +537,14 @@ async function deleteDataAndAllReferees(objectUri, predicate) {
 }
 
 
-async function checkAllReferees(objectUri, subjectType2Predicate) {
+async function checkAllReferees(objectUri, subjectType2Predicate, configLevel) {
+
 
   const regularReferee = {}
   const mandatoryReferee = {};
   for (let subjectType in subjectType2Predicate) {
     const subjects = await dataReferredBySubjects(subjectType, objectUri, subjectType2Predicate[subjectType]);
-    if (fullLevelConfig[rdfType2DataType[subjectType]]?.[subjectType2Predicate[subjectType]] && subjects?.length){
+    if (configs[configLevel][rdfType2DataType[subjectType]]?.[subjectType2Predicate[subjectType]] && subjects?.length){
       // there are mandatory predicate being affected
       mandatoryReferee[subjectType] = subjects
     } else {

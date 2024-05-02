@@ -3,6 +3,8 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {Transaction} = require("graphdb-utils");
 const {themeBuilder} = require("./themeBuilder");
 const {configLevel} = require('../../config');
+const {Server400Error} = require("../../utils");
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const createTheme = async (req, res) => {
     const form = req.body;
@@ -38,18 +40,6 @@ const updateTheme = async (req, res) => {
   if (await themeBuilder('interface', null,null, {}, {}, form, configLevel)) {
     await Transaction.commit();
     return res.status(200).json({success: true});
-  }
-};
-
-const deleteTheme = async (req, res, next) => {
-  try {
-    const {id} = req.params;
-    if (!id)
-      return res.status(400).json({success: false, message: 'Id is needed'});
-    await GDBThemeModel.findAndDelete({_id: id});
-    return res.status(200).json({success: true});
-  } catch (e) {
-    next(e);
   }
 };
 
@@ -92,5 +82,32 @@ const updateThemeHandler = async (req, res, next) => {
   }
 };
 
+const deleteThemeHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteTheme'))
+      return await deleteTheme(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
 
-module.exports = {createThemeHandler, fetchThemeHandler, deleteTheme, updateThemeHandler};
+const deleteTheme = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:forTheme');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:Outcome': 'cids:forTheme',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+}
+
+
+module.exports = {createThemeHandler, fetchThemeHandler, updateThemeHandler, deleteThemeHandler};

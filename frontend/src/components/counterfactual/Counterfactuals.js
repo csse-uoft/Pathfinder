@@ -5,11 +5,11 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
-import {fetchCounterfactuals} from "../../api/counterfactualApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes} from "../../api/generalAPI";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 export default function Counterfactuals() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -22,6 +22,12 @@ export default function Counterfactuals() {
     selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
   });
   const [trigger, setTrigger] = useState(true);
 
@@ -39,29 +45,8 @@ export default function Counterfactuals() {
   const showDeleteDialog = (uri) => {
     setState(state => ({
       ...state, selectedUri: uri, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete theme ' + uri + ' ?'
+      deleteDialogTitle: 'Delete counterfactual ' + uri + ' ?'
     }));
-  };
-
-  const handleDelete = async (uri, form) => {
-
-    deleteTheme(uri).then(({success, message})=>{
-      if (success) {
-        setState(state => ({
-          ...state, showDeleteDialog: false,
-        }));
-        setTrigger(!trigger);
-        enqueueSnackbar(message || "Success", {variant: 'success'})
-      }
-    }).catch((e)=>{
-      setState(state => ({
-        ...state, showDeleteDialog: false,
-      }));
-      reportErrorToBackend(e)
-      setTrigger(!trigger);
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    });
-
   };
 
   const columns = [
@@ -84,7 +69,7 @@ export default function Counterfactuals() {
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'counterfactual'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'counterfactual'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser}
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
@@ -115,7 +100,13 @@ export default function Counterfactuals() {
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
-        delete={handleDelete}
+        delete={handleDelete('counterfactual', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('counterfactual', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
       />
     </Container>
   );

@@ -4,6 +4,7 @@ const {counterfactualBuilder} = require("./counterfactualBuilder");
 const {Server400Error} = require("../../utils");
 const {GDBCounterfactualModel} = require("../../models/counterfactual");
 const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 
 const RESOURCE = 'Counterfactual'
@@ -75,4 +76,31 @@ const createCounterfactualHandler = async (req, res, next) => {
   }
 };
 
-module.exports = {createCounterfactualHandler, fetchCounterfactualHandler, updateCounterfactualHandler}
+const deleteCounterfactualHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'delete' + RESOURCE))
+      return await deleteCounterfactual(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteCounterfactual = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasCounterfactual');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:HowMuchImpact': 'cids:hasCounterfactual',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+}
+
+module.exports = {createCounterfactualHandler, fetchCounterfactualHandler, updateCounterfactualHandler, deleteCounterfactualHandler}

@@ -38,13 +38,14 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
   const minSelectedLength = 1; // Set your minimum length here
   const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
   const [indicatorReportDict, setIndicatorReportDict] = useState({});
+  const [trigger, setTrigger] = useState(true);
 
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
@@ -77,12 +78,10 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     safe: false
   });
 
-  const [indicatorReportDict, setIndicatorReportDict] = useState({})
-
   const showDeleteDialog = (uri) => {
     setState(state => ({
       ...state, selectedUri: uri, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete code ' + uri + ' ?'
+      deleteDialogTitle: 'Delete Indicator ' + uri + ' ?'
     }));
   };
 

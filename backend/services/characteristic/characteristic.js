@@ -52,7 +52,7 @@ const deleteCharacteristic = async (req, res) => {
     const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
       'cids:Organization': 'cids:hasCharacteristic',
       'cids:Stakeholder': 'cids:hasCharacteristic',
-    })
+    }, configLevel)
     return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
 };

@@ -59,6 +59,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'deleteCounterfactual':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     case 'fetchCounterfactual':
       if (userAccount.isSuperuser)
         return true;
@@ -83,6 +88,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'deleteDataset':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
     case 'fetchDatasets':
       if (userAccount.isSuperuser)
         return true;
@@ -97,6 +107,10 @@ async function hasAccess(req, operationType) {
       break;
 
     case 'fetchHowMuchImpact':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'deleteHowMuchImpact':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -121,6 +135,10 @@ async function hasAccess(req, operationType) {
         return true;
       break;
     case 'fetchImpactRisk':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'deleteImpactRisk':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -168,6 +186,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'deleteImpactReport':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
     case 'fetchImpactReports':
       if (userAccount.isSuperuser)
@@ -204,6 +226,10 @@ async function hasAccess(req, operationType) {
       break;
 
     case 'updateStakeholderOutcome':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'deleteStakeholderOutcome':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -617,6 +643,10 @@ async function hasAccess(req, operationType) {
         //   return true;
       }
       break;
+
+    case 'deleteOutcome':
+      if (userAccount.isSuperuser)
+        return true;
     case 'fetchOutcome':
       if (userAccount.isSuperuser)
         return true;
@@ -720,6 +750,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'deleteTheme': // only superuser can create theme
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'updateTheme': // only superuser can update theme
       if (userAccount.isSuperuser)
         return true;
@@ -728,6 +762,9 @@ async function hasAccess(req, operationType) {
       return true;
 
 
+    case 'deleteIndicatorReport':
+      if (userAccount.isSuperuser)
+        return true;
     case 'createIndicatorReport':
       if (userAccount.isSuperuser)
         return true;

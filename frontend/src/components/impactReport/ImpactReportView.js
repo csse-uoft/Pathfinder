@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Container, Chip,Paper, Table, TableContainer, Typography} from "@mui/material";
 import {Add as AddIcon,} from "@mui/icons-material";
-import {DropdownMenu, Link, Loading, DataTable} from "../shared";
+import {DropdownMenu, Link, Loading, DataTable, DeleteModal} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
@@ -10,7 +10,6 @@ import {navigateHelper} from "../../helpers/navigatorHelper";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import {
-  fetchDataTypes,
   fetchDataType,
   fetchDataTypeInterfaces,
   fetchDataTypesGivenListOfUris
@@ -23,6 +22,8 @@ import {
   handleGroupClick, handleOrgClick,
   handleSelectAllClick
 } from "../../helpers/helpersForDropdownFilter";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 
 export default function ImpactReportView({multi, single, organizationUser, superUser, groupUser}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -41,6 +42,12 @@ export default function ImpactReportView({multi, single, organizationUser, super
     deleteDialogTitle: '',
     showDeleteDialog: false,
     editable: false
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
   });
   const [trigger, setTrigger] = useState(true);
 
@@ -113,32 +120,12 @@ export default function ImpactReportView({multi, single, organizationUser, super
 
   }, [selectedOrganizations]);
 
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
+  const showDeleteDialog = (uri) => {
+    setState(state => ({
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete code ' + uri + ' ?'
+    }));
+  };
 
   const columns = [
     {
@@ -170,7 +157,7 @@ export default function ImpactReportView({multi, single, organizationUser, super
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'impactReport'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+        <DropdownMenu urlPrefix={'impactScale'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
                       hideDeleteOption
                       handleDelete={() => showDeleteDialog(_uri)}/>
     }
@@ -242,7 +229,7 @@ export default function ImpactReportView({multi, single, organizationUser, super
                 {impactReport?._uri}
               </Link>
               <DropdownMenu urlPrefix={'impactReport'}
-                                        objectUri={encodeURIComponent(impactReport._uri)} hideDeleteOption
+                                        objectUri={encodeURIComponent(impactReport._uri)} hideDeleteOption={!userContext.isSuperuser}
                                         hideEditOption={!userContext.isSuperuser}
                                         handleDelete={() => showDeleteDialog(impactReport._uri)}/>
             </TableCell>
@@ -281,6 +268,19 @@ export default function ImpactReportView({multi, single, organizationUser, super
       );
     })
   }
+      <DeleteModal
+        objectUri={state.selectedUri}
+        title={state.deleteDialogTitle}
+        show={state.showDeleteDialog}
+        onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
+        delete={handleDelete('impactReport', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('impactReport', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
+      />
 </Container>
   );
 }

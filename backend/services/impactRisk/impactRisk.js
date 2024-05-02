@@ -5,6 +5,7 @@ const {Server400Error} = require("../../utils");
 const {GDBImpactRiskModel} = require("../../models/impactRisk");
 const {fetchDatasetInterfacesHandler} = require("../dataset/datasets");
 const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const resource = 'ImpactRisk';
 
@@ -97,11 +98,38 @@ const fetchImpactRisk = async (req, res) => {
   return res.status(200).json({success: true, impactRisk});
 };
 
+const deleteImpactRiskHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'delete' + resource))
+      return await deleteImpactRisk(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteImpactRisk = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasImpactRisk');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:ImpactReport': 'cids:hasImpactRisk',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+}
 
 module.exports = {
   createImpactRiskHandler,
   fetchImpactRisksHandler,
   fetchImpactRiskHandler,
   fetchImpactRiskInterfacesHandler,
-  updateImpactRiskHandler
+  updateImpactRiskHandler,
+  deleteImpactRiskHandler
 };

@@ -241,7 +241,7 @@ const deleteIndicator = async (req, res) => {
       'cids:StakeholderOutcome': 'cids:hasIndicator',
       'cids:HowMuchImpact': 'cids:forIndicator',
       'cids:IndicatorReport': 'cids:forIndicator',
-    })
+    }, configLevel)
     return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
 }

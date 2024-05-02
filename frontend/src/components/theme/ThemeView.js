@@ -9,6 +9,8 @@ import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 
 export default function ThemeView({single, multi, organizationUser, groupUser, superUser}) {
   const {uri} = useParams();
@@ -22,6 +24,12 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
     selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
   });
   const [trigger, setTrigger] = useState(true);
 
@@ -78,27 +86,6 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
     }));
   };
 
-  const handleDelete = async (uri, form) => {
-
-    deleteTheme(uri).then(({success, message})=>{
-      if (success) {
-        setState(state => ({
-          ...state, showDeleteDialog: false,
-        }));
-        setTrigger(!trigger);
-        enqueueSnackbar(message || "Success", {variant: 'success'})
-      }
-    }).catch((e)=>{
-      setState(state => ({
-        ...state, showDeleteDialog: false,
-      }));
-      reportErrorToBackend(e)
-      setTrigger(!trigger);
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    });
-
-  };
-
   const columns = [
     {
       label: 'Theme Name',
@@ -136,7 +123,7 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'theme'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'theme'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser}
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
@@ -169,7 +156,13 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
-        delete={handleDelete}
+        delete={handleDelete('theme', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('theme', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
       />
     </Container>
   );
