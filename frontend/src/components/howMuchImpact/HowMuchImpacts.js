@@ -5,8 +5,6 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {deleteTheme} from "../../api/themeApi";
-import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes} from "../../api/generalAPI";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
