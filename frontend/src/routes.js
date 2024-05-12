@@ -82,6 +82,7 @@ import Theme from "./components/theme/Theme";
 import StakeholderOutcome from "./components/stakeholderOutcome/stakeholderOutcome";
 import TotalReviewPages from "./components/totalReviewPage/TotalReviewPages";
 import TotalReviewPage from "./components/totalReviewPage/TotalReviewPage";
+import DataExportPage from "./components/dataExport/dataExport";
 
 
 const routes = (
@@ -150,7 +151,8 @@ const routes = (
            element={<PrivateRoute element={AddEditCharacteristic}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/:viewMode`}
            element={<PrivateRoute element={AddEditCharacteristic}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/view`} element={<PrivateRoute element={Characteristic}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/view`}
+           element={<PrivateRoute element={Characteristic}/>}/>
 
 
     {/*Groups*/}
@@ -190,7 +192,7 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/view`} element={<PrivateRoute element={Outcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/:orgUri/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/outcome/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
-    
+
     <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditOutcome}/>}/>
 
@@ -237,6 +239,8 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/fileUploading`} element={<PrivateRoute element={FileUploadingPage}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/fileUploading/:orgUri/:fileType`}
            element={<PrivateRoute element={FileUploadingPage}/>}/>
+
+    <Route path={`${process.env.PUBLIC_URL}/dataExport`} element={<PrivateRoute element={DataExportPage}/>}/>
 
 
     <Route path={`${process.env.PUBLIC_URL}/indicatorReports`}
