@@ -61,7 +61,9 @@ export default function DataExportPage() {
     organizations: {},
     levels: ['Basic', 'Essential'],
     dataTypes: {'Basic': {'cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport'},
-      'Essential': {'cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport'}}
+      'Essential': {'cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport',
+        'cids:Code': 'cids:Code', 'cids:StakeholderOutcome': 'cids:StakeholderOutcome', 'cids:ImpactReport': 'cids:ImpactReport', 'cids:HowMuchImpact': 'cids:HowMuchImpact',
+        'cids:Stakeholder': 'cids:Stakeholder', 'cids:Characteristic': 'cids:Characteristic'}}
   });
   const [errors, setErrors] = useState(
     {}
