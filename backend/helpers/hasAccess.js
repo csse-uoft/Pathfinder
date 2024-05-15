@@ -25,6 +25,10 @@ async function hasAccess(req, operationType) {
   switch (operationType) {
     case 'reportFrontendError':
       return true;
+    case 'dataExport':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'fileUploading':
       return true; // todo: only editors can upload files
       break;

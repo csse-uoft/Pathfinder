@@ -101,6 +101,9 @@ function Dashboard() {
       {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={`/fileUploading`} icon={<FileUpload/>} key={'fileUploading'}
                                                                            text="File Upload"/>:null}
 
+      <NavButton to={'/dataExport'} icon={<Download/>} key={`dataExport`}
+                 text="Data Export"/>
+
       <NavButton to={'/reportGenerate'} icon={<Download/>} key={`reportGenerate`}
                  text="Reports"/>
 
