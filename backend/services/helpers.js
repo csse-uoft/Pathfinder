@@ -85,7 +85,7 @@ async function assignImpactNorms(environment, config, object, mainModel, mainObj
         {
           uri,
           type: getPrefixedURI(object['@type'][0]),
-          property: getPrefixedURI(getFullPropertyURI(mainModel, internalKey))
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
         },
         config[internalKey]
       );
