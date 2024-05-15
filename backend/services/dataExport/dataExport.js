@@ -12,6 +12,7 @@ const {GDBCodeModel} = require("../../models/code");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {GDBHowMuchImpactModel} = require("../../models/howMuchImpact");
+const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 
 const dataExportHandler = async (req, res, next) => {
   try {
@@ -39,7 +40,8 @@ const dataExport = async (req, res) => {
     'time:Instant': GDBInstant,
     'cids:Stakeholder': GDBStakeholderOrganizationModel,
     'cids:Characteristic': GDBCharacteristicModel,
-    'cids:HowMuchImpact': GDBHowMuchImpactModel
+    'cids:HowMuchImpact': GDBHowMuchImpactModel,
+    'cids:ImpactNorms': GDBImpactNormsModel
   };
 
 
@@ -77,6 +79,14 @@ const dataExport = async (req, res) => {
 
     },
     Essential: {
+      'http://ontology.eil.utoronto.ca/cids/cids#ImpactNorms': {
+        'http://ontology.eil.utoronto.ca/cids/cids#hasIndicator': 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasStakeholder": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasStakeholderOutcome": 'uri',
+        'http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport': 'uri',
+        'http://ontology.eil.utoronto.ca/cids/cids#hasImpactReport': 'uri',
+      },
       'http://ontology.eil.utoronto.ca/cids/cids#Organization': {
         'http://ontology.eil.utoronto.ca/cids/cids#hasIndicator': 'uri',
         "http://ontology.eil.utoronto.ca/cids/cids#hasOutcome": 'uri',
@@ -292,7 +302,8 @@ const dataExport = async (req, res) => {
           'cids:hasCode',
           '^cids:forIndicator',
           'cids:forStakeholder',
-          'cids:hasCharacteristic'
+          'cids:hasCharacteristic',
+          'cids:hasImpactModel'
         ]
     };
     dataTypes.map(dataType => {
