@@ -168,16 +168,9 @@ export default function DataExportPage() {
             errors.level
           }
           noEmpty
-          // onBlur={() => {
-          //   if (!state.level) {
-          //     setErrors(errors => ({...errors, level: 'The field cannot be empty'}));
-          //   } else {
-          //     setErrors(errors => ({...errors, level: null}));
-          //   }
-          // }}
           onChange={e => {
             setState(state => ({
-                ...state, level: e.target.value
+                ...state, level: e.target.value, dataTypes: []
               })
             );
           }}
