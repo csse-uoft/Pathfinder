@@ -6,7 +6,7 @@ const GDBDataSetModel = createGraphDBModel({
   description: {type: String, internalKey: 'schema:description'},
   dateCreated: {type: Date, internalKey: 'schema:dateCreated'},
 }, {
-  rdfTypes: ['cids:Dataset'], name: 'dataset'
+  rdfTypes: ['dcat:Dataset'], name: 'dataset'
 });
 
 module.exports = {

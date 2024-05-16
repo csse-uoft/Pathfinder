@@ -59,11 +59,17 @@ export default function DataExportPage() {
     fileTypes: ['JSON-ld'],
     properties: ['All'],
     organizations: {},
-    levels: ['Basic', 'Essential'],
+    levels: ['Basic', 'Essential', 'Full'],
     dataTypes: {'Basic': {'cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport'},
       'Essential': {'cids:ImpactNorms':'cids:ImpactNorms','cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport',
         'cids:Code': 'cids:Code', 'cids:StakeholderOutcome': 'cids:StakeholderOutcome', 'cids:ImpactReport': 'cids:ImpactReport', 'cids:HowMuchImpact': 'cids:HowMuchImpact',
-        'cids:Stakeholder': 'cids:Stakeholder', 'cids:Characteristic': 'cids:Characteristic'}}
+        'cids:Stakeholder': 'cids:Stakeholder', 'cids:Characteristic': 'cids:Characteristic'},
+      'Full': {
+        'cids:ImpactNorms':'cids:ImpactNorms','cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport',
+        'cids:Code': 'cids:Code', 'cids:StakeholderOutcome': 'cids:StakeholderOutcome', 'cids:ImpactReport': 'cids:ImpactReport', 'cids:HowMuchImpact': 'cids:HowMuchImpact',
+        'cids:Stakeholder': 'cids:Stakeholder', 'cids:Characteristic': 'cids:Characteristic', 'cids:Counterfactual': 'cids:Counterfactual', 'cids:ImpactRisk':  'cids:ImpactRisk', 'dcat:Dataset': 'dcat:Dataset'
+      }
+    }
   });
   const [errors, setErrors] = useState(
     {}
@@ -168,16 +174,9 @@ export default function DataExportPage() {
             errors.level
           }
           noEmpty
-          // onBlur={() => {
-          //   if (!state.level) {
-          //     setErrors(errors => ({...errors, level: 'The field cannot be empty'}));
-          //   } else {
-          //     setErrors(errors => ({...errors, level: null}));
-          //   }
-          // }}
           onChange={e => {
             setState(state => ({
-                ...state, level: e.target.value
+                ...state, level: e.target.value, dataTypes: []
               })
             );
           }}

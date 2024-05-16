@@ -13,6 +13,9 @@ const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {GDBHowMuchImpactModel} = require("../../models/howMuchImpact");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
+const {GDBDataSetModel} = require("../../models/dataset");
+const {GDBCounterfactualModel} = require("../../models/counterfactual");
+const {GDBImpactRiskModel} = require("../../models/impactRisk");
 
 const dataExportHandler = async (req, res, next) => {
   try {
@@ -41,7 +44,10 @@ const dataExport = async (req, res) => {
     'cids:Stakeholder': GDBStakeholderOrganizationModel,
     'cids:Characteristic': GDBCharacteristicModel,
     'cids:HowMuchImpact': GDBHowMuchImpactModel,
-    'cids:ImpactNorms': GDBImpactNormsModel
+    'cids:ImpactNorms': GDBImpactNormsModel,
+    'dcat:Dataset': GDBDataSetModel,
+    'cids:Counterfactual': GDBCounterfactualModel,
+    'cids:ImpactRisk': GDBImpactRiskModel
   };
 
 
@@ -135,10 +141,8 @@ const dataExport = async (req, res) => {
         "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
         "http://ontology.eil.utoronto.ca/cids/cids#forStakeholder": 'uri',
         "http://ontology.eil.utoronto.ca/cids/cids#forOutcome": 'uri',
-        "http://ontology.eil.utoronto.ca/cids/cids#fromPerspectiveOf": 'uri',
         "http://ontology.eil.utoronto.ca/cids/cids#hasImportance": 'string',
         "http://ontology.eil.utoronto.ca/cids/cids#isUnderserved": 'boolean',
-        "http://ontology.eil.utoronto.ca/cids/cids#intendedImpact": 'string',
         "http://ontology.eil.utoronto.ca/cids/cids#hasIndicator": 'uri',
         "http://ontology.eil.utoronto.ca/cids/cids#hasImpactReport": 'uri',
       },
@@ -153,7 +157,7 @@ const dataExport = async (req, res) => {
       },
       'http://ontology.eil.utoronto.ca/cids/cids#HowMuchImpact': {
         "http://ontology.eil.utoronto.ca/cids/cids#forIndicator": 'uri',
-        "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
+        "http://ontology.eil.utoronto.ca/ISO21972/iso21972#value": 'iso21972:Measure',
       },
       'http://ontology.eil.utoronto.ca/cids/cids#Stakeholder': {
         "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
@@ -189,6 +193,155 @@ const dataExport = async (req, res) => {
       },
       "http://www.w3.org/2006/time#Instant": {
         "http://www.w3.org/2006/time#inXSDDate": "string"
+      }
+
+    },
+    Full: {
+      'http://ontology.eil.utoronto.ca/cids/cids#ImpactNorms': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://schema.org/hasDescription": 'string',
+        "http://schema.org/dateCreated": 'date',
+        'http://ontology.eil.utoronto.ca/cids/cids#forOrganization': 'uri',
+        'http://ontology.eil.utoronto.ca/cids/cids#hasIndicator': 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasStakeholder": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasStakeholderOutcome": 'uri',
+        'http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport': 'uri',
+        'http://ontology.eil.utoronto.ca/cids/cids#hasImpactReport': 'uri',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Organization': {
+        'http://ontology.eil.utoronto.ca/cids/cids#hasIndicator': 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCharacteristic": 'uri',
+        "http://ontology.eil.utoronto.ca/tove/organization#hasLegalName": 'string',
+        "http://ontology.eil.utoronto.ca/tove/organization#hasLegalStatus": 'string',
+        "http://ontology.eil.utoronto.ca/tove/organization#hasLegalId": 'tove_org:OrganizationID'
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Code': {
+        "http://ontology.eil.utoronto.ca/cids/cids#definedBy": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
+        "http://ontology.eil.utoronto.ca/tove/organization#hasIdentifier": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasSpecification": 'uri',
+        "http://schema.org/codeValue": 'string',
+        "http://ontology.eil.utoronto.ca/ISO21972/iso21972#value": 'iso21972:Measure',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Indicator': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCode": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasStakeholderOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#forTheme": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#definedBy": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#forOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasBaseline": 'iso21972:Measure',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasThreshold": 'iso21972:Measure',
+        "http://www.w3.org/ns/dcat#dataset": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasAccess": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasIdentifier": 'string',
+        "http://schema.org/dateCreated": 'date',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Outcome': {
+        "http://ontology.eil.utoronto.ca/cids/cids#canProduce": 'uri',
+        "http://schema.org/dateCreated": 'date',
+        'http://www.w3.org/2001/sw/BestPractices/OEP/SimplePartWhole/part.owl#partOf': 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCode": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasStakeholderOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#forTheme": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasIndicator": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Theme': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCode": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#StakeholderOutcome': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCode": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#forStakeholder": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#forOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#fromPerspectiveOf": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasImportance": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#isUnderserved": 'boolean',
+        "http://ontology.eil.utoronto.ca/cids/cids#intendedImpact": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasIndicator": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasImpactReport": 'uri',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#ImpactReport': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#forOrganization": 'uri',
+        "http://www.w3.org/2006/time#hasTime": 'time:DateTimeInterval',
+        "http://ontology.eil.utoronto.ca/cids/cids#forOutcome": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasImpactScale": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasImpactDepth": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasComment": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasImpactDuration": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasReportedImpact": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasReportedRisk": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasExpectation": 'string',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#HowMuchImpact': {
+        "http://ontology.eil.utoronto.ca/cids/cids#forIndicator": 'uri',
+        "http://ontology.eil.utoronto.ca/ISO21972/iso21972#value": 'iso21972:Measure',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCounterfactual": 'uri',
+        "http://www.w3.org/2006/time#hasTime": 'time:DateTimeInterval',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Counterfactual': {
+        "http://schema.org/description": 'string',
+        "http://ontology.eil.utoronto.ca/ISO21972/iso21972#value": 'iso21972:Measure',
+        "http://www.w3.org/2006/time#hasTime": 'time:DateTimeInterval',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#ImpactRisk': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasIdentifier": 'string',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Stakeholder': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasDescription": 'string',
+        "http://schema.org/description": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCatchmentArea": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCharacteristic": 'uri',
+        'http://www.w3.org/2001/sw/BestPractices/OEP/SimplePartWhole/part.owl#partOf': 'uri',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#Characteristic': {
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasValue": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasCode": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#forStakeholder": 'uri',
+      },
+      'http://ontology.eil.utoronto.ca/cids/cids#IndicatorReport': {
+        "http://ontology.eil.utoronto.ca/cids/cids#forOrganization": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#forIndicator": 'uri',
+        "http://ontology.eil.utoronto.ca/ISO21972/iso21972#value": 'iso21972:Measure',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasComment": 'string',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasName": 'string',
+        "http://www.w3.org/2006/time#hasTime": 'time:DateTimeInterval',
+        "http://www.w3.org/ns/dcat#dataset": 'uri',
+        "http://ontology.eil.utoronto.ca/cids/cids#hasAccess": 'uri',
+        "http://schema.org/dateCreated": 'date',
+      },
+      'http://ontology.eil.utoronto.ca/ISO21972/iso21972#Measure': {
+        'http://ontology.eil.utoronto.ca/ISO21972/iso21972#numerical_value': 'number'
+      },
+      "http://ontology.eil.utoronto.ca/tove/organization#OrganizationID": {
+        "http://ontology.eil.utoronto.ca/tove/organization#hasIdentifier": "string",
+        "http://ontology.eil.utoronto.ca/tove/organization#issuedBy": "uri",
+      },
+      "http://www.w3.org/2006/time#DateTimeInterval": {
+        "http://www.w3.org/2006/time#hasBeginning": 'time:Instant',
+        "http://www.w3.org/2006/time#hasEnd": 'time:Instant',
+      },
+      "http://www.w3.org/2006/time#Instant": {
+        "http://www.w3.org/2006/time#inXSDDate": "string"
+      },
+      "http://www.w3.org/ns/dcat#Dataset": {
+        "http://schema.org/identifier": "string",
+        "http://schema.org/name": "string",
+        "http://schema.org/description": "string",
+        "http://schema.org/dateCreated": "date",
       }
 
     },
@@ -304,7 +457,22 @@ const dataExport = async (req, res) => {
           'cids:forStakeholder',
           'cids:hasCharacteristic',
           'cids:hasImpactModel'
-        ]
+        ],
+      'Full': ['cids:hasIndicator',
+        'cids:hasOutcome',
+        'cids:forTheme',
+        '^cids:forOrganization',
+        '^cids:forOutcome',
+        'cids:definedBy',
+        'cids:hasCode',
+        '^cids:forIndicator',
+        'cids:forStakeholder',
+        'cids:hasCharacteristic',
+        'cids:hasImpactModel',
+        'cids:hasCounterfactual',
+        'cids:hasImpactRisk',
+        'dcat:dataset'
+      ]
     };
     dataTypes.map(dataType => {
       if (!data[orgUri][dataType]) {
