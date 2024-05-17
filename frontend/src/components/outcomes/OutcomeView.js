@@ -214,7 +214,6 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
   if (state.loading)
     return <Loading message={`Loading outcomes...`}/>;
-  console.log(state.data)
 
   const style = {backgroundColor: 'rgb(39, 44, 52)', color: 'white', width: '9rem'}
 
@@ -228,7 +227,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                                 {multi ?
                                   <Chip
                                     disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                                    onClick={() => navigate(`/outcome/${encodeURIComponent(uri)}/new`)}
+                                    onClick={() => navigate(`/outcome/new`)}
                                     color="primary"
                                     icon={<AddIcon/>}
                                     label="Add new Outcome"

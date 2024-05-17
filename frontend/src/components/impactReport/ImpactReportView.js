@@ -178,7 +178,7 @@ export default function ImpactReportView({multi, single, organizationUser, super
                                 {multi ?
                                   <Chip
                                     disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                                    onClick={() => navigate(`/impactReport/${encodeURIComponent(uri)}/new`)}
+                                    onClick={() => navigate(`/impactReport/new`)}
                                     color="primary"
                                     icon={<AddIcon/>}
                                     label="Add new Impact Report"

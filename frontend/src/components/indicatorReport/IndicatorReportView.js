@@ -166,7 +166,7 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
                                 {multi ?
                                   <Chip
                                     disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                                    onClick={() => navigate(`/indicatorReport/${encodeURIComponent(uri)}/new`)}
+                                    onClick={() => navigate(`/indicatorReport/new`)}
                                     color="primary"
                                     icon={<AddIcon/>}
                                     label="Add new Indicator Report"

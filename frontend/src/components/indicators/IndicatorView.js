@@ -223,7 +223,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
             {multi ?
               <Chip
                 disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                onClick={() => navigate(`/indicator/${encodeURIComponent(uri)}/new`)}
+                onClick={() => navigate(`/indicator/new`)}
                 color="primary"
                 icon={<AddIcon/>}
                 label="Add new Indicator"

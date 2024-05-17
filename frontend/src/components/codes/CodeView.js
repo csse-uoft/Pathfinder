@@ -212,41 +212,6 @@ export default function CodeView({organizationUser, groupUser, superUser, multi,
             label="Add new Codes"
             variant="outlined"/> : null
         }
-// <<<<<<< editing
-//     ];
-
-//     if (state.loading)
-//         return <Loading message={`Loading codes...`}/>;
-
-//     return (
-//         <Container>
-//             <Typography variant={'h2'}> Codes </Typography>
-//             <DataTable
-//                 title={multi ? "Codes" : "Code"}
-//                 data={state.data}
-//                 columns={columns}
-//                 uriField="uriField"
-//                 customToolbar={ multi ?
-//                     <Chip
-//                         disabled={!userContext.isSuperuser}
-//                         onClick={() => navigate('/code/new')}
-//                         color="primary"
-//                         icon={<AddIcon/>}
-//                         label="Add new Codes"
-//                         variant="outlined"/> : null
-//                 }
-
-//             />
-//             <DeleteModal
-//                 objectUri={state.selectedUri}
-//                 title={state.deleteDialogTitle}
-//                 show={state.showDeleteDialog}
-//                 onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
-//                 delete={handleDelete}
-//             />
-//         </Container>
-//     );
-// =======
 
       />
       <DeleteModal
