@@ -152,7 +152,7 @@ export default function StakeholderOutcomeView({
                         <TableCell sx={{display: 'flex', justifyContent: 'space-between'}}>
                           <Link
                               colorWithHover
-                              to={`/outcome/${encodeURIComponent(stakeholderOutcome._uri)}/view`}
+                              to={`/stakeholderOutcome/${encodeURIComponent(stakeholderOutcome._uri)}/view`}
                           >{stakeholderOutcome._uri}
 
                           </Link>
@@ -211,6 +211,7 @@ export default function StakeholderOutcomeView({
           })
 
         }
+
         <DeleteModal
           objectUri={state.selectedUri}
           title={state.deleteDialogTitle}

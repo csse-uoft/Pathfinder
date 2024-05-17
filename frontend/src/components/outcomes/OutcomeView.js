@@ -214,7 +214,6 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
   if (state.loading)
     return <Loading message={`Loading outcomes...`}/>;
-  console.log(state.data)
 
   const style = {backgroundColor: 'rgb(39, 44, 52)', color: 'white', width: '9rem'}
 
@@ -228,19 +227,19 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                                 {multi ?
                                   <Chip
                                     disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                                    onClick={() => navigate(`/outcome/${encodeURIComponent(uri)}/new`)}
+                                    onClick={() => navigate(`/outcome/new`)}
                                     color="primary"
                                     icon={<AddIcon/>}
                                     label="Add new Outcome"
                                     variant="outlined"/> : null}
-                                <DropdownFilter selectedOrganizations={selectedOrganizations}
-                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
-                                                organizationInterfaces
-                                                handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
-                                                handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
-                                                handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
-                                                handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}
-                                />
+                                  {multi?<DropdownFilter selectedOrganizations={selectedOrganizations}
+                                                   areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
+                                                   organizationInterfaces
+                                                   handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                                   handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                                   handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                                   handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}
+                                  />:null}
                                 </div>
                               }
         />

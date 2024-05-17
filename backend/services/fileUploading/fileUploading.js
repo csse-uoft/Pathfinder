@@ -39,6 +39,7 @@ const {stakeholderOrganizationBuilder} = require("../stakeholder/stakeholderOrga
 const {GDBDataSetModel} = require("../../models/dataset");
 const {datasetBuilder} = require("../dataset/datasetBuilder");
 const {configLevel} = require('../../config')
+const {splitDataByOrganization} = require("./fileUploadingMultiOrganization");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -349,7 +350,7 @@ const fileUploading = async (req, res, next) => {
     }
 
 
-    const {objects, organizationUri, fileName} = req.body;
+    const {objects, organizationUri, fileName, organizationUris} = req.body;
     addTrace(`Loading file ${fileName}...`);
     addMessage(0, 'startToProcess', {fileName}, {});
     if (!Array.isArray(objects)) {
@@ -372,9 +373,7 @@ const fileUploading = async (req, res, next) => {
       const msg = formatMessage();
       throw new Server400Error(msg);
     }
-    addTrace('    Adding objects to organization with URI: ' + organizationUri);
-    addTrace('');
-    addMessage(4, 'addingToOrganization', {organizationUri}, {});
+
 
     const expandedObjects = await expand(objects);
 
@@ -390,6 +389,24 @@ const fileUploading = async (req, res, next) => {
       const msg = formatMessage();
       throw new Server400Error(msg);
     }
+
+    // split expanded Organizations with organizations
+    const splittedObjects = splitDataByOrganization(expandedObjects, organizationsUris);
+
+    for (let organizationUri in splittedObjects) {
+      if (organizationUri !== 'global') {
+
+        addTrace('    Adding objects to organization with URI: ' + organizationUri);
+        addTrace('');
+        addMessage(4, 'addingToOrganization', {organizationUri}, {});
+
+
+
+      } else {
+
+      }
+    }
+
 
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
