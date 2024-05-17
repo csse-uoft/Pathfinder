@@ -483,7 +483,7 @@ const dataExport = async (req, res) => {
   }
 
   for (let orgUri in data) {
-    ret = [...ret, ...await writeAllDataObjectOfAnOrganization(orgUri, level)];
+    ret = [...ret, [...await writeAllDataObjectOfAnOrganization(orgUri, level)]];
   }
 
 
