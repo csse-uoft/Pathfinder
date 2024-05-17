@@ -3,12 +3,11 @@ import {Chip, Container, Typography} from "@mui/material";
 import {Add as AddIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {useSnackbar} from 'notistack';
-import {deleteOrganization} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {useNavigate} from "react-router-dom";
-import {fetchDataTypes, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {fetchDataTypes, fetchDataType, fetchDataTypeInterfaces, deleteDataType} from "../../api/generalAPI";
 import {
   areAllGroupOrgsSelected, fetchOrganizationsWithGroups,
   handleChange,
@@ -31,7 +30,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
@@ -85,16 +84,17 @@ export default function OrganizationView({organizationUser, groupUser, superUser
 
   }, [trigger]);
 
-  const showDeleteDialog = (id) => {
+  const showDeleteDialog = (uri) => {
     setState(state => ({
-      ...state, selectedId: id, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete organization ' + id + ' ?'
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete organization ' + uri + ' ?'
     }));
   };
 
-  const handleDelete = async (id, form) => {
+  const handleDelete = async (uri, form) => {
+    console.log(uri)
 
-    deleteOrganization(id).then(({success, message}) => {
+    deleteDataType('organization', uri, true).then(({success, message}) => {
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -147,7 +147,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
       label: ' ',
       body: ({_uri}) => {
         if (multi)
-          return <DropdownMenu urlPrefix={'organization'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+          return <DropdownMenu urlPrefix={'organization'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser}
                                hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>;
         if (single)
           return null;
@@ -188,7 +188,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
         }
       />
       <DeleteModal
-        objectId={state.selectedId}
+        objectUri={state.selectedUri}
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}

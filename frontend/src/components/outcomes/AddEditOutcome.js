@@ -8,11 +8,11 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
-import {updateOutcome} from "../../api/outcomeApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import {validateForm} from "../../helpers";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -60,9 +60,10 @@ export default function AddEditOutcome() {
     locatedIns: [],
     partOf: null,
   });
+  console.log(form.themes)
   const [loading, setLoading] = useState(true);
 
-  const attriConfig = fullLevelConfig.outcome;
+  const attriConfig = configs[CONFIGLEVEL].outcome;
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',
@@ -149,10 +150,10 @@ export default function AddEditOutcome() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateOutcome({form}, encodeURIComponent(uri)).then((res) => {
+      updateDataType('outcome', encodeURIComponent(uri),{form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
+          // navigate(-1);
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {

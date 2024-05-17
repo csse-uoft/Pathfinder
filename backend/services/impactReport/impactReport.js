@@ -5,16 +5,41 @@ const {Transaction} = require("graphdb-utils");
 const {impactReportBuilder} = require("./impactReportBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 
 const resource = 'ImpactReport';
+
+const updateImpactReportHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'updateImpactReport'))
+      return await updateImpactReport(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
+    next(e);
+  }
+}
+
+const updateImpactReport = async (req, res) => {
+  const {form} = req.body;
+  const {uri} = req.params;
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await impactReportBuilder('interface', null,null,null, {}, {}, form, configLevel)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
+  }
+};
 
 const createImpactReportHandler = async (req, res, next) => {
   try {
     const {form} = req.body;
     await Transaction.beginTransaction();
     if (await hasAccess(req, 'create' + resource)) {
-      if (await impactReportBuilder('interface',null, null, null, {}, {}, form)){
+      if (await impactReportBuilder('interface',null, null, null, {}, {}, form, configLevel)){
         await Transaction.commit();
         return res.status(200).json({success: true})
       }
@@ -56,15 +81,6 @@ const fetchImpactReportInterfacesHandler = async (req, res, next) => {
   }
 };
 
-const fetchImpactReportInterfaces = async (req, res) => {
-  const impactReportInterfaces = {}
-  const impactReports = await GDBImpactReportModel.find({});
-  impactReports.map(impactReport => {
-    impactReportInterfaces[impactReport._uri] = impactReport.name || impactReport._uri
-  })
-  return res.status(200).json({success: true, impactReportInterfaces});
-};
-
 const fetchImpactReports = async (req, res) => {
   const {orgUri} = req.params;
   if (!orgUri)
@@ -83,10 +99,41 @@ const fetchImpactReport = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is missing');
-  const impactReport = await GDBImpactReportModel.findOne({_uri: uri}, {populates: ['forStakeholderOutcome']});
+  const impactReport = await GDBImpactReportModel.findOne({_uri: uri}, {populates: ['forStakeholderOutcome', 'hasTime.hasBeginning', 'hasTime.hasEnd']});
   if (!impactReport)
     throw new Server400Error('No such impact Report');
   return res.status(200).json({success: true, impactReport});
 };
 
-module.exports = {fetchImpactReportHandler, fetchImpactReportsHandler, fetchImpactReportInterfacesHandler, createImpactReportHandler};
+const deleteImpactReportHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteImpactReport'))
+      return await deleteImpactReport(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteImpactReport = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasImpactReport');
+    await deleteDataAndAllReferees(uri, 'cids:forImpactReport');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+
+      'cids:ImpactNorms': 'cids:hasImpactReport',
+      'cids:StakeholderOutcome': 'cids:hasImpactReport',
+      'cids:ImpactRisk': 'cids:forImpactReport',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+}
+
+module.exports = {fetchImpactReportHandler, fetchImpactReportsHandler, fetchImpactReportInterfacesHandler, createImpactReportHandler, updateImpactReportHandler, deleteImpactReportHandler};

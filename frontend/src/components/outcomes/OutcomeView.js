@@ -28,6 +28,8 @@ import {
 import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 
 
 export default function OutcomeView({multi, single, organizationUser, groupUser, superUser, organizationUri}) {
@@ -44,10 +46,18 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
     showDeleteDialog: false,
     editable: false,
   });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
+  });
+  const [indicatorInterfaces, setIndicatorInterfaces] = useState({});
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState(['']);
   const minSelectedLength = 1; // Set your minimum length here
   const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
+  const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
     fetchDataTypeInterfaces('organization')
@@ -111,6 +121,13 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
     
   }, []);
+
+  const showDeleteDialog = (uri) => {
+    setState(state => ({
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete ' + uri + ' ?'
+    }));
+  };
 
 
   
@@ -269,7 +286,7 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                         >{outcome._uri}
                         
                         </Link>
-                        <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(outcome._uri)} hideDeleteOption
+                        <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(outcome._uri)} hideDeleteOption={!userContext.isSuperuser}
                         hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(outcome._uri)}/>
 
                         </TableCell>
@@ -320,6 +337,19 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
             );
           })
         }
+        <DeleteModal
+          objectUri={state.selectedUri}
+          title={state.deleteDialogTitle}
+          show={state.showDeleteDialog}
+          onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
+          delete={handleDelete('outcome', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        />
+        <DeleteDialog
+          state={deleteDialog}
+          setState={setDeleteDialog}
+          handleDelete={handleDelete('outcome', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+          selectedUri={state.selectedUri}
+        />
   
       </Container>
     );

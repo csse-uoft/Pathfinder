@@ -1462,9 +1462,9 @@ google-libphonenumber@>=3.2.22:
   resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.29.tgz#06ca967f632252e4eb2df032288fb4327284edce"
   integrity sha512-eRVj4HIcRR+MGPDlrt1n8/nORoUMhEj3Wns5f61uDaSrLeFdXdKjBhoEOkiMe2pnmOY+UzI1j8O8umjhzPYs1A==
 
-"graphdb-utils@https://github.com/csse-uoft/graphdb-utils.git":
+"graphdb-utils@git+https://github.com/csse-uoft/graphdb-utils.git":
   version "1.0.0"
-  resolved "https://github.com/csse-uoft/graphdb-utils.git#c3ac02be146700b8341c67da0e6219f30e90bc58"
+  resolved "git+https://github.com/csse-uoft/graphdb-utils.git#1cac12f94734845624e13fadf80b2ab70f9457cb"
   dependencies:
     form-data "^4.0.0"
     graphdb "^3.0.1"

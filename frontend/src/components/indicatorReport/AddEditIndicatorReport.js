@@ -10,8 +10,9 @@ import IndicatorReportField from "../shared/IndicatorReportField";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {validateForm} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
@@ -34,7 +35,7 @@ export default function AddEditIndicatorReport() {
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
 
-  const attriConfig = fullLevelConfig.indicatorReport;
+  const attriConfig = configs[CONFIGLEVEL].indicatorReport;
 
   const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
@@ -133,11 +134,11 @@ export default function AddEditIndicatorReport() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri),{form}).then((res) => {
+      updateDataType('indicatorReport',encodeURIComponent(uri),{form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/indicatorReports/${encodeURIComponent(form.organization)}`);
+          // navigate(`/indicatorReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {

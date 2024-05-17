@@ -7,16 +7,20 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {
-  updateIndicatorReport
-} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isFieldRequired, validateField, validateForm, validateURI, validateFieldAndURI} from "../../helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  updateDataType
+} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -30,7 +34,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactModel() {
-  const attriConfig = fullLevelConfig.impactNorms
+  const attriConfig = configs[CONFIGLEVEL].impactNorms
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();
@@ -105,6 +109,8 @@ export default function AddEditImpactModel() {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
       fetchDataType('impactModel', encodeURIComponent(uri)).then(({success, impactNorms}) => {
         if (success) {
+          impactNorms.uri = impactNorms._uri;
+          console.log(impactNorms)
           setForm(impactNorms);
           setLoading(false);
         }
@@ -167,11 +173,11 @@ export default function AddEditImpactModel() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('impactModel', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
+          // navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {

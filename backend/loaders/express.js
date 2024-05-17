@@ -19,7 +19,8 @@ const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRout
   errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute, codeRoute, codesRoute, characteristicRoute,
   characteristicsRoute, stakeholderOutcomeRoute, impactReportsRoute, impactReportRoute,
   stakeholderOutcomesRoute, impactModelsRoute, featuresRoute, impactModelRoute, impactRiskRoute, impactRisksRoute,
-  howMuchImpactsRoute, counterfactualRoute, counterfactualsRoute, datasetRoute, datasetsRoute, howMuchImpactRoute
+  howMuchImpactsRoute, counterfactualRoute, counterfactualsRoute, datasetRoute, datasetsRoute, howMuchImpactRoute,
+  dataExportRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -32,7 +33,7 @@ const app = express();
 app.set('trust proxy', ['::ffff:172.31.12.233', '172.31.12.233']);
 
 app.use(logger('dev'));
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({extended: false}));
 app.use(cors({
   credentials: true,
@@ -105,6 +106,7 @@ app.use('/api/counterfactuals', counterfactualsRoute);
 app.use('/api/counterfactual', counterfactualRoute);
 app.use('/api/dataset', datasetRoute);
 app.use('/api/datasets', datasetsRoute);
+app.use('/api/dataExport', dataExportRoute);
 
 
 

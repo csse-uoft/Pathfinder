@@ -1,5 +1,5 @@
 const {GDBCodeModel} = require("../models/code");
-const {GDBOrganizationModel} = require("../models/organization");
+const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../models/organization");
 const {GDBOutcomeModel} = require("../models/outcome");
 const {GDBIndicatorModel} = require("../models/indicator");
 const {GDBIndicatorReportModel} = require("../models/indicatorReport");
@@ -10,13 +10,13 @@ const {GDBDataSetModel} = require("../models/dataset");
 const {GDBFeatureModel} = require("../models/feature");
 const {GDBGroupModel} = require("../models/group");
 const {GDBHowMuchImpactModel} = require("../models/howMuchImpact");
-const {GDBImpactModelModel} = require("../models/impactStuffs");
+const {GDBImpactModelModel, GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBImpactReportModel} = require("../models/impactReport");
 const {GDBStakeholderModel} = require("../models/stakeholder");
 const {GDBThemeModel} = require("../models/theme");
 
 const name2Model = {
-  ImpactModel: GDBImpactModelModel,
+  ImpactModel: GDBImpactNormsModel,
   Code: GDBCodeModel,
   Organization: GDBOrganizationModel,
   Outcome: GDBOutcomeModel,
@@ -31,7 +31,7 @@ const name2Model = {
   HowMuchImpact: GDBHowMuchImpactModel,
   ImpactReport: GDBImpactReportModel,
   StakeholderOutcome: GDBStakeholderOutcomeModel,
-  Stakeholder: GDBStakeholderModel,
+  Stakeholder: GDBStakeholderOrganizationModel,
   Theme: GDBThemeModel
 }
 

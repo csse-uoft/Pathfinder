@@ -4,10 +4,12 @@ const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
-const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
+
 
 
 const fetchIndicators = async (req, res) => {
@@ -138,6 +140,7 @@ const fetchIndicator = async (req, res) => {
   indicator.unitOfMeasure = indicator.unitOfMeasure?.label;
   indicator.baseline = indicator.baseline?.numericalValue;
   indicator.threshold = indicator.threshold?.numericalValue;
+  indicator.accesss = indicator.hasAccesss;
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization})
@@ -159,7 +162,7 @@ const createIndicatorHandler = async (req, res, next) => {
     if (await hasAccess(req, 'createIndicator')){
       const {form} = req.body;
       await Transaction.beginTransaction();
-      if (await indicatorBuilder('interface',  null, null, null, {}, {}, form)){
+      if (await indicatorBuilder('interface',  null, null, null, {}, {}, form, configLevel)){
         await Transaction.commit();
         return res.status(200).json({success: true})
       }
@@ -187,70 +190,13 @@ function cacheListOfOrganizations(organizations, organizationDict) {
 const updateIndicator = async (req, res) => {
   const {form} = req.body;
   const {uri} = req.params;
-  if (!uri)
-    throw new Server400Error('Uri is needed');
-  if (!form || !form.description || !form.name || !form.organization || !form.unitOfMeasure)
-    throw new Server400Error('Invalid input');
-  const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure']});
-  if (!indicator)
-    throw new Server400Error('No such indicator');
-  indicator.name = form.name;
-  indicator.description = form.description;
-  indicator.unitOfMeasure.label = form.unitOfMeasure;
-  if (indicator.forOrganization !== form.organization) {
-
-    indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization});
-    form.organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-    // remove the indicator from previous organization
-    indicator.forOrganization.hasIndicators = indicator.forOrganization.hasIndicators.filter(
-      indicatorUri => indicatorUri !== uri
-    )
-    await indicator.forOrganization.save();
-    // add the indicator to the new organization
-    if (!form.organization.hasIndicators)
-      form.organization.hasIndicators = []
-    form.organization.hasIndicators.push(uri);
-    await form.organization.save();
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  form.hasAccesss = form.accesss;
+  if (await indicatorBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
   }
-  // const organizationDict = {};
-  // // fetch indicator.forOrganizations from database
-  // indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(organizationURI =>
-  //   GDBOrganizationModel.findOne({_uri: organizationURI})
-  // ));
-  // // cache indicator.forOrganizations into dict
-  // cacheListOfOrganizations(indicator.forOrganizations, organizationDict);
-  // // fetch form.organizations from database
-  // form.organizations = await Promise.all(form.organizations.map(organizationUri => {
-  //     // if the organization already in the dict, simply get from dict
-  //     if (organizationDict[organizationUri])
-  //       return organizationDict[organizationUri];
-  //     // otherwise, fetch
-  //     return GDBOrganizationModel.findOne({_uri: organizationUri});
-  //   }
-  // ));
-  // // cache organizations which is not in dict
-  // cacheListOfOrganizations(form.organizations, organizationDict);
-  //
-  //
-  // // remove the indicator from every organizations in indicator.forOrganizations
-  // await Promise.all(indicator.forOrganizations.map(organization => {
-  //   const index = organization.hasIndicators.indexOf(uri);
-  //   organization.hasIndicators.splice(index, 1);
-  //   organization.markModified('hasIndicators');
-  //   return organization.save();
-  // }));
-  //
-  // // add the indicator to every organizations in form.organizations
-  // await Promise.all(form.organizations.map(organization => {
-  //   if (!organization.hasIndicators)
-  //     organization.hasIndicators = [];
-  //   organization.hasIndicators.push(indicator._uri);
-  //   return organization.save();
-  // }));
-  //
-  indicator.forOrganization = form.organization;
-  await indicator.save();
-  return res.status(200).json({success: true});
 
 };
 
@@ -258,69 +204,105 @@ const updateIndicatorHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'updateIndicator'))
       return await updateIndicator(req, res);
-    return res.status(400).json({success: false, message: 'Wrong auth'});
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
+    next(e);
+  }
+};
+
+
+const deleteIndicatorHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteIndicator'))
+      return await deleteIndicator(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
   }
 };
 
-const createIndicator = async (req, res) => {
-  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
-  if (!userAccount)
-    throw new Server400Error('Wrong auth');
-  const {form} = req.body;
-  if (!form || !form.organization || !form.name || !form.description || !form.unitOfMeasure)
-    throw new Server400Error('Invalid input');
-  form.forOrganization = await  GDBOrganizationModel.findOne({_uri: form.organization}, {populates: ['hasIndicators']})
-  // for each organization, does it contain any indicator with same name?
-  let duplicate = false;
-  let organizationInProblem;
-  if (form.organization.hasIndicators) {
-    form.organization.hasIndicators.map(indicator => {
-      if (indicator.name === form.name) {
-        duplicate = true;
-        organizationInProblem = form.organization._id;
-      }
-    });
+const deleteIndicator = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasIndicator');
+    await deleteDataAndAllReferees(uri, 'cids:forIndicator');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:Organization': 'cids:hasIndicator',
+      'cids:ImpactNorms': 'cids:hasIndicator',
+      'cids:Outcome': 'cids:hasIndicator',
+      'cids:StakeholderOutcome': 'cids:hasIndicator',
+      'cids:HowMuchImpact': 'cids:forIndicator',
+      'cids:IndicatorReport': 'cids:forIndicator',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
+}
 
-  if (duplicate && organizationInProblem)
-    return res.status(200).json({
-      success: false,
-      message: 'The name of the indicator has been occupied in organization ' + organizationInProblem
-    });
+// const createIndicator = async (req, res) => {
+//   const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+//   if (!userAccount)
+//     throw new Server400Error('Wrong auth');
+//   const {form} = req.body;
+//   if (!form || !form.organization || !form.name || !form.description || !form.unitOfMeasure)
+//     throw new Server400Error('Invalid input');
+//   form.forOrganization = await  GDBOrganizationModel.findOne({_uri: form.organization}, {populates: ['hasIndicators']})
+//   // for each organization, does it contain any indicator with same name?
+//   let duplicate = false;
+//   let organizationInProblem;
+//   if (form.organization.hasIndicators) {
+//     form.organization.hasIndicators.map(indicator => {
+//       if (indicator.name === form.name) {
+//         duplicate = true;
+//         organizationInProblem = form.organization._id;
+//       }
+//     });
+//   }
+//
+//   if (duplicate && organizationInProblem)
+//     return res.status(200).json({
+//       success: false,
+//       message: 'The name of the indicator has been occupied in organization ' + organizationInProblem
+//     });
+//
+//   form.unitOfMeasure = GDBUnitOfMeasure({
+//     label: form.unitOfMeasure
+//   });
+//   const indicator = GDBIndicatorModel({
+//     name: form.name,
+//     description: form.description,
+//     forOrganization: form.forOrganization._uri,
+//     unitOfMeasure: form.unitOfMeasure
+//   }, form.uri ? {uri: form.uri} : null);
+//
+//   await indicator.save();
+//   if (!form.forOrganization.hasIndicators)
+//     form.forOrganization.hasIndicators = [];
+//   form.forOrganization.hasIndicators.push(indicator)
+//   await form.forOrganization.save()
+//
+//   // add the indicator to the organizations
+//   // await Promise.all(indicator.forOrganizations.map(organization => {
+//   //   if (!organization.hasIndicators)
+//   //     organization.hasIndicators = [];
+//   //   organization.hasIndicators.push(indicator);
+//   //   return organization.save();
+//   // }));
+//   // const ownership = GDBOwnershipModel({
+//   //   resource: indicator,
+//   //   owner: userAccount,
+//   //   dateOfCreated: new Date(),
+//   // });
+//   // await ownership.save();
+//   return res.status(200).json({success: true});
+// };
 
-  form.unitOfMeasure = GDBUnitOfMeasure({
-    label: form.unitOfMeasure
-  });
-  const indicator = GDBIndicatorModel({
-    name: form.name,
-    description: form.description,
-    forOrganization: form.forOrganization._uri,
-    unitOfMeasure: form.unitOfMeasure
-  }, form.uri ? {uri: form.uri} : null);
 
-  await indicator.save();
-  if (!form.forOrganization.hasIndicators)
-    form.forOrganization.hasIndicators = [];
-  form.forOrganization.hasIndicators.push(indicator)
-  await form.forOrganization.save()
-
-  // add the indicator to the organizations
-  // await Promise.all(indicator.forOrganizations.map(organization => {
-  //   if (!organization.hasIndicators)
-  //     organization.hasIndicators = [];
-  //   organization.hasIndicators.push(indicator);
-  //   return organization.save();
-  // }));
-  // const ownership = GDBOwnershipModel({
-  //   resource: indicator,
-  //   owner: userAccount,
-  //   dateOfCreated: new Date(),
-  // });
-  // await ownership.save();
-  return res.status(200).json({success: true});
-};
-
-
-module.exports = {updateIndicatorHandler, createIndicatorHandler, fetchIndicatorsHandler, fetchIndicatorHandler, fetchIndicatorInterfacesHandler};
+module.exports = {updateIndicatorHandler, createIndicatorHandler, fetchIndicatorsHandler, fetchIndicatorHandler, fetchIndicatorInterfacesHandler, deleteIndicatorHandler};

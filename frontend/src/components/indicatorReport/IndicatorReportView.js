@@ -19,6 +19,8 @@ import {
   handleSelectAllClick
 } from "../../helpers/helpersForDropdownFilter";
 import DropdownFilter from "../shared/DropdownFilter";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 
 export default function IndicatorReportView({single, multi, organizationUser, groupUser, superUser, organizationUri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -37,6 +39,18 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
     selectedId: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
+  });
+  const showDeleteDialog = (uri) => {
+    setState(state => ({
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete code ' + uri + ' ?'
+    }));
+  };
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
   });
   const [indicatorReportDict, setIndicatorReportDict] = useState({})
   const [trigger, setTrigger] = useState(true);
@@ -129,10 +143,10 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
 
     {
       label: ' ',
-      body: ({_uri}) => {
-        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+      body: (indicatorReportUri) => {
+        return <DropdownMenu urlPrefix={'indicatorReport'} objectUri={encodeURIComponent(indicatorReportUri)} hideDeleteOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
                              hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                             handleDelete={() => showDeleteDialog(_uri)}/>;
+                             handleDelete={() => showDeleteDialog(indicatorReportUri)}/>;
       }
     }
   ];
@@ -189,7 +203,19 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
           />
         )
       }
-
+      <DeleteModal
+        objectUri={state.selectedUri}
+        title={state.deleteDialogTitle}
+        show={state.showDeleteDialog}
+        onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
+        delete={handleDelete('indicatorReport', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('indicatorReport', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
+      />
     </Container>
   );
 

@@ -5,10 +5,10 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {deleteTheme, fetchThemes} from "../../api/themeApi";
-import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes} from "../../api/generalAPI";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 export default function Datasets() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
@@ -21,6 +21,12 @@ export default function Datasets() {
     selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
   });
   const [trigger, setTrigger] = useState(true);
 
@@ -42,26 +48,7 @@ export default function Datasets() {
     }));
   };
 
-  const handleDelete = async (uri, form) => {
 
-    deleteTheme(uri).then(({success, message})=>{
-      if (success) {
-        setState(state => ({
-          ...state, showDeleteDialog: false,
-        }));
-        setTrigger(!trigger);
-        enqueueSnackbar(message || "Success", {variant: 'success'})
-      }
-    }).catch((e)=>{
-      setState(state => ({
-        ...state, showDeleteDialog: false,
-      }));
-      reportErrorToBackend(e)
-      setTrigger(!trigger);
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    });
-
-  };
 
   const columns = [
     {
@@ -83,7 +70,7 @@ export default function Datasets() {
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'dataset'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+        <DropdownMenu urlPrefix={'dataset'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser}
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
@@ -114,7 +101,13 @@ export default function Datasets() {
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
-        delete={handleDelete}
+        delete={handleDelete('dataset', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+      />
+      <DeleteDialog
+        state={deleteDialog}
+        setState={setDeleteDialog}
+        handleDelete={handleDelete('dataset', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        selectedUri={state.selectedUri}
       />
     </Container>
   );

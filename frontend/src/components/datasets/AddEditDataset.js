@@ -1,6 +1,6 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
-import React, {useState, useContext} from "react";
+import React, {useState, useContext, useEffect} from "react";
 import {Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
@@ -11,10 +11,10 @@ import {useSnackbar} from "notistack";
 
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
     root: {
@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditDataset() {
 
-    const attriConfig = fullLevelConfig.dataset
+    const attriConfig = configs[CONFIGLEVEL].dataset
 
     const classes = useStyles();
     const userContext = useContext(UserContext);
@@ -70,8 +70,40 @@ export default function AddEditDataset() {
     }
 
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
+            fetchDataType('dataset', encodeURIComponent(uri)).then(({success, dataset}) => {
+                if (success) {
+                    dataset.uri = dataset._uri;
+                    console.log(dataset)
+                    setForm(dataset);
+                    setLoading(false);
+                }
+            }).catch(e => {
+                if (e.json)
+                    setErrors(e.json);
+                reportErrorToBackend(e);
+                setLoading(false);
+                navigate(-1);
+                enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+            });
+        } else if (mode === 'edit' && !uri) {
+            navigate(-1);
+            enqueueSnackbar("No URI or orgUri provided", {variant: 'error'});
+        } else if (mode === 'new') {
+            setLoading(false);
+            // navigate(-1);
+            // enqueueSnackbar("No orgId provided", {variant: 'error'});
+        } else if (mode === 'new') {
+            setLoading(false);
+        } else {
+            navigate(-1);
+            enqueueSnackbar('Wrong auth', {variant: 'error'});
+        }
+
+    }, [mode, uri]);
 
 
 
@@ -101,7 +133,7 @@ export default function AddEditDataset() {
                 setState({loadingButton: false, submitDialog: false,});
             });
         } else if (mode === 'edit') {
-            updateCode(encodeURIComponent(uri), {form},).then((res) => {
+            updateDataType('dataset', encodeURIComponent(uri), {form}).then((res) => {
                 if (res.success) {
                     setState({loadingButton: false, submitDialog: false,});
                     navigate('/datasets');

@@ -10,10 +10,15 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {updateCode} from "../../api/codeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
-import {  baseLevelConfig, fullLevelConfig } from "../../helpers/attributeConfig"
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  updateDataType
+} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
@@ -35,7 +40,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditCode() {
 
-  const attriConfig = fullLevelConfig.code
+  const attriConfig = configs[CONFIGLEVEL].code
   const classes = useStyles();
   const userContext = useContext(UserContext);
   const navigator = useNavigate();
@@ -150,7 +155,7 @@ export default function AddEditCode() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateCode(encodeURIComponent(uri), {form},).then((res) => {
+      updateDataType('code', encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');

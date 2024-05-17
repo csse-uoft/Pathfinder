@@ -6,6 +6,8 @@ const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const resource = 'StakeholderOutcome'
 
@@ -14,7 +16,7 @@ const createStakeholderOutcomeHandler = async (req, res, next) => {
     const {form} = req.body;
     if (await hasAccess(req, 'create' + resource)) {
       await Transaction.beginTransaction();
-      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form)) {
+      if (await stakeholderOutcomeBuilder('interface', null, null, null, {}, {}, form, configLevel)) {
         await Transaction.commit();
         return res.status(200).json({success: true});
       }
@@ -67,6 +69,29 @@ const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next)
     next(e);
   }
 };
+
+const updateStakeholderOutcomeHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'updateStakeholderOutcome'))
+      return await updateStakeholderOutcome(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    // if (Transaction.isActive())
+    //   Transaction.rollback();
+    next(e);
+  }
+};
+
+const updateStakeholderOutcome = async (req, res) => {
+  const {form} = req.body;
+  const {uri} = req.params;
+  // await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await stakeholderOutcomeBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
+    // await Transaction.commit();
+    return res.status(200).json({success: true});
+  }
+}
 
 const fetchStakeholderOutcomeHandler = async (req, res, next) => {
   try {
@@ -129,7 +154,37 @@ const fetchStakeholderOutcomesThroughStakeholder = async (req, res) => {
   return res.status(200).json({success: true, stakeholderOutcomes})
 }
 
+const deleteStakeholderOutcomeHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteStakeholderOutcome'))
+      return await deleteStakeholderOutcome(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteStakeholderOutcome = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasStakeholderOutcome');
+    await deleteDataAndAllReferees(uri, 'cids:forOutcome');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:ImpactNorms': 'cids:hasStakeholderOutcome',
+      'cids:Outcome': 'cids:hasStakeholderOutcome',
+      'cids:ImpactReport': 'cids:forOutcome',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+}
+
 
 module.exports = {createStakeholderOutcomeHandler,
-  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomeHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler
+  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomeHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler, updateStakeholderOutcomeHandler, deleteStakeholderOutcomeHandler
 }

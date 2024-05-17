@@ -7,15 +7,15 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import GeneralField from "../shared/fields/GeneralField";
 import SelectField from "../shared/fields/SelectField";
 import Dropdown from "../shared/fields/MultiSelectField";
-import {createDataType, fetchDataType, fetchDataTypeInterfaces} from "../../api/generalAPI";
-import {fullLevelConfig} from "../../helpers/attributeConfig";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
+import {isFieldRequired, validateField, validateURI} from "../../helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -30,7 +30,7 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditHowMuchImpact() {
-  const attriConfig = fullLevelConfig.howMuchImpact
+  const attriConfig = configs[CONFIGLEVEL].howMuchImpact
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator);
   const classes = useStyles();
@@ -70,7 +70,7 @@ export default function AddEditHowMuchImpact() {
         options["counterfactuals"] = counterfactualRet.interfaces
         options["indicators"] = indicatorRet.interfaces
         setOps(ops => ({...ops, options}));
-        setLoading(false);
+        // setLoading(false);
       }
     ).catch(([e]) => {
       reportErrorToBackend(e);
@@ -85,6 +85,7 @@ export default function AddEditHowMuchImpact() {
       fetchDataType('howMuchImpact', encodeURIComponent(uri)).then(({success, howMuchImpact}) => {
         if (success) {
           howMuchImpact.uri = howMuchImpact._uri;
+          console.log(howMuchImpact)
           setForm(howMuchImpact);
           setLoading(false);
         }
@@ -139,23 +140,31 @@ export default function AddEditHowMuchImpact() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('howMuchImpact', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
+          // navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating outcome', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating howMuchImpact', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
 
   };
+
+  const attribute2Compass = {
+    indicator: 'cids:forIndicator',
+    value: 'iso21972:value',
+    counterfactuals: 'cids:hasCounterfactual',
+    startTime: 'cids:hasTime',
+    endTime: 'cids:hasTime'
+  }
 
   const validate = () => {
     const error = {};
@@ -201,7 +210,7 @@ export default function AddEditHowMuchImpact() {
 
         </Paper>
       ) : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
-        <Typography variant={'h4'}> Impact Model </Typography>
+        <Typography variant={'h4'}> How Much Impact </Typography>
 
         <GeneralField
           key={'uri'}
@@ -211,14 +220,7 @@ export default function AddEditHowMuchImpact() {
           onChange={e => form.uri = e.target.value}
           error={!!errors.uri}
           helperText={errors.uri}
-          onBlur={() => {
-            if (form.uri !== '' && !isValidURL(form.uri)) {
-              setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-            } else {
-              setErrors(errors => ({...errors, uri: ''}));
-            }
-
-          }}
+          onBlur={validateURI(form, setErrors)}
         />
 
         <GeneralField
@@ -229,6 +231,8 @@ export default function AddEditHowMuchImpact() {
           onChange={e => form.value = e.target.value}
           error={!!errors.value}
           helperText={errors.value}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'value')}
+          onBlur={validateField(form, attriConfig, 'value', attribute2Compass['value'], setErrors)}
         />
 
 
@@ -247,6 +251,8 @@ export default function AddEditHowMuchImpact() {
               })
             );
           }}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'indicator')}
+          onBlur={validateField(form, attriConfig, 'indicator', attribute2Compass['indicator'], setErrors)}
         />
 
         <Dropdown
@@ -257,9 +263,11 @@ export default function AddEditHowMuchImpact() {
             form.counterfactuals = e.target.value
           }
           }
-          value={state.counterfactuals}
+          value={form.counterfactuals}
           error={!!errors.counterfactuals}
           helperText={errors.counterfactuals}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'counterfactuals')}
+          onBlur={validateField(form, attriConfig, 'counterfactuals', attribute2Compass['counterfactuals'], setErrors)}
         />
 
         <SelectField
@@ -271,6 +279,7 @@ export default function AddEditHowMuchImpact() {
           helperText={
             errors.subtype
           }
+          disabled={mode === 'edit'}
           onChange={e => {
             setForm(form => ({
                 ...form, subtype: e.target.value
@@ -293,6 +302,8 @@ export default function AddEditHowMuchImpact() {
               })
             );
           }}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'startTime')}
+          onBlur={validateField(form, attriConfig, 'startTime', attribute2Compass['startTime'], setErrors)}
         />
 
         <GeneralField
@@ -309,6 +320,8 @@ export default function AddEditHowMuchImpact() {
               })
             );
           }}
+          required={isFieldRequired(attriConfig, attribute2Compass, 'endTime')}
+          onBlur={validateField(form, attriConfig, 'endTime', attribute2Compass['endTime'], setErrors)}
         />
 
 
