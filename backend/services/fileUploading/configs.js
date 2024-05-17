@@ -2,7 +2,7 @@ const baseLevelConfig = {
 
   theme: {},
   outcome: {
-    'cids:hasIndicator': {flag: true},
+    // 'cids:hasIndicator': {flag: true},
   },
   indicator: {
     'cids:forOutcome': {flag: true},
@@ -22,9 +22,8 @@ const baseLevelConfig = {
 
 const fullLevelConfig = {
   outcome: {
-    'cids:hasIndicator': {flag: true},
-    'oep:partOf': {ignoreInstance: true},
-    'cids:hasCode': {flag: true},
+    // 'cids:hasIndicator': {flag: true},
+    'oep:partOf': {ignoreInstance: true}
   },
   impactNorms: {},
   indicator: {

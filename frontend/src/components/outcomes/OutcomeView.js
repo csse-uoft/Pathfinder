@@ -233,14 +233,14 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
                                     icon={<AddIcon/>}
                                     label="Add new Outcome"
                                     variant="outlined"/> : null}
-                                <DropdownFilter selectedOrganizations={selectedOrganizations}
-                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
-                                                organizationInterfaces
-                                                handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
-                                                handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
-                                                handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
-                                                handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}
-                                />
+                                  {multi?<DropdownFilter selectedOrganizations={selectedOrganizations}
+                                                   areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
+                                                   organizationInterfaces
+                                                   handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
+                                                   handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
+                                                   handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
+                                                   handleOrgClick={handleOrgClick(selectedOrganizations, setSelectedOrganizations, organizationsWithGroups)}
+                                  />:null}
                                 </div>
                               }
         />

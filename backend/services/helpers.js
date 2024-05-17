@@ -381,7 +381,7 @@ async function assignInvertValues(environment, config, object, mainModel, mainOb
         },
         config[internalKey]
       );
-  } else if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || (form[propertyName])) {
+  } else if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || (form?.[propertyName])) {
     mainObject[propertyName] = [];
     for (const objectURI of environment === 'fileUploading'? getListOfValue(object, mainModel, propertyName) : form[propertyName]) {
       mainObject[propertyName] = [...mainObject[propertyName], objectURI]
