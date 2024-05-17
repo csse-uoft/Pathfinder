@@ -265,7 +265,9 @@ export default function AddEditGroup() {
             key={'organizations'}
             value={form.organizations}
             onChange={e => {
-              form.organizations = e.target.value;
+              setForm(form => ({
+                ...form, organizations: e.target.value
+              }))
             }}
             options={options.organizations}
             error={!!errors.organizations}
