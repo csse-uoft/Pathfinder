@@ -261,6 +261,7 @@ export default function AddEditGroup() {
           />
 
           <Dropdown
+            chooseAll
             label="Organizations"
             key={'organizations'}
             value={form.organizations}
