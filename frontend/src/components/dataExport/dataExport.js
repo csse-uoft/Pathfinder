@@ -148,6 +148,7 @@ export default function DataExportPage() {
         <Typography variant={'h4'}> Data Export </Typography>
 
         <Dropdown
+          chooseAll
           key={'organizations'}
           label={'Organizations'}
           value={state.organizations}

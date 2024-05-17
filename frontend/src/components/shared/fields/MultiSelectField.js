@@ -7,8 +7,8 @@ export default function Dropdown(props) {
   const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth, fullWidth, chooseAll} = props;
 
   const handleChange = useCallback((e, value) => {
-    if (value.includes('Choose All')) {
-      onChange({target: {value: Object.values(options)}});
+    if (value.includes('Choose All') && chooseAll) {
+      onChange({target: {value: Object.keys(options)}});
     } else {
       onChange({target: {value}});
     }
