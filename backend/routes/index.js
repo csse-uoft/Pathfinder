@@ -35,5 +35,6 @@ module.exports = {
   counterfactualRoute: require('./counterfactual'),
   counterfactualsRoute: require('./counterfactuals'),
   datasetRoute: require('./dataset'),
-  datasetsRoute: require('./datasets')
+  datasetsRoute: require('./datasets'),
+  dataExportRoute: require('./dataExport')
 }

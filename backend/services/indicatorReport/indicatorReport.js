@@ -10,6 +10,7 @@ const {indicatorReportBuilder} = require("./indicatorReportBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const resource = 'IndicatorReport';
 
@@ -275,10 +276,39 @@ const fetchIndicatorReports = async (req, res) => {
   return res.status(200).json({success: true, indicatorReports, editable});
 };
 
+const deleteIndicatorReportHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteIndicatorReport'))
+      return await deleteIndicatorReport(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteIndicatorReport = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasIndicatorReport');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:ImpactNorms': 'cids:hasIndicatorReport',
+      'cids:Indicator': 'cids:hasIndicatorReport',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+}
+
 module.exports = {
   createIndicatorReportHandler,
   fetchIndicatorReportHandler,
   updateIndicatorReportHandler,
   fetchIndicatorReportsHandler,
-  fetchIndicatorReportInterfacesHandler
+  fetchIndicatorReportInterfacesHandler,
+  deleteIndicatorReportHandler
 };

@@ -9,6 +9,7 @@ const {outcomeBuilder} = require("./outcomeBuilder");
 const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 const resource = 'Outcome'
 
@@ -309,6 +310,39 @@ const updateOutcome = async (req, res) => {
 //   return res.status(200).json({success: true});
 // };
 
+const deleteOutcomeHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteOutcome'))
+      return await deleteOutcome(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteOutcome = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasOutcome');
+    await deleteDataAndAllReferees(uri, 'cids:forOutcome');
+    await deleteDataAndAllReferees(uri, 'cids:canProduce');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:Organization': 'cids:hasOutcome',
+      'cids:ImpactNorms': 'cids:hasOutcome',
+      'cids:Outcome': 'cids:canProduce',
+      'cids:StakeholderOutcome': 'cids:forOutcome',
+      'cids:Indicator': 'cids:forOutcome',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+};
+
 const updateOutcomeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'updateOutcome'))
@@ -428,5 +462,6 @@ module.exports = {
   fetchOutcomesHandler,
   fetchOutcomeHandler,
   fetchOutcomesThroughThemeHandler,
-  fetchOutcomeInterfaceHandler
+  fetchOutcomeInterfaceHandler,
+  deleteOutcomeHandler
 };

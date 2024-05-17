@@ -5,6 +5,7 @@ const {Transaction} = require("graphdb-utils");
 const {howMuchImpactBuilder} = require("./howMuchImpactBuilder");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
 
 
 const HowMuchImpactModelDict = {
@@ -135,7 +136,32 @@ const fetchHowMuchImpacts = async (req, res) => {
   return res.status(200).json({success: 200, howMuchImpacts: howMuchImpacts});
 }
 
+const deleteHowMuchImpactHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'delete' + resource))
+      return await deleteHowMuchImpact(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const deleteHowMuchImpact = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri);
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {}, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
+}
+
 
 module.exports = {
-  fetchHowMuchImpactsHandler, createHowMuchImpactHandler, fetchHowMuchImpactHandler, fetchHowMuchImpactInterfaceHandler, updateHowMuchImpactHandler
+  fetchHowMuchImpactsHandler, createHowMuchImpactHandler, fetchHowMuchImpactHandler, fetchHowMuchImpactInterfaceHandler, updateHowMuchImpactHandler, deleteHowMuchImpactHandler
 }

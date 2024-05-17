@@ -4,10 +4,15 @@ import {Help as HelpIcon} from "@mui/icons-material";
 
 export default function Dropdown(props) {
   // options is {labelValue1: label1, labelValue2: label2, ...}
-  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth, fullWidth} = props;
+  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth, fullWidth, chooseAll} = props;
 
   const handleChange = useCallback((e, value) => {
-    onChange({target: {value}});
+    if (value.includes('Choose All')) {
+      onChange({target: {value: Object.values(options)}});
+    } else {
+      onChange({target: {value}});
+    }
+
   }, [onChange]);
 
   return (
@@ -15,10 +20,11 @@ export default function Dropdown(props) {
       <Autocomplete
         sx={{mt: '16px',}}
         multiple
-        options={Object.keys(options)}
+        options={chooseAll? ['Choose All', ...Object.keys(options)]: Object.keys(options)}
         onChange={handleChange}
-        getOptionLabel={ labelValue=> options[labelValue]}
+        getOptionLabel={ labelValue=> options[labelValue] || 'Choose All'}
         defaultValue={value}
+        value={value}
         onBlur={onBlur}
         fullWidth={fullWidth}
         disabled={disabled}

@@ -1,17 +1,18 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Container, Paper, Table, TableContainer, Typography} from "@mui/material";
 
-import {DropdownMenu, Link, Loading, DataTable} from "../shared";
+import {DropdownMenu, Link, Loading, DataTable, DeleteModal} from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchStakeholderOutcomesThroughOrganization} from "../../api/stakeholderOutcomeAPI";
-import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 import {fetchDataType} from "../../api/generalAPI";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
+import {handleDelete} from "../../helpers/deletingObjectHelper";
+import DeleteDialog from "../shared/DeleteDialog";
 
 
 export default function StakeholderOutcomeView({
@@ -35,7 +36,20 @@ export default function StakeholderOutcomeView({
     showDeleteDialog: false,
     editable: false
   });
+  const [deleteDialog, setDeleteDialog] = useState({
+    continueButton: false,
+    loadingButton: false,
+    confirmDialog: '',
+    safe: false
+  });
   const [trigger, setTrigger] = useState(true);
+
+  const showDeleteDialog = (uri) => {
+    setState(state => ({
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete ' + uri + ' ?'
+    }));
+  };
 
   useEffect(() => {
     if (multi) {
@@ -62,33 +76,6 @@ export default function StakeholderOutcomeView({
       });
     }
   }, [trigger]);
-
-  // const showDeleteDialog = (id) => {
-  //   setState(state => ({
-  //     ...state, selectedId: id, showDeleteDialog: true,
-  //     deleteDialogTitle: 'Delete organization ' + id + ' ?'
-  //   }));
-  // };
-
-  // const handleDelete = async (id, form) => {
-  //
-  //   deleteOrganization(id).then(({success, message})=>{
-  //     if (success) {
-  //       setState(state => ({
-  //         ...state, showDeleteDialog: false,
-  //       }));
-  //       setTrigger(!trigger);
-  //       enqueueSnackbar(message || "Success", {variant: 'success'})
-  //     }
-  //   }).catch((e)=>{
-  //     setState(state => ({
-  //       ...state, showDeleteDialog: false,
-  //     }));
-  //     setTrigger(!trigger);
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // };
 
   const columns = [
     {
@@ -170,7 +157,8 @@ export default function StakeholderOutcomeView({
 
                           </Link>
                           <DropdownMenu urlPrefix={'stakeholderOutcome'}
-                                        objectUri={encodeURIComponent(stakeholderOutcome._uri)} hideDeleteOption
+                                        objectUri={encodeURIComponent(stakeholderOutcome._uri)}
+                                        hideDeleteOption={!userContext.isSuperuser}
                                         hideEditOption={!userContext.isSuperuser}
                                         handleDelete={() => showDeleteDialog(stakeholderOutcome._uri)}/>
 
@@ -190,7 +178,7 @@ export default function StakeholderOutcomeView({
 
                       <TableRow>
                         <TableCell sx={style} variant="head">Impact Report</TableCell>
-                        <TableCell> {stakeholderOutcome.impactReports.map(impactReportUri => {
+                        <TableCell> {stakeholderOutcome.impactReports?.map(impactReportUri => {
                           return (
                               <>
                                 <Link
@@ -223,6 +211,20 @@ export default function StakeholderOutcomeView({
           })
 
         }
+
+        <DeleteModal
+          objectUri={state.selectedUri}
+          title={state.deleteDialogTitle}
+          show={state.showDeleteDialog}
+          onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
+          delete={handleDelete('stakeholderOutcome', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+        />
+        <DeleteDialog
+          state={deleteDialog}
+          setState={setDeleteDialog}
+          handleDelete={handleDelete('stakeholderOutcome', deleteDialog, setState, setDeleteDialog, trigger, setTrigger)}
+          selectedUri={state.selectedUri}
+        />
       </Container>
   );
 }
