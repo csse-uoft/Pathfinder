@@ -83,7 +83,7 @@ const fetchGroup = async (req, res) => {
   group.uri = group._uri
   group.organizationNames = {};
   group.organizations = group.organizations.map(organization => {
-    group.organizationNames[organization._uri] = organization.legalName;
+    group.organizationNames[organization._uri] = organization.legalName || organization._uri;
     return organization._uri;
   })
   return res.status(200).json({success: true, group: group});

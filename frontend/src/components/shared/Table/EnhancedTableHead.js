@@ -14,37 +14,64 @@ export function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox" key={0}>
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              'aria-label': 'select all desserts',
-            }}
-          />
-        </TableCell>
-        {columns.map((headCell, idx) => (
-          <TableCell
-            key={idx + 1}
-            style={headCell.style}
-            sortDirection={orderBy === (headCell.sortBy || headCell.body) ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === (headCell.sortBy || headCell.body)}
-              direction={orderBy === (headCell.sortBy || headCell.body) ? order : 'asc'}
-              onClick={createSortHandler(headCell.sortBy || headCell.body)}
-            >
-              {headCell.label}
-              {orderBy === headCell.label ? (
-                <span className={classes.sortSpan}>
+        {/*<TableCell padding="checkbox" key={0}>*/}
+        {/*  <Checkbox*/}
+        {/*    color="primary"*/}
+        {/*    indeterminate={numSelected > 0 && numSelected < rowCount}*/}
+        {/*    checked={rowCount > 0 && numSelected === rowCount}*/}
+        {/*    onChange={onSelectAllClick}*/}
+        {/*    inputProps={{*/}
+        {/*      'aria-label': 'select all desserts',*/}
+        {/*    }}*/}
+        {/*  />*/}
+        {/*</TableCell>*/}
+        {columns.map((headCell, idx) =>
+        { if (Array.isArray(headCell.label)) {
+          return <TableCell colSpan={2}>{headCell.label.map(title => {
+              return <TableCell
+                key={idx + 1}
+                style={{...headCell.style, width:`${100 / headCell.colSpan}%`, border:'none'}}
+                sortDirection={orderBy === (headCell.sortBy || headCell.body) ? order : false}
+              >
+                <TableSortLabel
+                  active={orderBy === (headCell.sortBy || headCell.body)}
+                  direction={orderBy === (headCell.sortBy || headCell.body) ? order : 'asc'}
+                  onClick={createSortHandler(headCell.sortBy || headCell.body)}
+                >
+                  {title}
+                  {orderBy === headCell.label ? (
+                    <span className={classes.sortSpan}>
                   {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                 </span>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
+                  ) : null}
+                </TableSortLabel>
+              </TableCell>
+            }
+          )}</TableCell>
+        } else {
+          return (
+            <TableCell
+              key={idx + 1}
+              style={{...headCell.style,}}
+              sortDirection={orderBy === (headCell.sortBy || headCell.body) ? order : false}
+            >
+              <TableSortLabel
+                active={orderBy === (headCell.sortBy || headCell.body)}
+                direction={orderBy === (headCell.sortBy || headCell.body) ? order : 'asc'}
+                onClick={createSortHandler(headCell.sortBy || headCell.body)}
+              >
+                {headCell.label}
+                {orderBy === headCell.label ? (
+                  <span className={classes.sortSpan}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </span>
+                ) : null}
+              </TableSortLabel>
+            </TableCell>
+          )
+        }
+        }
+          )}
       </TableRow>
     </TableHead>
   );

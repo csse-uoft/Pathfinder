@@ -12,12 +12,15 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 
 
 const config = require('../config');
-const {initUserAccounts, addSuperPassword} = require('../services/userAccount/user');
+const {initUserAccounts, addSuperPassword, addSampleOrganizations} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
   errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute, codeRoute, codesRoute, characteristicRoute,
-  characteristicsRoute, stakeholderOutcomeRoute, impactReportsRoute, impactReportRoute
+  characteristicsRoute, stakeholderOutcomeRoute, impactReportsRoute, impactReportRoute,
+  stakeholderOutcomesRoute, impactModelsRoute, featuresRoute, impactModelRoute, impactRiskRoute, impactRisksRoute,
+  howMuchImpactsRoute, counterfactualRoute, counterfactualsRoute, datasetRoute, datasetsRoute, howMuchImpactRoute,
+  dataExportRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -30,7 +33,7 @@ const app = express();
 app.set('trust proxy', ['::ffff:172.31.12.233', '172.31.12.233']);
 
 app.use(logger('dev'));
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({extended: false}));
 app.use(cors({
   credentials: true,
@@ -71,6 +74,8 @@ app.use('/api/stakeholders', stakeholdersRoute)
 app.use('/api/theme', themeRoute);
 app.use('/api/themes', themesRoute);
 app.use('/api/indicator', indicatorRoute);
+app.use('/api/impactModels', impactModelsRoute);
+app.use('/api/impactModel', impactModelRoute);
 app.use('/api/fileUploading', fileUploadingRoute);
 app.use('/api/indicators', indicatorsRoute);
 app.use('/api/outcome', outcomeRoute);
@@ -88,9 +93,20 @@ app.use('/api/codes', codesRoute);
 app.use('/api/code', codeRoute);
 app.use('/api/characteristics', characteristicsRoute);
 app.use('/api/characteristic', characteristicRoute);
+app.use('/api/stakeholderOutcomes', stakeholderOutcomesRoute);
 app.use('/api/stakeholderOutcome', stakeholderOutcomeRoute);
 app.use('/api/impactReports', impactReportsRoute);
 app.use('/api/impactReport', impactReportRoute);
+app.use('/api/impactRisks', impactRisksRoute);
+app.use('/api/impactRisk', impactRiskRoute);
+app.use('/api/features', featuresRoute);
+app.use('/api/howMuchImpacts', howMuchImpactsRoute);
+app.use('/api/howMuchImpact', howMuchImpactRoute);
+app.use('/api/counterfactuals', counterfactualsRoute);
+app.use('/api/counterfactual', counterfactualRoute);
+app.use('/api/dataset', datasetRoute);
+app.use('/api/datasets', datasetsRoute);
+app.use('/api/dataExport', dataExportRoute);
 
 
 
@@ -100,6 +116,7 @@ initUserAccounts();
 addSuperPassword();
 initStreetTypes();
 initStreetDirections();
+addSampleOrganizations();
 
 app.use(errorHandler);
 

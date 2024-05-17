@@ -3,7 +3,7 @@
  */
 const namespaces = {
   '': 'http://ontology.eil.utoronto.ca/cids/cidsrep#',
-
+  'oep': 'http://www.w3.org/2001/sw/BestPractices/OEP/SimplePartWhole/part.owl#',
   'owl': 'http://www.w3.org/2002/07/owl#',
   'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
   'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',

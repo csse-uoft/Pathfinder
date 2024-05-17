@@ -1,5 +1,7 @@
 import {titleCase} from './formulaHelpers';
-export {titleCase}
+import {isValidURL} from "./validation_helpers";
+
+export {titleCase};
 /**
  * Flip object key value pairs
  * @param obj
@@ -77,7 +79,7 @@ export function verifyAddressField(location, result) {
     if (fieldName === 'apt_number')
       continue;
     if (isFieldEmpty(value))
-      result[fieldName] = 'This field is required'
+      result[fieldName] = 'This field is required';
   }
 }
 
@@ -95,6 +97,75 @@ export function verifyOtherAddressesFields(location, result) {
       delete result[i];
     }
     i++;
+  }
+}
+
+export function validateField(form, attriConfig ,attributeName, compassAttributeName, setErrors) {
+
+  return () => {
+    if ((Array.isArray(form[attributeName])? !form[attributeName].length : !form[attributeName]) && attriConfig[compassAttributeName]) {
+      if (attriConfig[compassAttributeName].ignoreInstance) {
+        setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'}));
+      } else if (attriConfig[compassAttributeName].flag) {
+        setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'})); // todo: to be checked
+      } else {
+        setErrors(errors => ({...errors, [attributeName]: ''}));
+      }
+    } else {
+      setErrors(errors => ({...errors, [attributeName]: ''}));
+    }
+  }
+}
+
+export function isFieldRequired(attriConfig, attribute2Compass, key) {
+  return attriConfig[attribute2Compass[key]]?.ignoreInstance
+}
+
+export function validateURI(form, setErrors) {
+  return () => {
+    if (form.uri && !isValidURL(form.uri)) {
+      setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
+    } else {
+      setErrors(errors => ({...errors, uri: ''}));
+    }
+  }
+}
+
+export function validateForm(form, attriConfig, attributes, errors, URIs) {
+  for (let attribute in attributes) {
+    if (attriConfig[attributes[attribute]] && (Array.isArray(form[attribute])? !form[attribute].length : !form[attribute])) {
+      errors[attribute] = 'This field cannot be empty';
+    }
+  }
+
+  for (let attribute of URIs) {
+    if (form[attribute] && !isValidURL(form[attribute])) {
+      errors[attribute] = 'The field must be a valid URI';
+    }
+  }
+}
+
+export function validateFieldAndURI(form, attriConfig ,attributeName, compassAttributeName, setErrors) {
+  return () => {
+    if (!form[attributeName] && attriConfig[compassAttributeName]) {
+      if (attriConfig[compassAttributeName].ignoreInstance) {
+        setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'}));
+        return
+      } else if (attriConfig[compassAttributeName].flag) {
+        setErrors(errors => ({...errors, [attributeName]: 'This field cannot be empty'}));
+        return
+      } else {
+        setErrors(errors => ({...errors, [attributeName]: ''}));
+      }
+    } else {
+      setErrors(errors => ({...errors, [attributeName]: ''}));
+    }
+    if (form[attributeName] && !isValidURL(form[attributeName])) {
+      setErrors(errors => ({...errors, [attributeName]: 'Please input an valid URI'}));
+      return
+    } else {
+      setErrors(errors => ({...errors, [attributeName]: ''}));
+    }
   }
 }
 
@@ -118,27 +189,28 @@ export function validateAddressPostalCode(field, errsContainer, parentField) {
   }
 }
 
-export function verifyEmail(field, fieldName, errsContainer){
+export function verifyEmail(field, fieldName, errsContainer) {
   const email_regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   if (!email_regex.test(field)) {
     errsContainer[fieldName] = "Invalid email! ".concat("They are in the format of jsmith@example.com");
     return "Invalid email! ".concat("They are in the format of jsmith@example.com");
   }
-  return false
+  return false;
 }
 
-export function verifyPhoneNumber(field, fieldName, errsContainer){
+export function verifyPhoneNumber(field, fieldName, errsContainer) {
   const phone_number_regex = /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
-  if (field && !phone_number_regex.test(field)){
+  if (field && !phone_number_regex.test(field)) {
     errsContainer[fieldName] = "Invalid phone number! They are in the format of NPA-NXX-XXXX ".concat(
       "where NPA is the three digit area code and NXX-XXXX is the seven digit subscriber number"
-    )
+    );
   }
 }
+
 export function validateContactFormat(profile, errsContainer) {
   // Verify email
   if (profile.email) {
-    verifyEmail(profile.email,'email', errsContainer)
+    verifyEmail(profile.email, 'email', errsContainer);
   }
   // Verify Phone number
   if (profile.primary_phone_number || profile.alt_phone_number) {
@@ -175,23 +247,23 @@ const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@
 // const phoneNumberRegex = /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
 const passwordRegex = /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/;
 const postalCodeRegex = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
-const phoneNumberRegex = /^\+1\s\(\d{3}\)\s\d{3}-\d{4}$/
-const inNorthAmericaRegex = /^\+1/
-const emptyPhoneNumber = /^\+1$/
-const emptyTelephone = /^\+$/
-const samePassword = /admin/
-const sameEmail = /admin@sample.com/
+const phoneNumberRegex = /^\+1\s\(\d{3}\)\s\d{3}-\d{4}$/;
+const inNorthAmericaRegex = /^\+1/;
+const emptyPhoneNumber = /^\+1$/;
+const emptyTelephone = /^\+$/;
+const samePassword = /admin/;
+const sameEmail = /admin@sample.com/;
 
 const EMAIL_ERR_MSG = "Invalid email format! Email must be in the format of e.g. jsmith@example.com.";
-const PHONE_ERR_MSH = "Invalid phone number!" //+ "They are in the format of NPA-NXX-XXXX " +
+const PHONE_ERR_MSH = "Invalid phone number!"; //+ "They are in the format of NPA-NXX-XXXX " +
 // // "where NPA is the three digit area code and NXX-XXXX is the seven digit subscriber number";
 const PASSWORD_ERR_MSG = "Your password doesn't satisfy the minimum requirements.";
 const OLD_PASSWORD_ERR_MSG = "Your input doesn't match the old password!  Please try again.";
 const CONFIRM_EMAIL_ERR_MSG = "Your input doesn't match your registered email!  Please try again.";
 const POSTAL_CODE_ERR_MSG = "Invalid postal code format! Postal code must be in the format of e.g. A1A 1A1 " +
   "where A is a letter and 1 is a digit.";
-const EXPIRATION_DATE_MSG = "This date is in the past.  Please enter a valid date."
-const CONFIRM_PASSWORD_ERR_MSG = 'Your passwords do not match!  Please try again.'
+const EXPIRATION_DATE_MSG = "This date is in the past.  Please enter a valid date.";
+const CONFIRM_PASSWORD_ERR_MSG = 'Your passwords do not match!  Please try again.';
 
 export const Validator = {
   /**
@@ -214,7 +286,7 @@ export const Validator = {
   },
 
   phone: phone => {
-    console.log(phone)
+    console.log(phone);
     if (!emptyPhoneNumber.test(phone) && inNorthAmericaRegex.test(phone) && !phoneNumberRegex.test(phone)) {
       return PHONE_ERR_MSH;
     }
@@ -238,7 +310,7 @@ export const Validator = {
 
   confirmPassword: (confirmPassword, password) => {
     if (confirmPassword !== password)
-      return CONFIRM_PASSWORD_ERR_MSG
+      return CONFIRM_PASSWORD_ERR_MSG;
   },
 
   postalCode: postalCode => {
@@ -247,7 +319,7 @@ export const Validator = {
   },
 
   expirationDate: expirationDate => {
-    if(new Date(expirationDate.split('-')) < new Date())
-      return EXPIRATION_DATE_MSG
+    if (new Date(expirationDate.split('-')) < new Date())
+      return EXPIRATION_DATE_MSG;
   }
 };

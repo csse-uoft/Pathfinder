@@ -3,17 +3,14 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
-import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -42,6 +39,7 @@ export default function OutcomeReports() {
   const [outcomes, setOutcomes] = useState([]);
   const [loading, setLoading] = useState(true);
   const {enqueueSnackbar} = useSnackbar();
+  const userContext = useContext(UserContext);
 
   const generateTXTFile = () => {
     let str = ''
@@ -54,17 +52,20 @@ export default function OutcomeReports() {
     }
 
     outcomes.map(outcome => {
-      addLine('Outcome: ' + outcome.name || '', 2);
-      outcome.indicators.map(indicator => {
-        addLine(`Indicator Name: ${indicator.name || ''}`, 6);
-        addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 10);
-        indicator.indicatorReports.map(indicatorReport => {
-          addLine(`Indicator Report: ${indicatorReport.name || ''}`, 10);
-          addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 14);
-          addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 14);
+      addLine('Outcome: ' + outcome.name || 'Name Not Given', 2);
+      outcome.themes?.map(theme => {
+        addLine(`Theme: ${theme.name || 'Name Not Given'}`, 6)
+      })
+      outcome.indicators?.map(indicator => {
+        addLine(`Indicator Name: ${indicator.name || 'Not Given'}`, 6);
+        addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`, 10);
+        indicator.indicatorReports?.map(indicatorReport => {
+          addLine(`Indicator Report: ${indicatorReport.name || 'Name Not Given'}`, 10);
+          addLine(`Value: ${indicatorReport.value?.numericalValue || 'Not Given'}`, 14);
+          addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning?.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd?.date)).toLocaleString()}` : '', 14);
         })
       })
-
+      addLine('')
     })
 
     const file = new Blob([str], { type: 'text/plain' });
@@ -110,9 +111,11 @@ export default function OutcomeReports() {
   }
 
   useEffect(() => {
-    fetchOrganizations().then(({organizations, success}) => {
+    fetchDataTypes('organization').then(({organizations, success}) => {
       if (success) {
         const organizationsOps = {};
+        if (userContext.isSuperuser)
+          organizationsOps['all'] = 'All Outcomes'
         organizations.map(organization => {
           organizationsOps[organization._uri] = organization.legalName;
         });
@@ -129,7 +132,7 @@ export default function OutcomeReports() {
 
   useEffect(() => {
     if (selectedOrganization) {
-      fetchOutcomes(encodeURIComponent(selectedOrganization)).then(({success, outcomes}) => {
+      fetchDataTypes('outcome', encodeURIComponent(selectedOrganization)).then(({success, outcomes}) => {
         if (success) {
           setOutcomes(outcomes);
         }
@@ -146,6 +149,7 @@ export default function OutcomeReports() {
   if (loading)
     return <Loading/>;
 
+  console.log(outcomes[0])
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'} sx={{position: 'relative'}}>
@@ -181,6 +185,19 @@ export default function OutcomeReports() {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'body1'}> {'Outcome: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome?.name || 'Name Not Given'}</Link> </Typography>
+              {
+                outcome.themes?
+                  outcome.themes.map(theme => {
+                    return (
+                          <Paper elevation={0} sx={{pl: 4}}>
+                            <Typography variant={'body1'}> {`Theme: `}<Link
+                              to={`/themes/${encodeURIComponent(theme._uri)}/view`}
+                              color={'#2f5ac7'} colorWithHover>{theme.name || 'Name Not Given'}</Link> </Typography>
+                          </Paper>
+                    )
+                  })
+                  :null
+              }
               {outcome.indicators?
                 <Paper elevation={0}>
                 {/*<Typography variant={'body1'}> {`Indicators:`}  </Typography>*/}

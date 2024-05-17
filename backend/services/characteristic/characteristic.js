@@ -2,19 +2,58 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {GDBCodeModel} = require("../../models/code");
+const {characteristicBuilder} = require("./characteristicBuilder");
+const {Transaction} = require("graphdb-utils");
+const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
+
 
 const createCharacteristicHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createCharacteristic')) {
       const {form} = req.body;
-      if (await createCharacteristic({form}))
+      await Transaction.beginTransaction();
+      if (await characteristicBuilder('interface', null, null, {}, {}, form, configLevel)){
+        await Transaction.commit();
         return res.status(200).json({success: true});
+      }
     } else {
       return res.status(400).json({message: 'Wrong Auth'});
     }
+  } catch (e) {
+    if (Transaction.isActive()){
+      Transaction.rollback();
+    }
 
+    next(e);
+  }
+};
+
+const deleteCharacteristicHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteCharacteristic'))
+      return await deleteCharacteristic(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
+  }
+};
+
+const deleteCharacteristic = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
+
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasCharacteristic');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:Organization': 'cids:hasCharacteristic',
+      'cids:Stakeholder': 'cids:hasCharacteristic',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
   }
 };
 
@@ -41,33 +80,27 @@ const fetchCharacteristic= async (req, res) => {
 
 const updateCharacteristicHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'updateCharacteristic')) {
-      const {form} = req.body;
-      const {uri} = req.params;
-      if (await updateCharacteristic({form, uri}))
-        return res.status(200).json({success: true});
-    } else {
-      return res.status(400).json({message: 'Wrong Auth'});
-    }
-
+    if (await hasAccess(req, 'updateCharacteristic'))
+      return await updateCharacteristic(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };
 
-async function updateCharacteristic({uri, form}) {
-  if (!form || !form.value || !uri) {
-    throw new Server400Error('Invalid input');
+const updateCharacteristic = async (req, res) => {
+  const {form} = req.body;
+  const {uri} = req.params;
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await characteristicBuilder('interface', null, null, {}, {}, form, configLevel)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
   }
-  if (!Array.isArray(form.codes))
-    throw new Server400Error('Invalid input');
-  const characteristic = await GDBCharacteristicModel.findOne({_uri: uri});
-  if (!characteristic)
-    throw new Server400Error('No such characteristic');
-  // check codes
-  characteristic.codes = form.codes;
+};
 
-}
 
 async function createCharacteristic({form, codeDict, errorProcessor, environment}) {
   if (!form || !form.value) {
@@ -103,5 +136,5 @@ async function createCharacteristic({form, codeDict, errorProcessor, environment
 
 
 module.exports = {
-  createCharacteristicHandler, fetchCharacteristicHandler
+  createCharacteristicHandler, fetchCharacteristicHandler, updateCharacteristicHandler, deleteCharacteristicHandler
 }

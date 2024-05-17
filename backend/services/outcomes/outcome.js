@@ -2,24 +2,28 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
-const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {outcomeBuilder} = require("./outcomeBuilder");
-const {getRepository} = require("../../loaders/graphDB");
-const {transSave} = require("../helpers");
+const {Transaction} = require("graphdb-utils");
+const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {configLevel} = require('../../config');
+const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
+
+const resource = 'Outcome'
 
 
 const fetchOutcomes = async (req, res) => {
 
   const {organizationUri} = req.params;
-  if (!organizationUri) {
+  if (!organizationUri || organizationUri === 'all') {
     // the organizationId is not given, return all outcomes which is reachable by the user
     const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
-      const outcomes = await GDBOutcomeModel.find({});
+      const outcomes = await GDBOutcomeModel.find({},
+        {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value', 'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd']});
       outcomes.map(outcome => outcome.editable = true);
       return res.status(200).json({success: true, outcomes, editable: true});
     }
@@ -41,8 +45,10 @@ const fetchOutcomes = async (req, res) => {
   } else {
     // the organizationId is given, return all outcomes belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
-      {populates: ['hasOutcomes.indicators.unitOfMeasure', 'hasOutcomes.indicators.indicatorReports.value',
-          'hasOutcomes.indicators.indicatorReports.hasTime.hasBeginning', 'hasOutcomes.indicators.indicatorReports.hasTime.hasEnd']});
+      {
+        populates: ['hasOutcomes.indicators.unitOfMeasure', 'hasOutcomes.indicators.indicatorReports.value',
+          'hasOutcomes.indicators.indicatorReports.hasTime.hasBeginning', 'hasOutcomes.indicators.indicatorReports.hasTime.hasEnd']
+      });
     if (!organization)
       throw new Server400Error('No such organization');
     let editable;
@@ -53,13 +59,6 @@ const fetchOutcomes = async (req, res) => {
     if (!organization.hasOutcomes)
       return res.status(200).json({success: true, outcomes: [], editable});
 
-    // for (let outcome of organization.hasOutcomes) {
-    //   await outcome.populate('indicators')
-    //   // outcome.indicators = (await Promise.all(outcome.indicators.map(indicatorURI =>
-    //   //   GDBIndicatorModel.findOne({_uri: indicatorURI})
-    //   // ))).map(indicator => indicator.name);
-    // }
-
     return res.status(200).json({success: true, outcomes: organization.hasOutcomes, editable});
   }
 
@@ -68,7 +67,7 @@ const fetchOutcomes = async (req, res) => {
 
 const fetchOutcomesHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOutcomes'))
+    if (await hasAccess(req, `fetch${resource}s`))
       return await fetchOutcomes(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -89,7 +88,7 @@ const fetchOutcomesThroughThemeHandler = async (req, res, next) => {
 
 const fetchOutcomeHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOutcome'))
+    if (await hasAccess(req, `fetch${resource}`))
       return await fetchOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
@@ -100,8 +99,8 @@ const fetchOutcomeHandler = async (req, res, next) => {
 
 const fetchOutcomeInterfaceHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchOutcomeInterface'))
-      return await fetchOutcomeInterface(req, res);
+    if (await hasAccess(req, `fetch${resource}s`))
+      return await fetchDataTypeInterfaces(resource, req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {
@@ -109,49 +108,36 @@ const fetchOutcomeInterfaceHandler = async (req, res, next) => {
   }
 };
 
-async function fetchOutcomeInterface(req, res) {
-  const outcomes = await GDBOutcomeModel.find({});
-  const outcomeInterfaces = {}
-  outcomes.map(outcome => {
-    outcomeInterfaces[outcome._uri] = outcome.name
-  })
-  return res.status(200).json({success: true, outcomeInterfaces});
-}
-
 const fetchOutcomesThroughTheme = async (req, res) => {
   const {themeUri} = req.params;
   if (!themeUri)
-    throw new Server400Error('Theme URI is not given')
+    throw new Server400Error('Theme URI is not given');
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   const reachableOrganizations = (await allReachableOrganizations(userAccount)).map(organization => organization._uri);
-  const outcomes = await GDBOutcomeModel.find({theme: themeUri, forOrganization: {$in: reachableOrganizations}},
-    {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value',
-        'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd']});
-  return res.status(200).json({success: true, outcomes})
+  let outcomes = await GDBOutcomeModel.find({forOrganization: {$in: reachableOrganizations}},
+    {
+      populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value',
+        'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd']
+    });
+  outcomes = outcomes.filter(outcome => outcome.themes?.includes(themeUri));
+  return res.status(200).json({success: true, outcomes});
 };
 
 const fetchOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is not given');
-  const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['themes', 'indicators']});
+  const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['indicators']});
   if (!outcome)
     throw new Server400Error('No such outcome');
-  outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization})
+  outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization});
   outcome.organization = outcome.forOrganization?._uri;
   outcome.organizationName = outcome.forOrganization?.legalName;
-  if (!outcome.themes)
-    outcome.themes = [];
-  outcome.themeNames = {};
-  outcome.themes?.map(theme => {
-    outcome.themeNames[theme._uri] = theme.name;
-  })
-  outcome.themes = outcome.themes?.map(theme => theme._uri);
 
   outcome.indicatorNames = {};
   outcome.indicators?.map(indicator => {
     outcome.indicatorNames[indicator._uri] = indicator.name;
-  })
+  });
   outcome.indicators = outcome.indicators?.map(indicator => indicator._uri);
   // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
   //   return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
@@ -171,20 +157,18 @@ const fetchOutcome = async (req, res) => {
 };
 
 const createOutcomeHandler = async (req, res, next) => {
-  const repo = await getRepository();
-  const trans = await repo.beginTransaction();
-  trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass);
   try {
-    if (await hasAccess(req, 'createOutcome')){
+    if (await hasAccess(req, 'createOutcome')) {
       const {form} = req.body;
-      await outcomeBuilder('interface', trans, null, null, null,null, {}, {transSave}, form);
-      await trans.commit();
-      return res.status(200).json({success: true});
+      await Transaction.beginTransaction();
+      if (await outcomeBuilder('interface', null, null, null, {}, {}, form, configLevel)){
+        await Transaction.commit();
+        return res.status(200).json({success: true});
+      }
     }
-      // return await createOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
-    await trans.rollback();
+    await Transaction.rollback();
     next(e);
   }
 };
@@ -203,125 +187,170 @@ function cacheListOfObjects(objs, objDict) {
 const updateOutcome = async (req, res) => {
   const {form} = req.body;
   const {uri} = req.params;
-  if (!uri)
-    throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || !form.organization || !form.indicators || !form.indicators.length)
-    throw new Server400Error('Invalid input');
-  // if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
-  //   throw new Server400Error('Duplicated identifier');
-  const outcome = await GDBOutcomeModel.findOne({_uri: uri});
-  if (!outcome)
-    throw new Server400Error('No such outcome');
-  outcome.name = form.name;
-  outcome.description = form.description;
-  outcome.themes = form.themes || []
-  const organizationDict = {};
-  const indicatorDict = {};
-
-  // fetch outcome.forOrganizations from database
-  // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(organizationURI =>
-  //   GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
-  // ));
-  outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization});
-  outcome.indicators = await Promise.all(outcome.indicators.map(indicatorURI =>
-    GDBIndicatorModel.findOne({_uri: indicatorURI})
-  ));
-  // outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
-  // cache outcome.forOrganizations into dict
-  // cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
-  cacheObject(outcome.forOrganization, organizationDict);
-  cacheListOfObjects(outcome.indicators, indicatorDict);
-  // cacheObject(outcome.indicator, indicatorDict);
-  // fetch form.organizations from database
-  form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_uri: form.organization});
-  form.indicator = indicatorDict[form.indicator] || await GDBIndicatorModel.findOne({_uri: form.indicator});
-  form.indicators = await Promise.all(form.indicators.map(indicatorUri => {
-    // if indicator already in the dict, simply return it
-    return indicatorDict[indicatorUri] || GDBIndicatorModel.findOne({_uri: indicatorUri});
-  }));
-  // form.organizations = await Promise.all(form.organizations.map(organizationId => {
-  //     // if the organization already in the dict, simply get from dict
-  //     if (organizationDict[organizationId])
-  //       return organizationDict[organizationId];
-  //     // otherwise, fetch
-  //     return GDBOrganizationModel.findOne({_id: organizationId});
-  //   }
-  // ));
-
-  // cache organizations which is not in dict
-  cacheObject(form.organization, organizationDict);
-  cacheListOfObjects(form.indicators, indicatorDict);
-  // cacheObject(form.indicator, indicatorDict);
-  // cacheListOfOrganizations(form.organizations, organizationDict);
-
-  if (form.organization._uri !== outcome.forOrganization._uri) {
-    // remove the outcome from outcome.organization
-    const index = outcome.forOrganization.hasOutcomes.findIndex(outcome => outcome._uri === uri);
-    outcome.forOrganization.hasOutcomes.splice(index, 1);
-    await outcome.forOrganization.save();
-
-    // add the outcome to form.organization
-    if (!form.organization.hasOutcomes)
-      form.organization.hasOutcomes = [];
-    form.organization.hasOutcomes.push(outcome);
-    await form.organization.save();
-    outcome.forOrganization = form.organization;
+  await Transaction.beginTransaction();
+  form.uri = uri;
+  if (await outcomeBuilder('interface', null, null,null, {}, {}, form, configLevel)) {
+    await Transaction.commit();
+    return res.status(200).json({success: true});
   }
+}
+// const updateOutcome = async (req, res) => {
+//   const {form} = req.body;
+//   const {uri} = req.params;
+//   if (!uri)
+//     throw new Server400Error('Id is needed');
+//   if (!form || !form.description || !form.name || !form.organization || !form.indicators || !form.indicators.length)
+//     throw new Server400Error('Invalid input');
+//   // if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
+//   //   throw new Server400Error('Duplicated identifier');
+//   const outcome = await GDBOutcomeModel.findOne({_uri: uri});
+//   if (!outcome)
+//     throw new Server400Error('No such outcome');
+//   outcome.name = form.name;
+//   outcome.description = form.description;
+//   outcome.themes = form.themes || [];
+//   const organizationDict = {};
+//   const indicatorDict = {};
+//
+//   // fetch outcome.forOrganizations from database
+//   // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(organizationURI =>
+//   //   GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
+//   // ));
+//   outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization});
+//   outcome.indicators = await Promise.all(outcome.indicators.map(indicatorURI =>
+//     GDBIndicatorModel.findOne({_uri: indicatorURI})
+//   ));
+//   // outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
+//   // cache outcome.forOrganizations into dict
+//   // cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
+//   cacheObject(outcome.forOrganization, organizationDict);
+//   cacheListOfObjects(outcome.indicators, indicatorDict);
+//   // cacheObject(outcome.indicator, indicatorDict);
+//   // fetch form.organizations from database
+//   form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_uri: form.organization});
+//   form.indicator = indicatorDict[form.indicator] || await GDBIndicatorModel.findOne({_uri: form.indicator});
+//   form.indicators = await Promise.all(form.indicators.map(indicatorUri => {
+//     // if indicator already in the dict, simply return it
+//     return indicatorDict[indicatorUri] || GDBIndicatorModel.findOne({_uri: indicatorUri});
+//   }));
+//   // form.organizations = await Promise.all(form.organizations.map(organizationId => {
+//   //     // if the organization already in the dict, simply get from dict
+//   //     if (organizationDict[organizationId])
+//   //       return organizationDict[organizationId];
+//   //     // otherwise, fetch
+//   //     return GDBOrganizationModel.findOne({_id: organizationId});
+//   //   }
+//   // ));
+//
+//   // cache organizations which is not in dict
+//   cacheObject(form.organization, organizationDict);
+//   cacheListOfObjects(form.indicators, indicatorDict);
+//   // cacheObject(form.indicator, indicatorDict);
+//   // cacheListOfOrganizations(form.organizations, organizationDict);
+//
+//   if (form.organization._uri !== outcome.forOrganization._uri) {
+//     // remove the outcome from outcome.organization
+//     const index = outcome.forOrganization.hasOutcomes.findIndex(outcome => outcome._uri === uri);
+//     outcome.forOrganization.hasOutcomes.splice(index, 1);
+//     await outcome.forOrganization.save();
+//
+//     // add the outcome to form.organization
+//     if (!form.organization.hasOutcomes)
+//       form.organization.hasOutcomes = [];
+//     form.organization.hasOutcomes.push(outcome);
+//     await form.organization.save();
+//     outcome.forOrganization = form.organization;
+//   }
+//
+//   // if (form.indicator._id !== outcome.indicator._id) {
+//   //   const index = outcome.indicator.forOutcomes.findIndex(outcome => outcome._id === id);
+//   //   outcome.indicator.forOutcomes.splice(index, 1);
+//   //   await outcome.indicator.save();
+//   //
+//   //   if (!form.indicator.forOutcomes)
+//   //     form.indicator.forOutcomes = [];
+//   //   form.indicator.forOutcomes.push(outcome);
+//   //   await form.indicator.save();
+//   //   outcome.indicator = form.indicator;
+//   // }
+//   // remove the outcome from every indicators in outcome.indicators
+//   await Promise.all(outcome.indicators.map(indicator => {
+//     const index = indicator.forOutcomes.findIndex(outcome => outcome._uri === uri);
+//     indicator.forOutcomes.splice(index, 1);
+//     return indicator.save();
+//   }));
+//
+//   // add the outcome to every indicators in form.indicators
+//   await Promise.all(form.indicators.map(indicator => {
+//     if (!indicator.forOutcomes)
+//       indicator.forOutcomes = [];
+//     indicator.forOutcomes.push(outcome);
+//     return indicator.save();
+//   }));
+//
+//   outcome.indicators = form.indicators;
+//   // outcome.hasIdentifier = form.identifier;
+//
+//   // remove the outcome from every organizations in outcome.forOrganizations
+//   // await Promise.all(outcome.forOrganizations.map(organization => {
+//   //   const index = organization.hasOutcomes.findIndex(outcome => outcome._id === id);
+//   //   organization.hasOutcomes.splice(index, 1);
+//   //   return organization.save();
+//   // }));
+//
+//   // add the outcome to every organizations in form.organizations
+//   // await Promise.all(form.organizations.map(organization => {
+//   //   if (!organization.hasOutcomes)
+//   //     organization.hasOutcomes = [];
+//   //   organization.hasOutcomes.push(outcome);
+//   //   return organization.save();
+//   // }));
+//
+//   await outcome.save();
+//   return res.status(200).json({success: true});
+// };
 
-  // if (form.indicator._id !== outcome.indicator._id) {
-  //   const index = outcome.indicator.forOutcomes.findIndex(outcome => outcome._id === id);
-  //   outcome.indicator.forOutcomes.splice(index, 1);
-  //   await outcome.indicator.save();
-  //
-  //   if (!form.indicator.forOutcomes)
-  //     form.indicator.forOutcomes = [];
-  //   form.indicator.forOutcomes.push(outcome);
-  //   await form.indicator.save();
-  //   outcome.indicator = form.indicator;
-  // }
-  // remove the outcome from every indicators in outcome.indicators
-  await Promise.all(outcome.indicators.map(indicator => {
-    const index = indicator.forOutcomes.findIndex(outcome => outcome._uri === uri);
-    indicator.forOutcomes.splice(index, 1);
-    return indicator.save();
-  }));
+const deleteOutcomeHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'deleteOutcome'))
+      return await deleteOutcome(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
 
-  // add the outcome to every indicators in form.indicators
-  await Promise.all(form.indicators.map(indicator => {
-    if (!indicator.forOutcomes)
-      indicator.forOutcomes = [];
-    indicator.forOutcomes.push(outcome);
-    return indicator.save();
-  }));
+const deleteOutcome = async (req, res) => {
+  const {uri} = req.params;
+  const {checked} = req.body;
+  if (!uri)
+    throw new Server400Error('uri is required');
 
-  outcome.indicators = form.indicators;
-  // outcome.hasIdentifier = form.identifier;
-
-  // remove the outcome from every organizations in outcome.forOrganizations
-  // await Promise.all(outcome.forOrganizations.map(organization => {
-  //   const index = organization.hasOutcomes.findIndex(outcome => outcome._id === id);
-  //   organization.hasOutcomes.splice(index, 1);
-  //   return organization.save();
-  // }));
-
-  // add the outcome to every organizations in form.organizations
-  // await Promise.all(form.organizations.map(organization => {
-  //   if (!organization.hasOutcomes)
-  //     organization.hasOutcomes = [];
-  //   organization.hasOutcomes.push(outcome);
-  //   return organization.save();
-  // }));
-
-  await outcome.save();
-  return res.status(200).json({success: true});
+  if (checked) {
+    await deleteDataAndAllReferees(uri, 'cids:hasOutcome');
+    await deleteDataAndAllReferees(uri, 'cids:forOutcome');
+    await deleteDataAndAllReferees(uri, 'cids:canProduce');
+    return res.status(200).json({message: 'Successfully deleted the object and all reference', success: true});
+  } else {
+    const {mandatoryReferee, regularReferee} = await checkAllReferees(uri, {
+      'cids:Organization': 'cids:hasOutcome',
+      'cids:ImpactNorms': 'cids:hasOutcome',
+      'cids:Outcome': 'cids:canProduce',
+      'cids:StakeholderOutcome': 'cids:forOutcome',
+      'cids:Indicator': 'cids:forOutcome',
+    }, configLevel)
+    return res.status(200).json({mandatoryReferee, regularReferee, success: true});
+  }
 };
 
 const updateOutcomeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'updateOutcome'))
       return await updateOutcome(req, res);
-    return res.status(400).json({success: false, message: 'Wrong auth'});
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    if (Transaction.isActive())
+      Transaction.rollback();
     next(e);
   }
 };
@@ -433,5 +462,6 @@ module.exports = {
   fetchOutcomesHandler,
   fetchOutcomeHandler,
   fetchOutcomesThroughThemeHandler,
-  fetchOutcomeInterfaceHandler
+  fetchOutcomeInterfaceHandler,
+  deleteOutcomeHandler
 };

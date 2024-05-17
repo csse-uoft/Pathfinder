@@ -3,17 +3,13 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
 import SelectField from "../shared/fields/SelectField";
 import {Undo, PictureAsPdf, FileDownload} from "@mui/icons-material";
-import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
-import {fetchImpactReports} from "../../api/impactReportAPI";
-import {fetchStakeholderOutcome, fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {UserContext} from "../../context";
+import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -39,7 +35,7 @@ export default function ImpactReports_ReportGenerate() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
-
+  const userContext = useContext(UserContext);
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [interfaces, setInterfaces] = useState({
@@ -58,56 +54,28 @@ export default function ImpactReports_ReportGenerate() {
         });
       str += line + '\n';
     };
-    // const pdf = new jsPDF({
-    //   orientation: 'p',
-    //   unit: 'mm',
-    //   format: 'a5',
-    //   putOnlyUsedFonts:true
-    // });
 
 
-    // let x = 20
-    // let y = 20
-    // pdf.setFontSize(20);
-    // pdf.text("Indicator Reports", x, y);
-    // y += 6;
-    // pdf.setFontSize(10);
-    // pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
-    // y += 10;
-    // indicators?.map(indicator => {
-    //   x = 23;
-    //   y += 6
-    //   pdf.text(`Indicator Name: ${indicator.name}`, x, y)
-    //   y += 6;
-    //   pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
-    //   y += 6;
-    //   indicator.indicatorReports?.map(indicatorReport => {
-    //     x = 26
-    //     pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
-    //     y += 6
-    //   })
-    // })
-    // pdf.save('indicator report.pdf');
-
-    indicators.map(indicator => {
-      addLine(`Indicator: ${indicator.name || ''}`, 2);
-      addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 6);
-      indicator.indicatorReports.map(indicatorReport => {
-        addLine(`Indicator Report: ${indicatorReport.name || ''}`, 6);
-        addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 10);
-        addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 10);
-      });
+    impactReports.map(impactReport => {
+      addLine(`Impact Report: ${impactReport.name || 'Name Not Given'}`, 2);
+      addLine(`Comment: ${impactReport.comment || 'Not Given'}`, 2);
+      addLine(`Impact Depth: ${impactReport.impactDepth?.value?.numericalValue || 'Not Given'}`, 2);
+      addLine(`Impact Scale: ${impactReport.impactScale?.value?.numericalValue || 'Not Given'}`, 2);
+      addLine(`Stakeholder Outcome: ${impactReport.forStakeholderOutcome?.name || 'Name Not Given'}`, 2);
+      addLine('')
     });
 
     const file = new Blob([str], {type: 'text/plain'});
-    saveAs(file, 'indicatorReport.txt');
+    saveAs(file, 'impactReport.txt');
   };
 
 
   useEffect(() => {
-    Promise.all([fetchOrganizations(), fetchStakeholderOutcomeInterface()]).then(
+    Promise.all([fetchDataTypes('organization'), fetchDataTypeInterfaces('stakeholderOutcome')]).then(
       ([{organizations}, {stakeholderOutcomeInterface}]) => {
         const organizationsOps = {};
+        if (userContext.isSuperuser)
+          organizationsOps['all'] = 'All Impact Reports'
         organizations.map(organization => {
           organizationsOps[organization._uri] = organization.legalName;
         });
@@ -125,7 +93,7 @@ export default function ImpactReports_ReportGenerate() {
 
   useEffect(() => {
     if (selectedOrganization) {
-      fetchImpactReports(encodeURIComponent(selectedOrganization)).then(({success, impactReports}) => {
+      fetchDataTypes('impactReport', encodeURIComponent(selectedOrganization)).then(({success, impactReports}) => {
         if (success) {
           setImpactReports(impactReports);
         }
@@ -179,10 +147,10 @@ export default function ImpactReports_ReportGenerate() {
           return (
 
             <Paper sx={{p: 2}} variant={'outlined'}>
-              <Typography variant={'h6'}> {`Impact Report: ${impactReport.name || ''}`}  </Typography>
+              <Typography variant={'h6'}> {`Impact Report: ${impactReport.name || 'Name Not Given'}`}  </Typography>
               <Typography variant={'body1'} sx={{pl: 4}}> {'Name: '}<Link
                 to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`} colorWithHover
-                color={'#2f5ac7'}>{impactReport.name || ''}</Link> </Typography>
+                color={'#2f5ac7'}>{impactReport.name || 'Name Not Given'}</Link> </Typography>
               <Typography variant={'body1'}
                           sx={{pl: 4}}> {`Comment: ${impactReport.comment || 'Not Given'}`} </Typography>
               <Typography variant={'body1'}
@@ -190,7 +158,7 @@ export default function ImpactReports_ReportGenerate() {
               <Typography variant={'body1'}
                           sx={{pl: 4}}> {`Impact Scale: ${impactReport.impactScale?.value?.numericalValue || 'Not Given'}`} </Typography>
               <Typography variant={'body1'} sx={{pl: 4}}> {'Stakeholder Outcome: '}<Link
-                to={`/stakeholderOutcome/${encodeURIComponent(impactReport.forStakeholderOutcome)}/view`} colorWithHover
+                to={`/stakeholderOutcome/${encodeURIComponent(impactReport.forStakeholderOutcome._uri)}/view`} colorWithHover
                 color={'#2f5ac7'}>{impactReport.forStakeholderOutcome?.name || 'Name Not Given'}</Link> </Typography>
 
             </Paper>

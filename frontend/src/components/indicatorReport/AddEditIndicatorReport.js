@@ -6,12 +6,14 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
-import {UserContext} from "../../context";
 import IndicatorReportField from "../shared/IndicatorReportField";
-import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
+import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
+import {validateForm} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -32,7 +34,23 @@ export default function AddEditIndicatorReport() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
-  const userContext = useContext(UserContext);
+
+  const attriConfig = configs[CONFIGLEVEL].indicatorReport;
+
+  const [datasetInterfaces, setDatasetInterfaces] = useState({});
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
+      if (success){
+        setDatasetInterfaces(interfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching dataset interface", {variant: 'error'});
+    })
+  }, [])
 
   const [state, setState] = useState({
     submitDialog: false,
@@ -48,17 +66,19 @@ export default function AddEditIndicatorReport() {
     organization: null,
     indicator: null,
     numericalValue: '',
-    unitOfMeasure: '',
+    // unitOfMeasure: '',
     startTime: '',
     endTime: '',
     dateCreated: '',
-    uri: ''
+    uri: '',
+    hasAccesss: [],
+    datasets: []
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchIndicatorReport(encodeURIComponent(uri)).then(({success, indicatorReport}) => {
+      fetchDataType('indicatorReport', encodeURIComponent(uri)).then(({success, indicatorReport}) => {
         if (success) {
           setForm(indicatorReport);
           setLoading(false);
@@ -98,7 +118,7 @@ export default function AddEditIndicatorReport() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicatorReport({form}).then((ret) => {
+      createDataType('indicatorReport', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -114,11 +134,11 @@ export default function AddEditIndicatorReport() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri),{form}).then((res) => {
+      updateDataType('indicatorReport',encodeURIComponent(uri),{form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/indicatorReports/${encodeURIComponent(form.organization)}`);
+          // navigate(`/indicatorReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {
@@ -133,37 +153,25 @@ export default function AddEditIndicatorReport() {
   };
 
   const validate = () => {
-    const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-    if (!form.comment)
-      error.comment = 'The field cannot be empty';
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
-    if (!form.indicator)
-      error.indicator = 'The field cannot be empty';
-    if (!form.startTime)
-      error.startTime = 'The field cannot be empty';
-    if (!form.endTime)
-      error.endTime = 'The field cannot be empty';
-    if (form.uri && !isValidURL(form.uri))
-      error.uri = 'The field cannot be empty'
-    if (!!form.startTime && !!form.endTime && form.startTime > form.endTime){
-      error.startTime = 'The date must be earlier than the end date'
-      error.endTime = 'The date must be later than the start date';
-    }
-
-    if (!form.numericalValue)
-      error.numericalValue = 'The field cannot be empty';
-    if (form.numericalValue && isNaN(form.numericalValue))
-      error.numericalValue = 'The field must be a number';
-    // if (!form.unitOfMeasure)
-    //   error.unitOfMeasure = 'The field cannot be empty';
-    if (!form.dateCreated)
-      error.dateCreated = 'The field cannot be empty';
-    setErrors(error);
-    return Object.keys(error).length === 0;
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
+
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    comment: 'cids:hasComment',
+    organization: 'cids:forOrganization',
+    indicator: 'cids:forIndicator',
+    numericalValue: 'iso21972:value',
+    // unitOfMeasure: 'iso21972:value',
+    startTime: 'cids:hasTime',
+    endTime: 'cids:hasTime',
+    dateCreated: 'schema:dateCreated',
+    hasAccesss: 'cids:hasAccess',
+    datasets: 'dcat:dataset',
+  }
 
   if (loading)
     return <Loading/>;
@@ -172,7 +180,7 @@ export default function AddEditIndicatorReport() {
     <Container maxWidth="md">
       {mode === 'view'? (
         <Paper sx={{p: 2}} variant={'outlined'}>
-
+          <Typography variant={'h4'}> Indicator Report </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -187,6 +195,12 @@ export default function AddEditIndicatorReport() {
           <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
           <Typography variant={'h6'}> {`Time Interval:`} </Typography>
           <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
+          <Typography variant={'h6'}> {`Datasets:`} </Typography>
+          {form.datasets?.length?
+            form.datasets.map(dataset => <Typography variant={'body1'}> {datasetInterfaces[dataset]} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+
           <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
             navigate(`/indicatorReport/${encodeURIComponent(uri)}/edit`);
           }
@@ -207,6 +221,7 @@ export default function AddEditIndicatorReport() {
           }}
           uriDiasbled={mode !== 'new'}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
 
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>

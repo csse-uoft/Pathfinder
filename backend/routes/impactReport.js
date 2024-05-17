@@ -1,12 +1,12 @@
 const express = require('express');
-const {fetchImpactReportHandler} = require("../services/impactReport/impactReport");
+const {fetchImpactReportHandler, createImpactReportHandler, updateImpactReportHandler, deleteImpactReportHandler} = require("../services/impactReport/impactReport");
 
 
 const router = express.Router();
 
 router.get('/:uri', fetchImpactReportHandler);
-// router.post('/', createIndicatorReportHandler);
-// router.put('/:uri', updateIndicatorReportHandler);
-
+router.post('/', createImpactReportHandler);
+router.put('/:uri', updateImpactReportHandler);
+router.delete('/:uri', deleteImpactReportHandler)
 
 module.exports = router;

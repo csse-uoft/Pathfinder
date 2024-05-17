@@ -3,16 +3,13 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import {
-  fetchOrganizationsBasedOnGroup,
-} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchGroups} from "../../api/groupApi";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
 import { jsPDF } from "jspdf"
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataTypes} from "../../api/generalAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -99,7 +96,7 @@ export default function GroupMembers() {
     pdf.save('group member.pdf');
   }
   useEffect(() => {
-    fetchGroups().then(res => {
+    fetchDataTypes('group').then(res => {
       if (res.success) {
         const groups = {};
         res.groups.map(group => {
@@ -117,7 +114,7 @@ export default function GroupMembers() {
 
   useEffect(() => {
     if (selectedGroup) {
-      fetchOrganizationsBasedOnGroup(encodeURIComponent(selectedGroup)).then(({organizations, success}) => {
+      fetchDataTypes('organization', encodeURIComponent(selectedGroup)).then(({organizations, success}) => {
         if (success) {
           setOrganizations(organizations);
         }

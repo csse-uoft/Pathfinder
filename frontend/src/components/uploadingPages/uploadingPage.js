@@ -44,7 +44,8 @@ export default function FileUploadingPage() {
     loading: true,
     submitDialog: false,
     loadingButton: false,
-    fileType: useParams().fileType,
+    fileType: 'JSON-ld',
+    // useParams().fileType,
     formType: useParams().formType,
     organization: useParams().orgUri,
     fileContent: null,
@@ -56,7 +57,7 @@ export default function FileUploadingPage() {
   });
   const [fileName, setFileName] = useState('')
   const [options, setOptions] = useState({
-    fileTypes: ['JSON'],
+    fileTypes: ['JSON-ld'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
     organizations: {}
   });
@@ -207,8 +208,8 @@ export default function FileUploadingPage() {
         />
 
         <FileUploader
-          title={state.fileType ? `Please upload a ${state.fileType} file` :
-            'Please choose file'}
+          // title={state.fileType ? `Please upload a ${state.fileType} file` :
+          //   'Please choose file'}
           disabled={!state.fileType}
           onchange={(fileContent, fileName) => {
             setState(state => ({...state, fileContent: fileContent}));

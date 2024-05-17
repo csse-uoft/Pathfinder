@@ -22,6 +22,19 @@ module.exports = {
   characteristicRoute: require('./characteristic'),
   characteristicsRoute: require('./characteristics'),
   stakeholderOutcomeRoute: require('./stakeholderOutcome'),
+  stakeholderOutcomesRoute: require('./stakeholderOutcomes'),
   impactReportRoute: require('./impactReport'),
-  impactReportsRoute: require('./impactReports')
+  impactReportsRoute: require('./impactReports'),
+  impactModelsRoute: require('./impactModels'),
+  impactModelRoute: require('./impactModel'),
+  featuresRoute: require('./features'),
+  impactRiskRoute: require('./impactRisk'),
+  impactRisksRoute: require('./impactRisks'),
+  howMuchImpactsRoute: require('./howMuchImpacts'),
+  howMuchImpactRoute: require('./howMuchImpact'),
+  counterfactualRoute: require('./counterfactual'),
+  counterfactualsRoute: require('./counterfactuals'),
+  datasetRoute: require('./dataset'),
+  datasetsRoute: require('./datasets'),
+  dataExportRoute: require('./dataExport')
 }

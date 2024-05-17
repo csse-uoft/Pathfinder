@@ -7,11 +7,10 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
-import {fetchOutcomesThroughTheme} from "../../api/outcomeApi";
-import {fetchTheme, fetchThemes} from "../../api/themeApi";
 import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchDataType, fetchDataTypes} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -55,51 +54,23 @@ export default function ThemeReports() {
       str += line + '\n';
     }
 
-    outcomes.map((outcome, index) => {
-      addLine(`Outcome: ${outcome.name}`, 2);
-      outcome.indicators.map(indicator => {
-        addLine(`Indicator Name: ${indicator.name}`, 6);
-        addLine(`Unit of Measure: ${indicator.unitOfMeasure.label}`, 10);
-        indicator.indicatorReports.map(indicatorReport =>{
-          addLine(`Indicator Report: ${indicatorReport.name}`, 10);
-          addLine(`Value: ${indicatorReport.value.numericalValue}`, 14);
-          addLine(`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`, 14)
+    addLine(`Theme: ${theme.name || 'Name Not Given'}`, 2)
+    addLine(`Description: ${theme.description || 'Not Given'}`, 2)
+    addLine('')
+
+    outcomes?.map((outcome, index) => {
+      addLine(`Outcome: ${outcome.name || 'Name Not Given'}`, 2);
+      outcome.indicators?.map(indicator => {
+        addLine(`Indicator Name: ${indicator.name || 'Not Given'}`, 6);
+        addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`, 10);
+        indicator.indicatorReports?.map(indicatorReport =>{
+          addLine(`Indicator Report: ${indicatorReport.name || 'Name Not Given'}`, 10);
+          addLine(`Value: ${indicatorReport.value?.numericalValue || 'Not Given'}`, 14);
+          addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning?.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd?.date)).toLocaleString()}` : '', 14)
         })
       })
+      addLine('')
     })
-
-    {outcomes.length ? outcomes.map((outcome, index) => {
-      return (
-        <Paper sx={{p: 2}} variant={'outlined'}>
-          <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>
-          {outcome.indicators?
-            <Paper elevation={0}>
-              {outcome.indicators.map(indicator => {
-                return (
-                  <Paper elevation={0} sx={{pl: 4}}>
-                    <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-                    <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label}`} </Typography>
-
-                    {indicator.indicatorReports?
-                      (indicator.indicatorReports.map(indicatorReport =>
-                        <Paper elevation={0} sx={{pl: 4}}>
-                          <Typography variant={'body1'}> {`Indicator Report: `}<Link
-                            to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
-                            color={'#2f5ac7'} colorWithHover>{indicatorReport.name}</Link> </Typography>
-                          <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
-                          <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
-                        </Paper>
-
-                      ))
-                      :null
-                    }
-                  </Paper>)
-              })}
-            </Paper> : null}
-        </Paper>
-      );
-    }) : null}
-
 
     const file = new Blob([str], { type: 'text/plain' });
     saveAs(file, 'themeReport.txt');
@@ -148,7 +119,7 @@ export default function ThemeReports() {
 
   useEffect(() => {
     if (selectedTheme) {
-      Promise.all([fetchOutcomesThroughTheme(encodeURIComponent(selectedTheme)), fetchTheme(encodeURIComponent(selectedTheme))]).
+      Promise.all([fetchDataTypes('outcome', `theme/${encodeURIComponent(selectedTheme)}`), fetchDataType('theme', encodeURIComponent(selectedTheme))]).
       then(([outcomeRet, themeRet]) => {
         if (outcomeRet.success && themeRet.success){
           setOutcomes(outcomeRet.outcomes)
@@ -166,7 +137,7 @@ export default function ThemeReports() {
 
 
   useEffect(() => {
-      fetchThemes().then(({success, themes}) => {
+      fetchDataTypes('theme').then(({success, themes}) => {
         if (success) {
           const themeOps = {};
           themes.map(theme => {
@@ -216,7 +187,7 @@ export default function ThemeReports() {
         />
         {!!selectedTheme?
           <Paper>
-          <Typography variant={'body1'} sx={{pl: 4}}>{`Theme Name: `} <Link to={`/theme/${encodeURIComponent(theme._uri)}/view`} color={'#2f5ac7'} colorWithHover>{theme.name || 'Not Given'}</Link> </Typography>
+          <Typography variant={'body1'} sx={{pl: 4}}>{`Theme Name: `} <Link to={`/themes/${encodeURIComponent(theme._uri)}/view`} color={'#2f5ac7'} colorWithHover>{theme.name || 'Not Given'}</Link> </Typography>
           <Typography variant={'body1'} sx={{pl:4}}> {`Description: ${theme.description || 'Not Given'}`} </Typography>
           </Paper>
           : null}

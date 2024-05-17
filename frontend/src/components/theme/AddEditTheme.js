@@ -6,12 +6,14 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createTheme, fetchTheme, updateTheme} from "../../api/themeApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {isFieldRequired, validateField, validateURI, validateForm} from "../../helpers";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -35,6 +37,9 @@ export default function AddEditTheme() {
   const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
 
+  const attriConfig = configs[CONFIGLEVEL].theme
+
+
   const [state, setState] = useState({
     submitDialog: false,
     loadingButton: false,
@@ -49,16 +54,11 @@ export default function AddEditTheme() {
     description: ''
   });
   const [loading, setLoading] = useState(true);
-  // const [options, setOptions] = useState({
-  //   reporters: {},
-  //   editors: [],
-  //   researchers: [],
-  //   administrators: [],
-  // });
+
 
   useEffect(() => {
     if (mode === 'edit' && uri || mode === 'view') {
-      fetchTheme(encodeURIComponent(uri)).then(res => {
+      fetchDataType('theme', encodeURIComponent(uri)).then(res => {
         if (res.success) {
           setForm({
             name: res.theme.name,
@@ -89,7 +89,7 @@ export default function AddEditTheme() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createTheme(form).then((ret) => {
+      createDataType('theme', {form}).then((ret) => {
           if (ret.success) {
             setState({loadingButton: false, submitDialog: false,});
             navigate('/themes');
@@ -105,7 +105,7 @@ export default function AddEditTheme() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateTheme(encodeURIComponent(uri), form).then((res) => {
+      updateDataType('theme', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/themes');
@@ -124,16 +124,16 @@ export default function AddEditTheme() {
   };
 
   const validate = () => {
-    const error = {};
-    if (!form.name) {
-      error.name = 'The field cannot be empty';
-    }
-    if (!form.description) {
-      error.description = 'The field cannot be empty';
-    }
-    setErrors(error);
-    return Object.keys(error).length === 0;
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
+
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+  }
 
   if (loading)
     return <Loading/>;
@@ -165,19 +165,12 @@ export default function AddEditTheme() {
           key={'name'}
           label={'Name'}
           value={form.name}
-          required
+          required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.name = e.target.value}
           error={!!errors.name}
           helperText={errors.name}
-          onBlur={() => {
-            if (form.name === '') {
-              setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-            } else {
-              setErrors(errors => ({...errors, name: ''}));
-            }
-
-          }}
+          onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
         />
 
         <GeneralField
@@ -185,19 +178,11 @@ export default function AddEditTheme() {
           key={'uri'}
           label={'URI'}
           value={form.uri}
-          required
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.uri = e.target.value}
           error={!!errors.uri}
           helperText={errors.uri}
-          onBlur={() => {
-            if (form.uri && !isValidURL(form.uri)) {
-              setErrors(errors => ({...errors, uri: 'Please input a valid URI'}));
-            } else {
-              setErrors(errors => ({...errors, uri: ''}));
-            }
-
-          }}
+          onBlur={validateURI(form, setErrors)}
         />
 
         <GeneralField
@@ -209,17 +194,10 @@ export default function AddEditTheme() {
           onChange={e => form.description = e.target.value}
           error={!!errors.description}
           helperText={errors.description}
-          required
+          required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
           multiline
           minRows={4}
-          onBlur={() => {
-            if (form.description === '') {
-              setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
-            } else {
-              setErrors(errors => ({...errors, description: ''}));
-            }
-
-          }}
+          onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
         />
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit

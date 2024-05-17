@@ -1,29 +1,25 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
-const {GDBMeasureModel} = require("../../models/measure");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
-const {getObjectValue, assignValue, assignMeasure} = require("../helpers");
-
-async function codeBuilder(environment, trans, object, organization, error, {codeDict}, {
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {assignValue, assignMeasure} = require("../helpers");
+const configs = require("../fileUploading/configs");
+async function codeBuilder(environment, object, organization, error, {codeDict}, {
   addMessage,
   addTrace,
-  transSave,
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCodeModel;
   let ret;
-  const mainObject = environment === 'fileUploading' ? codeDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? codeDict[uri] : (form?.uri? (await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri})) : mainModel({}));
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await mainObject.save();
     uri = mainObject._uri;
   }
 
-
-  const config = baseLevelConfig['code'];
+  const config = configs[configLevel]['code'];
   let hasError = false;
   if (mainObject) {
 
@@ -70,12 +66,13 @@ async function codeBuilder(environment, trans, object, organization, error, {cod
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'iso72Value', 'iso21972:value', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 
     if (environment === 'interface') {
-      await transSave(trans, mainObject);
+      await mainObject.save();
+      return true
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);

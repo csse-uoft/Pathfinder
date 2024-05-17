@@ -1,28 +1,26 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
-const {Server400Error} = require("../../utils");
+const configs = require("../fileUploading/configs");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {assignValue, assignValues} = require("../helpers");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function characteristicBuilder(environment, trans, object, error, {characteristicDict}, {
+async function characteristicBuilder(environment, object, error, {characteristicDict}, {
   addMessage,
   addTrace,
-  transSave,
   getFullPropertyURI,
   getValue,
   getListOfValue
-}, form) {
+}, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBCharacteristicModel;
   let ret;
-  const mainObject = environment === 'fileUploading' ? characteristicDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? characteristicDict[uri] : (form?.uri? (await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri})) : mainModel({}));
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await mainObject.save();
     uri = mainObject._uri;
   }
 
 
-  const config = baseLevelConfig['characteristic'];
+  const config = configs[configLevel]['characteristic'];
   let hasError = false;
   if (mainObject) {
 
@@ -38,12 +36,13 @@ async function characteristicBuilder(environment, trans, object, error, {charact
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'cids:hasValue', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
     if (environment === 'interface') {
-      await transSave(trans, mainObject);
+      await mainObject.save();
+      return true
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);

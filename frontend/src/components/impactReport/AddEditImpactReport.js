@@ -7,15 +7,20 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import IndicatorReportField from "../shared/IndicatorReportField";
-import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
+import ImpactReportField from "../shared/ImpactReportField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchImpactReport} from "../../api/impactReportAPI";
-import {fetchOrganizations} from "../../api/organizationApi";
-import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  fetchDataTypes,
+  updateDataType
+} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
+import {validateForm} from "../../helpers";
+
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -27,8 +32,8 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-
 export default function AddEditImpactReport() {
+  const attriConfig = configs[CONFIGLEVEL].impactReport
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -41,35 +46,42 @@ export default function AddEditImpactReport() {
     submitDialog: false,
     loadingButton: false,
   });
+  
   const [errors, setErrors] = useState(
     {}
   );
 
   const [ops, setOps] = useState({
     organization: {},
-    stakeholderOutcome: {}
+    stakeholderOutcome: {},
+    howMuchImpact: {},
+    impactRisk: {}
   });
 
   const [form, setForm] = useState({
     name: '',
     comment: '',
-    impactScale: '',
-    impactDepth: '',
-    forStakeholderOutcome: '',
+    impactScale: null,
+    impactDepth: null,
+    impactDuration: null,
+    forStakeholderOutcome: null,
+    reportedImpact: null,
     organization: null,
-    uri: ''
+    impactRisks: null,
+    startTime: '',
+    endTime: '',
+    uri: '',
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchOrganizations(),]).then(
-      ([{organizations},]) => {
-        const organizationsOps = {};
-        organizations.map(organization => {
-          organizationsOps[organization._uri] = organization.legalName;
-        });
-        setOps(ops => ({...ops, organization: organizationsOps}));
-        setLoading(false);
+    Promise.all([fetchDataTypeInterfaces('organization'), fetchDataTypeInterfaces('howMuchImpact'), fetchDataTypes('impactRisk')]).then(
+      ([organizationRet, howMuchImpactRet, {impactRisks}]) => {
+        const impactRiskInterfaces = {}
+        impactRisks.map(impactRisk => {
+          impactRiskInterfaces[impactRisk._uri] = impactRisk.hasIdentifier
+        })
+        setOps(ops => ({...ops, organization: organizationRet.interfaces, howMuchImpact: howMuchImpactRet.interfaces, impactRisk: impactRiskInterfaces}));
       }
     ).catch(([e]) => {
       reportErrorToBackend(e);
@@ -81,12 +93,13 @@ export default function AddEditImpactReport() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchImpactReport(encodeURIComponent(uri)).then(({success, impactReport}) => {
+      fetchDataType('impactReport', encodeURIComponent(uri)).then(({success, impactReport}) => {
         if (success) {
           impactReport.uri = impactReport._uri;
           impactReport.organization = impactReport.forOrganization;
-          impactReport.impactScale = impactReport.impactScale?.value?.numericalValue;
-          impactReport.impactDepth = impactReport.impactDepth?.value?.numericalValue;
+          impactReport.forStakeholderOutcome = impactReport.forStakeholderOutcome?._uri || impactReport.forStakeholderOutcome
+          impactReport.startTime = impactReport.hasTime?.hasBeginning?.date;
+          impactReport.endTime = impactReport.hasTime?.hasEnd?.date;
           setForm(impactReport);
           setLoading(false);
         }
@@ -122,10 +135,28 @@ export default function AddEditImpactReport() {
     }
   };
 
+  const attribute2Compass = {
+    stakeholders: 'cids:forStakeholder',
+    codes: 'cids:hasCode',
+    name: 'cids:hasName',
+    comment: 'cids:hasComment',
+    forStakeholderOutcome:'cids:forOutcome',
+    forOrganization: 'cids:forOrganization',
+    impactScale: 'cids:hasImpactScale',
+    impactDepth: 'cids:hasImpactDepth',
+    impactDuration: 'cids:hasImpactDuration',
+    startTime: 'time:hasTime',
+    endTime: 'time:hasTime',
+    reportedImpact: 'cids:hasReportedImpact',
+    expectation: 'cids:hasExpectation',
+    impactRisks: 'cids:hasImpactRisk',
+ 
+  }
+
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicatorReport({form}).then((ret) => {
+      createDataType('impactReport', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -141,11 +172,11 @@ export default function AddEditImpactReport() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('impactReport', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
+          // navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {
@@ -161,33 +192,7 @@ export default function AddEditImpactReport() {
 
   const validate = () => {
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-    if (!form.comment)
-      error.comment = 'The field cannot be empty';
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
-    if (!form.indicator)
-      error.indicator = 'The field cannot be empty';
-    if (!form.startTime)
-      error.startTime = 'The field cannot be empty';
-    if (!form.endTime)
-      error.endTime = 'The field cannot be empty';
-    if (form.uri && !isValidURL(form.uri))
-      error.uri = 'The field cannot be empty';
-    if (!!form.startTime && !!form.endTime && form.startTime > form.endTime) {
-      error.startTime = 'The date must be earlier than the end date';
-      error.endTime = 'The date must be later than the start date';
-    }
-
-    if (!form.numericalValue)
-      error.numericalValue = 'The field cannot be empty';
-    if (form.numericalValue && isNaN(form.numericalValue))
-      error.numericalValue = 'The field must be a number';
-    // if (!form.unitOfMeasure)
-    //   error.unitOfMeasure = 'The field cannot be empty';
-    if (!form.dateCreated)
-      error.dateCreated = 'The field cannot be empty';
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri'])
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -199,7 +204,7 @@ export default function AddEditImpactReport() {
     <Container maxWidth="md">
       {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
-
+          <Typography variant={'h4'}> Impact Report </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -209,14 +214,32 @@ export default function AddEditImpactReport() {
           <Typography variant={'h6'}> {`Organization:`} </Typography>
           <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
                                                colorWithHover
-                                               color={'#2f5ac7'}>{ops.organization[form.organization]}</Link>
+                                               color={'#2f5ac7'}>{ops.organization[form.organization] || 'Not Given'}</Link>
           </Typography>
 
           <Typography variant={'h6'}> {`Impact Scale:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactScale || 'Not Given'}`} </Typography>
+          <Typography variant={'body1'}> { form.impactScale? <Link to={`/howMuchImpact/${encodeURIComponent(form.impactScale)}/view`}
+                                                colorWithHover
+                                                color={'#2f5ac7'}>{ops.howMuchImpact[form.impactScale] || 'Not Given'} </Link> :'Not Given'}
+          </Typography>
 
           <Typography variant={'h6'}> {`Impact Depth:`} </Typography>
-          <Typography variant={'body1'}> {`${form.impactDepth|| 'Not Given'}`} </Typography>
+          <Typography variant={'body1'}> {form.impactDepth ? <Link to={`/howMuchImpact/${encodeURIComponent(form.impactDepth)}/view`}
+                                                colorWithHover
+                                                color={'#2f5ac7'}>{ops.howMuchImpact[form.impactDepth]}</Link> : 'Not Given'}
+          </Typography>
+
+          <Typography variant={'h6'}> {`Impact Duration:`} </Typography>
+          <Typography variant={'body1'}> {form.impactDuration ? <Link to={`/howMuchImpact/${encodeURIComponent(form.impactDuration)}/view`}
+                                                                   colorWithHover
+                                                                   color={'#2f5ac7'}>{ops.howMuchImpact[form.impactDuration]}</Link> : 'Not Given'}
+          </Typography>
+          <Typography variant={'h6'}> {`Impact Risk:`} </Typography>
+          {form.impactRisks?.length?
+            form.impactRisks.map(code => <Typography variant={'body1'}> {<Link to={`/impactRisk/${encodeURIComponent(code)}/view`} colorWithHover
+                                                                         color={'#2f5ac7'}>{ops.impactRisk[code]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/impactReport/${encodeURIComponent(uri)}/edit`);
@@ -224,29 +247,29 @@ export default function AddEditImpactReport() {
           }>
             Edit
           </Button>
-
+        
         </Paper>
       ) : (<Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Impact Report </Typography>
-        <IndicatorReportField
+          <ImpactReportField
           disabled={mode === 'view'}
           disabledOrganization={!!orgUri}
           defaultValue={form}
-          required
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
           uriDiasbled={mode !== 'new'}
           importErrors={errors}
+          attribute2Compass={attribute2Compass}
         />
-
+          
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit
         </Button>
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Indicator Report?' :
-                       'Are you sure you want to update this Indicator Report?'}
+                       'Are you sure you want to update this Impact Report?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

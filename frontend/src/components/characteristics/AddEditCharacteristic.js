@@ -6,21 +6,16 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
+
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
-import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createCode, fetchCode, fetchCodes, updateCode} from "../../api/codeAPI";
-import {fetchStakeholders} from "../../api/stakeholderAPI";
-import {createCharacteristic, fetchCharacteristic, updateCharacteristic} from "../../api/characteristicApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType,} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
+import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -40,6 +35,8 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditCharacteristic() {
+
+  const attriConfig = configs[CONFIGLEVEL].characteristic
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
@@ -70,32 +67,25 @@ export default function AddEditCharacteristic() {
     stakeholders: {},
     codes: {}
   });
+  console.log(options.stakeholders)
 
 
   useEffect(() => {
 
     Promise.all([
-      fetchCodes().then(({codes, success}) => {
+      fetchDataTypeInterfaces('code').then(({interfaces, success}) => {
         if (success) {
-          const codeDict = {};
-          codes.map(code => {
-            codeDict[code._uri] = code.name;
-          });
-          setOptions(options => ({...options, codes: codeDict}));
+          setOptions(options => ({...options, codes: interfaces}));
         }
       }),
-      fetchStakeholders().then(({stakeholders, success}) => {
+      fetchDataTypeInterfaces('stakeholder').then(({interfaces, success}) => {
         if (success) {
-          const stakeholderDict = {}
-          stakeholders.map(stakeholder => {
-            stakeholderDict[stakeholder._uri] = stakeholder.name;
-          })
-          setOptions(options => ({...options, stakeholders: stakeholderDict}));
+          setOptions(options => ({...options, stakeholders: interfaces}));
         }
       })
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
-        fetchCharacteristic(encodeURIComponent(uri)).then(res => {
+        fetchDataType('characteristic', encodeURIComponent(uri)).then(res => {
           if (res.success) {
             const {characteristic} = res;
             setForm({...characteristic, uri: characteristic._uri});
@@ -111,7 +101,7 @@ export default function AddEditCharacteristic() {
           }
         );
       } else if ((mode === 'edit' || mode === 'view') && !uri) {
-        navigate('/codes');
+        navigate('/characteristics');
         enqueueSnackbar("No URI provided", {variant: 'error'});
       } else {
         setLoading(false);
@@ -135,13 +125,20 @@ export default function AddEditCharacteristic() {
     }
   };
 
+  const attribute2Compass = {
+    stakeholders: 'cids:forStakeholder',
+    codes: 'cids:hasCode',
+    name: 'cids:hasName',
+    value: 'iso21972:value'
+  }
+
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createCharacteristic({form}).then((ret) => {
+      createDataType('characteristic',{form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/codes');
+          navigate('/characteristics');
           enqueueSnackbar(ret.message || 'Success', {variant: "success"});
         }
 
@@ -150,14 +147,14 @@ export default function AddEditCharacteristic() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating code', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating characteristic', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateCharacteristic(encodeURIComponent(uri), {form},).then((res) => {
+      updateDataType('characteristic', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/codes');
+          navigate('/characteristics');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -166,7 +163,7 @@ export default function AddEditCharacteristic() {
         }
         console.log(e);
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating code', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating characteristic', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -174,23 +171,11 @@ export default function AddEditCharacteristic() {
   };
 
   const validate = () => {
-    const error = {};
-    Object.keys(form).map(key => {
-      if (key !== 'uri' && !form[key]) {
-        error[key] = 'This field cannot be empty';
-      }
-    });
-    if (form.uri && !isValidURL(form.uri)) {
-      error.uri = 'The field should be a valid URI';
-    }
-    if (form.identifier && !isValidURL(form.identifier)){
-      error.identifier = 'The field should be a valid URI'
-    }
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri'])
+    setErrors(errors);
 
-    setErrors(error);
-
-    return Object.keys(error).length === 0;
-    // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
+    return Object.keys(errors).length === 0;
   };
 
   if (loading)
@@ -200,14 +185,20 @@ export default function AddEditCharacteristic() {
     <Container maxWidth="md">
       {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h4'}> Characteristic </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`Codes:`} </Typography>
-          {form.codes.map(code =>
+          {form.stakeholders?.length? <Typography variant={'h6'}> {`Stakeholders:`} </Typography>: null}
+          {form.stakeholders?.map(stakeholder =>
+            <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(stakeholder)}/view`}
+                                                 colorWithHover color={'#2f5ac7'}>{options.stakeholders[stakeholder] || stakeholder}</Link> </Typography>
+          )}
+          {form.codes?.length? <Typography variant={'h6'}> {`Codes:`} </Typography>:null}
+          {form.codes?.map(code =>
             <Typography variant={'body1'}> <Link to={`/code/${encodeURIComponent(code)}/view`}
-                                                 colorWithHover color={'#2f5ac7'}>{options[code] || code}</Link> </Typography>
+                                                 colorWithHover color={'#2f5ac7'}>{options.codes[code] || code}</Link> </Typography>
           )}
 
           {form.specification ? <Typography variant={'h6'}> {`specification:`} </Typography> : null}
@@ -224,11 +215,12 @@ export default function AddEditCharacteristic() {
             key={'name'}
             label={'Name'}
             value={form.name}
-            required
             sx={{mt: '16px', minWidth: 350}}
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
             helperText={errors.name}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
+            onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
           />
 
           <GeneralField
@@ -239,13 +231,7 @@ export default function AddEditCharacteristic() {
             onChange={e => form.uri = e.target.value}
             error={!!errors.uri}
             helperText={errors.uri}
-            onBlur={() => {
-              if (form.uri && !isValidURL(form.uri)) {
-                setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-              } else {
-                setErrors(errors => ({...errors, uri: ''}));
-              }
-            }}
+            onBlur={validateURI(form, setErrors)}
           />
 
           <Dropdown
@@ -258,7 +244,8 @@ export default function AddEditCharacteristic() {
             options={options.stakeholders}
             error={!!errors.stakeholders}
             helperText={errors.stakeholders}
-            // sx={{mb: 2}}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'stakeholders')}
+            onBlur={validateField(form, attriConfig, 'stakeholders', attribute2Compass['stakeholders'], setErrors)}
           />
 
           <Dropdown
@@ -271,7 +258,8 @@ export default function AddEditCharacteristic() {
             options={options.codes}
             error={!!errors.codes}
             helperText={errors.codes}
-            // sx={{mb: 2}}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
+            onBlur={validateField(form, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
           />
 
 
@@ -284,13 +272,8 @@ export default function AddEditCharacteristic() {
             onChange={e => form.value = e.target.value}
             error={!!errors.value}
             helperText={errors.value}
-            onBlur={() => {
-              if (form.value === '') {
-                setErrors(errors => ({...errors, value: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, value: ''}));
-              }
-            }}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'value')}
+            onBlur={validateField(form, attriConfig, 'value', attribute2Compass['value'], setErrors)}
           />
 
 
@@ -309,7 +292,7 @@ export default function AddEditCharacteristic() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         {mode === 'view' ?
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-            navigate(`/code/${encodeURIComponent(uri)}/edit`);
+            navigate(`/characteristic/${encodeURIComponent(uri)}/edit`);
           }
           }>
             Edit

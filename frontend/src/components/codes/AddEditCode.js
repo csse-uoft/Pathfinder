@@ -6,19 +6,20 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createCode, fetchCode, updateCode} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {
+  createDataType,
+  fetchDataType,
+  fetchDataTypeInterfaces,
+  updateDataType
+} from "../../api/generalAPI";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
+import {isFieldRequired, validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -39,6 +40,7 @@ const useStyles = makeStyles(() => ({
 
 export default function AddEditCode() {
 
+  const attriConfig = configs[CONFIGLEVEL].code
   const classes = useStyles();
   const userContext = useContext(UserContext);
   const navigator = useNavigate();
@@ -66,8 +68,7 @@ export default function AddEditCode() {
     codeValue: '',
     iso72Value: ''
   });
-  // const [outcomeForm, setOutcomeForm] = useState([
-  // ]);
+
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     objectForm: {},
@@ -78,18 +79,14 @@ export default function AddEditCode() {
   useEffect(() => {
 
     Promise.all([
-      fetchOrganizations().then(({organizations, success}) => {
+      fetchDataTypeInterfaces('organization').then(({interfaces, success}) => {
         if (success) {
-          const orgDict = {};
-          organizations.map(org => {
-            orgDict[org._uri] = org.legalName;
-          });
-          setOptions(options => ({...options, definedBy: orgDict}));
+          setOptions(options => ({...options, definedBy: interfaces}));
         }
       }),
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
-          fetchCode(encodeURIComponent(uri)).then(res => {
+          fetchDataType('code', encodeURIComponent(uri)).then(res => {
             if (res.success) {
               const {code} = res;
               setForm({...code, uri: code._uri});
@@ -129,10 +126,20 @@ export default function AddEditCode() {
     }
   };
 
+  const attribute2Compass = {
+    definedBy: 'cids:definedBy',
+    specification: 'cids:hasSpecification',
+    identifier: 'tove_org:hasIdentifier',
+    name: 'cids:hasName',
+    description: 'cids:hasDescription',
+    codeValue: 'schema:codeValue',
+    iso72Value: 'iso21972:value'
+  }
+
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createCode({form}).then((ret) => {
+      createDataType('code', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');
@@ -148,7 +155,7 @@ export default function AddEditCode() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateCode(encodeURIComponent(uri), {form},).then((res) => {
+      updateDataType('code', encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');
@@ -168,22 +175,13 @@ export default function AddEditCode() {
   };
 
   const validate = () => {
-    const error = {};
-    Object.keys(form).map(key => {
-      if (key !== 'uri' && !form[key]) {
-        error[key] = 'This field cannot be empty';
-      }
-    });
-    if (form.uri && !isValidURL(form.uri)) {
-      error.uri = 'The field should be a valid URI';
-    }
-    if (form.identifier && !isValidURL(form.identifier)){
-      error.identifier = 'The field should be a valid URI'
-    }
+    const errors = {};
 
-    setErrors(error);
+    validateForm(form, attriConfig, attribute2Compass, errors, ['identifier', 'uri'])
 
-    return Object.keys(error).length === 0;
+    setErrors(errors);
+
+    return Object.keys(errors).length === 0;
     // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
 
@@ -194,6 +192,7 @@ export default function AddEditCode() {
     <Container maxWidth="md">
       {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h4'}> Code </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -210,7 +209,7 @@ export default function AddEditCode() {
           {form.iso72Value ? <Typography variant={'h6'}> {`iso72 Value:`} </Typography> : null}
           <Typography variant={'body1'}> {form.iso72Value} </Typography>
           <Typography variant={'h6'}> {`Description:`} </Typography>
-          <Typography variant={'body1'}> {`${form.description}`} </Typography>
+          <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
 
 
         </Paper>
@@ -221,19 +220,12 @@ export default function AddEditCode() {
             key={'name'}
             label={'Name'}
             value={form.name}
-            required
+            required={isFieldRequired(attriConfig, attribute2Compass, 'name')}
             sx={{mt: '16px', minWidth: 350}}
             onChange={e => form.name = e.target.value}
             error={!!errors.name}
             helperText={errors.name}
-            onBlur={() => {
-              if (!form.name) {
-                setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, name: ''}));
-              }
-
-            }}
+            onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
           />
 
           <GeneralField
@@ -244,14 +236,7 @@ export default function AddEditCode() {
             onChange={e => form.uri = e.target.value}
             error={!!errors.uri}
             helperText={errors.uri}
-            onBlur={() => {
-              if (form.uri && !isValidURL(form.uri)) {
-                setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
-              } else {
-                setErrors(errors => ({...errors, uri: ''}));
-              }
-
-            }}
+            onBlur={validateURI(form, setErrors)}
           />
 
           <SelectField
@@ -260,16 +245,11 @@ export default function AddEditCode() {
             value={form.definedBy}
             options={options.definedBy}
             error={!!errors.definedBy}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'definedBy')}
             helperText={
               errors.definedBy
             }
-            onBlur={() => {
-              if (!form.definedBy) {
-                setErrors(errors => ({...errors, definedBy: 'This field cannot be empty' }))
-              } else {
-                setErrors(errors => ({...errors, definedBy: '' }))
-              }
-            }}
+            onBlur={validateField(form, attriConfig,'definedBy',attribute2Compass['definedBy'], setErrors)}
             onChange={e => {
               setForm(form => ({
                   ...form, definedBy: e.target.value
@@ -287,17 +267,11 @@ export default function AddEditCode() {
             onChange={e => form.identifier = e.target.value}
             error={!!errors.identifier}
             helperText={errors.identifier}
-            onBlur={() => {
-              if (!form.identifier || !isValidURL(form.identifier)) {
-                setErrors(errors => ({...errors, identifier: 'Please input an valid URI'}));
-              } else {
-                setErrors(errors => ({...errors, identifier: ''}));
-              }
-            }}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'identifier')}
+            onBlur={validateFieldAndURI(form, attriConfig,'identifier',attribute2Compass['identifier'], setErrors)}
           />
 
           <GeneralField
-            disabled={!userContext.isSuperuser}
             key={'specification'}
             label={'Specification'}
             value={form.specification}
@@ -305,13 +279,8 @@ export default function AddEditCode() {
             onChange={e => form.specification = e.target.value}
             error={!!errors.specification}
             helperText={errors.specification}
-            onBlur={() => {
-              if (form.specification === '') {
-                setErrors(errors => ({...errors, specification: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, specification: ''}));
-              }
-            }}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'specification')}
+            onBlur={validateField(form, attriConfig,'specification',attribute2Compass['specification'], setErrors)}
           />
 
           <GeneralField
@@ -323,13 +292,8 @@ export default function AddEditCode() {
             onChange={e => form.codeValue = e.target.value}
             error={!!errors.codeValue}
             helperText={errors.codeValue}
-            onBlur={() => {
-              if (form.codeValue === '') {
-                setErrors(errors => ({...errors, codeValue: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, codeValue: ''}));
-              }
-            }}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'codeValue')}
+            onBlur={validateField(form, attriConfig,'codeValue',attribute2Compass['codeValue'], setErrors)}
           />
 
           <GeneralField
@@ -341,13 +305,8 @@ export default function AddEditCode() {
             onChange={e => form.iso72Value = e.target.value}
             error={!!errors.iso72Value}
             helperText={errors.iso72Value}
-            onBlur={() => {
-              if (form.iso72Value === '') {
-                setErrors(errors => ({...errors, iso72Value: 'This field cannot be empty'}));
-              } else {
-                setErrors(errors => ({...errors, iso72Value: ''}));
-              }
-            }}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'iso72Value')}
+            onBlur={validateField(form, attriConfig,'iso72Value',attribute2Compass['iso72Value'], setErrors)}
           />
 
           <GeneralField
@@ -359,7 +318,9 @@ export default function AddEditCode() {
             error={!!errors.description}
             helperText={errors.description}
             minRows={4}
+            required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
             multiline
+            onBlur={validateField(form, attriConfig,'description',attribute2Compass['description'], setErrors)}
           />
 
           <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}

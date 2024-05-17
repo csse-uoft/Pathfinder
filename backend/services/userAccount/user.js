@@ -1,6 +1,7 @@
 const Hashing = require("../../utils/hashing");
 const {GDBUserAccountModel, GDBSuperPasswordModel} = require('../../models/userAccount');
 const {Server400Error} = require("../../utils");
+const {GDBOrganizationModel} = require("../../models/organization");
 
 
 
@@ -110,6 +111,26 @@ async function addSuperPassword() {
   }
 }
 
+async function addSampleOrganizations() {
+  const alreadyHas = await GDBOrganizationModel.findOne({_uri: 'http://www.b12give.ca'});
+  if (!alreadyHas) {
+    const org1 = GDBOrganizationModel({
+      legalName: 'B12Give',
+      legalStatus: 'For Profit'
+    }, {uri: 'http://www.b12give.ca'})
+    const org2 = GDBOrganizationModel({
+      legalName: 'Org1',
+      legalStatus: 'Registered Charity'
+    }, {uri: 'http://www.demo.ca/Organization/Organization1'})
+    const org3 = GDBOrganizationModel({
+      legalName: 'Org2'
+    }, {uri: 'http://www.demo.ca/Organization/Organization2'})
+    await org1.save();
+    await org2.save();
+    await org3.save();
+  }
+}
+
 /**
  * Check if the database contains at least one user account.
  * If not, create a default user account.
@@ -169,5 +190,5 @@ async function initUserAccounts() {
 
 
 module.exports = {
-  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword, addSuperPassword
+  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword, addSuperPassword, addSampleOrganizations
 };

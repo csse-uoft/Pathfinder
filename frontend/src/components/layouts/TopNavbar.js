@@ -13,7 +13,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import OutputIcon from '@mui/icons-material/Output'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import SummarizeIcon from '@mui/icons-material/Summarize';
-import {Domain, Download, Edit, FileUpload, People} from "@mui/icons-material";
+import {Boy, Code, Domain, Download, Edit, FileUpload, People} from "@mui/icons-material";
 import {useNavigate} from 'react-router-dom';
 import {navigateHelper} from "../../helpers/navigatorHelper";
 
@@ -110,6 +110,14 @@ function TopNavBar() {
                   <Typography variant="inherit">Organizations</Typography>
                 </MenuItem>:<div/>}
 
+              {userContext.isSuperuser || userContext.groupAdminOfs.length || userContext.administratorOfs.length?
+                <MenuItem onClick={handleLink(`/stakeholders`)}>
+                  <ListItemIcon>
+                    <People fontSize="medium" sx={{color: 'black'}}/>
+                  </ListItemIcon>
+                  <Typography variant="inherit">Stakeholders</Typography>
+                </MenuItem>:<div/>}
+
               {userContext.isSuperuser?
                 <MenuItem onClick={handleLink(`/users`)}>
                   <ListItemIcon>
@@ -118,7 +126,7 @@ function TopNavBar() {
                   <Typography variant="inherit">Users</Typography>
                 </MenuItem>:<div/>}
 
-              <MenuItem onClick={handleLink(`/organization-indicators`)}>
+              <MenuItem onClick={handleLink(`/indicators`)}>
                 <ListItemIcon>
                   <DragIndicatorIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
@@ -132,11 +140,25 @@ function TopNavBar() {
                 <Typography variant="inherit">Outcomes</Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleLink(`/organization-indicatorReports`)}>
+              <MenuItem onClick={handleLink(`/organization-stakeholderOutcomes`)}>
+                <ListItemIcon>
+                  <OutputIcon fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Stakeholder Outcomes</Typography>
+              </MenuItem>
+
+              <MenuItem onClick={handleLink(`/indicatorReports`)}>
                 <ListItemIcon>
                   <SummarizeIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
                 <Typography variant="inherit">Indicator Reports</Typography>
+              </MenuItem>
+
+              <MenuItem onClick={handleLink(`/impactReports`)}>
+                <ListItemIcon>
+                  <SummarizeIcon fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Impact Reports</Typography>
               </MenuItem>
 
               <MenuItem onClick={handleLink(`/themes`)}>
@@ -144,6 +166,20 @@ function TopNavBar() {
                   <Domain fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
                 <Typography variant="inherit">Themes</Typography>
+              </MenuItem>
+
+              <MenuItem onClick={handleLink(`/characteristics`)}>
+                <ListItemIcon>
+                  <Domain fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Characteristics</Typography>
+              </MenuItem>
+
+              <MenuItem onClick={handleLink(`/codes`)}>
+                <ListItemIcon>
+                  <Domain fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Codes</Typography>
               </MenuItem>
 
               <MenuItem onClick={handleLink(`/fileUploading`)}>

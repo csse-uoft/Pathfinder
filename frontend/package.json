@@ -25,6 +25,7 @@
     "redux": "^4.0.5"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
     "gh-pages": "^5.0.0",
     "react-scripts": "5.0.1",
     "source-map-explorer": "^2.5.2"

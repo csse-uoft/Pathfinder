@@ -7,11 +7,13 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchCodesInterfaces} from "../../api/codeAPI";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
+import {validateForm} from "../../helpers";
+import {CONFIGLEVEL} from "../../helpers/attributeConfig";
+import configs from "../../helpers/attributeConfig";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -33,6 +35,9 @@ export default function AddEditIndicator() {
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
+  const [codesInterfaces, setCodesInterfaces] = useState({});
+  const [datasetInterfaces, setDatasetInterfaces] = useState({});
+
   const [state, setState] = useState({
     submitDialog: false,
     loadingButton: false,
@@ -41,27 +46,71 @@ export default function AddEditIndicator() {
     {}
   );
 
-  const [codesInterfaces, setCodesInterfaces] = useState({
-
-  })
-
   const [form, setForm] = useState({
     name: '',
-    // hasIdentifier: '',
+    identifier: '',
     description: '',
     unitOfMeasure: '',
     uri: '',
-    organization: '',
+    organization: null,
     baseline: '',
-    codes: []
+    threshold: '',
+    codes: [],
+    dateCreated: '',
+    accesss: [],
+    datasets: []
   });
+
   const [loading, setLoading] = useState(true);
+  const [indicatorReportInterfaces, setIndicatorReportInterfaces] = useState({});
+
+  const attriConfig = configs[CONFIGLEVEL].indicator;
+
+  const attribute2Compass = {
+    name: 'cids:hasName',
+    identifier: 'tove_org:hasIdentifier',
+    description: 'cids:hasDescription',
+    unitOfMeasure: 'iso21972:value',
+    organization: 'cids:forOrganization',
+    baseline: 'cids:hasBaseline',
+    threshold: 'cids:hasThreshold',
+    codes: 'cids:hasCode',
+    dateCreated: 'schema:dateCreated',
+    accesss: 'cids:hasAccess',
+    datasets: 'dcat:dataset'
+  }
+
 
   useEffect(() => {
-    fetchCodesInterfaces().then(({success, codesInterfaces}) => {
+    fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
+      if (success) {
+        setDatasetInterfaces(interfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching dataset interface", {variant: 'error'});
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('code').then(({success, interfaces}) => {
+      if (success) {
+        setCodesInterfaces(interfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('indicatorReport').then(({success, interfaces}) => {
       if (success){
-        console.log(codesInterfaces)
-        setCodesInterfaces(codesInterfaces)
+        setIndicatorReportInterfaces(interfaces)
       }
     }).catch(e => {
       if (e.json)
@@ -73,7 +122,7 @@ export default function AddEditIndicator() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchIndicator(encodeURIComponent(uri)).then(({success, indicator}) => {
+      fetchDataType('indicator', encodeURIComponent(uri)).then(({success, indicator}) => {
         if (success) {
           indicator.uri = indicator._uri;
           setForm(indicator);
@@ -112,7 +161,7 @@ export default function AddEditIndicator() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicator({form}, userContext).then((ret) => {
+      createDataType('indicator', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organization-indicators');
@@ -128,10 +177,10 @@ export default function AddEditIndicator() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicator({form}, encodeURIComponent(uri)).then((res) => {
+      updateDataType('indicator',encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/organization-indicators');
+          navigate('/indicators');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -148,15 +197,7 @@ export default function AddEditIndicator() {
 
   const validate = () => {
     const error = {};
-    if (form.name === '')
-      error.name = 'The field cannot be empty';
-
-    if (!form.description)
-      error.description = 'The field cannot be empty';
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
-    // if (!form.hasIdentifier)
-    //   error.hasIdentifier = 'The field cannot be empty';
+    validateForm(form, attriConfig, attribute2Compass, error, ['uri']);
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -168,7 +209,7 @@ export default function AddEditIndicator() {
     <Container maxWidth="md">
       {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
-
+          <Typography variant={'h4'}> Indicator </Typography>
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
@@ -176,14 +217,31 @@ export default function AddEditIndicator() {
           <Typography variant={'h6'}> {`Organization:`} </Typography>
           <Typography variant={'body1'}> {<Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover
                                                 color={'#2f5ac7'}>{form.organizationName}</Link>} </Typography>
+          <Typography variant={'h6'}> {`Date Created:`} </Typography>
+          <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
           <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
           <Typography variant={'body1'}> {`${form.unitOfMeasure || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Baseline:`} </Typography>
           <Typography variant={'body1'}> {`${form.baseline || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`codes:`} </Typography>
+          <Typography variant={'h6'}> {`Threshold:`} </Typography>
+          <Typography variant={'body1'}> {`${form.threshold || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Identifier:`} </Typography>
+          <Typography variant={'body1'}> {`${form.identifier || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Indicator Reports:`} </Typography>
+          {form.indicatorReports?.length?
+            form.indicatorReports.map(indicatorReport => <Typography variant={'body1'}> {<Link to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`} colorWithHover
+                                                                                               color={'#2f5ac7'}>{indicatorReportInterfaces[indicatorReport]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+          <Typography variant={'h6'}> {`Codes:`} </Typography>
           {form.codes?.length?
             form.codes.map(code => <Typography variant={'body1'}> {<Link to={`/code/${encodeURIComponent(code)}/view`} colorWithHover
                                                                          color={'#2f5ac7'}>{codesInterfaces[code]}</Link>} </Typography>)
+
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
+          <Typography variant={'h6'}> {`Datasets:`} </Typography>
+          {form.datasets?.length?
+            form.datasets.map(dataset => <Typography variant={'body1'}>{datasetInterfaces[dataset]} </Typography>)
 
             : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 
@@ -212,6 +270,7 @@ export default function AddEditIndicator() {
               setForm(form => ({...form, ...state}));
             }}
             importErrors={errors}
+            attribute2Compass={attribute2Compass}
           />
 
           {mode === 'view' ?

@@ -1,52 +1,73 @@
-const {baseLevelConfig} = require("../fileUploading/configs");
+const configs = require("../fileUploading/configs");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
-const {GDBMeasureModel} = require("../../models/measure");
-const {getObjectValue, assignMeasure, assignValue, assignValues} = require("../helpers");
-const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {assignMeasure, assignValue, assignValues} = require("../helpers");
+const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function indicatorBuilder(environment, trans, object, organization, impactNorms, error, {
+async function indicatorBuilder(environment, object, organization, error, {
   indicatorDict,
   objectDict
 }, {
                                   addMessage,
                                   addTrace,
-                                  transSave,
                                   getFullPropertyURI,
                                   getValue,
                                   getListOfValue
-                                }, form) {
+                                }, form, configLevel) {
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBIndicatorModel;
   let hasError = false;
   let ret;
-  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
-  if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+  let impactNorms;
+  // let mainObject;
+  // if (environment === 'fileUploading') {
+  //   const prevObject = await mainModel.findOne({_uri: uri});
+  //   if (prevObject) {
+  //     mainObject = prevObject;
+  //     indicatorDict[uri] = prevObject;
+  //   } else {
+  //     mainObject = indicatorDict[uri];
+  //   }
+  // } else if (environment === 'interface') {
+  //   mainObject = await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
+  // }
+  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
+  if (environment === 'interface') {
+    await mainObject.save();
     uri = mainObject._uri;
   }
 
-  const config = baseLevelConfig['indicator'];
+  const config = configs[configLevel]['indicator'];
   if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
     // add the organization to it, and add it to the organization
-    if (environment !== 'fileUploading') {
+    if (environment === 'interface') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-      impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
+      // impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})
+      // if (!impactNorms.indicators)
+      //   impactNorms.indicators = [];
+      // impactNorms.indicators = [...impactNorms.indicators, uri]
     }
 
     mainObject.forOrganization = organization._uri;
-    if (!impactNorms.indicators)
-      impactNorms.indicators = [];
-    impactNorms.indicators.push(uri);
 
     if (!organization.hasIndicators)
       organization.hasIndicators = [];
-    organization.hasIndicators.push(uri);
+    if (!organization.hasIndicators.includes(uri)) {
+      organization.hasIndicators = [...organization.hasIndicators, uri];
+    }
+
+
+    if (environment === 'interface') {
+      await organization.save();
+      // await impactNorms.save();
+    }
+
+
+    // ret = await assignImpactNorms(config, object, mainModel, mainObject, 'partOf', 'oep:partOf', addMessage, organization._uri, uri, hasError, error)
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -56,13 +77,46 @@ async function indicatorBuilder(environment, trans, object, organization, impact
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'hasAccesss', 'cids:hasAccess', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'tove_org:hasIdentifier', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'dateCreated', 'schema:dateCreated', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    if (mainObject.dateCreated) {
+      mainObject.dateCreated = new Date(mainObject.dateCreated)
+    }
+
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'datasets', 'dcat:dataset', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'threshold', 'cids:hasThreshold', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 
     ret = assignValues(environment, config, object, mainModel, mainObject, 'codes', 'cids:hasCode', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
+
+    if (environment === 'interface'){
+      await mainObject.save();
+      return true
+    }
+
+
 
 
     // add outcomes
@@ -120,8 +174,10 @@ async function indicatorBuilder(environment, trans, object, organization, impact
           } else {
             if (!outcome.indicators)
               outcome.indicators = [];
-            outcome.indicators.push(uri);
-            await transSave(trans, outcome);
+            if (!outcome.indicators.includes(uri)) {
+              outcome.indicators.push(uri);
+            }
+            await outcome.save();
           }
 
         } // if the outcome is in the file or the environment is 'interface', don't have to worry about adding the indicator to the outcome
@@ -129,7 +185,7 @@ async function indicatorBuilder(environment, trans, object, organization, impact
     }
 
     // add indicator report, in this case, indicator reports will not be in the form
-    if (environment !== 'interface') {
+    if (environment === 'fileUploading') {
       if (object[getFullPropertyURI(mainModel, 'indicatorReports')]) {
         if (!mainObject.indicatorReports)
           mainObject.indicatorReports = [];
