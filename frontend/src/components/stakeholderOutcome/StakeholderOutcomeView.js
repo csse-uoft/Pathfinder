@@ -211,6 +211,7 @@ export default function StakeholderOutcomeView({
           })
 
         }
+
         <DeleteModal
           objectUri={state.selectedUri}
           title={state.deleteDialogTitle}
