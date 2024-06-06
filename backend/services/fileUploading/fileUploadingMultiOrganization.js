@@ -32,7 +32,7 @@ const {GDBThemeModel} = require("../../models/theme");
 const {GDBCodeModel} = require("../../models/code");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
-const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel} = require("../../models/howMuchImpact");
+const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel, GDBHowMuchImpactModel} = require("../../models/howMuchImpact");
 const {GDBUnitOfMeasure, GDBMeasureModel} = require("../../models/measure");
 const {organizationBuilder} = require("../organizations/organizationBuilder");
 const {impactNormsBuilder} = require("../impactStuffs/impactNormsBuilder");
@@ -599,6 +599,14 @@ const fileUploadingMultiOrganization = async (req, res) => {
         targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:hasIndicatorReport');
       } else if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
         targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:hasIndicator');
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
+        targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:forOutcome');
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
+        targetOrganizationId = object[getFullURI('cids:forOrganization')]?.[0]['@value'];
+      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
+        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ||
+        object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
+        targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:forIndicator');
       }
       // todo: other type of objects in essential level
       if (targetOrganizationId) {
@@ -640,6 +648,7 @@ const fileUploadingMultiOrganization = async (req, res) => {
     if (!organizationObjects.length) {
       // if there is no such organization in the file, fetch the organization
       organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
+      organizationDict[organizationUri] = organization;
     } else {
       // otherwise, create an organization based on the data in the file
       error = await organizationBuilder('fileUploading', organizationObjects[0], error, {objectDict, organizationDict},
@@ -676,181 +685,6 @@ const fileUploadingMultiOrganization = async (req, res) => {
           indicatorReportDict,
           objectDict
         }, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'impactRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEvidenceRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'evidenceRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'externalRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderParticipationRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'stakeholderParticipationRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBDropOffRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'dropOffRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEfficiencyRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'efficiencyRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBExecutionRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'executionRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBAlignmentRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'alignmentRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEnduranceRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'enduranceRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'unexpectedImpactRisk', object, organization, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
-        error = await stakeholderOrganizationBuilder('fileUploading', object, organization, error, {
-          stakeholderDict,
-          objectDict,
-          impactNormsDict
-        }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
-        error = await datasetBuilder('fileUploading', object, organization, error, {
-          datasetDict,
-          objectDict
-        }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
-        error = await codeBuilder('fileUploading', object, organization, error, {codeDict}, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
-        error = await characteristicBuilder('fileUploading', object, error, {characteristicDict}, {
           addMessage,
           getFullPropertyURI,
           getValue,
@@ -914,6 +748,181 @@ const fileUploadingMultiOrganization = async (req, res) => {
           getValue,
           getListOfValue
         }, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
+        error = await datasetBuilder('fileUploading', object, null, error, {
+          datasetDict,
+          objectDict
+        }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
+        error = await characteristicBuilder('fileUploading', object, error, {characteristicDict}, {
+          addMessage,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null, configLevel);
+      }else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
+        error = await codeBuilder('fileUploading', object, null, error, {codeDict}, {
+          addMessage,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'impactRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBEvidenceRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'evidenceRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'externalRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderParticipationRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'stakeholderParticipationRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBDropOffRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'dropOffRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBEfficiencyRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'efficiencyRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBExecutionRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'executionRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBAlignmentRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'alignmentRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBEnduranceRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'enduranceRisk', object,  null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
+        error = await impactRiskBuilder('fileUploading', 'unexpectedImpactRisk', object, null, error,
+          {
+            impactRiskDict,
+            evidenceRiskDict,
+            externalRiskDict,
+            stakeholderParticipationRiskDict,
+            dropOffRiskDict,
+            efficiencyRiskDict,
+            executionRiskDict,
+            alignmentRiskDict,
+            enduranceRiskDict,
+            unexpectedImpactRiskDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+        error = await stakeholderOrganizationBuilder('fileUploading', object,  null, error, {
+          stakeholderDict,
+          objectDict,
+          impactNormsDict
+        }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
       }
     }
   };
