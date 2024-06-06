@@ -32,6 +32,10 @@ async function hasAccess(req, operationType) {
     case 'fileUploading':
       return true; // todo: only editors can upload files
       break;
+    case 'fileUploadingMultiOrganization':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     // users
     case 'inviteNewUser':
       return userAccount.isSuperuser;
