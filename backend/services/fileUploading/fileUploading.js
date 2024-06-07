@@ -39,21 +39,20 @@ const {stakeholderOrganizationBuilder} = require("../stakeholder/stakeholderOrga
 const {GDBDataSetModel} = require("../../models/dataset");
 const {datasetBuilder} = require("../dataset/datasetBuilder");
 const {configLevel} = require('../../config')
-const {splitDataByOrganization} = require("./fileUploadingMultiOrganization");
 
-const fileUploadingHandler = async (req, res, next) => {
-  try {
-    if (await hasAccess(req, 'fileUploading')) {
-      await Transaction.beginTransaction();
-      return await fileUploading(req, res, next);
-    }
-    return res.status(400).json({message: 'Wrong Auth'});
-  } catch (e) {
-    if (Transaction.isActive())
-    await Transaction.rollback();
-    next(e);
-  }
-};
+// const fileUploadingHandler = async (req, res, next) => {
+//   try {
+//     if (await hasAccess(req, 'fileUploading')) {
+//       await Transaction.beginTransaction();
+//       return await fileUploading(req, res, next);
+//     }
+//     return res.status(400).json({message: 'Wrong Auth'});
+//   } catch (e) {
+//     if (Transaction.isActive())
+//     await Transaction.rollback();
+//     next(e);
+//   }
+// };
 
 
 
@@ -950,4 +949,4 @@ const fileUploading = async (req, res, next) => {
   }
 };
 
-module.exports = {fileUploadingHandler,};
+module.exports = {fileUploading};

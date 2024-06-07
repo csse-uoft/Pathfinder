@@ -32,7 +32,12 @@ const {GDBThemeModel} = require("../../models/theme");
 const {GDBCodeModel} = require("../../models/code");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
-const {GDBImpactScaleModel, GDBImpactDepthModel, GDBImpactDurationModel, GDBHowMuchImpactModel} = require("../../models/howMuchImpact");
+const {
+  GDBImpactScaleModel,
+  GDBImpactDepthModel,
+  GDBImpactDurationModel,
+  GDBHowMuchImpactModel
+} = require("../../models/howMuchImpact");
 const {GDBUnitOfMeasure, GDBMeasureModel} = require("../../models/measure");
 const {organizationBuilder} = require("../organizations/organizationBuilder");
 const {impactNormsBuilder} = require("../impactStuffs/impactNormsBuilder");
@@ -49,26 +54,25 @@ const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-const fileUploadingMultiOrganizationHandler = async (req, res, next) => {
-  try {
-    if (await hasAccess(req, 'fileUploadingMultiOrganization')) {
-      await Transaction.beginTransaction();
-      return await fileUploadingMultiOrganization(req, res, next);
-    }
-    return res.status(400).json({message: 'Wrong Auth'});
-  } catch (e) {
-    if (Transaction.isActive())
-      await Transaction.rollback();
-    next(e);
-  }
-};
+// const fileUploadingMultiOrganizationHandler = async (req, res, next) => {
+//   try {
+//     if (await hasAccess(req, 'fileUploadingMultiOrganization')) {
+//       await Transaction.beginTransaction();
+//       return await fileUploadingMultiOrganization(req, res, next);
+//     }
+//     return res.status(400).json({message: 'Wrong Auth'});
+//   } catch (e) {
+//     if (Transaction.isActive())
+//       await Transaction.rollback();
+//     next(e);
+//   }
+// };
 
-const fileUploadingMultiOrganization = async (req, res) => {
+const fileUploadingMultiOrganization = async (req, res, next) => {
 
   let messageBuffer = {
     begin: [], end: [], noURI: []
   };
-  let traceOfUploading = '';
   let error = 0;
 
   function formatMessage() {
@@ -348,624 +352,637 @@ const fileUploadingMultiOrganization = async (req, res) => {
     'dataset': GDBDataSetModel
   };
 
-  const {objects, organizationUri, fileName, organizationUris} = req.body;
-  const objectDict = {};
-  addMessage(0, 'startToProcess', {fileName}, {});
-  if (!Array.isArray(objects)) {
-    // the object should be an array
-    error += 1;
-    addMessage(0, 'fileNotAList', {}, {});
-    const msg = formatMessage();
-    throw new Server400Error(msg);
-  }
-
-  if (!objects.length) {
-    // the objects shouldn't be empty
-    addMessage(0, 'fileEmpty', {});
-    error += 1;
-    const msg = formatMessage();
-    throw new Server400Error(msg);
-  }
-
-  const expandedObjects = await expand(objects);
-
-  if (!expandedObjects.length) {
-    error += 1;
-    addMessage(8, 'emptyExpandedObjects', {});
-    const msg = formatMessage();
-    throw new Server400Error(msg);
-  }
-
-
-  for (let object of expandedObjects) {
-    const uri = object['@id'];
-    if (!uri) {
-      // in the case there is no URI, ignore the object
-      addMessage(8, 'noURI',
-        {type: object['@type'][0]}, {ignoreInstance: true});
-      continue;
-    } else if (!isValidURL(uri)) {
-      // in the case the uri is not valid, reject the file
-      addMessage(8, 'invalidURI', {uri, type: getPrefixedURI(object['@type'][0])}, {ignoreInstance: true});
+  try {
+    const {objects, fileName} = req.body;
+    const objectDict = {};
+    addMessage(0, 'startToProcess', {fileName}, {});
+    if (!Array.isArray(objects)) {
+      // the object should be an array
       error += 1;
-      continue;
-    } else {
-      // then the object is good to get into the dict
-      objectDict[uri] = object;
-      let hasError = false;
-      if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
-        outcomeDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
-        organizationDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
-        impactRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEvidenceRiskModel)[1])) {
-        evidenceRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
-        externalRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderParticipationRiskModel)[1])) {
-        stakeholderParticipationRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBDropOffRiskModel)[1])) {
-        dropOffRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEfficiencyRiskModel)[1])) {
-        efficiencyRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBExecutionRiskModel)[1])) {
-        executionRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBAlignmentRiskModel)[1])) {
-        alignmentRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEnduranceRiskModel)[1])) {
-        enduranceRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
-        unexpectedImpactRiskDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) { // todo: may have to change the index
-        impactNormsDict[uri] = {_uri: uri};
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        indicatorDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        datasetDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        counterfactualDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
-        addMessage(4, 'readingMessage',
-          {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        indicatorReportDict[uri] = {_uri: uri};
-
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
-        addMessage(4, 'readingMessage',
-          {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        stakeholderDict[uri] = {_uri: uri};
-
-      } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        themeDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        codeDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        characteristicDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        stakeholderOutcomeDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        impactReportDict[uri] = await GDBImpactReportModel.findOne({_uri: uri}) || {_uri: uri};
-      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        impactScaleDict[uri] = {_uri: uri}; // todo: to be fixed, should be in separate dicts
-      } else if (object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        impactDepthDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        impactDurationDict[uri] = {_uri: uri};
-      } else if (object['@type'].includes(getFullTypeURIList(GDBUnitOfMeasure)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
-        if (!object[getFullPropertyURI(GDBUnitOfMeasure, 'label')]) {
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBUnitOfMeasure, 'label'))
-            });
-          error += 1;
-          hasError = true;
-        }
-        if (!hasError) {
-          const unitOfMeasure = GDBUnitOfMeasure({
-            label: getValue(object, GDBUnitOfMeasure, 'label')
-          }, {uri: uri});
-          await unitOfMeasure.save();
-        }
-      } else if (object['@type'].includes(getFullTypeURIList(GDBMeasureModel)[1])) {
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-
-        if (!object[getFullPropertyURI(GDBMeasureModel, 'numericalValue')]) {
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBMeasureModel, 'numericalValue'))
-            }, {});
-          error += 1;
-          hasError = true;
-        }
-        if (!hasError) {
-          const measure = GDBMeasureModel({
-            numericalValue: getValue(object, GDBMeasureModel, 'numericalValue')
-          }, {uri: uri});
-          await measure.save();
-        }
-
-      } else if (object['@type'].includes(getFullTypeURIList(GDBDateTimeIntervalModel)[1])) {
-
-        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-
-        if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')]) {
-          addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning'))} is missing`);
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning'))
-            }, {});
-          error += 1;
-          hasError = true;
-        }
-
-        if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')]) {
-          addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd'))} is missing`);
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd'))
-            }, {});
-          error += 1;
-          hasError = true;
-        }
-
-        if (!hasError) {
-          const dateTimeInterval = GDBDateTimeIntervalModel({
-            hasBeginning: getValue(object, GDBDateTimeIntervalModel, 'hasBeginning') ||
-              GDBInstant({
-                date: new Date(getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0],
-                  GDBInstant, 'date')
-                )
-              }),
-            hasEnd: getValue(object, GDBDateTimeIntervalModel, 'hasEnd') ||
-              GDBInstant({
-                date: new Date(getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0],
-                  GDBInstant, 'date')
-                )
-              })
-          }, {uri: uri});
-          await dateTimeInterval.save();
-        }
-
-      } else {
-        addMessage(8, 'unsupportedObject', {uri}, {flag: true});
-      }
+      addMessage(0, 'fileNotAList', {}, {});
+      const msg = formatMessage();
+      throw new Server400Error(msg);
     }
-  }
-  const organizedObjects = {unorganizedObjects: [...expandedObjects]};
-  const object2Organization = {};
+
+    if (!objects.length) {
+      // the objects shouldn't be empty
+      addMessage(0, 'fileEmpty', {});
+      error += 1;
+      const msg = formatMessage();
+      throw new Server400Error(msg);
+    }
+
+    const expandedObjects = await expand(objects);
+
+    if (!expandedObjects.length) {
+      error += 1;
+      addMessage(8, 'emptyExpandedObjects', {});
+      const msg = formatMessage();
+      throw new Server400Error(msg);
+    }
 
 
-  /**
-   * a recursive function continuously go through all unOrganized objects and organization them in the
-   * list to indicates which organization they belong to
-   * if there is a recursive call happens that nothing is organized, return done
-   */
-  const organizeObjects = (organizedObjects) => {
-    const unOrganizedObjects = organizedObjects.unorganizedObjects;
-    const unOrganizedNumber = unOrganizedObjects.length;
-
-    const checkLinkingItemsOrganizations = (object, linking) => {
-      const targetItemsOrganizations = object[getFullURI(linking)]?.map(indicator => object2Organization[indicator['@value']]);
-      if (targetItemsOrganizations && targetItemsOrganizations.length > 0 && targetItemsOrganizations.every(element => element === targetItemsOrganizations[0])) {
-        // see the organizations of all indicators this outcome links to, if they are all same, the outcome is belongs to that one
-        return targetItemsOrganizations[0];
-      } // if not true, the organization which the outcome belongs to is not decidable
-    };
-    let unOrganizedObjectsAfterRound = [];
-    for (const object of unOrganizedObjects) {
+    for (let object of expandedObjects) {
       const uri = object['@id'];
-      let targetOrganizationId = null;
-      if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
-        targetOrganizationId = uri;
-      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
-        targetOrganizationId = object[getFullURI('cids:forOrganization')]?.[0]['@value'];
-      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
-        targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:hasIndicatorReport');
-      } else if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
-        targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:hasIndicator');
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
-        targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:forOutcome');
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
-        targetOrganizationId = object[getFullURI('cids:forOrganization')]?.[0]['@value'];
-      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
-        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ||
-        object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
-        targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:forIndicator');
-      }
-      // todo: other type of objects in essential level
-      if (targetOrganizationId) {
-        // the object belongs to the organization targetOrganizationId
-        if (!organizedObjects[targetOrganizationId]) {
-          organizedObjects[targetOrganizationId] = [];
-        }
-        organizedObjects[targetOrganizationId] = [...organizedObjects[targetOrganizationId], object];
-        object2Organization[uri] = targetOrganizationId;
+      if (!uri) {
+        // in the case there is no URI, ignore the object
+        addMessage(8, 'noURI',
+          {type: object['@type'][0]}, {ignoreInstance: true});
+        continue;
+      } else if (!isValidURL(uri)) {
+        // in the case the uri is not valid, reject the file
+        addMessage(8, 'invalidURI', {uri, type: getPrefixedURI(object['@type'][0])}, {ignoreInstance: true});
+        error += 1;
+        continue;
       } else {
-        // the object is not decidable on this round
-        unOrganizedObjectsAfterRound = [...unOrganizedObjectsAfterRound, object];
+        // then the object is good to get into the dict
+        objectDict[uri] = object;
+        let hasError = false;
+        if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
+          outcomeDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
+          organizationDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
+          impactRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBEvidenceRiskModel)[1])) {
+          evidenceRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
+          externalRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderParticipationRiskModel)[1])) {
+          stakeholderParticipationRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBDropOffRiskModel)[1])) {
+          dropOffRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBEfficiencyRiskModel)[1])) {
+          efficiencyRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBExecutionRiskModel)[1])) {
+          executionRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBAlignmentRiskModel)[1])) {
+          alignmentRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBEnduranceRiskModel)[1])) {
+          enduranceRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
+          unexpectedImpactRiskDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) { // todo: may have to change the index
+          impactNormsDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          indicatorDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          datasetDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          counterfactualDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
+          addMessage(4, 'readingMessage',
+            {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          indicatorReportDict[uri] = {_uri: uri};
+
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+          addMessage(4, 'readingMessage',
+            {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          stakeholderDict[uri] = {_uri: uri};
+
+        } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          themeDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          codeDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          characteristicDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          stakeholderOutcomeDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          impactReportDict[uri] = await GDBImpactReportModel.findOne({_uri: uri}) || {_uri: uri};
+        } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          impactScaleDict[uri] = {_uri: uri}; // todo: to be fixed, should be in separate dicts
+        } else if (object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          impactDepthDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+          impactDurationDict[uri] = {_uri: uri};
+        } else if (object['@type'].includes(getFullTypeURIList(GDBUnitOfMeasure)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
+          if (!object[getFullPropertyURI(GDBUnitOfMeasure, 'label')]) {
+            addMessage(8, 'propertyMissing',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0]),
+                property: getPrefixedURI(getFullPropertyURI(GDBUnitOfMeasure, 'label'))
+              });
+            error += 1;
+            hasError = true;
+          }
+          if (!hasError) {
+            const unitOfMeasure = GDBUnitOfMeasure({
+              label: getValue(object, GDBUnitOfMeasure, 'label')
+            }, {uri: uri});
+            await unitOfMeasure.save();
+          }
+        } else if (object['@type'].includes(getFullTypeURIList(GDBMeasureModel)[1])) {
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+
+          if (!object[getFullPropertyURI(GDBMeasureModel, 'numericalValue')]) {
+            addMessage(8, 'propertyMissing',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0]),
+                property: getPrefixedURI(getFullPropertyURI(GDBMeasureModel, 'numericalValue'))
+              }, {});
+            error += 1;
+            hasError = true;
+          }
+          if (!hasError) {
+            const measure = GDBMeasureModel({
+              numericalValue: getValue(object, GDBMeasureModel, 'numericalValue')
+            }, {uri: uri});
+            await measure.save();
+          }
+
+        } else if (object['@type'].includes(getFullTypeURIList(GDBDateTimeIntervalModel)[1])) {
+
+          addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+
+          if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')]) {
+            addTrace('        Error: Mandatory property missing');
+            addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning'))} is missing`);
+            addMessage(8, 'propertyMissing',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0]),
+                property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning'))
+              }, {});
+            error += 1;
+            hasError = true;
+          }
+
+          if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')]) {
+            addTrace('        Error: Mandatory property missing');
+            addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd'))} is missing`);
+            addMessage(8, 'propertyMissing',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0]),
+                property: getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd'))
+              }, {});
+            error += 1;
+            hasError = true;
+          }
+
+          if (!hasError) {
+            const dateTimeInterval = GDBDateTimeIntervalModel({
+              hasBeginning: getValue(object, GDBDateTimeIntervalModel, 'hasBeginning') ||
+                GDBInstant({
+                  date: new Date(getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0],
+                    GDBInstant, 'date')
+                  )
+                }),
+              hasEnd: getValue(object, GDBDateTimeIntervalModel, 'hasEnd') ||
+                GDBInstant({
+                  date: new Date(getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0],
+                    GDBInstant, 'date')
+                  )
+                })
+            }, {uri: uri});
+            await dateTimeInterval.save();
+          }
+
+        } else {
+          addMessage(8, 'unsupportedObject', {uri}, {flag: true});
+        }
       }
     }
-    organizedObjects.unorganizedObjects = [...unOrganizedObjectsAfterRound];
-    if (organizedObjects.unorganizedObjects.length === 0) { // if all things are organized
-      return;
+    const organizedObjects = {unorganizedObjects: [...expandedObjects]};
+    const object2Organization = {};
+
+
+    /**
+     * a recursive function continuously go through all unOrganized objects and organization them in the
+     * list to indicates which organization they belong to
+     * if there is a recursive call happens that nothing is organized, return done
+     */
+    const organizeObjects = (organizedObjects) => {
+      const unOrganizedObjects = organizedObjects.unorganizedObjects;
+      const unOrganizedNumber = unOrganizedObjects.length;
+
+      const checkLinkingItemsOrganizations = (object, linking) => {
+        const targetItemsOrganizations = object[getFullURI(linking)]?.map(indicator => object2Organization[indicator['@value']]);
+        if (targetItemsOrganizations && targetItemsOrganizations.length > 0 && targetItemsOrganizations.every(element => element === targetItemsOrganizations[0])) {
+          // see the organizations of all indicators this outcome links to, if they are all same, the outcome is belongs to that one
+          return targetItemsOrganizations[0];
+        } // if not true, the organization which the outcome belongs to is not decidable
+      };
+      let unOrganizedObjectsAfterRound = [];
+      for (const object of unOrganizedObjects) {
+        const uri = object['@id'];
+        let targetOrganizationId = null;
+        if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
+          targetOrganizationId = uri;
+        } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
+          targetOrganizationId = object[getFullURI('cids:forOrganization')]?.[0]['@value'];
+        } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
+          targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:hasIndicatorReport');
+        } else if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
+          targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:hasIndicator');
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
+          targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:forOutcome');
+        } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
+          targetOrganizationId = object[getFullURI('cids:forOrganization')]?.[0]['@value'];
+        } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
+          object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ||
+          object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
+          targetOrganizationId = checkLinkingItemsOrganizations(object, 'cids:forIndicator');
+        }
+        // todo: other type of objects in essential level
+        if (targetOrganizationId) {
+          // the object belongs to the organization targetOrganizationId
+          if (!organizedObjects[targetOrganizationId]) {
+            organizedObjects[targetOrganizationId] = [];
+          }
+          organizedObjects[targetOrganizationId] = [...organizedObjects[targetOrganizationId], object];
+          object2Organization[uri] = targetOrganizationId;
+        } else {
+          // the object is not decidable on this round
+          unOrganizedObjectsAfterRound = [...unOrganizedObjectsAfterRound, object];
+        }
+      }
+      organizedObjects.unorganizedObjects = [...unOrganizedObjectsAfterRound];
+      if (organizedObjects.unorganizedObjects.length === 0) { // if all things are organized
+        return;
+      }
+      if (unOrganizedNumber === organizedObjects.unorganizedObjects.length) { // nothing has been organized in this round, means no further organization can be done
+        return;
+      } else {
+        return organizeObjects(organizedObjects); // continuously do recursive call to organize objects
+      }
+    };
+
+    organizeObjects(organizedObjects);
+    const orphanObjects = organizedObjects.unorganizedObjects.filter(object => ['cids:Outcome', 'cids:Indicator', 'cids:IndicatorReport'].map(prefixedURI => getFullURI(prefixedURI)).includes(object['@type'][0]));
+    if (orphanObjects.length > 0) {
+      // if there is above types of items are unorganized, the file should be rejected
+      console.log('issue');
+      throw new Server400Error('there are items cannot be figured which organization it is belonged to');
+      // todo: ask Daniela, what does she or Sharad want to see when there is object not belows to the organization
     }
-    if (unOrganizedNumber === organizedObjects.unorganizedObjects.length) { // nothing has been organized in this round, means no further organization can be done
-      return;
+
+    const loadDataOfAnOrganization = async (organizationData, organizationUri, error) => {
+      // fetch all organizations belongs to the organization
+      const organizationObjects = organizationData.filter(item => item['@type'][0] === getFullURI('cids:Organization'));
+      let organization;
+      if (!organizationObjects.length) {
+        // if there is no such organization in the file, fetch the organization
+        organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
+        organizationDict[organizationUri] = organization;
+      } else {
+        // otherwise, create an organization based on the data in the file
+        error = await organizationBuilder('fileUploading', organizationObjects[0], error, {
+            objectDict,
+            organizationDict
+          },
+          {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
+        organization = organizationDict[organizationUri];
+      }
+      for (let object of organizationData) {
+        if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
+          error = await outcomeBuilder('fileUploading', object, organization, error, {
+            objectDict,
+            outcomeDict,
+            impactNormsDict
+          }, {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
+          error = await impactNormsBuilder('fileUploading', object, organization, error, {impactNormsDict}, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
+          error = await indicatorBuilder('fileUploading', object, organization, error, {
+            indicatorDict,
+            objectDict
+          }, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
+          error = await indicatorReportBuilder('fileUploading', object, organization, error, {
+            indicatorDict,
+            indicatorReportDict,
+            objectDict
+          }, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
+          error = await stakeholderOutcomeBuilder('fileUploading', object, organization, error, {
+            outcomeDict,
+            stakeholderOutcomeDict,
+            objectDict
+          }, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
+          error = await impactReportBuilder('fileUploading', object, organization, error, {
+            stakeholderOutcomeDict,
+            impactReportDict,
+            objectDict
+          }, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
+          object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ||
+          object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
+          const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ? 'impactScale' : (object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ? 'impactDepth' : 'impactDuration');
+          error = await howMuchImpactBuilder('fileUploading', subType, object, organization, error, {
+            impactDepthDict,
+            impactDurationDict,
+            impactScaleDict,
+            objectDict
+          }, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        }
+      }
+
+
+      return error;
+    };
+
+    const loadDataOfOtherObjects = async (error) => {
+      for (let object of organizedObjects.unorganizedObjects) {
+        if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
+          error = await counterfactualBuilder('fileUploading', object, null, error, {
+            counterfactualDict,
+            objectDict
+          }, {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
+          error = await themeBuilder('fileUploading', object, error, {themeDict}, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
+          error = await datasetBuilder('fileUploading', object, null, error, {
+            datasetDict,
+            objectDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
+          error = await characteristicBuilder('fileUploading', object, error, {characteristicDict}, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
+          error = await codeBuilder('fileUploading', object, null, error, {codeDict}, {
+            addMessage,
+            getFullPropertyURI,
+            getValue,
+            getListOfValue
+          }, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'impactRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBEvidenceRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'evidenceRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'externalRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderParticipationRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'stakeholderParticipationRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBDropOffRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'dropOffRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBEfficiencyRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'efficiencyRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBExecutionRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'executionRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBAlignmentRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'alignmentRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBEnduranceRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'enduranceRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
+          error = await impactRiskBuilder('fileUploading', 'unexpectedImpactRisk', object, null, error,
+            {
+              impactRiskDict,
+              evidenceRiskDict,
+              externalRiskDict,
+              stakeholderParticipationRiskDict,
+              dropOffRiskDict,
+              efficiencyRiskDict,
+              executionRiskDict,
+              alignmentRiskDict,
+              enduranceRiskDict,
+              unexpectedImpactRiskDict,
+              objectDict
+            }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+          error = await stakeholderOrganizationBuilder('fileUploading', object, null, error, {
+            stakeholderDict,
+            objectDict,
+            impactNormsDict
+          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
+        }
+      }
+    };
+
+    for (let organizationUri in organizedObjects) {
+      if (organizationUri !== 'unorganizedObjects') {
+        error = await loadDataOfAnOrganization(organizedObjects[organizationUri], organizationUri, error);
+      } else {
+        // handling the objects doesn't belong to any organization
+        error = await loadDataOfOtherObjects(error);
+      }
+    }
+
+    if (!error) {
+      addMessage(4, 'insertData', {}, {});
+
+      async function autoSaving() {
+        for (let key in dicts) {
+          const dict = dicts[key];
+          const GDBObjects = Object.entries(dict).map(([uri, object]) => {
+            return GDBModels[key](
+              object, {_uri: object._uri}
+            );
+          });
+          await Promise.all(GDBObjects.map(object => object.save()));
+        }
+      }
+
+      await autoSaving();
+      await Transaction.commit();
+      addMessage(0, 'completedLoading', {fileName}, {});
+      const msg = formatMessage();
+      return res.status(200).json({success: true, traceOfUploading: msg});
     } else {
-      return organizeObjects(organizedObjects); // continuously do recursive call to organize objects
+      addMessage(0, 'errorCounting', {error}, {});
+      const msg = formatMessage();
+      await Transaction.rollback();
+      throw new Server400Error(msg);
     }
-  };
 
-  organizeObjects(organizedObjects);
-  const orphanObjects = organizedObjects.unorganizedObjects.filter(object => ['cids:Outcome', 'cids:Indicator', 'cids:IndicatorReport'].map(prefixedURI => getFullURI(prefixedURI)).includes(object['@type'][0]));
-  if (orphanObjects.length > 0) {
-    // if there is above types of items are unorganized, the file should be rejected
-    console.log('issue');
-    throw new Server400Error('there are items cannot be figured which organization it is belonged to');
-    // todo: ask Daniela, what does she or Sharad want to see when there is object not belows to the organization
+  } catch (e) {
+    if (Transaction.isActive())
+      await Transaction.rollback();
+    if (e.name === 'jsonld.InvalidUrl') {
+      addMessage(4, 'invalidURL', {url: e.details.url}, {});
+      e.message = formatMessage();
+    }
+    next(e);
   }
-
-  const loadDataOfAnOrganization = async (organizationData, organizationUri, error) => {
-    // fetch all organizations belongs to the organization
-    const organizationObjects = organizationData.filter(item => item['@type'][0] === getFullURI('cids:Organization'));
-    let organization;
-    if (!organizationObjects.length) {
-      // if there is no such organization in the file, fetch the organization
-      organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
-      organizationDict[organizationUri] = organization;
-    } else {
-      // otherwise, create an organization based on the data in the file
-      error = await organizationBuilder('fileUploading', organizationObjects[0], error, {objectDict, organizationDict},
-        {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
-      organization = organizationDict[organizationUri];
-    }
-    for (let object of organizationData) {
-      if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
-        error = await outcomeBuilder('fileUploading', object, organization, error, {
-          objectDict,
-          outcomeDict,
-          impactNormsDict
-        }, {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
-        error = await impactNormsBuilder('fileUploading', object, organization, error, {impactNormsDict}, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
-        error = await indicatorBuilder('fileUploading', object, organization, error, {
-          indicatorDict,
-          objectDict
-        }, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
-        error = await indicatorReportBuilder('fileUploading', object, organization, error, {
-          indicatorDict,
-          indicatorReportDict,
-          objectDict
-        }, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
-        error = await stakeholderOutcomeBuilder('fileUploading', object, organization, error, {
-          outcomeDict,
-          stakeholderOutcomeDict,
-          objectDict
-        }, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
-        error = await impactReportBuilder('fileUploading', object, organization, error, {
-          stakeholderOutcomeDict,
-          impactReportDict,
-          objectDict
-        }, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
-        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ||
-        object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
-        const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ? 'impactScale' : (object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ? 'impactDepth' : 'impactDuration');
-        error = await howMuchImpactBuilder('fileUploading', subType, object, organization, error, {
-          impactDepthDict,
-          impactDurationDict,
-          impactScaleDict,
-          objectDict
-        }, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      }
-    }
-
-
-    return error;
-  };
-
-  const loadDataOfOtherObjects = async (error) => {
-    for (let object of organizedObjects.unorganizedObjects) {
-      if (object['@type'].includes(getFullTypeURIList(GDBCounterfactualModel)[1])) {
-        error = await counterfactualBuilder('fileUploading', object, null, error, {
-          counterfactualDict,
-          objectDict
-        }, {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBThemeModel)[1])) {
-        error = await themeBuilder('fileUploading', object, error, {themeDict}, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBDataSetModel)[1])) {
-        error = await datasetBuilder('fileUploading', object, null, error, {
-          datasetDict,
-          objectDict
-        }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBCharacteristicModel)[1])) {
-        error = await characteristicBuilder('fileUploading', object, error, {characteristicDict}, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      }else if (object['@type'].includes(getFullTypeURIList(GDBCodeModel)[1])) {
-        error = await codeBuilder('fileUploading', object, null, error, {codeDict}, {
-          addMessage,
-          getFullPropertyURI,
-          getValue,
-          getListOfValue
-        }, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'impactRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEvidenceRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'evidenceRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'externalRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderParticipationRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'stakeholderParticipationRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBDropOffRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'dropOffRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEfficiencyRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'efficiencyRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBExecutionRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'executionRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBAlignmentRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'alignmentRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBEnduranceRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'enduranceRisk', object,  null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBUnexpectedImpactRiskModel)[1])) {
-        error = await impactRiskBuilder('fileUploading', 'unexpectedImpactRisk', object, null, error,
-          {
-            impactRiskDict,
-            evidenceRiskDict,
-            externalRiskDict,
-            stakeholderParticipationRiskDict,
-            dropOffRiskDict,
-            efficiencyRiskDict,
-            executionRiskDict,
-            alignmentRiskDict,
-            enduranceRiskDict,
-            unexpectedImpactRiskDict,
-            objectDict
-          }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
-        error = await stakeholderOrganizationBuilder('fileUploading', object,  null, error, {
-          stakeholderDict,
-          objectDict,
-          impactNormsDict
-        }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      }
-    }
-  };
-
-  for (let organizationUri in organizedObjects) {
-    if (organizationUri !== 'unorganizedObjects') {
-      error = await loadDataOfAnOrganization(organizedObjects[organizationUri], organizationUri, error);
-    } else {
-      // handling the objects doesn't belong to any organization
-      error = await loadDataOfOtherObjects(error);
-    }
-  }
-
-  if (!error) {
-    addMessage(4, 'insertData', {}, {});
-
-    async function autoSaving() {
-      for (let key in dicts) {
-        const dict = dicts[key];
-        const GDBObjects = Object.entries(dict).map(([uri, object]) => {
-          return GDBModels[key](
-            object, {_uri: object._uri}
-          );
-        });
-        await Promise.all(GDBObjects.map(object => object.save()));
-      }
-    }
-
-    await autoSaving();
-    await Transaction.commit();
-    addMessage(0, 'completedLoading', {fileName}, {});
-    const msg = formatMessage();
-    return res.status(200).json({success: true, traceOfUploading: msg});
-  } else {
-    addMessage(0, 'errorCounting', {error}, {});
-    const msg = formatMessage();
-    await Transaction.rollback();
-    throw new Server400Error(msg);
-  }
-
 
 
 };
 
 
-module.exports = {fileUploadingMultiOrganizationHandler};
+module.exports = {fileUploadingMultiOrganization};
