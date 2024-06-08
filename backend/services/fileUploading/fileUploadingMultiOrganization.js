@@ -52,6 +52,7 @@ const {characteristicBuilder} = require("../characteristic/characteristicBuilder
 const {stakeholderOutcomeBuilder} = require("../stakeholderOutcome/stakeholderOutcomeBuilder");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
+const {GDBStakeholderModel} = require("../../models/stakeholder");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 // const fileUploadingMultiOrganizationHandler = async (req, res, next) => {
@@ -404,6 +405,9 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
         } else if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
           organizationDict[uri] = {_uri: uri};
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderModel)[1])) {
+          organizationDict[uri] = {_uri: uri};
+          addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
           impactRiskDict[uri] = {_uri: uri};
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
@@ -598,6 +602,8 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
         let targetOrganizationId = null;
         if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
           targetOrganizationId = uri;
+        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderModel)[1])) {
+          targetOrganizationId = uri;
         } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
           targetOrganizationId = object[getFullURI('cids:forOrganization')]?.[0]['@value'];
         } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
@@ -648,12 +654,18 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
 
     const loadDataOfAnOrganization = async (organizationData, organizationUri, error) => {
       // fetch all organizations belongs to the organization
-      const organizationObjects = organizationData.filter(item => item['@type'][0] === getFullURI('cids:Organization'));
+      const organizationObjects = organizationData.filter(item => item['@type'][0] === getFullURI('cids:Organization') || item['@type'][0] === getFullURI('cids:Stakeholder'));
       let organization;
       if (!organizationObjects.length) {
         // if there is no such organization in the file, fetch the organization
         organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
-        organizationDict[organizationUri] = organization;
+        if (organization) {
+          organizationDict[organizationUri] = organization;
+        } else {
+          // in this case, the organization is neither in the file nor in the database
+          throw new Server400Error(`Organization with URI ${organizationUri} is neither in the database nor in the file`)
+        }
+
       } else {
         // otherwise, create an organization based on the data in the file
         error = await organizationBuilder('fileUploading', organizationObjects[0], error, {

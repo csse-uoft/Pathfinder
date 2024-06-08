@@ -1,6 +1,6 @@
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {assignValue, assignValues, assignImpactNorms} = require("../helpers");
+const {assignValue, assignValues} = require("../helpers");
 const configs = require("../fileUploading/configs");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
@@ -14,7 +14,6 @@ async function stakeholderOrganizationBuilder(environment, object, organization,
   let uri = object? object['@id'] : undefined;
   let ret;
   const mainModel = GDBStakeholderOrganizationModel;
-  let impactNorms;
   const mainObject = environment === 'fileUploading' ? stakeholderDict[uri] : mainModel({
   }, {uri: form.uri});
 
