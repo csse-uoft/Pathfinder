@@ -181,7 +181,7 @@ async function impactReportBuilder(environment, object, organization, error, {
     }
 
     if (!ignore && !hasError && environment === 'fileUploading') {
-      addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+      // addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
     }

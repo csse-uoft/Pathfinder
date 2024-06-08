@@ -41,6 +41,7 @@ export default function FileUploadingPage() {
 
 
   const [state, setState] = useState({
+    mode: 'Single Organization',
     loading: true,
     submitDialog: false,
     loadingButton: false,
@@ -59,6 +60,7 @@ export default function FileUploadingPage() {
   const [options, setOptions] = useState({
     fileTypes: ['JSON-ld'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
+    mode: ['Single Organization', 'Multiple Organizations'],
     organizations: {}
   });
   const [errors, setErrors] = useState(
@@ -97,7 +99,7 @@ export default function FileUploadingPage() {
     try {
       setState(state => ({...state, loadingButton: true}));
       let responds;
-      const respond = await uploadFile(state.fileContent, state.organization, fileName)
+      const respond = await uploadFile(state.fileContent,state.mode === 'Multiple Organizations', state.organization, fileName)
       if (respond.success) {
         // let trace = ''
         // respond.traceOfUploading.map(message => trace += message)
@@ -116,7 +118,7 @@ export default function FileUploadingPage() {
 
   const validate = () => {
     const error = {};
-    if (!state.organization) {
+    if (state.mode === 'Single Organization' && !state.organization) {
       error.organization = 'The field cannot be empty';
     }
     if (!state.fileContent) {
@@ -159,6 +161,30 @@ export default function FileUploadingPage() {
             );
           }}
         />
+        <SelectField
+          disabled={state.optionDisabled || !userContext.isSuperuser}
+          key={'mode'}
+          label={'Mode'}
+          value={state.mode}
+          options={options.mode}
+          error={!!errors.mode}
+          helperText={
+            errors.mode
+          }
+          onBlur={() => {
+            if (!state.mode) {
+              setErrors(errors => ({...errors, mode: 'The field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, mode: null}));
+            }
+          }}
+          onChange={e => {
+            setState(state => ({
+                ...state, mode: e.target.value
+              })
+            );
+          }}
+        />
         {/*<SelectField*/}
         {/*  disabled={state.optionDisabled}*/}
         {/*  key={'formType'}*/}
@@ -183,7 +209,8 @@ export default function FileUploadingPage() {
         {/*    );*/}
         {/*  }}*/}
         {/*/>*/}
-        <SelectField
+        {state.mode === 'Single Organization'?
+          <SelectField
           key={'organization'}
           label={'Organization'}
           value={state.organization}
@@ -205,7 +232,7 @@ export default function FileUploadingPage() {
               })
             );
           }}
-        />
+        />: null}
 
         <FileUploader
           // title={state.fileType ? `Please upload a ${state.fileType} file` :

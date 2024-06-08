@@ -1,7 +1,5 @@
 const express = require('express');
-const {fileUploadingHandler} = require("../services/fileUploading/fileUploading");
-
-
+const {fileUploadingHandler} = require("../services/fileUploading/fileUploadingHander");
 
 const router = express.Router({mergeParams: true});
 

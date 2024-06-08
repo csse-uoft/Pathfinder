@@ -79,7 +79,7 @@ async function impactRiskBuilder(environment, subType, object, organization, err
     error = ret.error;
 
     if (!ignore && !hasError && environment === 'fileUploading') {
-      addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+      // addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
     }

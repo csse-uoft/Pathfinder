@@ -39,21 +39,20 @@ const {stakeholderOrganizationBuilder} = require("../stakeholder/stakeholderOrga
 const {GDBDataSetModel} = require("../../models/dataset");
 const {datasetBuilder} = require("../dataset/datasetBuilder");
 const {configLevel} = require('../../config')
-const {splitDataByOrganization} = require("./fileUploadingMultiOrganization");
 
-const fileUploadingHandler = async (req, res, next) => {
-  try {
-    if (await hasAccess(req, 'fileUploading')) {
-      await Transaction.beginTransaction();
-      return await fileUploading(req, res, next);
-    }
-    return res.status(400).json({message: 'Wrong Auth'});
-  } catch (e) {
-    if (Transaction.isActive())
-    await Transaction.rollback();
-    next(e);
-  }
-};
+// const fileUploadingHandler = async (req, res, next) => {
+//   try {
+//     if (await hasAccess(req, 'fileUploading')) {
+//       await Transaction.beginTransaction();
+//       return await fileUploading(req, res, next);
+//     }
+//     return res.status(400).json({message: 'Wrong Auth'});
+//   } catch (e) {
+//     if (Transaction.isActive())
+//     await Transaction.rollback();
+//     next(e);
+//   }
+// };
 
 
 
@@ -390,22 +389,22 @@ const fileUploading = async (req, res, next) => {
       throw new Server400Error(msg);
     }
 
-    // split expanded Organizations with organizations
-    const splittedObjects = splitDataByOrganization(expandedObjects, organizationsUris);
-
-    for (let organizationUri in splittedObjects) {
-      if (organizationUri !== 'global') {
-
-        addTrace('    Adding objects to organization with URI: ' + organizationUri);
-        addTrace('');
-        addMessage(4, 'addingToOrganization', {organizationUri}, {});
-
-
-
-      } else {
-
-      }
-    }
+    // // split expanded Organizations with organizations
+    // const splittedObjects = splitDataByOrganization(expandedObjects, organizationsUris);
+    //
+    // for (let organizationUri in splittedObjects) {
+    //   if (organizationUri !== 'global') {
+    //
+    //     addTrace('    Adding objects to organization with URI: ' + organizationUri);
+    //     addTrace('');
+    //     addMessage(4, 'addingToOrganization', {organizationUri}, {});
+    //
+    //
+    //
+    //   } else {
+    //
+    //   }
+    // }
 
 
 
@@ -578,7 +577,7 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         impactDurationDict[uri] = {_uri: uri};
-      }else if (object['@type'].includes(getFullTypeURIList(GDBUnitOfMeasure)[1])) {
+      } else if (object['@type'].includes(getFullTypeURIList(GDBUnitOfMeasure)[1])) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])});
@@ -952,4 +951,4 @@ const fileUploading = async (req, res, next) => {
   }
 };
 
-module.exports = {fileUploadingHandler,};
+module.exports = {fileUploading};

@@ -150,8 +150,8 @@ async function indicatorBuilder(environment, object, organization, error, {
           const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
           if (!outcome) {
             if (environment === 'fileUploading') {
-              addTrace('        Error: bad reference');
-              addTrace(`            Outcome ${outcomeURI} appears neither in the file nor in the sandbox`);
+              // addTrace('        Error: bad reference');
+              // addTrace(`            Outcome ${outcomeURI} appears neither in the file nor in the sandbox`);
               addMessage(8, 'badReference',
                 {uri, referenceURI: outcomeURI, type: 'Outcome'}, {rejectFile: true});
               error += 1;
@@ -162,8 +162,8 @@ async function indicatorBuilder(environment, object, organization, error, {
           } else if (outcome.forOrganization !== organization._uri) {
             // check if the outcome belongs to the organization
             if (environment === 'fileUploading') {
-              addTrace('        Error:');
-              addTrace(`            Outcome ${outcomeURI} doesn't belong to this organization`);
+              // addTrace('        Error:');
+              // addTrace(`            Outcome ${outcomeURI} doesn't belong to this organization`);
               addMessage(8, 'subjectDoesNotBelong',
                 {uri, type: 'Outcome', subjectURI: outcomeURI}, {rejectFile: true});
               error += 1;
@@ -210,7 +210,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
     } else if (environment === 'fileUploading'){
-      addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+      // addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
     }

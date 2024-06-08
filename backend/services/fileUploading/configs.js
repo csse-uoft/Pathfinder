@@ -1,5 +1,5 @@
 const baseLevelConfig = {
-
+  organization: {},
   theme: {},
   outcome: {
     // 'cids:hasIndicator': {flag: true},
@@ -21,6 +21,7 @@ const baseLevelConfig = {
 };
 
 const fullLevelConfig = {
+  organization: {},
   outcome: {
     // 'cids:hasIndicator': {flag: true},
     'oep:partOf': {ignoreInstance: true}

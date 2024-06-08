@@ -44,7 +44,7 @@ async function themeBuilder(environment, object, error, {themeDict}, {
 
 
     if (!hasError) {
-      addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+      // addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
     }
