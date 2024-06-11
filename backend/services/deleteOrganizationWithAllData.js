@@ -7,6 +7,7 @@ const {GDBIndicatorReportModel} = require("../models/indicatorReport");
 const {GDBStakeholderOutcomeModel} = require("../models/stakeholderOutcome");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBImpactReportModel} = require("../models/impactReport");
+const {Server400Error} = require("../utils");
 
 async function deleteOrganizationWithAllData(organization, keepOrg) {
   if (!organization) {

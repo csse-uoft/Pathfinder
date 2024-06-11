@@ -52,6 +52,7 @@ const {stakeholderOutcomeBuilder} = require("../stakeholderOutcome/stakeholderOu
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
 const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
 const {GDBStakeholderModel} = require("../../models/stakeholder");
+const {deleteOrganizationWithAllData} = require("../deleteOrganizationWithAllData");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 // const fileUploadingMultiOrganizationHandler = async (req, res, next) => {
@@ -672,6 +673,11 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
 
       } else {
         // otherwise, create an organization based on the data in the file
+        // todo: delete all organization's data
+        const existingOrganization = GDBOrganizationModel.findOne({_uri: organizationUri});
+        if (existingOrganization) {
+          await deleteOrganizationWithAllData(existingOrganization, false)
+        }
         error = await organizationBuilder('fileUploading', organizationObjects[0], error, {
             objectDict,
             organizationDict
