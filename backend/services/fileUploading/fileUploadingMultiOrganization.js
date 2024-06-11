@@ -674,7 +674,7 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
       } else {
         // otherwise, create an organization based on the data in the file
         // todo: delete all organization's data
-        const existingOrganization = GDBOrganizationModel.findOne({_uri: organizationUri});
+        const existingOrganization = await GDBOrganizationModel.findOne({_uri: organizationUri});
         if (existingOrganization) {
           await deleteOrganizationWithAllData(existingOrganization, false)
         }
