@@ -654,7 +654,7 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
       // if there is above types of items are unorganized, the file should be rejected
       console.log('issue');
       throw new Server400Error('there are items cannot be figured which organization it is belonged to');
-      // todo: ask Daniela, what does she or Sharad want to see when there is object not belows to the organization
+      // todo: ask Daniela, what does she or Sharad want to see when there is object not belongs to the organization
     }
 
     const loadDataOfAnOrganization = async (organizationData, organizationUri, error) => {
@@ -673,7 +673,7 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
 
       } else {
         // otherwise, create an organization based on the data in the file
-        // todo: delete all organization's data
+        // delete existing data of that organization
         const existingOrganization = await GDBOrganizationModel.findOne({_uri: organizationUri});
         if (existingOrganization) {
           await deleteOrganizationWithAllData(existingOrganization, false)
