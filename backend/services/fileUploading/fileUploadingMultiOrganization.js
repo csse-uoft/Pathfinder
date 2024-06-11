@@ -19,7 +19,6 @@ const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBImpactReportModel} = require("../../models/impactReport");
-const {hasAccess} = require("../../helpers/hasAccess");
 const {Transaction} = require("graphdb-utils");
 const {Server400Error} = require("../../utils");
 const {expand} = require("jsonld");
@@ -154,6 +153,11 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
           + 'Some objects must have a @context');
         messageBuffer['begin'].push(whiteSpaces + '    Read more about JSON-LD  at: https://json-ld.org/');
         messageBuffer['begin'].push(whiteSpaces + '    Nothing was uploaded');
+        break;
+      case 'noOrganization':
+        messageBuffer[uri].push(whiteSpaces + `    The organization is missing in the file for object${hasName ? ' ' + hasName : ''} with URI ${uri} of type ${type}`);
+        if (ignoreInstance)
+          messageBuffer[uri].push(whiteSpaces + '    The object is ignored');
         break;
       case 'wrongOrganizationURI':
         messageBuffer['begin'].push(whiteSpaces + `${title}: Incorrect organization URI ${organizationUri}: No such Organization`);
@@ -658,13 +662,13 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
       let organization;
       if (!organizationObjects.length) {
         // if there is no such organization in the file, fetch the organization
-        organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
-        if (organization) {
-          organizationDict[organizationUri] = organization;
-        } else {
-          // in this case, the organization is neither in the file nor in the database
-          throw new Server400Error(`Organization with URI ${organizationUri} is neither in the database nor in the file`)
-        }
+        // organization = await GDBOrganizationModel.findOne({_uri: organizationUri});
+        // if (organization) {
+        //   organizationDict[organizationUri] = organization;
+        // } else {
+        //   // in this case, the organization is neither in the file nor in the database
+        //   throw new Server400Error(`Organization with URI ${organizationUri} is neither in the database nor in the file`)
+        // }
 
       } else {
         // otherwise, create an organization based on the data in the file
@@ -676,13 +680,34 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
         organization = organizationDict[organizationUri];
       }
       for (let object of organizationData) {
+        let uri = object['@id']
         if (object['@type'].includes(getFullTypeURIList(GDBOutcomeModel)[1])) {
+          if (!organization) {
+            delete outcomeDict[uri] // remove the object from its dict and print out a message
+            addMessage(8, 'noOrganization',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0])
+              },
+              {ignoreInstance: true})
+            continue;
+          }
           error = await outcomeBuilder('fileUploading', object, organization, error, {
             objectDict,
             outcomeDict,
             impactNormsDict
           }, {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
         } else if (object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[2]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[1]) || object['@type'].includes(getFullTypeURIList(GDBImpactNormsModel)[0])) {
+          if (!organization) {
+            delete impactNormsDict[uri] // remove the object from its dict and print out a message
+            addMessage(8, 'noOrganization',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0])
+              },
+              {ignoreInstance: true})
+            continue;
+          }
           error = await impactNormsBuilder('fileUploading', object, organization, error, {impactNormsDict}, {
             addMessage,
             getFullPropertyURI,
@@ -690,6 +715,16 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
             getListOfValue
           }, null, configLevel);
         } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorModel)[1])) {
+          if (!organization) {
+            delete indicatorDict[uri] // remove the object from its dict and print out a message
+            addMessage(8, 'noOrganization',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0])
+              },
+              {ignoreInstance: true})
+            continue;
+          }
           error = await indicatorBuilder('fileUploading', object, organization, error, {
             indicatorDict,
             objectDict
@@ -700,6 +735,16 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
             getListOfValue
           }, null, configLevel);
         } else if (object['@type'].includes(getFullTypeURIList(GDBIndicatorReportModel)[1])) {
+          if (!organization) {
+            delete indicatorReportDict[uri] // remove the object from its dict and print out a message
+            addMessage(8, 'noOrganization',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0])
+              },
+              {ignoreInstance: true})
+            continue;
+          }
           error = await indicatorReportBuilder('fileUploading', object, organization, error, {
             indicatorDict,
             indicatorReportDict,
@@ -711,6 +756,16 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
             getListOfValue
           }, null, configLevel);
         } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOutcomeModel)[1])) {
+          if (!organization) {
+            delete stakeholderOutcomeDict[uri] // remove the object from its dict and print out a message
+            addMessage(8, 'noOrganization',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0])
+              },
+              {ignoreInstance: true})
+            continue;
+          }
           error = await stakeholderOutcomeBuilder('fileUploading', object, organization, error, {
             outcomeDict,
             stakeholderOutcomeDict,
@@ -722,6 +777,16 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
             getListOfValue
           }, null, configLevel);
         } else if (object['@type'].includes(getFullTypeURIList(GDBImpactReportModel)[1])) {
+          if (!organization) {
+            delete impactReportDict[uri] // remove the object from its dict and print out a message
+            addMessage(8, 'noOrganization',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0])
+              },
+              {ignoreInstance: true})
+            continue;
+          }
           error = await impactReportBuilder('fileUploading', object, organization, error, {
             stakeholderOutcomeDict,
             impactReportDict,
@@ -736,6 +801,18 @@ const fileUploadingMultiOrganization = async (req, res, next) => {
           object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ||
           object['@type'].includes(getFullURI(GDBImpactDurationModel.schemaOptions.rdfTypes[2]))) {
           const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ? 'impactScale' : (object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2])) ? 'impactDepth' : 'impactDuration');
+          if (!organization) {
+            delete {
+              impactScale: impactScaleDict, impactDepth: impactDepthDict, impactDuration: impactDurationDict
+            }[subType][uri] // remove the object from its dict and print out a message
+            addMessage(8, 'noOrganization',
+              {
+                uri,
+                type: getPrefixedURI(object['@type'][0])
+              },
+              {ignoreInstance: true})
+            continue;
+          }
           error = await howMuchImpactBuilder('fileUploading', subType, object, organization, error, {
             impactDepthDict,
             impactDurationDict,
