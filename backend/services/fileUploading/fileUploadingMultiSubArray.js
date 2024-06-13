@@ -124,10 +124,10 @@ async function fileUploadingMultiSubArray(req, res, next) {
         messageBuffer['begin'].push(whiteSpaces + 'The file is empty');
         messageBuffer['begin'].push(whiteSpaces + 'There is nothing to upload');
         break;
-      case 'addingToOrganization':
-        messageBuffer['begin'].push(whiteSpaces + 'Adding objects to organization with URI: ' + organizationUri);
-        messageBuffer['begin'].push(whiteSpaces + '');
-        break;
+      // case 'addingToOrganization':
+      //   messageBuffer['begin'].push(whiteSpaces + 'Adding objects to organization with URI: ' + organizationUri);
+      //   messageBuffer['begin'].push(whiteSpaces + '');
+      //   break;
       case 'emptyExpandedObjects':
         messageBuffer['begin'].push(whiteSpaces + title);
         messageBuffer['begin'].push(whiteSpaces + '    Please check that the file is a valid JSON-LD file and it conforms to context( for example, each object must have an @id and @type property. '
@@ -547,14 +547,14 @@ async function fileUploadingMultiSubArray(req, res, next) {
       if (organizationObjects.length === 0) {
         throw new Server400Error('There is a subarray doesn\'t contain organization');
       } else {
-        throw new Server400Error('There is a subarray contains more than one organization');
+        throw new Server400Error(`The subarray with organization ${organizationObjects[0]['@id']} contains more than one organization`);
       }
 
     }
-    const organizationUri = organizationObjects[0]["@id"];
-    if (!organizationUri) {
-      throw new Server400Error("There is an organization doesn't contain uri");
-    }
+    // const organizationUri = organizationObjects[0]["@id"];
+    // if (!organizationUri) {
+    //   throw new Server400Error("There is an organization doesn't contain uri");
+    // }
     const existingOrganization = await GDBOrganizationModel.findOne({_uri: organizationUri});
     if (existingOrganization) {
       await deleteOrganizationWithAllData(existingOrganization, false);
