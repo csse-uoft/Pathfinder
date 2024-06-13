@@ -225,6 +225,25 @@ async function fileUploadingMultiSubArray(req, res, next) {
         break;
     }
   }
+  const getListOfValue = (object, graphdbModel, property) => {
+    const ret = object[getFullURI(graphdbModel.schema[property].internalKey)].map(obj => {
+      if (isValidURL(obj['@value'])) {
+        return obj['@value'];
+      } else {
+        error += 1;
+        addMessage(8, 'invalidValue',
+          {
+            uri: object['@id'],
+            type: getPrefixedURI(object['@type'][0]),
+            property: getPrefixedURI(getFullPropertyURI(graphdbModel, property)),
+            value: obj['@value']
+          }, {});
+      }
+
+    });
+    return ret.filter(uri => !!uri);
+  };
+
 
   async function uploadSubArray(objects) {
 
@@ -311,25 +330,6 @@ async function fileUploadingMultiSubArray(req, res, next) {
       'stakeholder': GDBStakeholderOrganizationModel,
       'dataset': GDBDataSetModel
     };
-    const getListOfValue = (object, graphdbModel, property) => {
-      const ret = object[getFullURI(graphdbModel.schema[property].internalKey)].map(obj => {
-        if (isValidURL(obj['@value'])) {
-          return obj['@value'];
-        } else {
-          error += 1;
-          addMessage(8, 'invalidValue',
-            {
-              uri: object['@id'],
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(graphdbModel, property)),
-              value: obj['@value']
-            }, {});
-        }
-
-      });
-      return ret.filter(uri => !!uri);
-    };
-
     if (!Array.isArray(objects)) {
       // the object should be an array
       error += 1;
@@ -376,7 +376,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
           outcomeDict[uri] = {_uri: uri};
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         } else if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
-          organization = {_uri: uri};
+          organization = GDBOrganizationModel({_uri: uri});
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
           impactRiskDict[uri] = {_uri: uri};
@@ -544,7 +544,12 @@ async function fileUploadingMultiSubArray(req, res, next) {
 
     const organizationObjects = expandedObjects.filter(item => item['@type'][0] === getFullURI('cids:Organization'));
     if (organizationObjects.length !== 1) {
-      throw new Server400Error('There is a subarray contains more than one organization');
+      if (organizationObjects.length === 0) {
+        throw new Server400Error('There is a subarray doesn\'t contain organization');
+      } else {
+        throw new Server400Error('There is a subarray contains more than one organization');
+      }
+
     }
     const organizationUri = organizationObjects[0]["@id"];
     if (!organizationUri) {
@@ -555,7 +560,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
       await deleteOrganizationWithAllData(existingOrganization, false);
     }
     error = await organizationBuilder('fileUploading', organizationObjects[0], error, {
-        objectDict, organizationDict: {organizationUri: organization}
+        objectDict, organizationDict: {[organizationUri]: organization}
       },
       {addMessage, getFullPropertyURI, getValue, getListOfValue}, null, configLevel);
 
@@ -909,6 +914,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
       }
     }
 
+    await organization.save();
     await autoSaving();
 
   }
@@ -960,3 +966,5 @@ async function fileUploadingMultiSubArray(req, res, next) {
     next(e);
   }
 }
+
+module.exports = {fileUploadingMultiSubArray}
