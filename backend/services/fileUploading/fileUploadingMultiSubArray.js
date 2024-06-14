@@ -388,7 +388,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
         } else if (object['@type'].includes(getFullTypeURIList(GDBEvidenceRiskModel)[1])) {
           evidenceRiskDict[uri] = {_uri: uri};
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
+        } else if (object['@type'].includes(getFullURI('cids:ExternalRisk'))) {
           externalRiskDict[uri] = {_uri: uri};
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderParticipationRiskModel)[1])) {
@@ -429,7 +429,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
             {uri, type: getPrefixedURI(object['@type'][0])}, {});
           indicatorReportDict[uri] = {_uri: uri};
 
-        } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+        } else if (object['@type'].includes(getFullURI('cids:Stakeholder'))) {
           addMessage(4, 'readingMessage',
             {uri, type: getPrefixedURI(object['@type'][0])}, {});
           stakeholderDict[uri] = {_uri: uri};
@@ -776,7 +776,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
             unexpectedImpactRiskDict,
             objectDict
           }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBExternalRiskModel)[1])) {
+      } else if (object['@type'].includes(getFullURI('cids:ExternalRisk'))) {
         error = await impactRiskBuilder('fileUploading', 'externalRisk', object, null, error,
           {
             impactRiskDict,
@@ -896,7 +896,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
             unexpectedImpactRiskDict,
             objectDict
           }, {addMessage, getValue, getFullPropertyURI, getListOfValue}, null, configLevel);
-      } else if (object['@type'].includes(getFullTypeURIList(GDBStakeholderOrganizationModel)[1])) {
+      } else if (object['@type'].includes(getFullURI('cids:Stakeholder'))) {
         error = await stakeholderOrganizationBuilder('fileUploading', object, null, error, {
           stakeholderDict,
           objectDict,
