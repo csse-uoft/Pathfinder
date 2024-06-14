@@ -157,10 +157,13 @@ async function fileUploadingMultiSubArray(req, res, next) {
         if (ignoreInstance)
           messageBuffer[uri].push(whiteSpaces + '    The object is ignored');
         break;
+      case 'blankLine':
+        messageBuffer[uri].push('\n');
+        break;
       case 'NoSuchImpactNorms':
         messageBuffer[uri].push(whiteSpaces + `Error: No Such ImpactNorms`);
         messageBuffer[uri].push(whiteSpaces + `   In object with URI ${uri} of type ${type}, there is no such impactNorms ${impactNormsURI} under the organization`);
-
+        break;
       case 'duplicatedURIInDataBase':
         messageBuffer[uri].push(whiteSpaces + `${title}: Duplicated URI`);
         messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} has been used as an URI already in another object in the sandbox`);
@@ -377,6 +380,7 @@ async function fileUploadingMultiSubArray(req, res, next) {
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         } else if (object['@type'].includes(getFullTypeURIList(GDBOrganizationModel)[1])) {
           organization = GDBOrganizationModel({_uri: uri});
+          addMessage(null, 'blankLine', {uri}, {});
           addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         } else if (object['@type'].includes(getFullTypeURIList(GDBImpactRiskModel)[1])) {
           impactRiskDict[uri] = {_uri: uri};
@@ -551,10 +555,10 @@ async function fileUploadingMultiSubArray(req, res, next) {
       }
 
     }
-    // const organizationUri = organizationObjects[0]["@id"];
-    // if (!organizationUri) {
-    //   throw new Server400Error("There is an organization doesn't contain uri");
-    // }
+    const organizationUri = organizationObjects[0]["@id"];
+    if (!organizationUri) {
+      throw new Server400Error("There is an organization doesn't contain uri");
+    }
     const existingOrganization = await GDBOrganizationModel.findOne({_uri: organizationUri});
     if (existingOrganization) {
       await deleteOrganizationWithAllData(existingOrganization, false);
