@@ -56,6 +56,7 @@ async function organizationBuilder(environment, object, error, {organizationDict
     if (hasError) {
     } else if (environment === 'fileUploading') {
       // addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+      // addMessage(null, 'blankLine', {uri}, {})
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
     }

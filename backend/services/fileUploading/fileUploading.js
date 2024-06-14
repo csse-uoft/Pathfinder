@@ -367,7 +367,7 @@ const fileUploading = async (req, res, next) => {
       addTrace('Warning!');
       addTrace('The file is empty');
       addTrace('There is nothing to upload ');
-      addMessage(0, 'fileEmpty', {});
+      addMessage(0, 'fileEmpty', {}, {});
       error += 1;
       const msg = formatMessage();
       throw new Server400Error(msg);
