@@ -50,7 +50,7 @@ export default function DataExportPage() {
     level: 'Basic',
     properties: [],
     dataTypes: [],
-
+    propertyPrefix: 'Full',
     errorDialog: false,
     success: false,
     fail: false,
@@ -59,6 +59,7 @@ export default function DataExportPage() {
     fileTypes: ['JSON-ld'],
     properties: ['All'],
     organizations: {},
+    propertyPrefixes: ['Full', 'Shorthand'],
     levels: ['Basic', 'Essential', 'Full'],
     dataTypes: {'Basic': {'cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport'},
       'Essential': {'cids:ImpactNorms':'cids:ImpactNorms','cids:Indicator': 'cids:Indicator', 'cids:Outcome': 'cids:Outcome', 'cids:Theme': 'cids:Theme', 'cids:IndicatorReport': 'cids:IndicatorReport',
@@ -106,7 +107,7 @@ export default function DataExportPage() {
   const handleConfirm = async () => {
     try {
       setState(state => ({...state, loadingButton: true}));
-      const {data} = await dataExport(state.organizations, state.level, state.properties, state.dataTypes)
+      const {data} = await dataExport(state.organizations, state.level, state.properties, state.dataTypes, state.propertyPrefix)
       if (data) {
         setState(state => ({...state, loadingButton: false, submitDialog: false, success: true}));
         const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -126,6 +127,9 @@ export default function DataExportPage() {
       error.organizations = 'The field cannot be empty';
     }
     if (!state.fileType) {
+      error.fileType = 'The field cannot be empty';
+    }
+    if (!state.propertyPrefix) {
       error.fileType = 'The field cannot be empty';
     }
     if (!state.level) {
@@ -197,6 +201,31 @@ export default function DataExportPage() {
           onChange={e => {
             setState(state => ({
                 ...state, dataTypes: e.target.value
+              })
+            );
+          }}
+        />
+
+        <SelectField
+          noEmpty
+          key={'propertyPrefix'}
+          label={'Property Prefix'}
+          value={state.propertyPrefix}
+          options={options.propertyPrefixes}
+          error={!!errors.propertyPrefix}
+          helperText={
+            errors.propertyPrefix
+          }
+          onBlur={() => {
+            if (!state.propertyPrefix) {
+              setErrors(errors => ({...errors, propertyPrefix: 'The field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, propertyPrefix: null}));
+            }
+          }}
+          onChange={e => {
+            setState(state => ({
+                ...state, propertyPrefix: e.target.value
               })
             );
           }}
