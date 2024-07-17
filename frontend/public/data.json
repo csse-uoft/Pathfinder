@@ -1,0 +1,53 @@
+{
+	"entities": [{
+		"label": "Organization",
+		"title": "Organization A"
+	}, {
+		"label": "Organization",
+		"title": "CompanyB"
+	}, {
+		"label": "Organization",
+		"title": "University of Calgary"
+	}, {
+		"label": "Organization",
+		"title": "University of Toronto"
+	}, {
+		"label": "Person",
+		"title": "PersonB"
+	}, {
+		"label": "Organization",
+		"title": "CompanyA"
+	}, {
+		"label": "Person",
+		"title": "PersonA"
+	}],
+	"relations": [{
+		"source": "CompanyA",
+		"target": "PersonA",
+		"type": "owned by"
+	}, {
+		"source": "University of Toronto",
+		"target": "PersonA",
+		"type": "workplace"
+	}, {
+		"source": "PersonA",
+		"target": "PersonB",
+		"type": "supervisor"
+	}, {
+		"source": "PersonB",
+		"target": "PersonA",
+		"type": "supervisee"
+	}, {
+		"source": "CompanyB",
+		"target": "Organization A",
+		"type": "subsidiary"
+	}, {
+		"source": "CompanyB",
+		"target": "PersonA",
+		"type": "owned by"
+	}, {
+		"source": "Organization A",
+		"target": "PersonA",
+		"type": "owned by"
+	}]
+}
