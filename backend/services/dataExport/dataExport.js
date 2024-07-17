@@ -403,10 +403,11 @@ const dataExport = async (req, res) => {
     for (let property in object.schema) {
       const propertyType = level2Property[level][SPARQL.getFullURI(object.schemaOptions.rdfTypes.slice(-1)[0])]?.[SPARQL.getFullURI(object.schema[property].internalKey)];
       if ((propertyType === 'boolean' && object[property] === false) || (object[property] && propertyType)) {
-        const propertyUri = object[property];
-        writtenObject[SPARQL.getFullURI(object.schema[property].internalKey)] = propertyUri;
+        const propertyUri = object.schema[property].internalKey
+        const objectUri = object[property];
+        writtenObject[propertyPrefix === 'Full' ? SPARQL.getFullURI(propertyUri):propertyUri] = objectUri;
         if (datatype2Model[propertyType]) {
-          const nestedObject = await datatype2Model[propertyType].findOne({_uri: propertyUri});
+          const nestedObject = await datatype2Model[propertyType].findOne({_uri: objectUri});
           ret = [...ret, ...await writeAnObjectAndItsNestedObjects(nestedObject)];
         }
       }
@@ -430,7 +431,7 @@ const dataExport = async (req, res) => {
   }
 
 
-  const {organizationUris, level, properties, dataTypes} = req.body;
+  const {organizationUris, level, properties, dataTypes, propertyPrefix} = req.body;
   let ret = [];
   const data = {};
   // await storeObjectUrisPredicatedByOrganization(organizationUris);
