@@ -83,6 +83,7 @@ import StakeholderOutcome from "./components/stakeholderOutcome/stakeholderOutco
 import TotalReviewPages from "./components/totalReviewPage/TotalReviewPages";
 import TotalReviewPage from "./components/totalReviewPage/TotalReviewPage";
 import DataExportPage from "./components/dataExport/dataExport";
+import NodeGraph from "./components/nodeGraph/nodeGraph";
 
 
 const routes = (
@@ -299,6 +300,9 @@ const routes = (
 
     <Route path={`${process.env.PUBLIC_URL}/counterfactual/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditCounterfactual}/>}/>
+
+    <Route path={`${process.env.PUBLIC_URL}/nodeGraph`}
+           element={<PrivateRoute element={NodeGraph}/>}/>
 
   </Routes>
 );
