@@ -68,7 +68,7 @@ export default function NodeGraph() {
 
   return (
     <Container sx={{alignItems: 'center'}}>
-      <div id="cy" style={{width: '80vw', height: '80vh'}}>
+      <div id="cy" style={{width: '60vw', height: '80vh', border: '2px solid black'}}>
 
       </div>
     </Container>
