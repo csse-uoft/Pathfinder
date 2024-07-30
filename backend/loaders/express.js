@@ -20,7 +20,7 @@ const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRout
   characteristicsRoute, stakeholderOutcomeRoute, impactReportsRoute, impactReportRoute,
   stakeholderOutcomesRoute, impactModelsRoute, featuresRoute, impactModelRoute, impactRiskRoute, impactRisksRoute,
   howMuchImpactsRoute, counterfactualRoute, counterfactualsRoute, datasetRoute, datasetsRoute, howMuchImpactRoute,
-  dataExportRoute
+  dataExportRoute, nodeGraphRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -107,6 +107,7 @@ app.use('/api/counterfactual', counterfactualRoute);
 app.use('/api/dataset', datasetRoute);
 app.use('/api/datasets', datasetsRoute);
 app.use('/api/dataExport', dataExportRoute);
+app.use('/api/nodeGraph', nodeGraphRoute)
 
 
 

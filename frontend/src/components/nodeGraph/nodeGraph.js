@@ -69,7 +69,7 @@ export default function NodeGraph() {
     // Fetch data from the backend API
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/data'); // Replace with your API endpoint
+        const response = await fetch('/api/nodeGraph'); // Replace with your API endpoint
         const data = await response.json();
         initializeCytoscape(data);
       } catch (error) {
