@@ -63,82 +63,95 @@ export default function NodeGraph() {
   const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
-    // Initialize Cytoscape
-    cyRef.current = cytoscape({
-      container: document.getElementById('cy'), // Container to render in
-      elements: [ // List of graph elements to start with
-        { // Node a
-          data: { id: 'a', label: 'Node A' }
-        },
-        { // Node b
-          data: { id: 'b', label: 'Node B' }
-        },
-        { // Edge ab
-          data: { id: 'ab', source: 'a', target: 'b' }
-        }
-      ],
-      style: [ // The stylesheet for the graph
-        {
-          selector: 'node',
-          style: {
-            'background-color': '#666',
-            'label': 'data(label)',
-            'width': '150px', // Adjust node width
-            'height': '150px', // Adjust node height
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'font-size': '14px',
-            'text-wrap': 'wrap',
-            'text-max-width': '100px', // Adjust max text width
-            'transition-property': 'background-color, border-width, border-color',
-            'transition-duration': '0.5s'
-          }
-        },
-        {
-          selector: 'node.hover',
-          style: {
-            'background-color': '#FF5722',
-            'border-width': 6,
-            'border-color': '#FF9800'
-          }
-        },
-        {
-          selector: 'edge',
-          style: {
-            'width': 3,
-            'line-color': '#ccc',
-            'target-arrow-color': '#ccc',
-            'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier'
-          }
-        }
-      ],
-      layout: {
-        name: 'grid',
-        rows: 1
+
+
+
+    // Fetch data from the backend API
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/data'); // Replace with your API endpoint
+        const data = await response.json();
+        initializeCytoscape(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
-    });
+    };
 
-    // Event listener for node clicks
-    cyRef.current.on('tap', 'node', (evt) => {
-      const node = evt.target;
-      setSelectedNode(node.data());
-      setNodeColor(node.style('background-color')); // Set the initial color to the node's current color
-      setDrawerOpen(true); // Open the drawer
-    });
+    fetchData();
 
-    // Event listeners for mouseover and mouseout
-    cyRef.current.on('mouseover', 'node', (evt) => {
-      evt.target.addClass('hover');
-    });
 
-    cyRef.current.on('mouseout', 'node', (evt) => {
-      evt.target.removeClass('hover');
-    });
+
+
+    // Function to initialize Cytoscape with fetched data
+    const initializeCytoscape = (data) => {
+      cyRef.current = cytoscape({
+        container: document.getElementById('cy'), // Container to render in
+        elements: data, // Use fetched data
+        style: [ // The stylesheet for the graph
+          {
+            selector: 'node',
+            style: {
+              'background-color': '#666',
+              'label': 'data(label)',
+              'width': '150px', // Adjust node width
+              'height': '150px', // Adjust node height
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'font-size': '14px',
+              'text-wrap': 'wrap',
+              'text-max-width': '100px', // Adjust max text width
+              'transition-property': 'background-color, border-width, border-color',
+              'transition-duration': '0.5s'
+            }
+          },
+          {
+            selector: 'node.hover',
+            style: {
+              'background-color': '#FF5722',
+              'border-width': 6,
+              'border-color': '#FF9800'
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'width': 3,
+              'line-color': '#ccc',
+              'target-arrow-color': '#ccc',
+              'target-arrow-shape': 'triangle',
+              'curve-style': 'bezier'
+            }
+          }
+        ],
+        layout: {
+          name: 'grid',
+          rows: 1
+        }
+      });
+
+      // Event listener for node clicks
+      cyRef.current.on('tap', 'node', (evt) => {
+        const node = evt.target;
+        setSelectedNode(node.data());
+        setNodeColor(node.style('background-color')); // Set the initial color to the node's current color
+        setDrawerOpen(true); // Open the drawer
+      });
+
+      // Event listeners for mouseover and mouseout
+      cyRef.current.on('mouseover', 'node', (evt) => {
+        evt.target.addClass('hover');
+      });
+
+      cyRef.current.on('mouseout', 'node', (evt) => {
+        evt.target.removeClass('hover');
+      });
+    };
 
     // Cleanup on component unmount
     return () => {
-      cyRef.current.destroy();
+      if (cyRef.current) {
+        cyRef.current.destroy();
+      }
     };
   }, []);
 
