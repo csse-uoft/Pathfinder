@@ -4,13 +4,11 @@ import {Link} from '../shared';
 import {Container, Button, Typography} from "@mui/material";
 import {
   Edit,
-  Create,
   People,
-  ViewHeadline as Log,
-  CheckCircleOutline as Criteria,
   FileUpload,
   Download,
-  Summarize
+  Summarize,
+  AccountTree
 } from "@mui/icons-material";
 import {UserContext} from "../../context";
 import {NavButton} from "./NavButton";
@@ -106,6 +104,9 @@ function Dashboard() {
 
       <NavButton to={'/reportGenerate'} icon={<Download/>} key={`reportGenerate`}
                  text="Reports"/>
+
+      <NavButton to={'/nodeGraph'} icon={<AccountTree/>} key={`nodeGraph`}
+                 text="Node Graph"/>
 
 
 
