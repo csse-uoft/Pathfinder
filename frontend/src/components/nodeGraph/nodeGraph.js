@@ -94,6 +94,7 @@ export default function NodeGraph() {
               'text-max-width': "50px",
               'transition-property': 'background-color, border-width, border-color',
               'transition-duration': '0.5s',
+              'word-break': 'break-all',
             }
           },
           {
