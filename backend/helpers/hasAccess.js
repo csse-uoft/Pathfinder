@@ -56,6 +56,11 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'fetchNodeGraphData':
+      if (userAccount.isSuperuser)
+        return true;
+      break
+
     // counterfactual
     case 'createCounterfactual':
       if (userAccount.isSuperuser)
