@@ -1,10 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import cytoscape from 'cytoscape';
-import { Container, Button, TextField, Drawer, IconButton, Tabs, Tab, Box, Typography } from "@mui/material";
+import { Container, Button, TextField, Drawer, IconButton, Tabs, Tab, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { makeStyles } from "@mui/styles";
 
-// Define custom styles using Material-UI's makeStyles
 const useStyles = makeStyles(() => ({
   root: {
     width: '100vw',
@@ -33,9 +32,12 @@ const useStyles = makeStyles(() => ({
   tabPanel: {
     padding: '10px',
   },
+  formControl: {
+    marginTop: 16,
+    minWidth: 120,
+  },
 }));
 
-// TabPanel component to manage content within each tab
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -61,106 +63,72 @@ export default function NodeGraph() {
   const [nodeColor, setNodeColor] = useState('#666');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedData, setSelectedData] = useState('basic');
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
 
   useEffect(() => {
-
-
-
-    // Fetch data from the backend API
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/nodeGraph'); // Replace with your API endpoint
-        const data = await response.json();
-        initializeCytoscape(data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-
-
-
-
-    // Function to initialize Cytoscape with fetched data
-    const initializeCytoscape = (data) => {
-      cyRef.current = cytoscape({
-        container: document.getElementById('cy'), // Container to render in
-        elements: data, // Use fetched data
-        style: [ // The stylesheet for the graph
-          {
-            selector: 'node',
-            style: {
-              'background-color': '#666',
-              'label': 'data(label)',
-              'width': '150px', // Adjust node width
-              'height': '150px', // Adjust node height
-              'text-valign': 'center',
-              'text-halign': 'center',
-              'font-size': '14px',
-              'text-wrap': 'wrap',
-              'text-max-width': '100px', // Adjust max text width
-              'transition-property': 'background-color, border-width, border-color',
-              'transition-duration': '0.5s'
-            }
-          },
-          {
-            selector: 'node.hover',
-            style: {
-              'background-color': '#FF5722',
-              'border-width': 6,
-              'border-color': '#FF9800'
-            }
-          },
-          {
-            selector: 'edge',
-            style: {
-              'width': 3,
-              'line-color': '#ccc',
-              'target-arrow-color': '#ccc',
-              'target-arrow-shape': 'triangle',
-              'curve-style': 'bezier'
-            }
+    cyRef.current = cytoscape({
+      container: document.getElementById('cy'),
+      elements: [
+        { data: { id: 'a', label: 'Node A' } },
+        { data: { id: 'b', label: 'Node B' } },
+        { data: { id: 'c', label: 'Node C' } },
+        { data: { id: 'd', label: 'Node D' } },
+        { data: { id: 'ab', source: 'a', target: 'b' } },
+        { data: { id: 'ca', source: 'c', target: 'a' } }
+      ],
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'background-color': '#666',
+            'label': 'data(label)',
+            'width': '150px',
+            'height': '150px',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '14px',
+            'text-wrap': 'wrap',
+            'text-max-width': '100px',
+            'transition-property': 'background-color, border-width, border-color',
+            'transition-duration': '0.5s'
           }
-        ],
-        layout: {
-          name: 'grid',
-          rows: 1
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 3,
+            'line-color': '#ccc',
+            'target-arrow-color': '#ccc',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier'
+          }
         }
-      });
-
-      // Event listener for node clicks
-      cyRef.current.on('tap', 'node', (evt) => {
-        const node = evt.target;
-        setSelectedNode(node.data());
-        setNodeColor(node.style('background-color')); // Set the initial color to the node's current color
-        setDrawerOpen(true); // Open the drawer
-      });
-
-      // Event listeners for mouseover and mouseout
-      cyRef.current.on('mouseover', 'node', (evt) => {
-        evt.target.addClass('hover');
-      });
-
-      cyRef.current.on('mouseout', 'node', (evt) => {
-        evt.target.removeClass('hover');
-      });
-    };
-
-    // Cleanup on component unmount
-    return () => {
-      if (cyRef.current) {
-        cyRef.current.destroy();
+      ],
+      layout: {
+        name: 'grid',
+        rows: 1
       }
+    });
+
+    cyRef.current.on('tap', 'node', (evt) => {
+      const node = evt.target;
+      setSelectedNode(node.data());
+      setNodeColor(node.style('background-color'));
+      setDrawerOpen(true);
+    });
+
+    return () => {
+      cyRef.current.destroy();
     };
   }, []);
 
-  // Handle color change
   const handleColorChange = (event) => {
     setNodeColor(event.target.value);
   };
 
-  // Update node color
   const updateNodeColor = () => {
     if (selectedNode) {
       const node = cyRef.current.getElementById(selectedNode.id);
@@ -168,17 +136,41 @@ export default function NodeGraph() {
     }
   };
 
-  // Handle drawer close
   const handleClose = () => {
     setDrawerOpen(false);
   };
 
-  // Handle tab change
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  // Get relationships of the selected node
+  const handleDialogOpen = () => {
+    setNodes(cyRef.current.nodes().map(node => node.data()));
+    setEdges(cyRef.current.edges().map(edge => edge.data()));
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handleDataChange = (event) => {
+    setSelectedData(event.target.value);
+  };
+
+  const renderSelectedData = () => {
+    if (selectedData === 'all') {
+      cyRef.current.nodes().style('display', 'element');
+      cyRef.current.edges().style('display', 'element');
+    } else {
+      cyRef.current.nodes().style('display', 'none');
+      cyRef.current.edges().style('display', 'none');
+      cyRef.current.getElementById(selectedData).style('display', 'element');
+      cyRef.current.edges(`[source = "${selectedData}"], [target = "${selectedData}"]`).style('display', 'element');
+      cyRef.current.nodes(`[id = "${selectedData}"]`).neighborhood().nodes().style('display', 'element');
+    }
+  };
+
   const getRelationships = () => {
     if (!selectedNode) return null;
     const edges = cyRef.current.edges(`[source = "${selectedNode.id}"], [target = "${selectedNode.id}"]`);
@@ -187,7 +179,6 @@ export default function NodeGraph() {
     ));
   };
 
-  // Get neighborhood of the selected node
   const getNeighborhood = () => {
     if (!selectedNode) return null;
     const neighborhood = cyRef.current.$(`#${selectedNode.id}`).neighborhood().nodes();
@@ -199,6 +190,32 @@ export default function NodeGraph() {
   return (
     <div className={classes.root}>
       <div id="cy" className={classes.cyContainer}></div>
+      <Button variant="contained" color="primary" onClick={handleDialogOpen}>
+        Select Data to Render
+      </Button>
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Select Data</DialogTitle>
+        <DialogContent>
+          <FormControl className={classes.formControl}>
+            <InputLabel id="data-select-label">Node</InputLabel>
+            <Select
+              labelId="data-select-label"
+              value={selectedData}
+              onChange={handleDataChange}
+            >
+              <MenuItem value="all">All</MenuItem>
+              {nodes.map(node => (
+                <MenuItem key={node.id} value={node.id}>{node.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { renderSelectedData(); handleDialogClose(); }} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -219,19 +236,23 @@ export default function NodeGraph() {
                 <Tab label="Neighborhood" />
               </Tabs>
               <TabPanel value={tabValue} index={0}>
-                <p>ID: {selectedNode.id}</p>
-                <p>Label: {selectedNode.label}</p>
-                <TextField
-                  label="Node Color"
-                  type="color"
-                  value={nodeColor}
-                  onChange={handleColorChange}
-                  fullWidth
-                  margin="normal"
-                />
-                <Button variant="contained" color="primary" onClick={updateNodeColor} className={classes.button}>
-                  Update Color
-                </Button>
+                <>
+                  <p>ID: {selectedNode.id}</p>
+                  <p>Label: {selectedNode.label}</p>
+                  <TextField
+                    label="Node Color"
+                    type="color"
+                    value={nodeColor}
+                    onChange={handleColorChange}
+                    fullWidth
+                    margin="normal"
+                  />
+                  <Button variant="contained" color="primary" onClick={updateNodeColor} className={classes.button}>
+                    Update Color
+                  </Button>
+                </>
+                {selectedData === 'relationship' && getRelationships()}
+                {selectedData === 'neighborhood' && getNeighborhood()}
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
                 {getRelationships()}
