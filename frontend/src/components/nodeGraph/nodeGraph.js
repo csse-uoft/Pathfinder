@@ -3,6 +3,7 @@ import cytoscape from 'cytoscape';
 import { Container, Button, TextField, Drawer, IconButton, Tabs, Tab, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { makeStyles } from "@mui/styles";
+import {fetchNodeGraphData} from "../../api/nodeGraphApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -65,65 +66,67 @@ export default function NodeGraph() {
   const [tabValue, setTabValue] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState('basic');
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+  const [elements, setElements] = useState(null);
 
   useEffect(() => {
-    cyRef.current = cytoscape({
-      container: document.getElementById('cy'),
-      elements: [
-        { data: { id: 'a', label: 'Node A' } },
-        { data: { id: 'b', label: 'Node B' } },
-        { data: { id: 'c', label: 'Node C' } },
-        { data: { id: 'd', label: 'Node D' } },
-        { data: { id: 'ab', source: 'a', target: 'b' } },
-        { data: { id: 'ca', source: 'c', target: 'a' } }
-      ],
-      style: [
-        {
-          selector: 'node',
-          style: {
-            'background-color': '#666',
-            'label': 'data(label)',
-            'width': '150px',
-            'height': '150px',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'font-size': '14px',
-            'text-wrap': 'wrap',
-            'text-max-width': '100px',
-            'transition-property': 'background-color, border-width, border-color',
-            'transition-duration': '0.5s'
+    fetchNodeGraphData().then(({elements}) => {
+      setElements(elements)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (elements) {
+      cyRef.current = cytoscape({
+        container: document.getElementById('cy'),
+        elements: elements,
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'background-color': '#9eeb17',
+              'label': 'data(label)',
+              'width': '60px',
+              'height': '60px',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'font-size': '5px',
+              'text-wrap': 'wrap',
+              'text-max-width': "50px",
+              'transition-property': 'background-color, border-width, border-color',
+              'transition-duration': '0.5s',
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'width': 3,
+              'line-color': '#ccc',
+              'target-arrow-color': '#ccc',
+              'target-arrow-shape': 'triangle',
+              'curve-style': 'bezier',
+              'label': 'data(label)',
+              'font-size': '5px',
+              'text-rotation': 'autorotate', // Ensure text follows the edge
+              'text-margin-y': -7, // Position the label above the edge
+            }
           }
-        },
-        {
-          selector: 'edge',
-          style: {
-            'width': 3,
-            'line-color': '#ccc',
-            'target-arrow-color': '#ccc',
-            'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier'
-          }
+        ],
+        layout: {
+          name: 'cose'
         }
-      ],
-      layout: {
-        name: 'grid',
-        rows: 1
-      }
-    });
+      });
 
-    cyRef.current.on('tap', 'node', (evt) => {
-      const node = evt.target;
-      setSelectedNode(node.data());
-      setNodeColor(node.style('background-color'));
-      setDrawerOpen(true);
-    });
-
-    return () => {
-      cyRef.current.destroy();
-    };
-  }, []);
+      cyRef.current.on('tap', 'node', (evt) => {
+        const node = evt.target;
+        setSelectedNode(node.data());
+        setNodeColor(node.style('background-color'));
+        setDrawerOpen(true);
+      });
+      return () => {
+        cyRef.current.destroy();
+      };
+    }
+  }, [elements]);
 
   const handleColorChange = (event) => {
     setNodeColor(event.target.value);
@@ -204,7 +207,7 @@ export default function NodeGraph() {
               onChange={handleDataChange}
             >
               <MenuItem value="all">All</MenuItem>
-              {nodes.map(node => (
+              {elements?.nodes?.map(node => (
                 <MenuItem key={node.id} value={node.id}>{node.label}</MenuItem>
               ))}
             </Select>
