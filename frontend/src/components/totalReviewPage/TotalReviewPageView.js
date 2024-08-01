@@ -149,7 +149,6 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
       fetchDataTypes('organization').then(res => {
         if (res.success)
           setState(state => ({...state, loading: false, data: res.organizations}));
-        console.log(res.organizations)
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
