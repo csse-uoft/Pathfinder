@@ -282,8 +282,13 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
         const outcomes = organization.hasOutcomes?.map(outcomeUri => outcomeDict[outcomeUri]);
         outcomes?.map(outcomeObject => {
           if (outcomeObject) {
-            const themesUnderOutcome = outcomeObject.themes?.map(themeUri => themeDict[themeUri]);
-            themes[organization._uri] = [...(themes[organization._uri] || []), ...(themesUnderOutcome || [])];
+            let themesUnderOutcome = outcomeObject.themes?.map(themeUri => themeDict[themeUri]);
+
+            if (themesUnderOutcome) {
+              themesUnderOutcome= themesUnderOutcome.filter(theme => theme)
+              themes[organization._uri] = [...(themes[organization._uri] || []), ...(themesUnderOutcome || [])];
+            }
+
           }
         });
       });
