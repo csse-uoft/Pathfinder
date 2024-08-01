@@ -37,10 +37,9 @@ async function fetchStakeholdersThroughOrganization(req, res) {
     }
 
     impactNormss.map(impactNorms => {
-      if (impactNorms?.stakeholders){
+        if (impactNorms?.stakeholders){
         stakeholders = [...stakeholders, ...impactNorms?.stakeholders]
       }
-
     })
 
     return res.status(200).json({success: true, stakeholders});
