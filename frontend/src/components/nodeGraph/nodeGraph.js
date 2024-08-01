@@ -68,9 +68,47 @@ export default function NodeGraph() {
   const [selectedData, setSelectedData] = useState('basic');
   const [elements, setElements] = useState(null);
 
+  const nodeType2Color = {
+    "cids:Organization": "#9eeb17",
+    "cids:Indicator": "#eb7b17",
+    "cids:Outcome": "#eb3a17",
+    "time:DateTimeInterval" : "#f0fa0b",
+    "iso21972:Measure": "#06f920",
+    "cids:Code": "#06f999",
+    "cids:StakeholderOutcome": "#06f999",
+    "cids:IndicatorReport": "#069df9",
+    "cids:HowMuchImpact": "#1a3ef0",
+    "dcat:Dataset": "#8d54e3",
+    "cids:ImpactRisk": "#8910f5",
+    "cids:Characteristic": "#c532e8",
+    "cids:Theme": "#f938e2",
+    "cids:ImpactReport": "#2e0e26",
+    "cids:Counterfactual": "#ebcc1e",
+    "cids:ImpactNorms": "#e0a19b"
+  }
+
+  const edgeType2Color = {
+    "cids:hasIndicator" : "#413f1a",
+    "cids:hasOutcome" : "#e74c1f",
+    "cids:hasIndicatorReport": "#dea522",
+    "cids:definedBy" : "#f3f018",
+    "cids:forOrganization" : "#c5f318",
+    "cids:forIndicator" : '#99f318',
+    "cids:hasImpactModel": "#18f3a3",
+    "cids:forOutcome": "#2d8e6b",
+    "cids:hasCode" :"#1bf7d3",
+    "cids:forTheme": "#1bccf7",
+    "iso21972:value": "#246fb2",
+    "dcat:dataset": "#a497f6",
+    "cids:hasImpactReport": "#c197f6",
+    "cids:hasStakeholderOutcome": "#480997"
+  }
   useEffect(() => {
     fetchNodeGraphData().then(({elements}) => {
-      setElements(elements)
+      const {nodes, edges} = elements
+      nodes.map(node => node['data']['color'] = nodeType2Color[node.data.type] || '#df1087')
+      edges.map(edge => edge.data.color = edgeType2Color[edge.data.label] || '#df1087')
+      setElements({nodes, edges})
     })
   }, [])
 
@@ -83,7 +121,7 @@ export default function NodeGraph() {
           {
             selector: 'node',
             style: {
-              'background-color': '#9eeb17',
+              'background-color': 'data(color)',
               'label': 'data(label)',
               'width': '60px',
               'height': '60px',
@@ -101,8 +139,8 @@ export default function NodeGraph() {
             selector: 'edge',
             style: {
               'width': 3,
-              'line-color': '#ccc',
-              'target-arrow-color': '#ccc',
+              'line-color': 'data(color)',
+              'target-arrow-color': 'data(color)',
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
               'label': 'data(label)',
@@ -241,8 +279,9 @@ export default function NodeGraph() {
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <>
-                  <p>ID: {selectedNode.id}</p>
-                  <p>Label: {selectedNode.label}</p>
+                  <p>URI: {selectedNode.id}</p>
+                  <p>Type: {selectedNode.type}</p>
+                  <p>Name: {selectedNode.label}</p>
                   <TextField
                     label="Node Color"
                     type="color"
