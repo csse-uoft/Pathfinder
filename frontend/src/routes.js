@@ -84,7 +84,7 @@ import TotalReviewPages from "./components/totalReviewPage/TotalReviewPages";
 import TotalReviewPage from "./components/totalReviewPage/TotalReviewPage";
 import DataExportPage from "./components/dataExport/dataExport";
 import NodeGraph from "./components/nodeGraph/nodeGraph";
-
+import DataDashboard from "./components/dataDashboard/DataDashboard";
 
 const routes = (
   <Routes>
@@ -303,6 +303,8 @@ const routes = (
 
     <Route path={`${process.env.PUBLIC_URL}/nodeGraph`}
            element={<PrivateRoute element={NodeGraph}/>}/>
+      <Route path={`${process.env.PUBLIC_URL}/dataDashboard`}
+             element={<PrivateRoute element={DataDashboard}/>}/>
 
   </Routes>
 );
