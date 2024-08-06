@@ -1,9 +1,10 @@
-import {Container, Typography} from "@mui/material";
+import {Button, Container, Typography} from "@mui/material";
 import Dropdown from "../shared/fields/MultiSelectField";
 import React, { useRef, useEffect, useState } from 'react';
 import {fetchOrganizations} from "../../api/organizationApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {Loading} from "../shared";
+import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
 
 
 export default function DataDashboard() {
@@ -15,6 +16,26 @@ export default function DataDashboard() {
   const [errors, setErrors] = useState(
     {}
   );
+
+  // const [selectedIndicators, setSelectedIndicators] = useState([])
+  // const[indicatorInterfaces, setIndicatorInterfaces] = useState({})
+
+  // useEffect(() => {
+  //   fetchIndicatorInterfaces().then(res => {
+  //     if (res.success)  {
+  //       setIndicatorInterfaces(res.indicatorInterfaces)
+  //
+  //       setState(state => ({...state, loading: state.loading + 1}));
+  //       console.log(res.indicatorInterfaces)
+  //     }
+  //   }).catch(e => {
+  //     reportErrorToBackend(e);
+  //     setState(state => ({...state, loading: false}));
+  //     navigate('/dashboard');
+  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+  //   });
+  //
+  // }, []);
 
   useEffect(() => {
     fetchOrganizations().then(res => {
@@ -30,9 +51,9 @@ export default function DataDashboard() {
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
-
-
   }, []);
+
+
 
   if (state.loading)
     return <Loading message={`Loading organizations...`}/>;
@@ -72,6 +93,17 @@ export default function DataDashboard() {
             setSelectedOrganizations(e.target.value);
           }}
         />
+        <Button
+          size="lg"
+          endDecorator={<>{">"}</>}
+          onClick={() =>{
+
+          }
+          }
+          loadingPosition="start"
+        >
+          Generate Visualization
+        </Button>
       </Container>
     </Container>
   );
