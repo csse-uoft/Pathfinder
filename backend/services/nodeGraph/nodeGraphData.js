@@ -12,7 +12,7 @@ const fetchNodeGraphDataHandler = async (req, res, next) => {
 };
 
 const fetchNodeGraphData = async (req, res) => {
-  let {organizations} = req.params;
+  let {organizations} = req.body();
   if (!organizations)
     organizations = []
   const nodes = {}
