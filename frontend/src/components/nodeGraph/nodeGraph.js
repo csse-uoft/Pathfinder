@@ -3,7 +3,11 @@ import cytoscape from 'cytoscape';
 import { Container, Button, TextField, Drawer, IconButton, Tabs, Tab, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { makeStyles } from "@mui/styles";
-import {fetchNodeGraphData} from "../../api/nodeGraphApi";
+import Dropdown from "../shared/fields/MultiSelectField";
+import { fetchNodeGraphData, fetchNodeGraphDataByOrganization } from "../../api/nodeGraphApi";
+import { fetchOrganizations } from "../../api/organizationApi";
+import { Loading } from "../shared";
+import { reportErrorToBackend } from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -37,6 +41,12 @@ const useStyles = makeStyles(() => ({
     marginTop: 16,
     minWidth: 120,
   },
+  dropdownContainer: {
+    position: 'absolute',
+    top: '40px',
+    left: '10px',
+    zIndex: 1000,
+  },
 }));
 
 function TabPanel(props) {
@@ -67,12 +77,18 @@ export default function NodeGraph() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedData, setSelectedData] = useState('basic');
   const [elements, setElements] = useState(null);
+  const [organizationInterfaces, setOrganizationInterfaces] = useState({});
+  const [state, setState] = useState({
+    loading: true
+  });
+  const [errors, setErrors] = useState({});
+  const [selectedOrganizations, setSelectedOrganizations] = useState([]);
 
   const nodeType2Color = {
     "cids:Organization": "#9eeb17",
     "cids:Indicator": "#eb7b17",
     "cids:Outcome": "#eb3a17",
-    "time:DateTimeInterval" : "#f0fa0b",
+    "time:DateTimeInterval": "#f0fa0b",
     "iso21972:Measure": "#06f920",
     "cids:Code": "#06f999",
     "cids:StakeholderOutcome": "#06f999",
@@ -88,29 +104,65 @@ export default function NodeGraph() {
   }
 
   const edgeType2Color = {
-    "cids:hasIndicator" : "#413f1a",
-    "cids:hasOutcome" : "#e74c1f",
+    "cids:hasIndicator": "#413f1a",
+    "cids:hasOutcome": "#e74c1f",
     "cids:hasIndicatorReport": "#dea522",
-    "cids:definedBy" : "#f3f018",
-    "cids:forOrganization" : "#c5f318",
-    "cids:forIndicator" : '#99f318',
+    "cids:definedBy": "#f3f018",
+    "cids:forOrganization": "#c5f318",
+    "cids:forIndicator": '#99f318',
     "cids:hasImpactModel": "#18f3a3",
     "cids:forOutcome": "#2d8e6b",
-    "cids:hasCode" :"#1bf7d3",
+    "cids:hasCode": "#1bf7d3",
     "cids:forTheme": "#1bccf7",
     "iso21972:value": "#246fb2",
     "dcat:dataset": "#a497f6",
     "cids:hasImpactReport": "#c197f6",
     "cids:hasStakeholderOutcome": "#480997"
   }
+
+
+
+  // useEffect(() => {
+  //   fetchNodeGraphData().then(({elements}) => {
+  //     const {nodes, edges} = elements
+  //     nodes.map(node => node['data']['color'] = nodeType2Color[node.data.type] || '#df1087')
+  //     edges.map(edge => edge.data.color = edgeType2Color[edge.data.label] || '#df1087')
+  //     setElements({nodes, edges})
+  //   })
+  // }, [])
+
+
   useEffect(() => {
-    fetchNodeGraphData().then(({elements}) => {
-      const {nodes, edges} = elements
-      nodes.map(node => node['data']['color'] = nodeType2Color[node.data.type] || '#df1087')
-      edges.map(edge => edge.data.color = edgeType2Color[edge.data.label] || '#df1087')
-      setElements({nodes, edges})
-    })
-  }, [])
+    if (selectedOrganizations.length > 0) {
+      console.log("Fetching data for selected organizations:", selectedOrganizations);
+      fetchNodeGraphDataByOrganization(selectedOrganizations).then(({ elements }) => {
+        const { nodes, edges } = elements;
+        nodes.forEach(node => node['data']['color'] = nodeType2Color[node.data.type] || '#df1087');
+        edges.forEach(edge => edge.data.color = edgeType2Color[edge.data.label] || '#df1087');
+        setElements({ nodes, edges });
+      }).catch(e => {
+        reportErrorToBackend(e);
+      });
+    } else {
+      setElements({ nodes: [], edges: [] });
+    }
+  }, [selectedOrganizations]);
+
+  useEffect(() => {
+    fetchOrganizations().then(res => {
+      if (res.success) {
+        const orgInterfaces = {};
+        res.organizations.forEach(organization => {
+          orgInterfaces[organization._uri] = organization.legalName;
+        });
+        setOrganizationInterfaces(orgInterfaces);
+        setState(state => ({ ...state, loading: false }));
+      }
+    }).catch(e => {
+      reportErrorToBackend(e);
+      setState(state => ({ ...state, loading: false }));
+    });
+  }, []);
 
   useEffect(() => {
     if (elements) {
@@ -145,8 +197,8 @@ export default function NodeGraph() {
               'curve-style': 'bezier',
               'label': 'data(label)',
               'font-size': '5px',
-              'text-rotation': 'autorotate', // Ensure text follows the edge
-              'text-margin-y': -7, // Position the label above the edge
+              'text-rotation': 'autorotate',
+              'text-margin-y': -7,
             }
           }
         ],
@@ -187,8 +239,6 @@ export default function NodeGraph() {
   };
 
   const handleDialogOpen = () => {
-    setNodes(cyRef.current.nodes().map(node => node.data()));
-    setEdges(cyRef.current.edges().map(edge => edge.data()));
     setDialogOpen(true);
   };
 
@@ -232,6 +282,21 @@ export default function NodeGraph() {
   return (
     <div className={classes.root}>
       <div id="cy" className={classes.cyContainer}></div>
+
+      <div className={classes.dropdownContainer}>
+        <Dropdown
+          chooseAll
+          key={'organizations'}
+          label={'Organizations'}
+          value={selectedOrganizations}
+          options={organizationInterfaces}
+          error={!!errors.organizations}
+          helperText={errors.organizations}
+          onChange={e => {
+            setSelectedOrganizations(e.target.value);
+          }}
+        />
+      </div>
       <Button variant="contained" color="primary" onClick={handleDialogOpen}>
         Select Data to Render
       </Button>
