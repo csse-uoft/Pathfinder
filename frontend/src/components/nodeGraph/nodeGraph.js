@@ -42,7 +42,7 @@ const useStyles = makeStyles(() => ({
     minWidth: 120,
   },
   dropdownContainer: {
-    position: 'absolute',
+    position: 'relative',
     top: '40px',
     left: '10px',
     zIndex: 1000,
