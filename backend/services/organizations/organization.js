@@ -254,8 +254,8 @@ async function updateOrganization(req, res) {
     throw new Server400Error('Id is needed');
   if (!form)
     throw new Server400Error('Form and outcomeForm are needed');
-  if (!form.administrator)
-    throw new Server400Error('Form must contain the administrator');
+  // if (!form.administrator)
+  //   throw new Server400Error('Form must contain the administrator');
 
   const organization = await GDBOrganizationModel.findOne({_uri: uri},
     {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors', 'telephone']});

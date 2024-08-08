@@ -33,7 +33,7 @@ async function indicatorBuilder(environment, object, organization, error, {
   // } else if (environment === 'interface') {
   //   mainObject = await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
   // }
-  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : await mainModel.findOne({_uri: form.uri})|| mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : (form.uri? await mainModel.findOne({_uri: form.uri}) : mainModel({}, {uri: form.uri}));
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;

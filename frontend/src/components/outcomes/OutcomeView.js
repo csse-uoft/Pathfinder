@@ -147,10 +147,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
     {
       label: ' ',
-      body: ({_uri}) => {
-        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
-                             hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
-                             handleDelete={() => showDeleteDialog(_uri)}/>;
+      body: (obj) => {
+        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(obj?._uri || obj)} hideDeleteOption
+                             hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(obj?._uri || obj)}
+                             handleDelete={() => showDeleteDialog(obj?._uri || obj)}/>;
       }
     }
   ];
@@ -184,10 +184,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
     {
       label: ' ',
-      body: ({_uri}) => {
-        return  <DropdownMenu urlPrefix={'stakeholderOutcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+      body: (uri) => {
+        return  <DropdownMenu urlPrefix={'stakeholderOutcome'} objectUri={encodeURIComponent(uri)} hideEditOption={!state.editable}
                               hideDeleteOption
-                              handleDelete={() => showDeleteDialog(_uri)}/>
+                              handleDelete={() => showDeleteDialog(uri)}/>
       }
 
     }
@@ -203,10 +203,10 @@ export default function OutcomeView({multi, single, organizationUser, groupUser,
 
     {
       label: ' ',
-      body: ({_uri}) => {
-        return  <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable}
+      body: (uri) => {
+        return  <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(uri)} hideEditOption={!state.editable}
                               hideDeleteOption
-                              handleDelete={() => showDeleteDialog(_uri)}/>
+                              handleDelete={() => showDeleteDialog(uri)}/>
       }
 
     }
