@@ -42,10 +42,14 @@ const useStyles = makeStyles(() => ({
     minWidth: 120,
   },
   dropdownContainer: {
-    position: 'relative',
+    position: 'fixed',
     top: '40px',
     left: '10px',
     zIndex: 1000,
+    backgroundColor: 'white',
+    padding: '10px',
+    borderRadius: '5px',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
   },
 }));
 
