@@ -5,5 +5,5 @@ export async function fetchNodeGraphData() {
 }
 
 export async function fetchNodeGraphDataByOrganization(organizations) {
-  return postJson('/api/nodeGraph/', { organizations });
+  return postJson('/api/nodeGraph/', {organizations});
 }
