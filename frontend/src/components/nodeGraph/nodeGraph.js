@@ -87,6 +87,7 @@ export default function NodeGraph() {
   });
   const [errors, setErrors] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
+  const [nodeColors, setNodeColors] = useState({});
 
   const nodeType2Color = {
     "cids:Organization": "#9eeb17",
@@ -124,25 +125,17 @@ export default function NodeGraph() {
     "cids:hasStakeholderOutcome": "#480997"
   }
 
-
-
-  // useEffect(() => {
-  //   fetchNodeGraphData().then(({elements}) => {
-  //     const {nodes, edges} = elements
-  //     nodes.map(node => node['data']['color'] = nodeType2Color[node.data.type] || '#df1087')
-  //     edges.map(edge => edge.data.color = edgeType2Color[edge.data.label] || '#df1087')
-  //     setElements({nodes, edges})
-  //   })
-  // }, [])
-
-
   useEffect(() => {
     if (selectedOrganizations.length > 0) {
-      console.log("Fetching data for selected organizations:", selectedOrganizations);
       fetchNodeGraphDataByOrganization(selectedOrganizations).then(({ elements }) => {
         const { nodes, edges } = elements;
-        nodes.forEach(node => node['data']['color'] = nodeType2Color[node.data.type] || '#df1087');
-        edges.forEach(edge => edge.data.color = edgeType2Color[edge.data.label] || '#df1087');
+        nodes.forEach(node => {
+          const manualColor = nodeColors[node.data.id];
+          node['data']['color'] = manualColor || nodeType2Color[node.data.type] || '#df1087';
+        });
+        edges.forEach(edge => {
+          edge.data.color = edgeType2Color[edge.data.label] || '#df1087';
+        });
         setElements({ nodes, edges });
       }).catch(e => {
         reportErrorToBackend(e);
@@ -150,7 +143,7 @@ export default function NodeGraph() {
     } else {
       setElements({ nodes: [], edges: [] });
     }
-  }, [selectedOrganizations]);
+  }, [selectedOrganizations, nodeColors]);
 
   useEffect(() => {
     fetchOrganizations().then(res => {
@@ -211,12 +204,18 @@ export default function NodeGraph() {
         }
       });
 
+
+      Object.keys(nodeColors).forEach(nodeId => {
+        cyRef.current.$(`#${nodeId}`).style('background-color', nodeColors[nodeId]);
+      });
+
       cyRef.current.on('tap', 'node', (evt) => {
         const node = evt.target;
         setSelectedNode(node.data());
         setNodeColor(node.style('background-color'));
         setDrawerOpen(true);
       });
+
       return () => {
         cyRef.current.destroy();
       };
@@ -229,8 +228,14 @@ export default function NodeGraph() {
 
   const updateNodeColor = () => {
     if (selectedNode) {
-      const node = cyRef.current.getElementById(selectedNode.id);
-      node.style('background-color', nodeColor);
+      const sameTypeNodes = cyRef.current.nodes(`[type = "${selectedNode.type}"]`);
+      sameTypeNodes.forEach(node => {
+        node.style('background-color', nodeColor);
+        setNodeColors(prev => ({
+          ...prev,
+          [node.id()]: nodeColor
+        }));
+      });
     }
   };
 
