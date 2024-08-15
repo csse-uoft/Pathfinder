@@ -54,7 +54,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
         console.error(e.json);
       reportErrorToBackend(e);
       enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
-    })
+    });
   }, [organizationInterfaces]);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
       fetchDataTypes('organization').then(res => {
         if (res.success)
           setState(state => ({...state, loading: false, data: res.organizations}));
-        console.log(res.organizations)
+        console.log(res.organizations);
       }).catch(e => {
         reportErrorToBackend(e);
         setState(state => ({...state, loading: false}));
@@ -92,7 +92,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
   };
 
   const handleDelete = async (uri, form) => {
-    console.log(uri)
+    console.log(uri);
 
     deleteDataType('organization', uri, true).then(({success, message}) => {
       if (success) {
@@ -147,7 +147,8 @@ export default function OrganizationView({organizationUser, groupUser, superUser
       label: ' ',
       body: ({_uri}) => {
         if (multi)
-          return <DropdownMenu urlPrefix={'organization'} objectUri={encodeURIComponent(_uri)} hideDeleteOption={!userContext.isSuperuser}
+          return <DropdownMenu urlPrefix={'organization'} objectUri={encodeURIComponent(_uri)}
+                               hideDeleteOption={!userContext.isSuperuser}
                                hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>;
         if (single)
           return null;
@@ -179,7 +180,8 @@ export default function OrganizationView({organizationUser, groupUser, superUser
                 variant="outlined"/> : null}
             <DropdownFilter selectedOrganizations={selectedOrganizations}
                             areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
-                            organizationInterfaces
+                            organizationInterfaces={organizationInterfaces}
+                            setSelectedOrganizations={setSelectedOrganizations}
                             handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
                             handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
                             handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
