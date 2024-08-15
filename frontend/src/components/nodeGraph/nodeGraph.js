@@ -4,9 +4,8 @@ import { Container, Button, TextField, Drawer, IconButton, Tabs, Tab, Box, Typog
 import CloseIcon from '@mui/icons-material/Close';
 import { makeStyles } from "@mui/styles";
 import Dropdown from "../shared/fields/MultiSelectField";
-import { fetchNodeGraphData, fetchNodeGraphDataByOrganization } from "../../api/nodeGraphApi";
+import { fetchNodeGraphDataByOrganization } from "../../api/nodeGraphApi";
 import { fetchOrganizations } from "../../api/organizationApi";
-import { Loading } from "../shared";
 import { reportErrorToBackend } from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
@@ -50,7 +49,13 @@ const useStyles = makeStyles(() => ({
     padding: '10px',
     borderRadius: '5px',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    display: 'flex', // New: Arrange elements in a row
+    alignItems: 'center', // New: Align items vertically in the center
   },
+  colorPicker: {
+    minWidth: 60,
+    marginTop: 24,
+  }
 }));
 
 function TabPanel(props) {
@@ -88,6 +93,9 @@ export default function NodeGraph() {
   const [errors, setErrors] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
   const [nodeColors, setNodeColors] = useState({});
+  const [nodeTypes, setNodeTypes] = useState([]); // New state for node types
+  const [selectedNodeType, setSelectedNodeType] = useState(''); // New state for selected node type
+  const [selectedTypeColor, setSelectedTypeColor] = useState('#666'); // New state for selected type color
 
   const nodeType2Color = {
     "cids:Organization": "#9eeb17",
@@ -129,6 +137,11 @@ export default function NodeGraph() {
     if (selectedOrganizations.length > 0) {
       fetchNodeGraphDataByOrganization(selectedOrganizations).then(({ elements }) => {
         const { nodes, edges } = elements;
+
+        // Collect unique node types
+        const types = [...new Set(nodes.map(node => node.data.type))];
+        setNodeTypes(types);
+
         nodes.forEach(node => {
           const manualColor = nodeColors[node.data.id];
           node['data']['color'] = manualColor || nodeType2Color[node.data.type] || '#df1087';
@@ -227,7 +240,16 @@ export default function NodeGraph() {
   };
 
   const updateNodeColor = () => {
-    if (selectedNode) {
+    if (selectedNodeType) {
+      const sameTypeNodes = cyRef.current.nodes(`[type = "${selectedNodeType}"]`);
+      sameTypeNodes.forEach(node => {
+        node.style('background-color', selectedTypeColor);
+        setNodeColors(prev => ({
+          ...prev,
+          [node.id()]: selectedTypeColor
+        }));
+      });
+    } else if (selectedNode) {
       const sameTypeNodes = cyRef.current.nodes(`[type = "${selectedNode.type}"]`);
       sameTypeNodes.forEach(node => {
         node.style('background-color', nodeColor);
@@ -305,6 +327,30 @@ export default function NodeGraph() {
             setSelectedOrganizations(e.target.value);
           }}
         />
+        <FormControl className={classes.formControl}>
+          <InputLabel id="type-select-label">Node Type</InputLabel>
+          <Select
+            labelId="type-select-label"
+            value={selectedNodeType}
+            onChange={e => setSelectedNodeType(e.target.value)}
+          >
+            {nodeTypes.map(type => (
+              <MenuItem key={type} value={type}>{type}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          label="Color"
+          type="color"
+          value={selectedTypeColor}
+          onChange={(e) => setSelectedTypeColor(e.target.value)}
+          className={classes.colorPicker} // Assuming you have a style for color picker
+          margin="normal"
+        />
+        <Button variant="contained" color="primary" onClick={updateNodeColor} className={classes.button}>
+          Update Type Color
+        </Button>
       </div>
       <Button variant="contained" color="primary" onClick={handleDialogOpen}>
         Select Data to Render
