@@ -12,6 +12,10 @@ export async function fetchOrganizationsBasedOnGroup(groupUri) {
   return getJson('/api/organizations/' + groupUri);
 }
 
+export async function fetchUngroupedOrganization() {
+  return getJson('/api/organizations/ungrouped');
+}
+
 export async function fetchOrganizationsGivenOrganizationAdmin(adminURI) {
   return getJson('/api/organizations/orgAdmin/' + adminURI);
 }
