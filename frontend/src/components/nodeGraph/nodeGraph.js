@@ -180,7 +180,6 @@ export default function NodeGraph() {
   const classes = useStyles();
   const cyRef = useRef(null);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [nodeColor, setNodeColor] = useState('#666');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -313,16 +312,6 @@ export default function NodeGraph() {
         }
       });
 
-      Object.keys(nodeColors).forEach(nodeId => {
-        cyRef.current.$(`#${nodeId}`).style('background-color', nodeColors[nodeId]);
-      });
-
-      cyRef.current.on('tap', 'node', (evt) => {
-        const node = evt.target;
-        setSelectedNode(node.data());
-        setNodeColor(node.style('background-color'));
-        setDrawerOpen(true);
-      });
 
       return () => {
         cyRef.current.destroy();
@@ -348,17 +337,18 @@ export default function NodeGraph() {
 
   const handleUpdateColor = () => {
     if (selectedNodeType) {
-      const sameTypeNodes = cyRef.current.nodes(`[type = "${selectedNodeType}"]`);
-      sameTypeNodes.forEach(node => {
-        node.style('background-color', selectedTypeColor);
-        setNodeColors(prev => ({
-          ...prev,
-          [node.id()]: selectedTypeColor
-        }));
+      cyRef.current.batch(() => {
+        const sameTypeNodes = cyRef.current.nodes(`[type = "${selectedNodeType}"]`);
+        sameTypeNodes.forEach(node => {
+          node.style('background-color', selectedTypeColor);
+
+          node.data('color', selectedTypeColor);
+        });
       });
     }
     handleDialogClose();
   };
+  
 
   const handleClose = () => {
     setDrawerOpen(false);
