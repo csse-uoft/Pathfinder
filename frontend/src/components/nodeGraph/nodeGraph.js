@@ -8,6 +8,7 @@ import { fetchNodeGraphDataByOrganization } from "../../api/nodeGraphApi";
 import { fetchOrganizations } from "../../api/organizationApi";
 import { reportErrorToBackend } from "../../api/errorReportApi";
 
+// Custom styles
 const useStyles = makeStyles(() => ({
   root: {
     width: '100vw',
@@ -49,8 +50,8 @@ const useStyles = makeStyles(() => ({
     padding: '10px',
     borderRadius: '5px',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-    display: 'flex', // New: Arrange elements in a row
-    alignItems: 'center', // New: Align items vertically in the center
+    display: 'flex',
+    alignItems: 'center',
   },
   colorPicker: {
     minWidth: 60,
@@ -58,6 +59,50 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
+// NodeTypeSelector Component
+function NodeTypeSelector({ nodeTypes, selectedNodeType, handleNodeTypeChange }) {
+  return (
+    <FormControl fullWidth margin="normal">
+      <InputLabel id="type-select-label">Node Type</InputLabel>
+      <Select
+        labelId="type-select-label"
+        value={selectedNodeType}
+        onChange={handleNodeTypeChange}
+      >
+        {nodeTypes.map(type => (
+          <MenuItem key={type} value={type}>{type}</MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+}
+
+// NodeColorPicker Component
+function NodeColorPicker({ selectedTypeColor, handleColorChange }) {
+  return (
+    <TextField
+      label="Color"
+      type="color"
+      value={selectedTypeColor}
+      onChange={handleColorChange}
+      fullWidth
+      margin="normal"
+    />
+  );
+}
+
+// DialogActionsModule Component
+function DialogActionsModule({ handleUpdateColor }) {
+  return (
+    <DialogActions>
+      <Button variant="contained" color="primary" onClick={handleUpdateColor}>
+        Update 
+      </Button>
+    </DialogActions>
+  );
+}
+
+// TabPanel Component
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -76,6 +121,61 @@ function TabPanel(props) {
   );
 }
 
+// Empty Module 1: NodeShapeSelector
+function NodeShapeSelector() {
+  return (
+    <TextField
+      label="Shape"
+    />
+  );
+}
+
+// Empty Module 2: NodeSizeSelector
+function NodeSizeSelector() {
+  return (
+    <TextField
+      label="Size"
+    />
+  );
+}
+
+// Empty Module 3: NodeLabelEditor
+function NodeLabelEditor() {
+  return (
+    <TextField
+      label="Label"
+    />
+  );
+}
+
+// Empty Module 4: EdgeStyleEditor
+function EdgeStyleEditor() {
+  return (
+    <TextField
+    label="Edge"
+  />
+  );
+}
+
+// Empty Module 5: LayoutSelector
+function LayoutSelector() {
+  return (
+    <TextField
+    label="Layout"
+  />
+  );
+}
+
+// Empty Module 6: DataImportExport
+function DataImportExport() {
+  return (
+    <TextField
+    label="Import"
+  />
+  );
+}
+
+// Main NodeGraph Component
 export default function NodeGraph() {
   const classes = useStyles();
   const cyRef = useRef(null);
@@ -87,9 +187,7 @@ export default function NodeGraph() {
   const [selectedData, setSelectedData] = useState('basic');
   const [elements, setElements] = useState(null);
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
-  const [state, setState] = useState({
-    loading: true
-  });
+  const [state, setState] = useState({ loading: true });
   const [errors, setErrors] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
   const [nodeColors, setNodeColors] = useState({});
@@ -114,7 +212,7 @@ export default function NodeGraph() {
     "cids:ImpactReport": "#2e0e26",
     "cids:Counterfactual": "#ebcc1e",
     "cids:ImpactNorms": "#e0a19b"
-  }
+  };
 
   const edgeType2Color = {
     "cids:hasIndicator": "#413f1a",
@@ -131,14 +229,12 @@ export default function NodeGraph() {
     "dcat:dataset": "#a497f6",
     "cids:hasImpactReport": "#c197f6",
     "cids:hasStakeholderOutcome": "#480997"
-  }
+  };
 
   useEffect(() => {
     if (selectedOrganizations.length > 0) {
       fetchNodeGraphDataByOrganization(selectedOrganizations).then(({ elements }) => {
         const { nodes, edges } = elements;
-
-        // Collect unique node types
         const types = [...new Set(nodes.map(node => node.data.type))];
         setNodeTypes(types);
 
@@ -217,7 +313,6 @@ export default function NodeGraph() {
         }
       });
 
-
       Object.keys(nodeColors).forEach(nodeId => {
         cyRef.current.$(`#${nodeId}`).style('background-color', nodeColors[nodeId]);
       });
@@ -235,11 +330,23 @@ export default function NodeGraph() {
     }
   }, [elements]);
 
-  const handleColorChange = (event) => {
-    setNodeColor(event.target.value);
+  const handleDialogOpen = () => {
+    setDialogOpen(true);
   };
 
-  const updateNodeColor = () => {
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handleNodeTypeChange = (event) => {
+    setSelectedNodeType(event.target.value);
+  };
+
+  const handleColorChange = (event) => {
+    setSelectedTypeColor(event.target.value);
+  };
+
+  const handleUpdateColor = () => {
     if (selectedNodeType) {
       const sameTypeNodes = cyRef.current.nodes(`[type = "${selectedNodeType}"]`);
       sameTypeNodes.forEach(node => {
@@ -249,16 +356,8 @@ export default function NodeGraph() {
           [node.id()]: selectedTypeColor
         }));
       });
-    } else if (selectedNode) {
-      const sameTypeNodes = cyRef.current.nodes(`[type = "${selectedNode.type}"]`);
-      sameTypeNodes.forEach(node => {
-        node.style('background-color', nodeColor);
-        setNodeColors(prev => ({
-          ...prev,
-          [node.id()]: nodeColor
-        }));
-      });
     }
+    handleDialogClose();
   };
 
   const handleClose = () => {
@@ -269,30 +368,6 @@ export default function NodeGraph() {
     setTabValue(newValue);
   };
 
-  const handleDialogOpen = () => {
-    setDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const handleDataChange = (event) => {
-    setSelectedData(event.target.value);
-  };
-
-  const renderSelectedData = () => {
-    if (selectedData === 'all') {
-      cyRef.current.nodes().style('display', 'element');
-      cyRef.current.edges().style('display', 'element');
-    } else {
-      cyRef.current.nodes().style('display', 'none');
-      cyRef.current.edges().style('display', 'none');
-      cyRef.current.getElementById(selectedData).style('display', 'element');
-      cyRef.current.edges(`[source = "${selectedData}"], [target = "${selectedData}"]`).style('display', 'element');
-      cyRef.current.nodes(`[id = "${selectedData}"]`).neighborhood().nodes().style('display', 'element');
-    }
-  };
 
   const getRelationships = () => {
     if (!selectedNode) return null;
@@ -318,7 +393,7 @@ export default function NodeGraph() {
         <Dropdown
           chooseAll
           key={'organizations'}
-          label={'Organizations'}
+          label={'Data Filter'}
           value={selectedOrganizations}
           options={organizationInterfaces}
           error={!!errors.organizations}
@@ -327,56 +402,32 @@ export default function NodeGraph() {
             setSelectedOrganizations(e.target.value);
           }}
         />
-        <FormControl className={classes.formControl}>
-          <InputLabel id="type-select-label">Node Type</InputLabel>
-          <Select
-            labelId="type-select-label"
-            value={selectedNodeType}
-            onChange={e => setSelectedNodeType(e.target.value)}
-          >
-            {nodeTypes.map(type => (
-              <MenuItem key={type} value={type}>{type}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <TextField
-          label="Color"
-          type="color"
-          value={selectedTypeColor}
-          onChange={(e) => setSelectedTypeColor(e.target.value)}
-          className={classes.colorPicker} // Assuming you have a style for color picker
-          margin="normal"
-        />
-        <Button variant="contained" color="primary" onClick={updateNodeColor} className={classes.button}>
-          Update Type Color
-        </Button>
       </div>
       <Button variant="contained" color="primary" onClick={handleDialogOpen}>
-        Select Data to Render
+        Modify Node Style
       </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>Select Data</DialogTitle>
+        <DialogTitle>Select Node Type</DialogTitle>
         <DialogContent>
-          <FormControl className={classes.formControl}>
-            <InputLabel id="data-select-label">Node</InputLabel>
-            <Select
-              labelId="data-select-label"
-              value={selectedData}
-              onChange={handleDataChange}
-            >
-              <MenuItem value="all">All</MenuItem>
-              {elements?.nodes?.map(node => (
-                <MenuItem key={node.id} value={node.id}>{node.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <NodeTypeSelector
+            nodeTypes={nodeTypes}
+            selectedNodeType={selectedNodeType}
+            handleNodeTypeChange={handleNodeTypeChange}
+          />
+          <NodeColorPicker
+            selectedTypeColor={selectedTypeColor}
+            handleColorChange={handleColorChange}
+          />
+
+              {/* Future Expansion: Empty modules added for potential future functionalities */}
+              <NodeShapeSelector />
+              <NodeSizeSelector />
+              <NodeLabelEditor />
+              <EdgeStyleEditor />
+              <LayoutSelector />
+              <DataImportExport />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => { renderSelectedData(); handleDialogClose(); }} color="primary">
-            OK
-          </Button>
-        </DialogActions>
+        <DialogActionsModule handleUpdateColor={handleUpdateColor} />
       </Dialog>
       <Drawer
         anchor="right"
@@ -410,7 +461,7 @@ export default function NodeGraph() {
                     fullWidth
                     margin="normal"
                   />
-                  <Button variant="contained" color="primary" onClick={updateNodeColor} className={classes.button}>
+                  <Button variant="contained" color="primary" onClick={handleUpdateColor} className={classes.button}>
                     Update Color
                   </Button>
                 </>
@@ -429,6 +480,7 @@ export default function NodeGraph() {
           )}
         </div>
       </Drawer>
+
     </div>
   );
 }
