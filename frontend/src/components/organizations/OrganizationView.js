@@ -163,7 +163,7 @@ export default function OrganizationView({organizationUser, groupUser, superUser
 
   return (
     <Container>
-      <Typography variant={'h2'}> Organization Class View </Typography>
+      <Typography variant={'h2'}> Organizations </Typography>
       <DataTable
         title={multi ? "Organizations" : "Organization"}
         data={state.data.filter(org => selectedOrganizations?.includes(org._uri))}
