@@ -96,9 +96,10 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
     {
       label: 'Theme URI',
       body: ({_uri}) => {
-        return <Link colorWithHover to={`/theme/${encodeURIComponent(_uri)}/view`}>
-          {_uri}
-        </Link>
+        // return <Link colorWithHover to={`/theme/${encodeURIComponent(_uri)}/view`}>
+        //   {_uri}
+        // </Link>
+        return _uri
       },
       sortBy: ({legalName}) => legalName
     },
