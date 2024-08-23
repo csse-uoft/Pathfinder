@@ -260,13 +260,6 @@ export default function NodeGraph() {
     "cids:hasStakeholderOutcome": "#480997"
   };
 
-  useEffect(() => {
-    if (!selectedOrganizations.length) {
-      setNodeTypes([]);
-      setVisibleDataTypes([])
-    }
-
-  }, [selectedOrganizations])
 
   useEffect(() => {
     if (selectedOrganizations.length > 0) {
@@ -289,6 +282,8 @@ export default function NodeGraph() {
       });
     } else {
       setElements({ nodes: [], edges: [] });
+      setNodeTypes([]);
+      setVisibleDataTypes([])
     }
   }, [selectedOrganizations]);
 
