@@ -37,5 +37,6 @@ module.exports = {
   datasetRoute: require('./dataset'),
   datasetsRoute: require('./datasets'),
   dataExportRoute: require('./dataExport'),
-  nodeGraphRoute: require('./nodeGraph')
+  nodeGraphRoute: require('./nodeGraph'),
+  dataDashboardRoute: require('./dataDashboard'),
 }

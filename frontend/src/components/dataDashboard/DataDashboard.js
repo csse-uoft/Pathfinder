@@ -4,38 +4,21 @@ import React, { useRef, useEffect, useState } from 'react';
 import {fetchOrganizations} from "../../api/organizationApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {Loading} from "../shared";
-import {fetchIndicatorInterfaces} from "../../api/indicatorApi";
+import {fetchOrganizationsData} from "../../api/dataDashboardApi";
+import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar } from 'recharts';
 
 
 export default function DataDashboard() {
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
+  const [objectsCount, setObjectsCount] = useState([]);
+  const [theme2OutcomesCount, setTheme2OutcomesCount] = useState([])
   const [state, setState] = useState({
     loading: true
   });
   const [errors, setErrors] = useState(
     {}
   );
-
-  // const [selectedIndicators, setSelectedIndicators] = useState([])
-  // const[indicatorInterfaces, setIndicatorInterfaces] = useState({})
-
-  // useEffect(() => {
-  //   fetchIndicatorInterfaces().then(res => {
-  //     if (res.success)  {
-  //       setIndicatorInterfaces(res.indicatorInterfaces)
-  //
-  //       setState(state => ({...state, loading: state.loading + 1}));
-  //       console.log(res.indicatorInterfaces)
-  //     }
-  //   }).catch(e => {
-  //     reportErrorToBackend(e);
-  //     setState(state => ({...state, loading: false}));
-  //     navigate('/dashboard');
-  //     enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-  //   });
-  //
-  // }, []);
 
   useEffect(() => {
     fetchOrganizations().then(res => {
@@ -57,7 +40,6 @@ export default function DataDashboard() {
 
   if (state.loading)
     return <Loading message={`Loading organizations...`}/>;
-
   return (
     <Container maxWidth="md">
       <Container
@@ -77,7 +59,7 @@ export default function DataDashboard() {
             color: "#0b2f4e",
           }}
         >
-          Indicator Information
+          Data Dashboard
         </Typography>
         <Dropdown
           chooseAll
@@ -96,14 +78,53 @@ export default function DataDashboard() {
         <Button
           size="lg"
           endDecorator={<>{">"}</>}
-          onClick={() =>{
-
+          onClick={async () => {
+            if (selectedOrganizations && selectedOrganizations.length) {
+              const {objectsCount, theme2OutcomesCount} = await fetchOrganizationsData(selectedOrganizations);
+              objectsCount.map(organization => organization.organization = organizationInterfaces[organization.organization])
+              setObjectsCount(objectsCount)
+              setTheme2OutcomesCount(theme2OutcomesCount)
+            }
           }
           }
           loadingPosition="start"
         >
           Generate Visualization
         </Button>
+      </Container>
+      <Container
+        sx={{
+        width: "100%",
+        justifyContent: "center",
+        marginTop: "20px",
+      }}>
+        {
+        objectsCount && objectsCount.length?
+          <div>
+            <h3>Objects Count</h3>
+            <BarChart width={750} height={250} data={objectsCount}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="organization"/>
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="objectsCount" fill="#82ca9d" />
+          </BarChart></div> : null
+      }
+
+        {theme2OutcomesCount && theme2OutcomesCount.length?
+          <div>
+            <h3>Outcome Counts for Themes</h3>
+            <BarChart width={750} height={250} data={theme2OutcomesCount}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="theme" tick={false} />
+              <YAxis />
+              <Tooltip/>
+              <Bar dataKey="Outcomes" fill="#82ca9d" />
+            </BarChart>
+          </div>
+           : null
+        }
+
       </Container>
     </Container>
   );

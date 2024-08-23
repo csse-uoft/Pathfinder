@@ -261,6 +261,14 @@ export default function NodeGraph() {
   };
 
   useEffect(() => {
+    if (!selectedOrganizations.length) {
+      setNodeTypes([]);
+      setVisibleDataTypes([])
+    }
+
+  }, [selectedOrganizations])
+
+  useEffect(() => {
     if (selectedOrganizations.length > 0) {
       fetchNodeGraphDataByOrganization(selectedOrganizations).then(({ elements }) => {
         const { nodes, edges } = elements;
