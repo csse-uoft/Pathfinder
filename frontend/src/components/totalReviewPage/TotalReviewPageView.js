@@ -429,7 +429,7 @@ export default function totalReviewPageView({multi, single, organizationUser, gr
   ];
 
   if (state.loading)
-    return <Loading message={`Loading outcomes...`}/>;
+    return <Loading message={`Loading...`}/>;
 
   return (
     <Container>
