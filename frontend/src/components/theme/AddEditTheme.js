@@ -14,6 +14,8 @@ import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
+import Dropdown from "../shared/fields/MultiSelectField";
+import {fetchCodesInterfaces} from "../../api/codeAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -51,9 +53,20 @@ export default function AddEditTheme() {
   const [form, setForm] = useState({
     name: '',
     uri: '',
-    description: ''
+    description: '',
+    codes:[]
   });
   const [loading, setLoading] = useState(true);
+
+  const [codes, setCodes] = useState({})
+
+  useEffect(() => {
+    fetchCodesInterfaces().then(({success, interfaces}) => {
+      if (success) {
+        setCodes(interfaces);
+      }
+    })
+  }, [])
 
 
   useEffect(() => {
@@ -63,7 +76,8 @@ export default function AddEditTheme() {
           setForm({
             name: res.theme.name,
             description: res.theme.description,
-            uri: res.theme._uri
+            uri: res.theme._uri,
+            codes: res.theme.codes
           });
           setLoading(false);
         }
@@ -185,6 +199,20 @@ export default function AddEditTheme() {
           onBlur={validateURI(form, setErrors)}
         />
 
+        <Dropdown
+          label="Codes"
+          options={codes}
+          value={form.codes}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={(e) => {
+            setForm(state => ({...state, codes: e.target.value}));
+          }
+          }
+          required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
+          onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+
+        />
+
         <GeneralField
           disabled={operationMode === 'view'}
           key={'description'}
@@ -199,6 +227,8 @@ export default function AddEditTheme() {
           minRows={4}
           onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
         />
+
+
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit
         </Button>

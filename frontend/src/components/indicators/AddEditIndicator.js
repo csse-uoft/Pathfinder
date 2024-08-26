@@ -164,7 +164,7 @@ export default function AddEditIndicator() {
       createDataType('indicator', {form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/organization-indicators');
+          navigate('/indicators');
           enqueueSnackbar(ret.message || 'Success', {variant: "success"});
         }
       }).catch(e => {

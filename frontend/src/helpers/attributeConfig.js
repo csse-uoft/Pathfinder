@@ -77,7 +77,7 @@ const fullLevelConfig = {
   howMuchImpact: {},
 }
 
-const CONFIGLEVEL = 'baseLevelConfig' || 'fullLevelConfig';
+const CONFIGLEVEL =  'fullLevelConfig' || 'baseLevelConfig';
 
 module.exports = {
   baseLevelConfig, fullLevelConfig, CONFIGLEVEL
