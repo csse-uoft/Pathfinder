@@ -154,8 +154,6 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
   if (state.loading)
     return <Loading message={`Loading indicators...`}/>;
 
-  console.log(state.data)
-
   return (
     <Container>
       <Typography variant={'h2'}> Indicator Reports </Typography>
@@ -172,7 +170,8 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
                                     label="Add new Indicator Report"
                                     variant="outlined"/> : null}
                                 <DropdownFilter selectedOrganizations={selectedOrganizations}
-                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
+                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces={organizationInterfaces}
+                                                setSelectedOrganizations={setSelectedOrganizations}
                                                 handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
                                                 handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
                                                 handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}

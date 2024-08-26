@@ -25,6 +25,10 @@ async function hasAccess(req, operationType) {
   switch (operationType) {
     case 'reportFrontendError':
       return true;
+    case 'dataDashboard':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'dataExport':
       if (userAccount.isSuperuser)
         return true;

@@ -1,4 +1,5 @@
-import {fetchDataTypeInterfaces, fetchDataTypes} from "../api/generalAPI";
+import {fetchDataTypes} from "../api/generalAPI";
+import {fetchUngroupedOrganization} from "../api/organizationApi";
 
 export function handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations) {
 
@@ -89,9 +90,11 @@ export async function fetchOrganizationsWithGroups(setOrganizationsWithGroups, o
         }))
       };
     });
-    console.log(organizationsWithGroups);
     setOrganizationsWithGroups(organizationsWithGroups);
   }
+  const {organizations} = await fetchUngroupedOrganization();
+  setOrganizationsWithGroups(organizationsWithGroups => ([...organizationsWithGroups, {groupName: 'Ungrouped', organizations: organizations.map(organizationUri => ({_uri: organizationUri, legalName: organizationInterfaces?.[organizationUri]}))}]));
+
 }
 
 

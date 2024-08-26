@@ -3,38 +3,56 @@ import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {UserContext} from "../../context";
 import {Checkbox, FormControl, Input, MenuItem, MenuList, Select} from "@mui/material";
+import {fetchUngroupedOrganization} from "../../api/organizationApi";
 
-export default function DropdownFilter({areAllGroupOrgsSelected, selectedOrganizations, handleOrgClick, handleChange, handleGroupClick, handleSelectAllClick}) {
+export default function DropdownFilter({areAllGroupOrgsSelected, selectedOrganizations, handleOrgClick, handleChange, handleGroupClick, handleSelectAllClick, setSelectedOrganizations, organizationInterfaces}) {
 
-  const [organizationInterfaces, setOrganizationInterfaces] = useState({})
+  // const [organizationInterfaces, setOrganizationInterfaces] = useState(organizationInterfaces)
   const [organizationsWithGroups, setOrganizationsWithGroups] = useState([]);
 
-  useEffect(() => {
-    fetchDataTypeInterfaces('organization')
-      .then(({interfaces}) => {
-        setOrganizationInterfaces(interfaces)
-      }).catch(e => {
-      if (e.json)
-        console.error(e.json);
-      reportErrorToBackend(e);
-      enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
-    })
-  }, [])
+  // useEffect(() => {
+  //   fetchDataTypeInterfaces('organization')
+  //     .then(({interfaces}) => {
+  //       setOrganizationInterfaces(interfaces)
+  //     }).catch(e => {
+  //     if (e.json)
+  //       console.error(e.json);
+  //     reportErrorToBackend(e);
+  //     enqueueSnackbar(e.json?.message || "Error occurs when fetching organization Interfaces", {variant: 'error'});
+  //   })
+  // }, [])
 
   useEffect(() => {
+    let allOrganizations = []
     fetchDataTypes('group').then(({groups, success}) => {
       if (success) {
-        const organizationsWithGroups = groups?.map(groupObject => {
+        allOrganizations = groups?.map(groupObject => {
           return {
             groupName: groupObject.label,
             organizations: groupObject.organizations.map(organizationUri => ({_uri: organizationUri, legalName: organizationInterfaces?.[organizationUri]}))
           };
         });
-        console.log(organizationsWithGroups)
-        setOrganizationsWithGroups(organizationsWithGroups);
       }
+      return allOrganizations
+    }).then((allOrganizations) => {
+      fetchUngroupedOrganization().then(({organizations}) => {
+        allOrganizations = [...allOrganizations, {
+          groupName: 'Ungrouped',
+          organizations: organizations.map(organizationUri => ({
+            _uri: organizationUri,
+            legalName: organizationInterfaces?.[organizationUri]
+          }))
+        }];
+        setOrganizationsWithGroups(allOrganizations);
+        return allOrganizations
+      }).then((allOrganizations) => {
+        selectedOrganizations = ['']
+        allOrganizations.map(group => group?.organizations.map(organization => selectedOrganizations.push(organization._uri)))
+        setSelectedOrganizations(selectedOrganizations)
+      })
     });
   }, [organizationInterfaces]);
+
 
 
 

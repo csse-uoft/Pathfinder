@@ -4,6 +4,7 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {hasAccess} = require('../../helpers/hasAccess')
 const {GDBGroupModel} = require("../../models/group");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
+const {SPARQL, GraphDB} = require("graphdb-utils");
 
 const resource = "Organization"
 
@@ -29,7 +30,21 @@ const fetchOrganizationsInterfacesHandler = async (req, res, next) => {
 
 const fetchOrganizations = async (req, res) => {
   const {groupUri, orgAdminUri} = req.params
-  if (groupUri) {
+  if (groupUri === 'ungrouped') {
+    let query = `${SPARQL.getSPARQLPrefixes()} 
+     SELECT * WHERE {
+      ?organization rdf:type cids:Organization .
+      MINUS {
+        ?group rdf:type cidsrep:Group .
+        ?group cidsrep:hasOrganization ?organization .
+      }
+    }`;
+    const organizations = []
+    await GraphDB.sendSelectQuery(query, false, ({organization}) => {
+      organizations.push(organization.id);
+    });
+    return res.status(200).json({success: true, organizations})
+  } else if (groupUri) {
     // fetch organizations based on groupURI
     const group = await GDBGroupModel.findOne({_uri: groupUri}, {populates: ['organizations']});
     return res.status(200).json({success: true, organizations: group.organizations})

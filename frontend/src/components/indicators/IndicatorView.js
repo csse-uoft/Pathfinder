@@ -107,12 +107,10 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
   useEffect(() => {
     if (multi) {
       fetchDataTypesGivenListOfUris('indicator', '', selectedOrganizations, 'indicators').then(objectsDict => {
-        console.log(objectsDict);
         let indicators = [];
         for (let organization in objectsDict) {
           indicators = [...indicators, ...objectsDict[organization]];
         }
-        console.log(indicators);
         setState(state => ({...state, loading: false, data: indicators}));
       }).catch(e => {
         setState(state => ({...state, loading: false}));
@@ -173,7 +171,6 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
     {
       label: 'Indicator Baseline',
       body: ({baseline}) => {
-        console.log(baseline);
         return baseline?.numericalValue;
       }
     },
@@ -230,7 +227,7 @@ export default function IndicatorView({organizationUser, groupUser, superUser, m
                 variant="outlined"/> : null}
             {multi? <DropdownFilter selectedOrganizations={selectedOrganizations}
                              areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)}
-                             organizationInterfaces
+                             setSelectedOrganizations={setSelectedOrganizations} organizationInterfaces={organizationInterfaces}
                              handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
                              handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
                              handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}

@@ -23,6 +23,7 @@
     "react-redux": "^7.2.1",
     "react-router-dom": "^6.3.0",
     "react-star-rating-component": "^1.4.1",
+    "recharts": "^2.12.7",
     "redux": "^4.0.5"
   },
   "homepage": "https://csse-uoft.github.io/CommonApproachSandboxTesting",
