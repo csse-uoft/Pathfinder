@@ -86,7 +86,6 @@ export default function ImpactReportView({multi, single, organizationUser, super
     } else if (single) {
       fetchDataType('impactReport', encodeURIComponent(uri)).then(res => {
         if (res.success)
-          console.log(res);
         setState(state => ({...state, loading: false, data: [res.impactReport], editable: res.editable}));
       }).catch(e => {
         reportErrorToBackend(e);
@@ -102,12 +101,10 @@ export default function ImpactReportView({multi, single, organizationUser, super
   useEffect(() => {
     if (multi) {
       fetchDataTypesGivenListOfUris('impactReport', '', selectedOrganizations, 'impactReports').then(objectsDict => {
-        console.log(objectsDict);
         let impactReports = [];
         for (let organization in objectsDict) {
           impactReports = [...impactReports, ...objectsDict[organization]];
         }
-        console.log(impactReports);
         setState(state => ({...state, loading: false, data: impactReports}));
       }).catch(e => {
         setState(state => ({...state, loading: false}));
@@ -184,7 +181,8 @@ export default function ImpactReportView({multi, single, organizationUser, super
                                     label="Add new Impact Report"
                                     variant="outlined"/> : null}
                                 <DropdownFilter selectedOrganizations={selectedOrganizations}
-                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces
+                                                areAllGroupOrgsSelected={areAllGroupOrgsSelected(selectedOrganizations)} organizationInterfaces={organizationInterfaces}
+                                                setSelectedOrganizations={setSelectedOrganizations}
                                                 handleSelectAllClick={handleSelectAllClick(organizationsWithGroups, setSelectedOrganizations, selectedOrganizations)}
                                                 handleChange={handleChange(minSelectedLength, setSelectedOrganizations)}
                                                 handleGroupClick={handleGroupClick(areAllGroupOrgsSelected(selectedOrganizations), selectedOrganizations, setSelectedOrganizations)}
