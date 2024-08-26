@@ -253,7 +253,7 @@ export default function AddEditCharacteristic() {
             key={'codes'}
             value={form.codes}
             onChange={e => {
-              form.codes = e.target.value;
+              setForm(form => ({...form, codes: e.target.value}))
             }}
             options={options.codes}
             error={!!errors.codes}

@@ -8,7 +8,7 @@ import {
   FileUpload,
   Download,
   Summarize,
-  AccountTree
+  AccountTree, Leaderboard
 } from "@mui/icons-material";
 import {UserContext} from "../../context";
 import {NavButton} from "./NavButton";
@@ -107,6 +107,9 @@ function Dashboard() {
 
       <NavButton to={'/nodeGraph'} icon={<AccountTree/>} key={`nodeGraph`}
                  text="Node Graph"/>
+
+      <NavButton to={'/dataDashboard'} icon={<Leaderboard/>} key={`dataDashboard`}
+                 text="Data Dashboard"/>
 
 
 
