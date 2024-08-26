@@ -5,14 +5,16 @@ import {fetchOrganizations} from "../../api/organizationApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {Loading} from "../shared";
 import {fetchOrganizationsData} from "../../api/dataDashboardApi";
-import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar } from 'recharts';
+import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar,PieChart,Pie,Cell } from 'recharts';
 
 
 export default function DataDashboard() {
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
   const [objectsCount, setObjectsCount] = useState([]);
-  const [theme2OutcomesCount, setTheme2OutcomesCount] = useState([])
+  const [theme2OutcomesCount, setTheme2OutcomesCount] = useState([]);
+  const [organization2IndicatorCount, setOrganization2IndicatorCount] = useState([])
+  const COLORS = ['#82ca9d', '#8884d8', '#ffc658', '#ff7300'];
   const [state, setState] = useState({
     loading: true
   });
@@ -80,9 +82,10 @@ export default function DataDashboard() {
           endDecorator={<>{">"}</>}
           onClick={async () => {
             if (selectedOrganizations && selectedOrganizations.length) {
-              const {objectsCount, theme2OutcomesCount} = await fetchOrganizationsData(selectedOrganizations);
+              const {objectsCount, theme2OutcomesCount, organization2IndicatorCount} = await fetchOrganizationsData(selectedOrganizations);
               objectsCount.map(organization => organization.organization = organizationInterfaces[organization.organization])
               setObjectsCount(objectsCount)
+              setOrganization2IndicatorCount(organization2IndicatorCount)
               setTheme2OutcomesCount(theme2OutcomesCount)
             }
           }
@@ -124,6 +127,21 @@ export default function DataDashboard() {
           </div>
            : null
         }
+
+        {organization2IndicatorCount && organization2IndicatorCount.length?
+          <div>
+            <h3>Indicators Belong to Organizations</h3>
+            <PieChart width={730} height={250}>
+              <Pie data={organization2IndicatorCount} dataKey="Indicators" nameKey="organization" cx="50%" cy="50%" innerRadius={60} outerRadius={80}
+                   label={({ organization, Indicators }) => `${organization}: ${Indicators}`}  >
+                {organization2IndicatorCount.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+            </PieChart>
+          </div>
+        :null}
+
 
       </Container>
     </Container>

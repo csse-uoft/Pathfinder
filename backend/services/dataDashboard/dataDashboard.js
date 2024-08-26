@@ -53,14 +53,34 @@ cids:hasAccess)+ ?node .
     }
     theme2Outcomes[theme.id].add(outcome.id)
   })
-  console.log(theme2Outcomes)
 
   const theme2OutcomesCount = []
   for (let themeUri in theme2Outcomes){
     theme2OutcomesCount.push({theme: themeUri, Outcomes: theme2Outcomes[themeUri].size})
   }
 
-  return res.status(200).json({objectsCount, theme2OutcomesCount})
+  const organizations2Indicators = {}
+  query = `${SPARQL.getSPARQLPrefixes()} 
+  SELECT * WHERE {
+  ?organization cids:hasIndicator ?indicator .
+    ?organization rdf:type cids:Organization .
+    FILTER (?organization IN (${organizations.map(organization => `<${organization}>`).join(',')}))
+}`
+
+  await GraphDB.sendSelectQuery(query, false, ({organization, indicator}) => {
+    if (!organizations2Indicators[organization.id]) {
+      organizations2Indicators[organization.id] = new Set()
+    }
+    organizations2Indicators[organization.id].add(indicator.id)
+  })
+
+
+  const organization2IndicatorCount = []
+  Object.keys(organizations2Indicators).map(organization => {
+    return organization2IndicatorCount.push({organization, Indicators: organizations2Indicators[organization].size})
+  })
+
+  return res.status(200).json({objectsCount, theme2OutcomesCount, organization2IndicatorCount})
 
 
 }
