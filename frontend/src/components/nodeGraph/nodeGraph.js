@@ -1,13 +1,32 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import cytoscape from 'cytoscape';
-import { Container, Button, TextField, Drawer, IconButton, Tabs, Tab, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import {
+  Container,
+  Button,
+  TextField,
+  Drawer,
+  IconButton,
+  Tabs,
+  Tab,
+  Box,
+  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
+} from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import { makeStyles } from "@mui/styles";
+import {makeStyles} from "@mui/styles";
 import Dropdown from "../shared/fields/MultiSelectField";
-import { fetchNodeGraphDataByOrganization } from "../../api/nodeGraphApi";
-import { fetchOrganizations } from "../../api/organizationApi";
-import { reportErrorToBackend } from "../../api/errorReportApi";
+import {fetchNodeGraphDataByOrganization} from "../../api/nodeGraphApi";
+import {fetchOrganizations} from "../../api/organizationApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
+import RadioField from "../shared/fields/RadioField";
 
 // Custom styles
 const useStyles = makeStyles(() => ({
@@ -50,7 +69,7 @@ const useStyles = makeStyles(() => ({
     backgroundColor: 'white',
     padding: '10px',
     borderRadius: '5px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    // boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
     display: 'flex',
     alignItems: 'center',
   },
@@ -61,7 +80,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 // NodeTypeSelector Component
-function NodeTypeSelector({ nodeTypes, selectedNodeType, handleNodeTypeChange }) {
+function NodeTypeSelector({nodeTypes, selectedNodeType, handleNodeTypeChange}) {
   return (
     <FormControl fullWidth margin="normal">
       <InputLabel id="type-select-label">Node Type</InputLabel>
@@ -78,7 +97,7 @@ function NodeTypeSelector({ nodeTypes, selectedNodeType, handleNodeTypeChange })
   );
 }
 
-function EdgeTypeSelector({ edgeTypes, selectedEdgeType, handleEdgeTypeChange }) {
+function EdgeTypeSelector({edgeTypes, selectedEdgeType, handleEdgeTypeChange}) {
   return (
     <FormControl fullWidth margin="normal">
       <InputLabel id="type-select-label">Edge Type</InputLabel>
@@ -96,7 +115,7 @@ function EdgeTypeSelector({ edgeTypes, selectedEdgeType, handleEdgeTypeChange })
 }
 
 // NodeColorPicker Component
-function ColorPicker({ selectedTypeColor, handleColorChange }) {
+function ColorPicker({selectedTypeColor, handleColorChange}) {
   return (
     <TextField
       label="Color"
@@ -110,11 +129,11 @@ function ColorPicker({ selectedTypeColor, handleColorChange }) {
 }
 
 // DialogActionsModule Component
-function DialogActionsModule({ handleUpdateColor }) {
+function DialogActionsModule({handleUpdateColor}) {
   return (
     <DialogActions>
       <Button variant="contained" color="primary" onClick={handleUpdateColor}>
-        Update 
+        Update
       </Button>
     </DialogActions>
   );
@@ -122,7 +141,7 @@ function DialogActionsModule({ handleUpdateColor }) {
 
 // TabPanel Component
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const {children, value, index, ...other} = props;
 
   return (
     <div
@@ -170,8 +189,8 @@ function NodeLabelEditor() {
 function EdgeStyleEditor() {
   return (
     <TextField
-    label="Edge"
-  />
+      label="Edge"
+    />
   );
 }
 
@@ -179,8 +198,8 @@ function EdgeStyleEditor() {
 function LayoutSelector() {
   return (
     <TextField
-    label="Layout"
-  />
+      label="Layout"
+    />
   );
 }
 
@@ -188,8 +207,8 @@ function LayoutSelector() {
 function DataImportExport() {
   return (
     <TextField
-    label="Import"
-  />
+      label="Import"
+    />
   );
 }
 
@@ -204,16 +223,17 @@ export default function NodeGraph() {
   const [selectedData, setSelectedData] = useState('basic');
   const [elements, setElements] = useState(null);
   const [organizationInterfaces, setOrganizationInterfaces] = useState({});
-  const [state, setState] = useState({ loading: true });
+  const [state, setState] = useState({loading: true});
   const [errors, setErrors] = useState({});
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
   const [nodeTypes, setNodeTypes] = useState([]); // New state for node types
-  const [edgeTypes, setEdgeTypes] = useState([])
+  const [edgeTypes, setEdgeTypes] = useState([]);
   const [selectedNodeType, setSelectedNodeType] = useState(''); // New state for selected node type
   const [selectedEdgeType, setSelectedEdgeType] = useState(''); // New state for selected node type
   const [selectedNodeTypeColor, setSelectedNodeTypeColor] = useState('#666'); // New state for selected type color
   const [selectedEdgeTypeColor, setSelectedEdgeTypeColor] = useState('#666'); // New state for selected type color
-  const [visibleDataTypes, setVisibleDataTypes] = useState([])
+  const [themeAnchor, setThemeAnchor] = useState('organizationAnchor');
+  const [visibleDataTypes, setVisibleDataTypes] = useState([]);
   const {enqueueSnackbar} = useSnackbar();
 
   function rgbToHex(rgb) {
@@ -260,12 +280,28 @@ export default function NodeGraph() {
     "cids:hasStakeholderOutcome": "#480997"
   };
 
+  useEffect(() => {
+
+    if (cyRef.current?.layout) {
+      const roots = []
+      cyRef.current.nodes(`[type = "${themeAnchor === 'themeAnchor'? 'cids:Theme' : 'cids:Organization'}"]`).forEach(node => {
+        roots.push(node.id())
+      })
+      console.log(roots)
+      const layout = cyRef?.current?.layout({
+        name: 'breadthfirst',
+        roots: roots
+      });
+      layout.run();
+    }
+
+  }, [themeAnchor])
 
   useEffect(() => {
     if (selectedOrganizations.length > 0) {
-      fetchNodeGraphDataByOrganization(selectedOrganizations).then(({ elements }) => {
-        const { nodes, edges } = elements;
-        const nodeTypes = [...new Set(nodes.map(node => node.data.type))]
+      fetchNodeGraphDataByOrganization(selectedOrganizations).then(({elements}) => {
+        const {nodes, edges} = elements;
+        const nodeTypes = [...new Set(nodes.map(node => node.data.type))];
         setNodeTypes(nodeTypes);
         setVisibleDataTypes(Object.keys(nodeTypes));
         setEdgeTypes([...new Set(edges.map(edge => edge.data.label))]);
@@ -275,15 +311,15 @@ export default function NodeGraph() {
         edges.forEach(edge => {
           edge.data.color = edgeType2Color[edge.data.label] || '#df1087';
         });
-        setElements({ nodes, edges });
+        setElements({nodes, edges});
       }).catch(e => {
         reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else {
-      setElements({ nodes: [], edges: [] });
+      setElements({nodes: [], edges: []});
       setNodeTypes([]);
-      setVisibleDataTypes([])
+      setVisibleDataTypes([]);
     }
   }, [selectedOrganizations]);
 
@@ -295,17 +331,32 @@ export default function NodeGraph() {
           orgInterfaces[organization._uri] = organization.legalName;
         });
         setOrganizationInterfaces(orgInterfaces);
-        setState(state => ({ ...state, loading: false }));
+        setState(state => ({...state, loading: false}));
       }
     }).catch(e => {
       reportErrorToBackend(e);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-      setState(state => ({ ...state, loading: false }));
+      setState(state => ({...state, loading: false}));
     });
   }, []);
 
   useEffect(() => {
     if (elements) {
+      let roots = []
+      if (themeAnchor === 'themeAnchor') {
+        elements.nodes.map(node => {
+          if (node.data.type === 'cids:Theme') {
+            roots.push(node['data'].id)
+          }
+        })
+      } else {
+        elements.nodes.map(node => {
+          if (node.data.type === 'cids:Organization') {
+            roots.push(node['data'].id)
+          }
+        })
+      }
+      console.log(roots)
       cyRef.current = cytoscape({
         container: document.getElementById('cy'),
         elements: elements,
@@ -343,7 +394,8 @@ export default function NodeGraph() {
           }
         ],
         layout: {
-          name: 'cose'
+          name: 'breadthfirst',
+          roots: roots
         }
       });
 
@@ -363,16 +415,16 @@ export default function NodeGraph() {
   };
 
   const handleNodeTypeChange = (event) => {
-    const nodeType = event.target.value
+    const nodeType = event.target.value;
     setSelectedNodeType(nodeType);
     const node = cyRef.current.nodes(`[type = "${nodeType}"]`).eq(0);
-    setSelectedNodeTypeColor(rgbToHex(node.style('background-color')))
+    setSelectedNodeTypeColor(rgbToHex(node.style('background-color')));
   };
   const handleEdgeTypeChange = (event) => {
-    const edgeType = event.target.value
+    const edgeType = event.target.value;
     setSelectedEdgeType(edgeType);
     const edge = cyRef.current.edges(`[label = "${edgeType}"]`).eq(0);
-    setSelectedEdgeTypeColor(rgbToHex(edge.style('line-color')))
+    setSelectedEdgeTypeColor(rgbToHex(edge.style('line-color')));
   };
   const handleNodeColorChange = (event) => {
     setSelectedNodeTypeColor(event.target.value);
@@ -383,7 +435,6 @@ export default function NodeGraph() {
   };
 
 
-
   const handleUpdateNodeColor = () => {
     if (selectedNodeType) {
       cyRef.current.batch(() => {
@@ -392,8 +443,8 @@ export default function NodeGraph() {
           node.data('color', selectedNodeTypeColor);
         });
       });
-      setSelectedNodeType('')
-      setSelectedNodeTypeColor('#666')
+      setSelectedNodeType('');
+      setSelectedNodeTypeColor('#666');
     }
     if (selectedEdgeType) {
       cyRef.current.batch(() => {
@@ -402,12 +453,12 @@ export default function NodeGraph() {
           edge.data('color', selectedEdgeTypeColor);
         });
       });
-      setSelectedEdgeType('')
-      setSelectedNodeTypeColor('#666')
+      setSelectedEdgeType('');
+      setSelectedNodeTypeColor('#666');
     }
     handleDialogClose();
   };
-  
+
 
   const handleClose = () => {
     setDrawerOpen(false);
@@ -465,7 +516,8 @@ export default function NodeGraph() {
               node.style({
                 display: 'none'
               });
-            })
+            });
+            // cyRef.current.edges(`[label = "cids:forOrganization"]`).remove()
             e.target.value.map(index => {
               const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
               sameTypeNodes.forEach(node => {
@@ -473,15 +525,29 @@ export default function NodeGraph() {
                   display: 'element'
                 });
               });
-            })
+            });
+            // const layout = cyRef.current.layout({
+            //   name: 'breadthfirst',
+            // });
+            //
+            // layout.run();
+
           }}
         />
+        <RadioField value={themeAnchor}
+                    onChange={(e) => {setThemeAnchor(e.target.value)}}
+                    options={{'Theme Anchor': 'themeAnchor', 'Organization Anchor': 'organizationAnchor'}}
+                    row
+        >
+
+        </RadioField>
+
       </div>
       <Button variant="contained" color="primary" onClick={handleDialogOpen}>
         Modify Graph Appearance
       </Button>
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
-        <DialogContent style={{ minWidth: '500px' }}>
+        <DialogContent style={{minWidth: '500px'}}>
           <NodeTypeSelector
             nodeTypes={visibleDataTypes.map(index => nodeTypes[index])}
             selectedNodeType={selectedNodeType}
@@ -492,25 +558,25 @@ export default function NodeGraph() {
             handleColorChange={handleNodeColorChange}
           />
           <EdgeTypeSelector
-          edgeTypes={edgeTypes}
-          selectedEdgeType={selectedEdgeType}
-          handleEdgeTypeChange={handleEdgeTypeChange}
-        />
+            edgeTypes={edgeTypes}
+            selectedEdgeType={selectedEdgeType}
+            handleEdgeTypeChange={handleEdgeTypeChange}
+          />
 
           <ColorPicker
             selectedTypeColor={selectedEdgeTypeColor}
             handleColorChange={handleEdgeColorChange}
           />
 
-              {/* Future Expansion: Empty modules added for potential future functionalities */}
-              {/*<NodeShapeSelector />*/}
-              {/*<NodeSizeSelector />*/}
-              {/*<NodeLabelEditor />*/}
-              {/*<EdgeStyleEditor />*/}
-              {/*<LayoutSelector />*/}
-              {/*<DataImportExport />*/}
+          {/* Future Expansion: Empty modules added for potential future functionalities */}
+          {/*<NodeShapeSelector />*/}
+          {/*<NodeSizeSelector />*/}
+          {/*<NodeLabelEditor />*/}
+          {/*<EdgeStyleEditor />*/}
+          {/*<LayoutSelector />*/}
+          {/*<DataImportExport />*/}
         </DialogContent>
-        <DialogActionsModule handleUpdateColor={handleUpdateNodeColor} />
+        <DialogActionsModule handleUpdateColor={handleUpdateNodeColor}/>
       </Dialog>
       <Drawer
         anchor="right"
@@ -521,15 +587,15 @@ export default function NodeGraph() {
         <div className={classes.drawer}>
           <div className={classes.closeButton}>
             <IconButton onClick={handleClose}>
-              <CloseIcon />
+              <CloseIcon/>
             </IconButton>
           </div>
           {selectedNode ? (
             <div>
               <Tabs value={tabValue} onChange={handleTabChange} aria-label="node information tabs">
-                <Tab label="Basic Information" />
-                <Tab label="Relationship" />
-                <Tab label="Neighborhood" />
+                <Tab label="Basic Information"/>
+                <Tab label="Relationship"/>
+                <Tab label="Neighborhood"/>
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <>
