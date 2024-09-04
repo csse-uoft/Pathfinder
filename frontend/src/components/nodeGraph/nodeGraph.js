@@ -1,5 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react';
 import cytoscape from 'cytoscape';
+import svg from 'cytoscape-svg';
 import {
   Container,
   Button,
@@ -228,14 +229,17 @@ export default function NodeGraph() {
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
   const [nodeTypes, setNodeTypes] = useState([]); // New state for node types
   const [edgeTypes, setEdgeTypes] = useState([]);
+  const [nodesDict, setNodesDict] = useState({});
   const [selectedNodeType, setSelectedNodeType] = useState(''); // New state for selected node type
   const [selectedEdgeType, setSelectedEdgeType] = useState(''); // New state for selected node type
   const [selectedNodeTypeColor, setSelectedNodeTypeColor] = useState('#666'); // New state for selected type color
   const [selectedEdgeTypeColor, setSelectedEdgeTypeColor] = useState('#666'); // New state for selected type color
   const [themeAnchor, setThemeAnchor] = useState('organizationAnchor');
   const [visibleDataTypes, setVisibleDataTypes] = useState([]);
+  const [visibleEdgeTypes, setVisibleEdgeTypes] = useState([])
   const {enqueueSnackbar} = useSnackbar();
-
+  const [hideOrRemove, setHideOrRemove] = useState('Hide')
+  cytoscape.use(svg);
   function rgbToHex(rgb) {
     // Extract the numbers from the rgb string
     const rgbValues = rgb.match(/\d+/g).map(Number);
@@ -301,19 +305,25 @@ export default function NodeGraph() {
     if (selectedOrganizations.length > 0) {
       fetchNodeGraphDataByOrganization(selectedOrganizations).then(({elements}) => {
         const {nodes, edges} = elements;
+        const nodesDict = {}
         const nodeTypes = [...new Set(nodes.map(node => node.data.type))];
+        const edgeTypes = [...new Set(edges.map(edge => edge.data.label))]
         setNodeTypes(nodeTypes);
         setVisibleDataTypes(Object.keys(nodeTypes));
-        setEdgeTypes([...new Set(edges.map(edge => edge.data.label))]);
+        setEdgeTypes(edgeTypes);
+        setVisibleEdgeTypes(Object.keys(edgeTypes))
         nodes.forEach(node => {
+          nodesDict[node.data.id] = node.data
           node['data']['color'] = nodeType2Color[node.data.type] || '#df1087';
         });
         edges.forEach(edge => {
           edge.data.color = edgeType2Color[edge.data.label] || '#df1087';
         });
+        setNodesDict(nodesDict)
         setElements({nodes, edges});
       }).catch(e => {
         reportErrorToBackend(e);
+        console.log(e)
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else {
@@ -356,7 +366,6 @@ export default function NodeGraph() {
           }
         })
       }
-      console.log(roots)
       cyRef.current = cytoscape({
         container: document.getElementById('cy'),
         elements: elements,
@@ -502,47 +511,138 @@ export default function NodeGraph() {
             setSelectedOrganizations(e.target.value);
           }}
         />
-        <Dropdown
-          chooseAll
-          key={'visibleNodeTypes'}
-          label={'Data Types'}
-          value={visibleDataTypes}
-          options={nodeTypes}
-          error={!!errors.visibleDataTypes}
-          helperText={errors.visibleDataTypes}
-          onChange={e => {
-            setVisibleDataTypes(e.target.value);
-            cyRef.current.nodes().forEach(node => {
-              node.style({
-                display: 'none'
-              });
-            });
-            // cyRef.current.edges(`[label = "cids:forOrganization"]`).remove()
-            e.target.value.map(index => {
-              const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
-              sameTypeNodes.forEach(node => {
+        <div style={{ marginLeft: '20px' }}>
+          <Dropdown
+            chooseAll
+            key={'visibleNodeTypes'}
+            label={'Data Types'}
+            value={visibleDataTypes}
+            options={nodeTypes}
+            error={!!errors.visibleDataTypes}
+            helperText={errors.visibleDataTypes}
+            onChange={e => {
+              setVisibleDataTypes(e.target.value);
+              cyRef.current.nodes().forEach(node => {
                 node.style({
-                  display: 'element'
+                  display: 'none'
                 });
               });
-            });
-            // const layout = cyRef.current.layout({
-            //   name: 'breadthfirst',
-            // });
-            //
-            // layout.run();
+              // cyRef.current.edges(`[label = "cids:forOrganization"]`).remove()
+              e.target.value.map(index => {
+                const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
+                sameTypeNodes.forEach(node => {
+                  node.style({
+                    display: 'element',
+                    label: e.target.value.some(index => nodeTypes[index] === 'cids:Organization') ? nodesDict[node.id()].label
+                      : `${nodesDict[node.id()].label} ${nodesDict[node.id()].organizations.join(',').toUpperCase()}`
+                  });
+                });
+              });
+              // if (!e.target.value.includes('cids:Organization')) {
+              //   e.target.value.map(index => {
+              //     const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
+              //     sameTypeNodes.forEach(node => {
+              //       node.style({
+              //         label: node.style.label
+              //       })
+              //     });
+              //   });
+              // }
+              // const layout = cyRef.current.layout({
+              //   name: 'breadthfirst',
+              // });
+              //
+              // layout.run();
 
-          }}
-        />
+            }}
+          />
+          <Dropdown
+            chooseAll
+            key={'visibleEdges'}
+            label={'Edge Types'}
+            value={visibleEdgeTypes}
+            options={edgeTypes}
+            error={!!errors.visibleEdgeTypes}
+            helperText={errors.visibleEdgeTypes}
+            onChange={e => {
+              setVisibleEdgeTypes(e.target.value);
+              cyRef.current.edges().forEach(node => {
+                node.style({
+                  display: 'none'
+                });
+              });
+              // cyRef.current.edges(`[label = "cids:forOrganization"]`).remove()
+              e.target.value.map(index => {
+                const sameTypeEdges = cyRef.current.edges(`[label = "${edgeTypes[index]}"]`);
+                console.log(sameTypeEdges)
+                sameTypeEdges.forEach(edge => {
+                  edge.style({
+                    display: 'element',
+                  });
+                });
+              });
+              // if (!e.target.value.includes('cids:Organization')) {
+              //   e.target.value.map(index => {
+              //     const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
+              //     sameTypeNodes.forEach(node => {
+              //       node.style({
+              //         label: node.style.label
+              //       })
+              //     });
+              //   });
+              // }
+              // const layout = cyRef.current.layout({
+              //   name: 'breadthfirst',
+              // });
+              //
+              // layout.run();
+
+            }}
+          />
+
+          <RadioField value={hideOrRemove}
+                      onChange={e => {
+                        setHideOrRemove(e.target.value);
+                      }}
+                      options={{'Hide': 'Hide', 'Remove': 'Remove'}}
+                      row
+                      key={'HideOrRemove'}
+          />
+        </div>
+
+
+
         <RadioField value={themeAnchor}
                     onChange={(e) => {setThemeAnchor(e.target.value)}}
                     options={{'Theme Anchor': 'themeAnchor', 'Organization Anchor': 'organizationAnchor'}}
                     row
-        >
+        />
 
-        </RadioField>
 
       </div>
+
+      <Button disabled={!selectedOrganizations.length}
+              onClick={() => {
+                const svgContent = cyRef.current.svg({
+                  scale: 1,      // Set the scale of the SVG, 1 is the default
+                  full: true     // Export the entire graph (set to false to export the current viewport only)
+                });
+                const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+
+                // Create a temporary link element for the download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'nodeGraph.svg'; // Specify the file name for download
+
+                // Append the link to the document and trigger the download
+                document.body.appendChild(link);
+                link.click();
+
+                // Clean up by removing the link element from the document
+                document.body.removeChild(link);
+              }}>
+        Download SVG
+      </Button>
       <Button variant="contained" color="primary" onClick={handleDialogOpen}>
         Modify Graph Appearance
       </Button>

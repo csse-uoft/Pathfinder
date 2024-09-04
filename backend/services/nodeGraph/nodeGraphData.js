@@ -55,10 +55,12 @@ cids:hasAccess | cids:hasThreshold | cids:hasBaseline | cids:forOutcome | cids:c
     // organizations.map(organization => nodes[organization] = {data: {id: organization, label: organization, type: SPARQL.getPrefixedURI('cids:Organization')}})
     await GraphDB.sendSelectQuery(query, false, ({organization, node, nodeName, organizationLegalName, type}) => {
       if (!nodes[node.id]) {
-        nodes[node.id] = {data: {id: node.id, label:nodeName?.id || node.id, type: SPARQL.getPrefixedURI(type.id)}}
+        nodes[node.id] = {data: {id: node.id, label:nodeName?.id || node.id, type: SPARQL.getPrefixedURI(type.id), organizations: [organizationLegalName?.id || organization.id]}}
+      } else if (!nodes[node.id].data.organizations.includes(organization.id)){
+        nodes[node.id].data.organizations.push(organization.id)
       }
       if (!nodes[organization.id]) {
-        nodes[organization.id] = {data: {id: organization.id, label: organizationLegalName?.id || organization.id, type: 'cids:Organization'}}
+        nodes[organization.id] = {data: {id: organization.id, label: organizationLegalName?.id || organization.id, type: 'cids:Organization', organizations: [organization.id]}}
       }
     });
 
