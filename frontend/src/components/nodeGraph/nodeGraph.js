@@ -2,7 +2,6 @@ import React, {useRef, useEffect, useState} from 'react';
 import cytoscape from 'cytoscape';
 import svg from 'cytoscape-svg';
 import {
-  Container,
   Button,
   TextField,
   Drawer,
@@ -14,7 +13,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Select,
   MenuItem,
   FormControl,
@@ -238,6 +236,7 @@ export default function NodeGraph() {
   const [visibleDataTypes, setVisibleDataTypes] = useState([]);
   const [visibleEdgeTypes, setVisibleEdgeTypes] = useState([])
   const {enqueueSnackbar} = useSnackbar();
+  const [edgeCache, setEdgeCache] = useState([])
   const [hideOrRemove, setHideOrRemove] = useState('Hide')
   cytoscape.use(svg);
   function rgbToHex(rgb) {
@@ -566,21 +565,56 @@ export default function NodeGraph() {
             helperText={errors.visibleEdgeTypes}
             onChange={e => {
               setVisibleEdgeTypes(e.target.value);
-              cyRef.current.edges().forEach(node => {
-                node.style({
-                  display: 'none'
-                });
-              });
-              // cyRef.current.edges(`[label = "cids:forOrganization"]`).remove()
-              e.target.value.map(index => {
-                const sameTypeEdges = cyRef.current.edges(`[label = "${edgeTypes[index]}"]`);
-                console.log(sameTypeEdges)
-                sameTypeEdges.forEach(edge => {
+              const chosenEdges = e.target.value.map(index => edgeTypes[index])
+              if (hideOrRemove === 'Hide') {
+                cyRef.current.edges().forEach(edge => {
                   edge.style({
-                    display: 'element',
+                    display: 'none'
                   });
                 });
-              });
+                // cyRef.current.edges(`[label = "cids:forOrganization"]`).remove()
+                chosenEdges.map(edge => {
+                  const sameTypeEdges = cyRef.current.edges(`[label = "${edge}"]`);
+                  sameTypeEdges.forEach(edge => {
+                    edge.style({
+                      display: 'element',
+                    });
+                  });
+                });
+              } else {
+                const cache =edgeCache.concat(cyRef.current.edges().map(edge => {
+                  return {
+                    group: 'edges', // this specifies it's an edge
+                    data: {
+                      source: edge.data('source'),
+                      target: edge.data('target'),
+                      label: edge.data('label'),
+                      color: edge.data('color')
+                    }
+                  };
+                }));
+                cyRef.current.edges().forEach(edge => {
+                  edge.remove()
+                });
+                const usedEdges = []
+                const unusedEdges = []
+                cache.map(edge => {
+
+                  if (chosenEdges.includes(edge.data.label)) {
+                    usedEdges.push(edge)
+                  } else {
+                    unusedEdges.push(edge)
+                  }
+                })
+                cyRef.current.add(usedEdges);
+                setEdgeCache(unusedEdges)
+                const layout = cyRef.current.layout({
+                  name: 'breadthfirst',
+                });
+
+                layout.run();
+              }
+
               // if (!e.target.value.includes('cids:Organization')) {
               //   e.target.value.map(index => {
               //     const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
