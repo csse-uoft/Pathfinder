@@ -238,7 +238,31 @@ export default function NodeGraph() {
   const {enqueueSnackbar} = useSnackbar();
   const [edgeCache, setEdgeCache] = useState([])
   const [hideOrRemove, setHideOrRemove] = useState('Hide')
+  const [edgeStatus, setEdgeStatus] = useState({})
+
   cytoscape.use(svg);
+
+  function EdgeMode({edgeLabel}) {
+    return (
+      // <div>
+        /*<h4> {edgeLabel} </h4>*/
+        <RadioField
+          label={edgeLabel}
+          value={edgeStatus[edgeLabel]}
+          onChange={e => {
+            const edgeStat = edgeStatus
+            edgeStat[edgeLabel] = e.target.value
+            setEdgeStatus(edgeStat)
+          }}
+          options={{'Present':'Present', 'Hide': 'Hide', 'Remove': 'Remove'}}
+          row
+          key={`edgeStatus: ${edgeLabel}`}
+        />
+      // </div>
+
+    )
+  }
+
   function rgbToHex(rgb) {
     // Extract the numbers from the rgb string
     const rgbValues = rgb.match(/\d+/g).map(Number);
@@ -290,7 +314,6 @@ export default function NodeGraph() {
       cyRef.current.nodes(`[type = "${themeAnchor === 'themeAnchor'? 'cids:Theme' : 'cids:Organization'}"]`).forEach(node => {
         roots.push(node.id())
       })
-      console.log(roots)
       const layout = cyRef?.current?.layout({
         name: 'breadthfirst',
         roots: roots
@@ -311,6 +334,10 @@ export default function NodeGraph() {
         setVisibleDataTypes(Object.keys(nodeTypes));
         setEdgeTypes(edgeTypes);
         setVisibleEdgeTypes(Object.keys(edgeTypes))
+        const edgeStat = {}
+        edgeTypes.map(edgeType => edgeStat[edgeType] = {})
+        setEdgeStatus(edgeStat)
+
         nodes.forEach(node => {
           nodesDict[node.data.id] = node.data
           node['data']['color'] = nodeType2Color[node.data.type] || '#df1087';
@@ -537,21 +564,6 @@ export default function NodeGraph() {
                   });
                 });
               });
-              // if (!e.target.value.includes('cids:Organization')) {
-              //   e.target.value.map(index => {
-              //     const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
-              //     sameTypeNodes.forEach(node => {
-              //       node.style({
-              //         label: node.style.label
-              //       })
-              //     });
-              //   });
-              // }
-              // const layout = cyRef.current.layout({
-              //   name: 'breadthfirst',
-              // });
-              //
-              // layout.run();
 
             }}
           />
@@ -615,21 +627,6 @@ export default function NodeGraph() {
                 layout.run();
               }
 
-              // if (!e.target.value.includes('cids:Organization')) {
-              //   e.target.value.map(index => {
-              //     const sameTypeNodes = cyRef.current.nodes(`[type = "${nodeTypes[index]}"]`);
-              //     sameTypeNodes.forEach(node => {
-              //       node.style({
-              //         label: node.style.label
-              //       })
-              //     });
-              //   });
-              // }
-              // const layout = cyRef.current.layout({
-              //   name: 'breadthfirst',
-              // });
-              //
-              // layout.run();
 
             }}
           />
@@ -701,6 +698,12 @@ export default function NodeGraph() {
             selectedTypeColor={selectedEdgeTypeColor}
             handleColorChange={handleEdgeColorChange}
           />
+
+          {edgeTypes.map(edgeType => <EdgeMode
+            edgeLabel={edgeType}
+          />)}
+
+
 
           {/* Future Expansion: Empty modules added for potential future functionalities */}
           {/*<NodeShapeSelector />*/}
