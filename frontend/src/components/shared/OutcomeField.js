@@ -1,16 +1,10 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchThemes} from "../../api/themeApi";
-import {fetchOutcomes} from "../../api/outcomeApi";
-import {fetchOrganizations, fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
-import {fetchIndicators} from "../../api/indicatorApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import GeneralField from "./fields/GeneralField";
-import {fetchImpactModelInterfaces} from "../../api/impactModelAPI";
 import {fetchFeatureInterfaces} from "../../api/featureAPI";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
