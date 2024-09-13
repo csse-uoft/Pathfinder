@@ -236,11 +236,83 @@ export default function NodeGraph() {
   const [visibleDataTypes, setVisibleDataTypes] = useState([]);
   const [visibleEdgeTypes, setVisibleEdgeTypes] = useState([])
   const {enqueueSnackbar} = useSnackbar();
-  const [edgeCache, setEdgeCache] = useState([])
+  const [edgeCache, setEdgeCache] = useState({})
   const [hideOrRemove, setHideOrRemove] = useState('Hide')
   const [edgeStatus, setEdgeStatus] = useState({})
 
   cytoscape.use(svg);
+
+  function getRoots() {
+    const roots = []
+    cyRef.current.nodes(`[type = "${themeAnchor === 'themeAnchor'? 'cids:Theme' : 'cids:Organization'}"]`).forEach(node => {
+      roots.push(node.id())
+    })
+    return roots
+  }
+
+  function handleEdgeModeChange(edgeLabel) {
+    return (e) => {
+
+      const recoverCachedEdges = (type) => {
+        if (edgeCache?.[type]?.length) {
+          const recoverEdges = edgeCache[type]
+          cyRef.current.add(recoverEdges);
+          edgeCache[type] = []
+          setEdgeCache(edgeCache)
+          return 1
+        }
+        return 0
+      }
+
+      const action = e.target.value
+      const edgeStat = edgeStatus
+      edgeStat[edgeLabel] = action
+      setEdgeStatus(edgeStat)
+      let reRender
+
+      if (action === 'Hide') {
+        reRender = recoverCachedEdges(edgeLabel)
+        cyRef.current.edges(`[label = "${edgeLabel}"]`).forEach(edge => {
+          edge.style({
+            display: 'none'
+          });
+        });
+      } else if (action === 'Remove') {
+        reRender = 1
+        edgeCache[edgeLabel] = cyRef.current.edges(`[label = "${edgeLabel}"]`).map(edge => {
+          const cacheItem = {
+            group: 'edges', // this specifies it's an edge
+            data: {
+              source: edge.data('source'),
+              target: edge.data('target'),
+              label: edge.data('label'),
+              color: edge.data('color')
+            }
+          };
+          edge.remove()
+          return cacheItem
+        });
+        setEdgeCache(edgeCache)
+      } else if (action === 'Visible') {
+        reRender = recoverCachedEdges(edgeLabel)
+        cyRef.current.edges(`[label = "${edgeLabel}"]`).forEach(edge => {
+          edge.style({
+            display: 'element'
+          });
+        });
+      }
+      
+      if (reRender) {
+        const layout = cyRef.current.layout({
+          name: 'breadthfirst',
+          roots: getRoots()
+        });
+
+        layout.run();
+      }
+
+    }
+  }
 
   function EdgeMode({edgeLabel}) {
     return (
@@ -249,12 +321,8 @@ export default function NodeGraph() {
         <RadioField
           label={edgeLabel}
           value={edgeStatus[edgeLabel]}
-          onChange={e => {
-            const edgeStat = edgeStatus
-            edgeStat[edgeLabel] = e.target.value
-            setEdgeStatus(edgeStat)
-          }}
-          options={{'Present':'Present', 'Hide': 'Hide', 'Remove': 'Remove'}}
+          onChange={handleEdgeModeChange(edgeLabel)}
+          options={{'Visible':'Visible', 'Hide': 'Hide', 'Remove': 'Remove'}}
           row
           key={`edgeStatus: ${edgeLabel}`}
         />
@@ -310,13 +378,9 @@ export default function NodeGraph() {
   useEffect(() => {
 
     if (cyRef.current?.layout) {
-      const roots = []
-      cyRef.current.nodes(`[type = "${themeAnchor === 'themeAnchor'? 'cids:Theme' : 'cids:Organization'}"]`).forEach(node => {
-        roots.push(node.id())
-      })
       const layout = cyRef?.current?.layout({
         name: 'breadthfirst',
-        roots: roots
+        roots: getRoots()
       });
       layout.run();
     }
@@ -333,9 +397,9 @@ export default function NodeGraph() {
         setNodeTypes(nodeTypes);
         setVisibleDataTypes(Object.keys(nodeTypes));
         setEdgeTypes(edgeTypes);
-        setVisibleEdgeTypes(Object.keys(edgeTypes))
+        // setVisibleEdgeTypes(Object.keys(edgeTypes))
         const edgeStat = {}
-        edgeTypes.map(edgeType => edgeStat[edgeType] = {})
+        edgeTypes.map(edgeType => edgeStat[edgeType] = 'Visible')
         setEdgeStatus(edgeStat)
 
         nodes.forEach(node => {
@@ -567,81 +631,7 @@ export default function NodeGraph() {
 
             }}
           />
-          <Dropdown
-            chooseAll
-            key={'visibleEdges'}
-            label={'Edge Types'}
-            value={visibleEdgeTypes}
-            options={edgeTypes}
-            error={!!errors.visibleEdgeTypes}
-            helperText={errors.visibleEdgeTypes}
-            onChange={e => {
-              setVisibleEdgeTypes(e.target.value);
-              const chosenEdges = e.target.value.map(index => edgeTypes[index])
-              if (hideOrRemove === 'Hide') {
-                cyRef.current.edges().forEach(edge => {
-                  edge.style({
-                    display: 'none'
-                  });
-                });
-                // cyRef.current.edges(`[label = "cids:forOrganization"]`).remove()
-                chosenEdges.map(edge => {
-                  const sameTypeEdges = cyRef.current.edges(`[label = "${edge}"]`);
-                  sameTypeEdges.forEach(edge => {
-                    edge.style({
-                      display: 'element',
-                    });
-                  });
-                });
-              } else {
-                const cache =edgeCache.concat(cyRef.current.edges().map(edge => {
-                  return {
-                    group: 'edges', // this specifies it's an edge
-                    data: {
-                      source: edge.data('source'),
-                      target: edge.data('target'),
-                      label: edge.data('label'),
-                      color: edge.data('color')
-                    }
-                  };
-                }));
-                cyRef.current.edges().forEach(edge => {
-                  edge.remove()
-                });
-                const usedEdges = []
-                const unusedEdges = []
-                cache.map(edge => {
-
-                  if (chosenEdges.includes(edge.data.label)) {
-                    usedEdges.push(edge)
-                  } else {
-                    unusedEdges.push(edge)
-                  }
-                })
-                cyRef.current.add(usedEdges);
-                setEdgeCache(unusedEdges)
-                const layout = cyRef.current.layout({
-                  name: 'breadthfirst',
-                });
-
-                layout.run();
-              }
-
-
-            }}
-          />
-
-          <RadioField value={hideOrRemove}
-                      onChange={e => {
-                        setHideOrRemove(e.target.value);
-                      }}
-                      options={{'Hide': 'Hide', 'Remove': 'Remove'}}
-                      row
-                      key={'HideOrRemove'}
-          />
         </div>
-
-
 
         <RadioField value={themeAnchor}
                     onChange={(e) => {setThemeAnchor(e.target.value)}}
@@ -699,9 +689,13 @@ export default function NodeGraph() {
             handleColorChange={handleEdgeColorChange}
           />
 
-          {edgeTypes.map(edgeType => <EdgeMode
-            edgeLabel={edgeType}
-          />)}
+          <div>
+            <h3>Edges</h3>
+            {edgeTypes.map(edgeType => <EdgeMode
+              edgeLabel={edgeType}
+            />)}
+          </div>
+
 
 
 
