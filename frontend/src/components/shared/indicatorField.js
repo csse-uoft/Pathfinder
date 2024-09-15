@@ -64,6 +64,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
   const [options, setOptions] = useState({});
   const [stakeholderOptions, setStakeholderOptions] = useState({});
   const [datasetOptions, setDatasetOptions] = useState({})
+  const [subindicatorOptions, setSubindicatorOptions] = useState({})
   const userContext = useContext(UserContext);
   const [codesInterfaces, setCodesInterfaces] = useState({})
 
@@ -82,6 +83,20 @@ export default function IndicatorField({defaultValue, required, onChange, label,
         setErrors(e.json)
       reportErrorToBackend(e)
       enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('indicator').then(({success, interfaces}) => {
+      if (success) {
+        delete interfaces[state.uri]
+        setSubindicatorOptions(interfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching indicator interface", {variant: 'error'});
     })
   }, [])
 
@@ -252,6 +267,29 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
                 disabled={disabled}
                 onBlur={validateField(defaultValue, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
+
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Dropdown
+                label="Subindicators"
+                key={'subindicators'}
+                options={subindicatorOptions}
+                onChange={(e) => {
+                  setState(state => ({...state, subindicators: e.target.value}));
+                  const st = state;
+                  st.subindicators = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.subindicators}
+                error={!!errors.subindicators}
+                helperText={errors.subindicators}
+                // required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
+                disabled={disabled}
+                // onBlur={validateField(defaultValue, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
 
               />
             </Grid>

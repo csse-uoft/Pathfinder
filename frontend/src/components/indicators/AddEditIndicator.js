@@ -58,7 +58,8 @@ export default function AddEditIndicator() {
     codes: [],
     dateCreated: '',
     accesss: [],
-    datasets: []
+    datasets: [],
+    subIndicators: []
   });
 
   const [loading, setLoading] = useState(true);

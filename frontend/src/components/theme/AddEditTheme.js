@@ -13,7 +13,7 @@ import {isFieldRequired, validateField, validateURI, validateForm} from "../../h
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import {navigateHelper} from "../../helpers/navigatorHelper";
-import {createDataType, fetchDataType, updateDataType} from "../../api/generalAPI";
+import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 
@@ -54,17 +54,27 @@ export default function AddEditTheme() {
     name: '',
     uri: '',
     description: '',
+    subthemes: [],
     codes:[]
   });
   const [loading, setLoading] = useState(true);
 
   const [codes, setCodes] = useState({})
 
+  const [subthemes, setSubthemes] = useState({})
+
   useEffect(() => {
     fetchCodesInterfaces().then(({success, interfaces}) => {
       if (success) {
         setCodes(interfaces);
       }
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('Theme').then(({interfaces}) => {
+      delete interfaces[form.uri]
+      setSubthemes(interfaces)
     })
   }, [])
 
@@ -210,6 +220,20 @@ export default function AddEditTheme() {
           }
           required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
           onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+
+        />
+
+        <Dropdown
+          label="subthemes"
+          options={subthemes}
+          value={form.subthemes}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={(e) => {
+            setForm(state => ({...state, subthemes: e.target.value}));
+          }
+          }
+          // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
+          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
 
         />
 
