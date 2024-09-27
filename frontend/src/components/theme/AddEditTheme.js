@@ -54,14 +54,16 @@ export default function AddEditTheme() {
     name: '',
     uri: '',
     description: '',
-    subthemes: [],
+    subThemeRelationships: [{organizations: [],subThemes: []}],
     codes:[]
   });
   const [loading, setLoading] = useState(true);
 
   const [codes, setCodes] = useState({})
 
-  const [subthemes, setSubthemes] = useState({})
+  const [subThemes, setSubThemes] = useState({})
+
+  const [organizations, setOrganizations] = useState({})
 
   useEffect(() => {
     fetchCodesInterfaces().then(({success, interfaces}) => {
@@ -74,7 +76,13 @@ export default function AddEditTheme() {
   useEffect(() => {
     fetchDataTypeInterfaces('Theme').then(({interfaces}) => {
       delete interfaces[form.uri]
-      setSubthemes(interfaces)
+      setSubThemes(interfaces)
+    })
+  }, [])
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('Organization').then(({interfaces}) => {
+      setOrganizations(interfaces)
     })
   }, [])
 
@@ -87,7 +95,8 @@ export default function AddEditTheme() {
             name: res.theme.name,
             description: res.theme.description,
             uri: res.theme._uri,
-            codes: res.theme.codes
+            codes: res.theme.codes || [],
+            subThemeRelationships: res.theme.subThemeRelationships?.length? res.theme.subThemeRelationships : [{organizations: [],subThemes: []}]
           });
           setLoading(false);
         }
@@ -150,6 +159,20 @@ export default function AddEditTheme() {
   const validate = () => {
     const errors = {};
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
+    form.subThemeRelationships.map((relationship, index) => {
+      if (!relationship.organizations.length || !relationship.subThemes.length) {
+        if (!errors.subThemeRelationships){
+          errors.subThemeRelationships = {[index]: {}}
+        }
+        if (!relationship.organizations.length) {
+          errors.subThemeRelationships[index].organizations = 'Blank value is not valid'
+        }
+        if (!relationship.subThemes.length) {
+          errors.subThemeRelationships[index].subThemes = 'Blank value is not valid'
+        }
+
+      }
+    })
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -157,6 +180,67 @@ export default function AddEditTheme() {
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',
+  }
+
+  function SubThemeRelationships({id}) {
+    return <div>
+      <div style={{ paddingTop: '20px', paddingBottom: '20px' }}>
+        <Dropdown
+          label="Organizations"
+          key={`organization_${id}`}
+          options={organizations}
+          value={form.subThemeRelationships[id].organizations}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={(e) => {
+            const relationships = form.subThemeRelationships
+            relationships[id].organizations = e.target.value
+            setForm(state => ({...state, subThemeRelationships: relationships}));
+          }
+          }
+          error={!!errors?.subThemeRelationships?.[id]?.organizations}
+          helperText={errors?.subThemeRelationships?.[id]?.organizations}
+          // required={isFieldRequired(attriConfig, attribute2Compass, 'subthemes')}
+          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+        />
+        <Dropdown
+          label="subThemes"
+          options={subThemes}
+          key={`subThemes_${id}`}
+          value={form.subThemeRelationships[id].subThemes}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={(e) => {
+            const relationships = form.subThemeRelationships
+            relationships[id].subThemes = e.target.value
+            setForm(state => ({...state, subThemeRelationships: relationships}));
+          }
+          }
+          error={!!errors?.subThemeRelationships?.[id]?.subThemes}
+          helperText={errors?.subThemeRelationships?.[id]?.subThemes}
+          // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
+          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+
+        />
+      </div>
+
+      {id === form.subThemeRelationships.length - 1?
+        <div>
+          <Button onClick={() => {
+          const relationships = form.subThemeRelationships
+          relationships.push({organizations: [], subThemes: []})
+          setForm(state => ({...state, subThemeRelationships: relationships}));
+        }
+        }> Add </Button>
+
+          {id > 0? <Button onClick={() => {
+            const relationships = form.subThemeRelationships;
+            relationships.pop();
+            setForm(state => ({...state, subThemeRelationships: relationships}));
+          }
+          }> Remove </Button>: null}
+        </div>
+        :null}
+    </div>
+
   }
 
   if (loading)
@@ -223,19 +307,12 @@ export default function AddEditTheme() {
 
         />
 
-        <Dropdown
-          label="subthemes"
-          options={subthemes}
-          value={form.subthemes}
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={(e) => {
-            setForm(state => ({...state, subthemes: e.target.value}));
-          }
-          }
-          // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
-          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+        {
+          form.subThemeRelationships.map((relationship, id) => <SubThemeRelationships id={id}/>
+          )
+        }
 
-        />
+
 
         <GeneralField
           disabled={operationMode === 'view'}

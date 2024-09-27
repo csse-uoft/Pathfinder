@@ -5,6 +5,7 @@ const {themeBuilder} = require("./themeBuilder");
 const {configLevel} = require('../../config');
 const {Server400Error} = require("../../utils");
 const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
+const {GDBHasSubThemePropertyModel} = require("../../models/hasSubThemeProperty");
 
 const createTheme = async (req, res) => {
     const form = req.body;
@@ -29,8 +30,36 @@ const fetchTheme = async (req, res) => {
   if (!theme)
     return res.status(400).json({success: false, message: 'No such theme'});
   // theme.identifier = theme.hasIdentifier;
+  theme.subThemeRelationships = await arrangeSubThemeRelationships(uri)
+
   return res.status(200).json({success: true, theme});
 };
+
+const arrangeSubThemeRelationships = async (parentTheme) => {
+  const subThemeProperties = await GDBHasSubThemePropertyModel.find({hasParentTheme: parentTheme});
+  const subThemePropertiesHashBySubTheme = {}
+  subThemeProperties?.map(({hasChildTheme, forOrganization}) => {
+    if (!subThemePropertiesHashBySubTheme[hasChildTheme]) {
+      subThemePropertiesHashBySubTheme[hasChildTheme] = []
+    }
+    subThemePropertiesHashBySubTheme[hasChildTheme].push(forOrganization)
+  })
+  const subThemePropertiesHashByOrganizations = {}
+  for (let subTheme in subThemePropertiesHashBySubTheme) {
+    let organizations = subThemePropertiesHashBySubTheme[subTheme]
+    organizations.sort()
+    organizations = JSON.stringify(organizations)
+    if (!subThemePropertiesHashByOrganizations[organizations]) {
+      subThemePropertiesHashByOrganizations[organizations] = []
+    }
+    subThemePropertiesHashByOrganizations[organizations].push(subTheme)
+  }
+  const ret = []
+  for (let organizations in subThemePropertiesHashByOrganizations) {
+    ret.push({organizations: JSON.parse(organizations), subThemes: subThemePropertiesHashByOrganizations[organizations]})
+  }
+  return ret
+}
 
 const updateTheme = async (req, res) => {
   const {form} = req.body;
