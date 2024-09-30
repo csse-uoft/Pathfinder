@@ -160,8 +160,8 @@ export default function AddEditTheme() {
     const errors = {};
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
     form.subThemeRelationships.map((relationship, index) => {
-      if (!relationship.organizations.length || !relationship.subThemes.length) {
-        if (!errors.subThemeRelationships){
+      if (index && (!relationship.organizations.length || !relationship.subThemes.length)) {
+        if (!errors.subThemeRelationships) {
           errors.subThemeRelationships = {[index]: {}}
         }
         if (!relationship.organizations.length) {
@@ -170,7 +170,17 @@ export default function AddEditTheme() {
         if (!relationship.subThemes.length) {
           errors.subThemeRelationships[index].subThemes = 'Blank value is not valid'
         }
-
+      }
+      if (!index && ((relationship.organizations.length && !relationship.subThemes.length) || (!relationship.organizations.length && relationship.subThemes.length))) {
+        if (!errors.subThemeRelationships) {
+          errors.subThemeRelationships = {[index]: {}}
+        }
+        if (!relationship.organizations.length) {
+          errors.subThemeRelationships[index].organizations = 'Blank value is not valid'
+        }
+        if (!relationship.subThemes.length) {
+          errors.subThemeRelationships[index].subThemes = 'Blank value is not valid'
+        }
       }
     })
     setErrors(errors);

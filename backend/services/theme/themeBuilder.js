@@ -39,6 +39,9 @@ async function themeBuilder(environment, object, error, {themeDict}, {
 
     if (environment === 'interface') {
 
+      await GDBHasSubThemePropertyModel.findAndDelete({hasParentTheme: uri})
+
+
       if (form.subThemeRelationships?.length) {
         for (let {organizations, subThemes} of form.subThemeRelationships) {
           for (let organization of organizations) {
