@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {Autocomplete, Grid, Paper, TextField, Typography} from "@mui/material";
+import {Autocomplete, Button, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
 import Dropdown from "./fields/MultiSelectField";
 import {UserContext} from "../../context";
@@ -53,47 +53,131 @@ function LoadingAutoComplete({
   );
 }
 
-export default function IndicatorField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, disabledURI, attribute2Compass}) {
+export default function IndicatorField({
+                                         defaultValue,
+                                         required,
+                                         onChange,
+                                         label,
+                                         disabled,
+                                         importErrors,
+                                         disabledOrganization,
+                                         disabledURI,
+                                         attribute2Compass
+                                       }) {
 
   const [state, setState] = useState(defaultValue || {});
   const [options, setOptions] = useState({});
   const [stakeholderOptions, setStakeholderOptions] = useState({});
-  const [datasetOptions, setDatasetOptions] = useState({})
-  const [subindicatorOptions, setSubindicatorOptions] = useState({})
+  const [datasetOptions, setDatasetOptions] = useState({});
+  const [subIndicatorOptions, setSubIndicatorOptions] = useState({});
   const userContext = useContext(UserContext);
-  const [codesInterfaces, setCodesInterfaces] = useState({})
+  const [codesInterfaces, setCodesInterfaces] = useState({});
 
   const [errors, setErrors] = useState({...importErrors});
 
-    const attriConfig = fullLevelConfig.indicator;
+  const attriConfig = fullLevelConfig.indicator;
+
+  function SubIndicatorRelationships({id}) {
+    return <div>
+      <div style={{paddingTop: '20px', paddingBottom: '20px'}}>
+        <Dropdown
+          label="Organizations"
+          key={`organization_${id}`}
+          options={options}
+          value={state.subIndicatorRelationships[id].organizations}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={(e) => {
+            const relationships = state.subIndicatorRelationships;
+            relationships[id].organizations = e.target.value;
+
+            setState(state => ({...state, subIndicatorRelationships: relationships}));
+            const st = state;
+            st.subIndicatorRelationships = relationships;
+            onChange(st);
+          }
+          }
+          error={!!errors?.subIndicatorRelationships?.[id]?.organizations}
+          helperText={errors?.subIndicatorRelationships?.[id]?.organizations}
+          // required={isFieldRequired(attriConfig, attribute2Compass, 'subthemes')}
+          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+        />
+        <Dropdown
+          label="subIndicators"
+          options={subIndicatorOptions}
+          key={`subIndicators_${id}`}
+          value={state.subIndicatorRelationships[id].subIndicators}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={(e) => {
+            const relationships = state.subIndicatorRelationships;
+            relationships[id].subIndicators = e.target.value;
+            setState(state => ({...state, subIndicatorRelationships: relationships}));
+            const st = state;
+            st.subIndicatorRelationships = relationships;
+            onChange(st);
+          }
+          }
+          error={!!errors?.subIndicatorRelationships?.[id]?.subIndicators}
+          helperText={errors?.subIndicatorRelationships?.[id]?.subIndicators}
+          // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
+          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+
+        />
+      </div>
+
+      {id === state.subIndicatorRelationships.length - 1 ?
+        <div>
+          <Button onClick={() => {
+            const relationships = state.subIndicatorRelationships;
+            relationships.push({organizations: [], subIndicators: []});
+            setState(state => ({...state, subIndicatorRelationships: relationships}));
+            const st = state;
+            st.subIndicatorRelationships = relationships;
+            onChange(st);
+          }
+          }> Add </Button>
+
+          {id > 0 ? <Button onClick={() => {
+            const relationships = state.subIndicatorRelationships;
+            relationships.pop();
+            setState(state => ({...state, subIndicatorRelationships: relationships}));
+            const st = state;
+            st.subIndicatorRelationships = relationships;
+            onChange(st);
+          }
+          }> Remove </Button> : null}
+        </div>
+        : null}
+    </div>;
+
+  }
 
 
   useEffect(() => {
     fetchDataTypeInterfaces('code').then(({success, interfaces}) => {
       if (success) {
-        setCodesInterfaces(interfaces)
+        setCodesInterfaces(interfaces);
       }
     }).catch(e => {
       if (e.json)
-        setErrors(e.json)
-      reportErrorToBackend(e)
+        setErrors(e.json);
+      reportErrorToBackend(e);
       enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     fetchDataTypeInterfaces('indicator').then(({success, interfaces}) => {
       if (success) {
-        delete interfaces[state.uri]
-        setSubindicatorOptions(interfaces)
+        delete interfaces[state.uri];
+        setSubIndicatorOptions(interfaces);
       }
     }).catch(e => {
       if (e.json)
-        setErrors(e.json)
-      reportErrorToBackend(e)
+        setErrors(e.json);
+      reportErrorToBackend(e);
       enqueueSnackbar(e.json?.message || "Error occur when fetching indicator interface", {variant: 'error'});
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     setErrors({...importErrors});
@@ -101,28 +185,28 @@ export default function IndicatorField({defaultValue, required, onChange, label,
 
   useEffect(() => {
     fetchDataTypeInterfaces('organization').then(({success, interfaces}) => {
-      if(success) {
-        setOptions(interfaces)
+      if (success) {
+        setOptions(interfaces);
       }
-    })
+    });
   }, []);
 
   useEffect(() => {
     fetchDataTypeInterfaces('dataset').then(({success, interfaces}) => {
-      if(success) {
+      if (success) {
         setDatasetOptions(interfaces);
       }
-    })
+    });
   }, []);
 
 
   useEffect(() => {
-        fetchDataTypeInterfaces('stakeholder').then(({success, interfaces}) => {
-            if(success) {
-                setStakeholderOptions(interfaces);
-            }
-        })
-    }, [])
+    fetchDataTypeInterfaces('stakeholder').then(({success, interfaces}) => {
+      if (success) {
+        setStakeholderOptions(interfaces);
+      }
+    });
+  }, []);
 
   const handleChange = name => (e, value) => {
     setState(state => {
@@ -135,9 +219,9 @@ export default function IndicatorField({defaultValue, required, onChange, label,
 
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
-      {label? <Typography variant="h5">
+      {label ? <Typography variant="h5">
         {label}
-      </Typography>: <div/>}
+      </Typography> : <div/>}
       {
         <>
           <Grid container columnSpacing={2}>
@@ -172,36 +256,36 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 onBlur={validateURI(defaultValue, setErrors)}
               />
             </Grid>
-              <Grid item xs={4}>
-                  <GeneralField
-                      fullWidth
-                      type={'date'}
-                      value={state.dateCreated}
-                      label={'Date Created'}
-                      onChange={handleChange('dateCreated')}
-                      required={isFieldRequired(attriConfig, attribute2Compass, 'dateCreated')}
-                      disabled={disabled}
-                      error={!!errors.dateCreated}
-                      helperText={errors.dateCreated}
-                      minWidth={187}
-                      onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
-                  />
-              </Grid>
-              <Grid item xs={8}>
-                  <TextField
-                      sx={{mt: 2}}
-                      fullWidth
-                      label="Identifier"
-                      type="text"
-                      defaultValue={state.identifier}
-                      onChange={handleChange('identifier')}
-                      disabled={disabled}
-                      required={isFieldRequired(attriConfig, attribute2Compass, 'identifier')}
-                      error={!!errors.identifier}
-                      helperText={errors.identifier}
-                      onBlur={validateField(defaultValue, attriConfig, 'identifier', attribute2Compass['identifier'], setErrors)}
-                  />
-              </Grid>
+            <Grid item xs={4}>
+              <GeneralField
+                fullWidth
+                type={'date'}
+                value={state.dateCreated}
+                label={'Date Created'}
+                onChange={handleChange('dateCreated')}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'dateCreated')}
+                disabled={disabled}
+                error={!!errors.dateCreated}
+                helperText={errors.dateCreated}
+                minWidth={187}
+                onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
+              />
+            </Grid>
+            <Grid item xs={8}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="Identifier"
+                type="text"
+                defaultValue={state.identifier}
+                onChange={handleChange('identifier')}
+                disabled={disabled}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'identifier')}
+                error={!!errors.identifier}
+                helperText={errors.identifier}
+                onBlur={validateField(defaultValue, attriConfig, 'identifier', attribute2Compass['identifier'], setErrors)}
+              />
+            </Grid>
 
             <Grid item xs={12}>
               <LoadingAutoComplete
@@ -220,28 +304,28 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
-              <Grid item xs={12}>
-                  <Dropdown
-                      label="Access"
-                      key={'Access'}
-                      options={options}
-                      onChange={(e) => {
-                          setState(state => ({...state, accesss: e.target.value}));
-                          const st = state;
-                          st.accesss = e.target.value;
-                          onChange(st);
-                      }
-                      }
-                      fullWidth
-                      value={state.accesss}
-                      error={!!errors.accesss}
-                      helperText={errors.accesss}
-                      required={isFieldRequired(attriConfig, attribute2Compass, 'accesss')}
-                      disabled={disabled}
-                      onBlur={validateField(defaultValue, attriConfig, 'accesss', attribute2Compass['accesss'], setErrors)}
+            <Grid item xs={12}>
+              <Dropdown
+                label="Access"
+                key={'Access'}
+                options={options}
+                onChange={(e) => {
+                  setState(state => ({...state, accesss: e.target.value}));
+                  const st = state;
+                  st.accesss = e.target.value;
+                  onChange(st);
+                }
+                }
+                fullWidth
+                value={state.accesss}
+                error={!!errors.accesss}
+                helperText={errors.accesss}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'accesss')}
+                disabled={disabled}
+                onBlur={validateField(defaultValue, attriConfig, 'accesss', attribute2Compass['accesss'], setErrors)}
 
-                  />
-              </Grid>
+              />
+            </Grid>
 
             <Grid item xs={12}>
               <Dropdown
@@ -267,26 +351,10 @@ export default function IndicatorField({defaultValue, required, onChange, label,
             </Grid>
 
             <Grid item xs={12}>
-              <Dropdown
-                label="Subindicators"
-                key={'subindicators'}
-                options={subindicatorOptions}
-                onChange={(e) => {
-                  setState(state => ({...state, subindicators: e.target.value}));
-                  const st = state;
-                  st.subindicators = e.target.value;
-                  onChange(st);
-                }
-                }
-                fullWidth
-                value={state.subindicators}
-                error={!!errors.subindicators}
-                helperText={errors.subindicators}
-                // required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
-                disabled={disabled}
-                // onBlur={validateField(defaultValue, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
-
-              />
+              {
+                state.subIndicatorRelationships.map((relationship, id) => <SubIndicatorRelationships id={id}/>
+                )
+              }
             </Grid>
 
             <Grid item xs={12}>
@@ -345,22 +413,22 @@ export default function IndicatorField({defaultValue, required, onChange, label,
 
               />
             </Grid>
-              <Grid item xs={12}>
-                  <TextField
-                      sx={{mt: 2}}
-                      fullWidth
-                      label="Threshold"
-                      type="text"
-                      defaultValue={state.threshold}
-                      onChange={handleChange('threshold')}
-                      disabled={disabled}
-                      required={isFieldRequired(attriConfig, attribute2Compass, 'threshold')}
-                      error={!!errors.threshold}
-                      helperText={errors.threshold}
-                      onBlur={validateField(defaultValue, attriConfig, 'threshold', attribute2Compass['threshold'], setErrors)}
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="Threshold"
+                type="text"
+                defaultValue={state.threshold}
+                onChange={handleChange('threshold')}
+                disabled={disabled}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'threshold')}
+                error={!!errors.threshold}
+                helperText={errors.threshold}
+                onBlur={validateField(defaultValue, attriConfig, 'threshold', attribute2Compass['threshold'], setErrors)}
 
-                  />
-              </Grid>
+              />
+            </Grid>
 
             <Grid item xs={12}>
               <TextField
