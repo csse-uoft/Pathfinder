@@ -4,6 +4,8 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {assignMeasure, assignValue, assignValues} = require("../helpers");
+const {GDBHasSubThemePropertyModel} = require("../../models/hasSubThemeProperty");
+const {GDBHasSubIndicatorPropertyModel} = require("../../models/hasSubIndicatorProperty");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, object, organization, error, {
@@ -112,6 +114,25 @@ async function indicatorBuilder(environment, object, organization, error, {
     error = ret.error;
 
     if (environment === 'interface'){
+      await GDBHasSubIndicatorPropertyModel.findAndDelete({hasHeadlineIndicator: uri})
+
+
+      if (form.subIndicatorRelationships?.length) {
+        for (let {organizations, subIndicators} of form.subIndicatorRelationships) {
+          for (let organization of organizations) {
+            for (let subIndicator of subIndicators) {
+              const hasSubIndicatorProperty = GDBHasSubIndicatorPropertyModel({
+                hasHeadlineIndicator: uri,
+                hasChildIndicator: subIndicator,
+                forOrganization: organization
+              })
+              await hasSubIndicatorProperty.save()
+            }
+          }
+
+        }
+      }
+
       await mainObject.save();
       return true
     }

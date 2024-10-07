@@ -127,6 +127,7 @@ export default function AddEditIndicator() {
       fetchDataType('indicator', encodeURIComponent(uri)).then(({success, indicator}) => {
         if (success) {
           indicator.uri = indicator._uri;
+          indicator.subIndicatorRelationships = indicator.subIndicatorRelationships?.length? indicator.subIndicatorRelationships : [{organizations: [],subIndicators: []}]
           setForm(indicator);
           setLoading(false);
         }

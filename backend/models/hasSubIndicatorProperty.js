@@ -7,7 +7,7 @@ const GDBHasSubIndicatorPropertyModel = createGraphDBModel({
   hasChildIndicator: {type: GDBIndicatorModel, internalKey: ':hasSubIndicator'},
   forOrganization: {type: GDBOrganizationModel, internalKey: 'cids:forOrganization'}
 }, {
-  rdfTypes: [':hasSubThemeProperty'], name: 'hasSubThemeProperty'
+  rdfTypes: [':hasSubIndicatorProperty'], name: 'hasSubIndicatorProperty'
 });
 
 module.exports = {

@@ -193,8 +193,8 @@ export default function AddEditTheme() {
   }
 
   function SubThemeRelationships({id}) {
-    return <div>
-      <div style={{ paddingTop: '20px', paddingBottom: '20px' }}>
+    return <div style={{ paddingTop: '10px' }}>
+      <div style={{ paddingTop: '20px', paddingBottom: '20px', border: '2px solid lightgray', width: '50%'}}>
         <Dropdown
           label="Organizations"
           key={`organization_${id}`}
@@ -239,7 +239,7 @@ export default function AddEditTheme() {
           relationships.push({organizations: [], subThemes: []})
           setForm(state => ({...state, subThemeRelationships: relationships}));
         }
-        }> Add </Button>
+        }> Add Relationship </Button>
 
           {id > 0? <Button onClick={() => {
             const relationships = form.subThemeRelationships;
@@ -317,9 +317,9 @@ export default function AddEditTheme() {
 
         />
 
+        <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubTheme Relationships </Typography>
         {
-          form.subThemeRelationships.map((relationship, id) => <SubThemeRelationships id={id}/>
-          )
+          form.subThemeRelationships.map((relationship, id) => <SubThemeRelationships id={id}/>)
         }
 
 

@@ -9,6 +9,8 @@ const {Transaction} = require("graphdb-utils");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 const {configLevel} = require('../../config');
 const {deleteDataAndAllReferees, checkAllReferees} = require("../helpers");
+const {GDBHasSubThemePropertyModel} = require("../../models/hasSubThemeProperty");
+const {GDBHasSubIndicatorPropertyModel} = require("../../models/hasSubIndicatorProperty");
 
 
 
@@ -153,9 +155,36 @@ const fetchIndicator = async (req, res) => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
   delete indicator.forOrganization;
+  indicator.subIndicatorRelationships = await arrangeSubIndicatorRelationships(uri)
   return res.status(200).json({success: true, indicator});
 
 };
+
+const arrangeSubIndicatorRelationships = async (headlineIndicator) => {
+  const subIndicatorProperties = await GDBHasSubIndicatorPropertyModel.find({hasHeadlineIndicator: headlineIndicator});
+  const subIndicatorPropertiesHashBySubIndicator = {}
+  subIndicatorProperties?.map(({hasChildIndicator, forOrganization}) => {
+    if (!subIndicatorPropertiesHashBySubIndicator[hasChildIndicator]) {
+      subIndicatorPropertiesHashBySubIndicator[hasChildIndicator] = []
+    }
+    subIndicatorPropertiesHashBySubIndicator[hasChildIndicator].push(forOrganization)
+  })
+  const subIndicatorPropertiesHashByOrganizations = {}
+  for (let subIndicator in subIndicatorPropertiesHashBySubIndicator) {
+    let organizations = subIndicatorPropertiesHashBySubIndicator[subIndicator]
+    organizations.sort()
+    organizations = JSON.stringify(organizations)
+    if (!subIndicatorPropertiesHashByOrganizations[organizations]) {
+      subIndicatorPropertiesHashByOrganizations[organizations] = []
+    }
+    subIndicatorPropertiesHashByOrganizations[organizations].push(subIndicator)
+  }
+  const ret = []
+  for (let organizations in subIndicatorPropertiesHashByOrganizations) {
+    ret.push({organizations: JSON.parse(organizations), subIndicators: subIndicatorPropertiesHashByOrganizations[organizations]})
+  }
+  return ret
+}
 
 const createIndicatorHandler = async (req, res, next) => {
   try {

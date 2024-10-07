@@ -78,8 +78,8 @@ export default function IndicatorField({
   const attriConfig = fullLevelConfig.indicator;
 
   function SubIndicatorRelationships({id}) {
-    return <div>
-      <div style={{paddingTop: '20px', paddingBottom: '20px'}}>
+    return <div style={{ paddingTop: '10px' }}>
+      <div style={{paddingTop: '20px', paddingBottom: '20px', border: '2px solid lightgray'}}>
         <Dropdown
           label="Organizations"
           key={`organization_${id}`}
@@ -134,7 +134,7 @@ export default function IndicatorField({
             st.subIndicatorRelationships = relationships;
             onChange(st);
           }
-          }> Add </Button>
+          }> Add Relationship</Button>
 
           {id > 0 ? <Button onClick={() => {
             const relationships = state.subIndicatorRelationships;
@@ -350,6 +350,7 @@ export default function IndicatorField({
               />
             </Grid>
 
+            <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubTheme Relationships </Typography>
             <Grid item xs={12}>
               {
                 state.subIndicatorRelationships.map((relationship, id) => <SubIndicatorRelationships id={id}/>
