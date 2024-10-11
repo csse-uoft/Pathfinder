@@ -1,7 +1,7 @@
 const configs = require("../fileUploading/configs");
 const {GDBThemeModel} = require("../../models/theme");
-const {Server400Error} = require("../../utils");
 const {assignValue, assignValues} = require("../helpers");
+const {GDBHasSubThemePropertyModel} = require("../../models/hasSubThemeProperty");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function themeBuilder(environment, object, error, {themeDict}, {
@@ -38,6 +38,26 @@ async function themeBuilder(environment, object, error, {themeDict}, {
 
 
     if (environment === 'interface') {
+
+      await GDBHasSubThemePropertyModel.findAndDelete({hasParentTheme: uri})
+
+
+      if (form.subThemeRelationships?.length) {
+        for (let {organizations, subThemes} of form.subThemeRelationships) {
+          for (let organization of organizations) {
+            for (let subTheme of subThemes) {
+              const hasSubThemeProperty = GDBHasSubThemePropertyModel({
+                hasParentTheme: uri,
+                hasChildTheme: subTheme,
+                forOrganization: organization
+              })
+              await hasSubThemeProperty.save()
+            }
+          }
+
+        }
+      }
+
       await mainObject.save();
       return true
     }

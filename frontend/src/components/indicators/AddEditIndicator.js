@@ -14,6 +14,7 @@ import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} 
 import {validateForm} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
+import Dropdown from "../shared/fields/MultiSelectField";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -58,7 +59,8 @@ export default function AddEditIndicator() {
     codes: [],
     dateCreated: '',
     accesss: [],
-    datasets: []
+    datasets: [],
+    subIndicatorRelationships: [{organizations: [],subIndicators: []}],
   });
 
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,7 @@ export default function AddEditIndicator() {
     name: 'cids:hasName',
     identifier: 'tove_org:hasIdentifier',
     description: 'cids:hasDescription',
-    unitOfMeasure: 'iso21972:value',
+    unitOfMeasure: 'iso21972:unit_of_measure',
     organization: 'cids:forOrganization',
     baseline: 'cids:hasBaseline',
     threshold: 'cids:hasThreshold',
@@ -125,6 +127,7 @@ export default function AddEditIndicator() {
       fetchDataType('indicator', encodeURIComponent(uri)).then(({success, indicator}) => {
         if (success) {
           indicator.uri = indicator._uri;
+          indicator.subIndicatorRelationships = indicator.subIndicatorRelationships?.length? indicator.subIndicatorRelationships : [{organizations: [],subIndicators: []}]
           setForm(indicator);
           setLoading(false);
         }
@@ -196,10 +199,34 @@ export default function AddEditIndicator() {
   };
 
   const validate = () => {
-    const error = {};
-    validateForm(form, attriConfig, attribute2Compass, error, ['uri']);
-    setErrors(error);
-    return Object.keys(error).length === 0;
+    const errors = {};
+    validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
+    form.subIndicatorRelationships.map((relationship, index) => {
+      if (index && (!relationship.organizations.length || !relationship.subIndicators.length)) {
+        if (!errors.subIndicatorRelationships) {
+          errors.subIndicatorRelationships = {[index]: {}}
+        }
+        if (!relationship.organizations.length) {
+          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
+        }
+        if (!relationship.subIndicators.length) {
+          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
+        }
+      }
+      if (!index && ((relationship.organizations.length && !relationship.subIndicators.length) || (!relationship.organizations.length && relationship.subIndicators.length))) {
+        if (!errors.subIndicatorRelationships) {
+          errors.subIndicatorRelationships = {[index]: {}}
+        }
+        if (!relationship.organizations.length) {
+          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
+        }
+        if (!relationship.subIndicators.length) {
+          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
+        }
+      }
+    })
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   if (loading)

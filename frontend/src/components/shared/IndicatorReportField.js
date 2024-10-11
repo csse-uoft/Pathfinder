@@ -236,17 +236,21 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 onBlur={validateField(defaultValue, attriConfig, 'indicator', attribute2Compass['indicator'], setErrors)}
               />
             </Grid>
-            {/*<Grid item xs={3}>*/}
-            {/*  <TextField*/}
-            {/*    sx={{mt: 2}}*/}
-            {/*    fullWidth*/}
-            {/*    label="Unit Of Measure"*/}
-            {/*    type="text"*/}
-            {/*    value={state.unitOfMeasure}*/}
-            {/*    disabled*/}
-            {/*    required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}*/}
-            {/*  />*/}
-            {/*</Grid>*/}
+            <Grid item xs={3}>
+              <GeneralField
+                sx={{mt: 2}}
+                fullWidth
+                label={"Unit Of Measure"}
+                value={state.unitOfMeasure}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}
+                disabled={disabled}
+                error={!!errors.unitOfMeasure}
+                helperText={errors.unitOfMeasure}
+                minWidth={187}
+                onChange={handleChange('unitOfMeasure')}
+                onBlur={validateField(defaultValue, attriConfig, 'unitOfMeasure', attribute2Compass['unitOfMeasure'], setErrors)}
+              />
+            </Grid>
             <Grid item xs={4}>
               <GeneralField
                 fullWidth

@@ -16,6 +16,8 @@ import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
+import * as PropTypes from "prop-types";
+import SelectField from "../shared/fields/SelectField";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -29,17 +31,17 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-export default function AddEditTheme() {
+export default function AddEditThemeNetwork() {
 
   const classes = useStyles();
   const userContext = useContext(UserContext);
   const {uri, operationMode} = useParams();
   const mode = uri ? operationMode : 'new';
   const navigator = useNavigate();
-  const navigate = navigateHelper(navigator)
+  const navigate = navigateHelper(navigator);
   const {enqueueSnackbar} = useSnackbar();
 
-  const attriConfig = configs[CONFIGLEVEL].theme
+  const attriConfig = configs[CONFIGLEVEL].theme;
 
 
   const [state, setState] = useState({
@@ -54,50 +56,38 @@ export default function AddEditTheme() {
     name: '',
     uri: '',
     description: '',
-    subThemeRelationships: [{organizations: [],subThemes: []}],
-    codes:[]
+    dateCreated: '',
+    forOrganization: '',
+    themeEdges: []
   });
   const [loading, setLoading] = useState(true);
 
-  const [codes, setCodes] = useState({})
+  const [themeEdges, setThemeEdges] = useState({});
+  const [organizations, setOrganizations] = useState({});
 
-  const [subThemes, setSubThemes] = useState({})
 
-  const [organizations, setOrganizations] = useState({})
-
-  useEffect(() => {
-    fetchCodesInterfaces().then(({success, interfaces}) => {
-      if (success) {
-        setCodes(interfaces);
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    fetchDataTypeInterfaces('Theme').then(({interfaces}) => {
-      delete interfaces[form.uri]
-      setSubThemes(interfaces)
-    })
-  }, [])
 
   useEffect(() => {
     fetchDataTypeInterfaces('Organization').then(({interfaces}) => {
-      setOrganizations(interfaces)
-    })
-  }, [])
+      setOrganizations(interfaces);
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchDataTypeInterfaces('hasSubThemePropertie').then(({interfaces}) => {
+      setThemeEdges(interfaces);
+    });
+  }, []);
 
 
   useEffect(() => {
     if (mode === 'edit' && uri || mode === 'view') {
-      fetchDataType('theme', encodeURIComponent(uri)).then(res => {
+      fetchDataType('themeNetwork', encodeURIComponent(uri)).then(res => {
         if (res.success) {
-          setForm({
-            name: res.theme.name,
-            description: res.theme.description,
-            uri: res.theme._uri,
-            codes: res.theme.codes || [],
-            subThemeRelationships: res.theme.subThemeRelationships?.length? res.theme.subThemeRelationships : [{organizations: [],subThemes: []}]
-          });
+          res.themeNetwork.uri = res.themeNetwork._uri
+          setForm(
+            res.themeNetwork
+          );
           setLoading(false);
         }
       }).catch(e => {
@@ -106,7 +96,7 @@ export default function AddEditTheme() {
         navigate('/themes');
       });
     } else if (mode === 'edit' && !uri) {
-      navigate('/organizations');
+      navigate('/themeNetworks');
       enqueueSnackbar("No URI provided", {variant: 'error'});
     } else if (mode === 'new') {
       setLoading(false);
@@ -122,10 +112,10 @@ export default function AddEditTheme() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createDataType('theme', {form}).then((ret) => {
+      createDataType('themeNetwork', {form}).then((ret) => {
           if (ret.success) {
             setState({loadingButton: false, submitDialog: false,});
-            navigate('/themes');
+            navigate('/themeNetworks');
             enqueueSnackbar(ret.message || 'Success', {variant: "success"});
           }
         }
@@ -138,10 +128,10 @@ export default function AddEditTheme() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateDataType('theme', encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('themeNetwork', encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/themes');
+          navigate('/themeNetworks');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -159,30 +149,6 @@ export default function AddEditTheme() {
   const validate = () => {
     const errors = {};
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
-    form.subThemeRelationships.map((relationship, index) => {
-      if (index && (!relationship.organizations.length || !relationship.subThemes.length)) {
-        if (!errors.subThemeRelationships) {
-          errors.subThemeRelationships = {[index]: {}}
-        }
-        if (!relationship.organizations.length) {
-          errors.subThemeRelationships[index].organizations = 'Blank value is not valid'
-        }
-        if (!relationship.subThemes.length) {
-          errors.subThemeRelationships[index].subThemes = 'Blank value is not valid'
-        }
-      }
-      if (!index && ((relationship.organizations.length && !relationship.subThemes.length) || (!relationship.organizations.length && relationship.subThemes.length))) {
-        if (!errors.subThemeRelationships) {
-          errors.subThemeRelationships = {[index]: {}}
-        }
-        if (!relationship.organizations.length) {
-          errors.subThemeRelationships[index].organizations = 'Blank value is not valid'
-        }
-        if (!relationship.subThemes.length) {
-          errors.subThemeRelationships[index].subThemes = 'Blank value is not valid'
-        }
-      }
-    })
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -190,68 +156,7 @@ export default function AddEditTheme() {
   const attribute2Compass = {
     name: 'cids:hasName',
     description: 'cids:hasDescription',
-  }
-
-  function SubThemeRelationships({id}) {
-    return <div style={{ paddingTop: '10px' }}>
-      <div style={{ paddingTop: '20px', paddingBottom: '20px', border: '2px solid lightgray', width: '50%'}}>
-        <Dropdown
-          label="Organizations"
-          key={`organization_${id}`}
-          options={organizations}
-          value={form.subThemeRelationships[id].organizations}
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={(e) => {
-            const relationships = form.subThemeRelationships
-            relationships[id].organizations = e.target.value
-            setForm(state => ({...state, subThemeRelationships: relationships}));
-          }
-          }
-          error={!!errors?.subThemeRelationships?.[id]?.organizations}
-          helperText={errors?.subThemeRelationships?.[id]?.organizations}
-          // required={isFieldRequired(attriConfig, attribute2Compass, 'subthemes')}
-          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
-        />
-        <Dropdown
-          label="subThemes"
-          options={subThemes}
-          key={`subThemes_${id}`}
-          value={form.subThemeRelationships[id].subThemes}
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={(e) => {
-            const relationships = form.subThemeRelationships
-            relationships[id].subThemes = e.target.value
-            setForm(state => ({...state, subThemeRelationships: relationships}));
-          }
-          }
-          error={!!errors?.subThemeRelationships?.[id]?.subThemes}
-          helperText={errors?.subThemeRelationships?.[id]?.subThemes}
-          // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
-          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
-
-        />
-      </div>
-
-      {id === form.subThemeRelationships.length - 1?
-        <div>
-          <Button onClick={() => {
-          const relationships = form.subThemeRelationships
-          relationships.push({organizations: [], subThemes: []})
-          setForm(state => ({...state, subThemeRelationships: relationships}));
-        }
-        }> Add Relationship </Button>
-
-          {id > 0? <Button onClick={() => {
-            const relationships = form.subThemeRelationships;
-            relationships.pop();
-            setForm(state => ({...state, subThemeRelationships: relationships}));
-          }
-          }> Remove </Button>: null}
-        </div>
-        :null}
-    </div>
-
-  }
+  };
 
   if (loading)
     return <Loading/>;
@@ -276,7 +181,7 @@ export default function AddEditTheme() {
 
         </Paper>
       ) : (<Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Theme </Typography>
+        <Typography variant={'h4'}> Theme Network </Typography>
 
         <GeneralField
           disabled={operationMode === 'view'}
@@ -303,26 +208,54 @@ export default function AddEditTheme() {
           onBlur={validateURI(form, setErrors)}
         />
 
-        <Dropdown
-          label="Codes"
-          options={codes}
-          value={form.codes}
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={(e) => {
-            setForm(state => ({...state, codes: e.target.value}));
+        <SelectField
+          key={'organization'}
+          label={'Organization'}
+          value={form.forOrganization}
+          options={organizations}
+          error={!!errors.forOrganization}
+          helperText={
+            errors.forOrganization
           }
-          }
-          required={isFieldRequired(attriConfig, attribute2Compass, 'codes')}
-          onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
-
+          onChange={e => {
+            setForm(form => ({
+                ...form, forOrganization: e.target.value
+              })
+            );
+          }}
         />
 
-        <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubTheme Relationships </Typography>
-        {
-          form.subThemeRelationships.map((relationship, id) => <SubThemeRelationships id={id}/>)
-        }
+        <Dropdown
+          label="themeEdges"
+          options={themeEdges}
+          key={`themeEdges`}
+          value={form.themeEdges}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={(e) => {
+            setForm(state => ({...state, themeEdges: e.target.value}));
+          }
+          }
+          error={!!errors?.themeEdges}
+          helperText={errors?.themeEdges}
+          // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
+          // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
+        />
 
-
+        <GeneralField
+          fullWidth
+          type={'date'}
+          value={form.dateCreated}
+          label={'Date Created'}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => {
+            setForm(form => ({
+                ...form, dateCreated: e.target.value
+              })
+            );
+          }}
+          error={!!errors.dateCreated}
+          helperText={errors.dateCreated}
+        />
 
         <GeneralField
           disabled={operationMode === 'view'}
@@ -333,10 +266,8 @@ export default function AddEditTheme() {
           onChange={e => form.description = e.target.value}
           error={!!errors.description}
           helperText={errors.description}
-          required={isFieldRequired(attriConfig, attribute2Compass, 'description')}
           multiline
           minRows={4}
-          onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
         />
 
 
@@ -345,8 +276,8 @@ export default function AddEditTheme() {
         </Button>
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Theme?' :
-                       'Are you sure you want to update this Theme?'}
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Theme Network?' :
+                       'Are you sure you want to update this Theme Network?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

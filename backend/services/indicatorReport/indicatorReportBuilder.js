@@ -1,6 +1,6 @@
 const configs = require("../fileUploading/configs");
 const {assignValue, assignValues,
-  assignMeasure, assignTimeInterval, assignInvertValue
+  assignMeasure, assignTimeInterval, assignInvertValue, assignUnitOfMeasure
 } = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBOrganizationModel} = require("../../models/organization");
@@ -76,6 +76,10 @@ async function indicatorReportBuilder(environment, object, organization, error, 
     ret = await assignTimeInterval(environment, config, object, mainModel, mainObject, addMessage, form, uri, hasError, error);
     error = ret.error
     hasError = ret.hasError
+
+    ret = await assignUnitOfMeasure(environment, config, object, mainModel, mainObject, 'unitOfMeasure', 'iso21972:unit_of_measure', addMessage, uri, hasError, error, form);
+    hasError = ret.hasError;
+    error = ret.error;
 
     // add indicator to the indicatorReport
 

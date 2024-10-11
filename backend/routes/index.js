@@ -39,4 +39,7 @@ module.exports = {
   dataExportRoute: require('./dataExport'),
   nodeGraphRoute: require('./nodeGraph'),
   dataDashboardRoute: require('./dataDashboard'),
+  hasSubThemePropertiesRoute: require('./hasSubThemeProperties'),
+  themeNetworkRoute: require('./themeNetwork'),
+  themeNetworksRoute: require('./themeNetworks')
 }
