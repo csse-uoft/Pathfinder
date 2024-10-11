@@ -761,6 +761,26 @@ async function hasAccess(req, operationType) {
 
 
     // themes
+    case 'fetchSubThemeRelationships':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'createThemeNetwork':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'fetchThemeNetwork':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'updateThemeNetwork':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'fetchThemeNetworks':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'fetchTheme': // every one can fetch theme
       return true;
     case 'createTheme': // only superuser can create theme

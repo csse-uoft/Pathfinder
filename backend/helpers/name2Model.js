@@ -14,6 +14,7 @@ const {GDBImpactModelModel, GDBImpactNormsModel} = require("../models/impactStuf
 const {GDBImpactReportModel} = require("../models/impactReport");
 const {GDBStakeholderModel} = require("../models/stakeholder");
 const {GDBThemeModel} = require("../models/theme");
+const {GDBHasSubThemePropertyModel} = require("../models/hasSubThemeProperty");
 
 const name2Model = {
   ImpactModel: GDBImpactNormsModel,
@@ -32,7 +33,8 @@ const name2Model = {
   ImpactReport: GDBImpactReportModel,
   StakeholderOutcome: GDBStakeholderOutcomeModel,
   Stakeholder: GDBStakeholderOrganizationModel,
-  Theme: GDBThemeModel
+  Theme: GDBThemeModel,
+  SubThemeRelationship: GDBHasSubThemePropertyModel
 }
 
 module.exports = {name2Model}

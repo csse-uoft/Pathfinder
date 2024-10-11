@@ -17,7 +17,8 @@ const baseLevelConfig = {
   characteristic: {},
   impactScale:{},
   impactDepth: {},
-  code: {}
+  code: {},
+  themeNetwork: {}
 };
 
 const fullLevelConfig = {
@@ -56,7 +57,8 @@ const fullLevelConfig = {
   unexpectedImpactRisk: {},
   impactDuration: {},
   dataset: {},
-  stakeholder: {}
+  stakeholder: {},
+  themeNetwork: {}
 }
 
 module.exports = {

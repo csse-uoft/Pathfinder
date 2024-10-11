@@ -85,9 +85,10 @@ import TotalReviewPage from "./components/totalReviewPage/TotalReviewPage";
 import DataExportPage from "./components/dataExport/dataExport";
 import NodeGraph from "./components/nodeGraph/nodeGraph";
 import DataDashboard from "./components/dataDashboard/DataDashboard";
+import AddEditThemeNetwork from "./components/themeNetwork/AddEditThemeNetwork";
+import ThemeNetworks from "./components/themeNetwork/ThemeNetworks";
 
-const routes = (
-  <Routes>
+const routes = (<Routes>
     {/*basic*/}
     <Route exact path={`${process.env.PUBLIC_URL}/`} element={<Landing/>}/>
     <Route path={`${process.env.PUBLIC_URL}/login/doubleAuth`} element={<DoubleAuth/>}/>
@@ -175,6 +176,13 @@ const routes = (
            element={<PrivateRoute element={Theme}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/theme/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditTheme}/>}/>
+
+    {/*themeNetworks*/}
+    <Route path={`${process.env.PUBLIC_URL}/themeNetworks`} element={<PrivateRoute element={ThemeNetworks}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/themeNetwork/new`}
+           element={<PrivateRoute element={AddEditThemeNetwork}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/themeNetwork/:uri/:operationMode`}
+           element={<PrivateRoute element={AddEditThemeNetwork}/>}/>
     {/*indicators*/}
     {/*<Route path={`${process.env.PUBLIC_URL}/organization-indicators`}*/}
     {/*       element={<PrivateRoute element={Organization_indicators}/>}/>*/}
@@ -303,10 +311,9 @@ const routes = (
 
     <Route path={`${process.env.PUBLIC_URL}/nodeGraph`}
            element={<PrivateRoute element={NodeGraph}/>}/>
-      <Route path={`${process.env.PUBLIC_URL}/dataDashboard`}
-             element={<PrivateRoute element={DataDashboard}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/dataDashboard`}
+           element={<PrivateRoute element={DataDashboard}/>}/>
 
-  </Routes>
-);
+  </Routes>);
 
 export default routes;
