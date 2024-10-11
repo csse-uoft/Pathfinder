@@ -72,7 +72,7 @@ export default function AddEditIndicator() {
     name: 'cids:hasName',
     identifier: 'tove_org:hasIdentifier',
     description: 'cids:hasDescription',
-    unitOfMeasure: 'iso21972:value',
+    unitOfMeasure: 'iso21972:unit_of_measure',
     organization: 'cids:forOrganization',
     baseline: 'cids:hasBaseline',
     threshold: 'cids:hasThreshold',

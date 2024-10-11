@@ -1,5 +1,5 @@
 const {Server400Error} = require("../utils");
-const {GDBMeasureModel} = require("../models/measure");
+const {GDBMeasureModel, GDBUnitOfMeasure} = require("../models/measure");
 const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../models/time");
@@ -462,6 +462,50 @@ function assignValues(environment, config, object, mainModel, mainObject, proper
   return {hasError, error};
 }
 
+async function assignUnitOfMeasure(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, uri, hasError, error, form) {
+  if (mainObject[propertyName]) {
+    // if the mode is updating, deleting the previous object
+    await GDBUnitOfMeasure.findOneAndDelete({_uri: mainObject[propertyName]});
+    delete mainObject[propertyName];
+  }
+  let unitOfMeasureURI = environment === 'interface' ? null : getValue(object, mainModel, propertyName);
+  let unitOfMeasureObject = environment === 'interface' ? null : getObjectValue(object, mainModel, propertyName);
+
+  let label;
+  if (unitOfMeasureObject) {
+    label = getValue(measureObject, GDBMeasureModel, 'numericalValue');
+  } else if (environment === 'interface' && form && propertyName) {
+    label = form[propertyName];
+  }
+
+  if (!unitOfMeasureURI && !label && config[internalKey]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'interface') {
+        throw new Server400Error(`${propertyName} is Mandatory`);
+      } else if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+        },
+        config[internalKey]
+      );
+  } else if (unitOfMeasureURI || label) {
+    mainObject[propertyName] = unitOfMeasureURI ||
+      GDBUnitOfMeasure({
+          label
+        },
+        {uri: unitOfMeasureObject ? unitOfMeasureObject['@id'] : null});
+  }
+  return {hasError, error};
+}
+
 async function assignMeasure(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, uri, hasError, error, form) {
   if (mainObject[propertyName]) {
     // if the mode is updating, deleting the previous object
@@ -572,6 +616,6 @@ module.exports = {
   assignInvertValue,
   dataReferredBySubjects,
   deleteDataAndAllReferees,
-  checkAllReferees
-
+  checkAllReferees,
+  assignUnitOfMeasure
 };

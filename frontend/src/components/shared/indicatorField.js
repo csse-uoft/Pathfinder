@@ -381,22 +381,22 @@ export default function IndicatorField({
               />
             </Grid>
 
-            {/*<Grid item xs={12}>*/}
-            {/*  <TextField*/}
-            {/*    sx={{mt: 2}}*/}
-            {/*    fullWidth*/}
-            {/*    label="Unit of Measure"*/}
-            {/*    type="text"*/}
-            {/*    defaultValue={state.unitOfMeasure}*/}
-            {/*    onChange={handleChange('unitOfMeasure')}*/}
-            {/*    disabled={disabled}*/}
-            {/*    required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}*/}
-            {/*    error={!!errors.unitOfMeasure}*/}
-            {/*    helperText={errors.unitOfMeasure}*/}
-            {/*    onBlur={validateField(defaultValue, attriConfig, 'unitOfMeasure', attribute2Compass['unitOfMeasure'], setErrors)}*/}
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="Unit of Measure"
+                type="text"
+                defaultValue={state.unitOfMeasure}
+                onChange={handleChange('unitOfMeasure')}
+                disabled={disabled}
+                required={isFieldRequired(attriConfig, attribute2Compass, 'unitOfMeasure')}
+                error={!!errors.unitOfMeasure}
+                helperText={errors.unitOfMeasure}
+                onBlur={validateField(defaultValue, attriConfig, 'unitOfMeasure', attribute2Compass['unitOfMeasure'], setErrors)}
 
-            {/*  />*/}
-            {/*</Grid>*/}
+              />
+            </Grid>
 
             <Grid item xs={12}>
               <TextField

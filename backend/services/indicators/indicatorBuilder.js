@@ -3,7 +3,7 @@ const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
-const {assignMeasure, assignValue, assignValues} = require("../helpers");
+const {assignMeasure, assignValue, assignValues, assignUnitOfMeasure} = require("../helpers");
 const {GDBHasSubThemePropertyModel} = require("../../models/hasSubThemeProperty");
 const {GDBHasSubIndicatorPropertyModel} = require("../../models/hasSubIndicatorProperty");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
@@ -106,6 +106,10 @@ async function indicatorBuilder(environment, object, organization, error, {
     error = ret.error;
 
     ret = await assignMeasure(environment, config, object, mainModel, mainObject, 'threshold', 'cids:hasThreshold', addMessage, uri, hasError, error, form);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = await assignUnitOfMeasure(environment, config, object, mainModel, mainObject, 'unitOfMeasure', 'iso21972:unit_of_measure', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 
