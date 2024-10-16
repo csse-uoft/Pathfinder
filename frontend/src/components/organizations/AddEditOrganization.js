@@ -18,6 +18,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
+import URIField from "../shared/URIFields";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -339,8 +340,9 @@ export default function AddEditOrganization() {
           }}
         />
 
-        <GeneralField
-          disabled={mode === 'edit'}
+        <URIField
+          add={mode === 'new'}
+          edit={mode === 'edit'}
           key={'uri'}
           label={'URI'}
           value={form.uri}
