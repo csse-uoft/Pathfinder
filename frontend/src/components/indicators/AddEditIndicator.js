@@ -15,6 +15,7 @@ import {validateForm} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import Dropdown from "../shared/fields/MultiSelectField";
+import DataTypeGraph from "../shared/dataTypeGraph";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -287,6 +288,8 @@ export default function AddEditIndicator() {
         :
         <Paper sx={{p: 2}} variant={'outlined'}>
           <Typography variant={'h4'}> Indicator </Typography>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{flex: 0.5}}>
           <IndicatorField
             disabled={mode === 'view'}
             disabledURI={mode !== 'new'}
@@ -299,6 +302,11 @@ export default function AddEditIndicator() {
             importErrors={errors}
             attribute2Compass={attribute2Compass}
           />
+            </div>
+            <div style={{ flex: 1, maxHeight: '600px', overflowY: 'auto' }}>
+              <DataTypeGraph Indicator/>
+            </div>
+          </div>
 
           {mode === 'view' ?
             <div/> :

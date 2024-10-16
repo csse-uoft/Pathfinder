@@ -3,13 +3,86 @@ const {GraphDB, SPARQL} = require("graphdb-utils");
 
 const fetchNodeGraphDataHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, `fetchNodeGraphData`))
+    const {organizations} = req.body;
+    const {classType} = req.params;
+    if (organizations && await hasAccess(req, `fetchNodeGraphData`))
       return await fetchNodeGraphData(req, res);
+    if (classType === 'theme' && await hasAccess(req, `fetchThemeNodeGraph`))
+      return await fetchDataTypeNodeGraphData(req, res);
+    if (classType === 'indicator' && await hasAccess(req, `fetchIndicatorNodeGraph`))
+      return await fetchDataTypeNodeGraphData(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
   }
 };
+
+const fetchDataTypeNodeGraphData = async (req, res) => {
+  const {classType} = req.params;
+  const nodes = {}
+  const edges = []
+  let query;
+  if (classType === 'theme') {
+    query = `${SPARQL.getSPARQLPrefixes()} 
+ SELECT * WHERE {
+  ?theme  rdf:type cids:Theme .
+    ?theme cids:hasName ?name .
+}`;
+    await GraphDB.sendSelectQuery(query, false, ({theme, name}) => {
+      if (!nodes[theme.id]) {
+        nodes[theme.id] = {data: {id: theme.id, label:name?.id || theme.id}}
+      }
+    });
+
+    query = `${SPARQL.getSPARQLPrefixes()} 
+SELECT * WHERE {
+  ?subThemeProperty rdf:type cidsrep:hasSubThemeProperty .
+    ?subThemeProperty cidsrep:hasParentTheme ?parentTheme .
+    ?subThemeProperty cidsrep:hasSubTheme ?subTheme .
+    ?subThemeProperty cids:forOrganization ?organization .
+    OPTIONAL {?organization tove_org:hasLegalName ?organizationName} .
+}`;
+
+    await GraphDB.sendSelectQuery(query, false, ({parentTheme, subTheme, organization, organizationName}) => {
+      edges.push({data: {id: `${parentTheme.id} ${subTheme.id}`, source: parentTheme.id, target: subTheme.id, label: organizationName?.id || organization.id}})
+    });
+
+  } else if (classType === 'indicator') {
+    query = `${SPARQL.getSPARQLPrefixes()} 
+ SELECT * WHERE {
+  ?indicator  rdf:type cids:Indicator .
+    ?indicator cids:hasName ?name .
+}`;
+    await GraphDB.sendSelectQuery(query, false, ({indicator, name}) => {
+      if (!nodes[indicator.id]) {
+        nodes[indicator.id] = {data: {id: indicator.id, label:name?.id || indicator.id}}
+      }
+    });
+
+    query = `${SPARQL.getSPARQLPrefixes()} 
+SELECT * WHERE {
+  ?subIndicatorProperty rdf:type cidsrep:hasSubIndicatorProperty .
+    ?subIndicatorProperty cidsrep:hasHeadlineIndicator ?headlineIndicator .
+    ?subIndicatorProperty cidsrep:hasSubIndicator ?subIndicator .
+    ?subIndicatorProperty cids:forOrganization ?organization .
+    OPTIONAL {?organization tove_org:hasLegalName ?organizationName} .
+}`;
+
+    await GraphDB.sendSelectQuery(query, false, ({headlineIndicator, subIndicator, organization, organizationName}) => {
+      edges.push({data: {id: `${headlineIndicator.id} ${subIndicator.id}`, source: headlineIndicator.id, target: subIndicator.id, label: organizationName?.id || organization.id}})
+    });
+  }
+
+  const elements = {nodes: [], edges}
+  Object.keys(nodes).map(nodeUri => {
+      elements.nodes.push(nodes[nodeUri])
+    }
+  )
+
+  res.status(200).json({success: true, elements})
+
+
+}
 
 const fetchNodeGraphData = async (req, res) => {
   let {organizations} = req.body;

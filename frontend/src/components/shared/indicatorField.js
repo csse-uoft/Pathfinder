@@ -256,7 +256,14 @@ export default function IndicatorField({
                 onBlur={validateURI(defaultValue, setErrors)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubTheme Relationships </Typography>
+            <Grid item xs={12}>
+              {
+                state.subIndicatorRelationships.map((relationship, id) => <SubIndicatorRelationships id={id}/>
+                )
+              }
+            </Grid>
+            <Grid item xs={12}>
               <GeneralField
                 fullWidth
                 type={'date'}
@@ -271,7 +278,7 @@ export default function IndicatorField({
                 onBlur={validateField(defaultValue, attriConfig, 'dateCreated', attribute2Compass['dateCreated'], setErrors)}
               />
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -348,14 +355,6 @@ export default function IndicatorField({
                 onBlur={validateField(defaultValue, attriConfig, 'codes', attribute2Compass['codes'], setErrors)}
 
               />
-            </Grid>
-
-            <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubTheme Relationships </Typography>
-            <Grid item xs={12}>
-              {
-                state.subIndicatorRelationships.map((relationship, id) => <SubIndicatorRelationships id={id}/>
-                )
-              }
             </Grid>
 
             <Grid item xs={12}>
