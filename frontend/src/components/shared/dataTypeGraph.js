@@ -303,6 +303,7 @@ export default function DataTypeGraph({Theme, Indicator}) {
               'text-rotation': 'autorotate',
               'text-margin-y': -5,
               'word-break': 'break-all',
+              'text-wrap': 'wrap',
             }
           }
         ],

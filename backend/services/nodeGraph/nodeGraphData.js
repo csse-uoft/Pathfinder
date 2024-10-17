@@ -20,7 +20,7 @@ const fetchNodeGraphDataHandler = async (req, res, next) => {
 const fetchDataTypeNodeGraphData = async (req, res) => {
   const {classType} = req.params;
   const nodes = {}
-  const edges = []
+  const edges = {}
   let query;
   if (classType === 'theme') {
     query = `${SPARQL.getSPARQLPrefixes()} 
@@ -44,7 +44,12 @@ SELECT * WHERE {
 }`;
 
     await GraphDB.sendSelectQuery(query, false, ({parentTheme, subTheme, organization, organizationName}) => {
-      edges.push({data: {id: `${parentTheme.id} ${subTheme.id}`, source: parentTheme.id, target: subTheme.id, label: organizationName?.id || organization.id}})
+      if (edges[`${parentTheme.id} ${subTheme.id}`]) {
+        edges[`${parentTheme.id} ${subTheme.id}`].data.label = edges[`${parentTheme.id} ${subTheme.id}`].data.label + ' \n' + organizationName?.id || organization.id
+      } else {
+        edges[`${parentTheme.id} ${subTheme.id}`] = {data: {id: `${parentTheme.id} ${subTheme.id}`, source: parentTheme.id, target: subTheme.id, label: organizationName?.id || organization.id}}
+      }
+
     });
 
   } else if (classType === 'indicator') {
@@ -69,15 +74,24 @@ SELECT * WHERE {
 }`;
 
     await GraphDB.sendSelectQuery(query, false, ({headlineIndicator, subIndicator, organization, organizationName}) => {
-      edges.push({data: {id: `${headlineIndicator.id} ${subIndicator.id}`, source: headlineIndicator.id, target: subIndicator.id, label: organizationName?.id || organization.id}})
+      if (edges[`${headlineIndicator.id} ${subIndicator.id}`]) {
+        edges[`${headlineIndicator.id} ${subIndicator.id}`].data.label = edges[`${headlineIndicator.id} ${subIndicator.id}`].data.label + ' \n' + organizationName?.id || organization.id
+      } else {
+        edges[`${headlineIndicator.id} ${subIndicator.id}`] = {data: {id: `${headlineIndicator.id} ${subIndicator.id}`, source: headlineIndicator.id, target: subIndicator.id, label: organizationName?.id || organization.id}}
+      }
+
+      // edges.push({data: {id: `${headlineIndicator.id} ${subIndicator.id}`, source: headlineIndicator.id, target: subIndicator.id, label: organizationName?.id || organization.id}})
     });
   }
 
-  const elements = {nodes: [], edges}
+  const elements = {nodes: [], edges: []}
   Object.keys(nodes).map(nodeUri => {
       elements.nodes.push(nodes[nodeUri])
     }
   )
+  Object.keys(edges).map(edgeUri => {
+    elements.edges.push(edges[edgeUri])
+  })
 
   res.status(200).json({success: true, elements})
 
