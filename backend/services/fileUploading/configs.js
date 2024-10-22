@@ -25,7 +25,7 @@ const fullLevelConfig = {
   organization: {},
   outcome: {
     // 'cids:hasIndicator': {flag: true},
-    'oep:partOf': {ignoreInstance: true}
+    // 'oep:partOf': {ignoreInstance: true}
   },
   impactNorms: {},
   indicator: {
