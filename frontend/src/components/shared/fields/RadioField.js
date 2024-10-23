@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
   },
   labelRow: {
-    width: 200,
+    width: 100,
     marginRight: 20,
   }
 }));
@@ -46,7 +46,7 @@ export default function RadioField({
       <FormControl className={row ? classes.formControlRow : classes.formControl} error={props.error}>
         <FormLabel className={row && classes.labelRow} required={required && !noStar}
                    component="legend">{label}</FormLabel>
-        <RadioGroup value={value} onChange={handleChange} row>
+        <RadioGroup value={value} onChange={handleChange} row={row}>
           {/*{!required && <FormControlLabel*/}
           {/*  key={UN_SET}*/}
           {/*  value={UN_SET}*/}

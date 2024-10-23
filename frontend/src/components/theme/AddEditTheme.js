@@ -62,7 +62,7 @@ export default function AddEditTheme() {
 
   const [codes, setCodes] = useState({});
 
-  const [subThemes, setSubThemes] = useState({});
+  const [subThemes, setSubThemes] = useState({uri: {}, name: {}});
 
   const [organizations, setOrganizations] = useState({});
 
@@ -77,7 +77,11 @@ export default function AddEditTheme() {
   useEffect(() => {
     fetchDataTypeInterfaces('Theme').then(({interfaces}) => {
       delete interfaces[form.uri];
-      setSubThemes(interfaces);
+      const uri2uri = {}
+      for (let uri in interfaces) {
+        uri2uri[uri] = uri
+      }
+      setSubThemes({uri: uri2uri, name: interfaces});
     });
   }, []);
 
@@ -223,13 +227,15 @@ export default function AddEditTheme() {
           value={form.subThemeRelationships[id].subThemes}
           sx={{mt: '16px', minWidth: 350}}
           onChange={(e) => {
-            const relationships = form.subThemeRelationships;
-            relationships[id].subThemes = e.target.value;
-            setForm(state => ({...state, subThemeRelationships: relationships}));
+            form.subThemeRelationships[id].subThemes = e.target.value
+            // const relationships = form.subThemeRelationships;
+            // relationships[id].subThemes = e.target.value;
+            // setForm(state => ({...state, subThemeRelationships: relationships}));
           }
           }
           error={!!errors?.subThemeRelationships?.[id]?.subThemes}
           helperText={errors?.subThemeRelationships?.[id]?.subThemes}
+          twoLayerLabels
           // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
           // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
 

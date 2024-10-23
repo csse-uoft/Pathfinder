@@ -1,30 +1,35 @@
-import React, { useCallback} from "react";
+import React, {useCallback, useState} from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import {Help as HelpIcon} from "@mui/icons-material";
+import RadioField from "./RadioField";
 
 export default function Dropdown(props) {
   // options is {labelValue1: label1, labelValue2: label2, ...}
-  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth, fullWidth, chooseAll} = props;
+  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth, fullWidth, chooseAll, twoLayerLabels} = props;
 
   const handleChange = useCallback((e, value) => {
     if (value.includes('Choose All') && chooseAll) {
+      setState(value)
       onChange({target: {value: Object.keys(options)}});
     } else {
+      setState(value)
       onChange({target: {value}});
     }
-
   }, [onChange]);
 
+  const [layer, setLayer] = useState(twoLayerLabels? Object.keys(options)[0] : null)
+  const [state, setState] = useState(value)
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ }}>
       <Autocomplete
-        sx={{mt: '16px',}}
+        sx={{mt: '16px'}}
         multiple
-        options={chooseAll? ['Choose All', ...Object.keys(options)]: Object.keys(options)}
+        options={twoLayerLabels? Object.keys(options[layer]) : (chooseAll? ['Choose All', ...Object.keys(options)]: Object.keys(options))}
         onChange={handleChange}
-        getOptionLabel={ labelValue=> options[labelValue] || 'Choose All'}
-        defaultValue={value}
-        value={value}
+        getOptionLabel={twoLayerLabels? (labelValue=> options[layer][labelValue] || 'Choose All') : (labelValue=> options[labelValue] || 'Choose All')}
+        defaultValue={state}
+        value={state}
         onBlur={onBlur}
         fullWidth={fullWidth}
         disabled={disabled}
@@ -39,6 +44,15 @@ export default function Dropdown(props) {
             error={error}
           />
         )}
+        renderOption={(props, option) => (
+          <li {...props} style={{
+            whiteSpace: 'normal',           // Allow wrapping at natural spaces
+            overflowWrap: 'break-word',     // Wrap long words when necessary
+            wordBreak: 'break-word',        // Force break within long words if no white space is available
+          }}>
+            {twoLayerLabels ? options[layer][option] || 'Choose All' : options[option] || 'Choose All'}
+          </li>
+        )}
       />
       {questionMarkOnClick?<HelpIcon
         cursor={'pointer'}
@@ -46,6 +60,20 @@ export default function Dropdown(props) {
         sx={{mt: '25px'}}
         color={"primary"}
       />:<div/>}
+
+      <br/>
+      {twoLayerLabels?
+        <RadioField value={layer}
+                    onChange={(e) => {setLayer(e.target.value)}}
+                    options={((labels) => {
+                      const ret = {}
+                      labels.map(label => ret[label] = label)
+                      return ret
+                    })(Object.keys(options))}
+                    row
+        />
+        : <div/>
+      }
 
 
     </div>
