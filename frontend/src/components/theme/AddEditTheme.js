@@ -17,6 +17,7 @@ import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} 
 import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import DataTypeGraph from "../shared/dataTypeGraph";
+import URIField from "../shared/URIFields";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -302,8 +303,9 @@ export default function AddEditTheme() {
               onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
             />
 
-            <GeneralField
-              disabled={mode !== 'new'}
+            <URIField
+              add={mode === 'new'}
+              edit={mode !== 'new'}
               key={'uri'}
               label={'URI'}
               value={form.uri}

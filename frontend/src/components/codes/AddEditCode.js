@@ -20,6 +20,7 @@ import {
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
+import URIField from "../shared/URIFields";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -228,7 +229,9 @@ export default function AddEditCode() {
             onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
           />
 
-          <GeneralField
+          <URIField
+            add={mode === 'new'}
+            edit={mode === 'edit'}
             key={'uri'}
             label={'URI'}
             value={form.uri}

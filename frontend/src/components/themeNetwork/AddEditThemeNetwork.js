@@ -18,6 +18,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import * as PropTypes from "prop-types";
 import SelectField from "../shared/fields/SelectField";
+import URIField from "../shared/URIFields";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -196,8 +197,9 @@ export default function AddEditThemeNetwork() {
           onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
         />
 
-        <GeneralField
-          disabled={mode !== 'new'}
+        <URIField
+          add={mode === 'new'}
+          edit={mode !== 'new'}
           key={'uri'}
           label={'URI'}
           value={form.uri}

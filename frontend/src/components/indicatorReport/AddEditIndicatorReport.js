@@ -219,7 +219,7 @@ export default function AddEditIndicatorReport() {
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
-          uriDiasbled={mode !== 'new'}
+          uriDisabled={mode !== 'new'}
           importErrors={errors}
           attribute2Compass={attribute2Compass}
         />

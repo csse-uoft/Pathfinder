@@ -9,6 +9,7 @@ import {fetchFeatureInterfaces} from "../../api/featureAPI";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateURI} from "../../helpers";
+import URIField from "./URIFields";
 
 
 const filterOptions = createFilterOptions({
@@ -158,14 +159,14 @@ export default function OutcomeField({
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
+              <URIField
+                add={!(disabled || disableURI)}
+                edit={disabled || disableURI}
+                sx={{mt: 2, minWidth: 775}}
                 label="URI"
                 type="text"
-                defaultValue={state.uri}
+                value={state.uri}
                 onChange={handleChange('uri')}
-                disabled={disabled || disableURI}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
                 error={!!errors.uri}
                 helperText={errors.uri}

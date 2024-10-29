@@ -8,6 +8,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {fullLevelConfig} from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateURI} from "../../helpers";
+import URIField from "./URIFields";
 
 
 const filterOptions = createFilterOptions({
@@ -242,14 +243,13 @@ export default function IndicatorField({
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
+              <URIField
+                add={!(disabled || disabledURI)}
+                edit={disabled || disabledURI}
                 label="URI"
-                type="text"
-                defaultValue={state.uri}
+                sx={{mt: '16px', minWidth: 350}}
+                value={state.uri}
                 onChange={handleChange('uri')}
-                disabled={disabled || disabledURI}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
                 error={!!errors.uri}
                 helperText={errors.uri}

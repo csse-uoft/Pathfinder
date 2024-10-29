@@ -10,6 +10,7 @@ import {fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateURI} from "../../helpers";
+import URIField from "./URIFields";
 
 
 const filterOptions = createFilterOptions({
@@ -27,7 +28,7 @@ function LoadingAutoComplete({
                                error,
                                helperText,
                                required,
-                               onBlur
+                               onBlur,
                              }) {
   return (
     <Autocomplete
@@ -54,7 +55,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled, attribute2Compass}) {
+export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDisabled, attribute2Compass}) {
 
   const [state, setState] = useState(
     defaultValue ||
@@ -176,9 +177,11 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
+              <URIField
+                add={!uriDisabled}
+                edit={uriDisabled}
+                sx={{mt: 2, minWidth: 775}}
+                value={state.uri}
                 label="URI"
                 type="text"
                 defaultValue={state.uri}

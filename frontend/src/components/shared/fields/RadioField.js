@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
   },
   labelRow: {
-    width: 100,
+    width: 170,
     marginRight: 20,
   }
 }));
