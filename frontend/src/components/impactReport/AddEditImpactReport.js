@@ -67,7 +67,7 @@ export default function AddEditImpactReport() {
     forStakeholderOutcome: null,
     reportedImpact: null,
     organization: null,
-    impactRisks: null,
+    impactRisks: [],
     startTime: '',
     endTime: '',
     uri: '',
@@ -150,7 +150,6 @@ export default function AddEditImpactReport() {
     reportedImpact: 'cids:hasReportedImpact',
     expectation: 'cids:hasExpectation',
     impactRisks: 'cids:hasImpactRisk',
- 
   }
 
   const handleConfirm = () => {
@@ -258,7 +257,7 @@ export default function AddEditImpactReport() {
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
-          uriDiasbled={mode !== 'new'}
+          uriDisabled={mode !== 'new'}
           importErrors={errors}
           attribute2Compass={attribute2Compass}
         />

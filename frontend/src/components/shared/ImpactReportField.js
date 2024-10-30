@@ -12,6 +12,7 @@ import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {isFieldRequired, validateField, validateURI, validateFieldAndURI} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
+import URIField from "./URIFields";
 
 const filterOptions = createFilterOptions({
   ignoreAccents: false,
@@ -54,7 +55,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function ImpactReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled,attribute2Compass,}) {
+export default function ImpactReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDisabled,attribute2Compass,}) {
   
   const [state, setState] = useState(
     defaultValue ||
@@ -201,13 +202,14 @@ export default function ImpactReportField({defaultValue, required, onChange, lab
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
+              <URIField
                 key={'uri'}
-                sx={{mt: 2}}
-                fullWidth
+                add={!uriDisabled}
+                edit={uriDisabled}
+                sx={{mt: 2, minWidth: 775}}
                 label="URI"
                 type="text"
-                defaultValue={state.uri}
+                value={state.uri}
                 onChange={handleChange('uri')}
                 disabled={disabled}
                 error={!!errors.uri}

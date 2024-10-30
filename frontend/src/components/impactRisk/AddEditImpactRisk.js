@@ -15,6 +15,7 @@ import {createDataType, fetchDataType, updateDataType} from "../../api/generalAP
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
+import URIField from "../shared/URIFields";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -196,7 +197,9 @@ export default function AddEditImpactRisk() {
           onBlur={validateField(form, attriConfig, 'hasIdentifier', attribute2Compass['hasIdentifier'], setErrors)}
         />
 
-        <GeneralField
+        <URIField
+          add={mode === 'new'}
+          edit={mode !== 'new'}
           key={'uri'}
           label={'URI'}
           value={form.uri}

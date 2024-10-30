@@ -8,6 +8,7 @@ import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {isFieldRequired, validateField} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
+import URIField from "./URIFields";
 
 
 const filterOptions = createFilterOptions({
@@ -59,6 +60,7 @@ export default function CounterFactualField({
                                               label,
                                               disabled,
                                               importErrors,
+                                              disableURI,
                                               attribute2Compass,
                                             }) {
 
@@ -130,15 +132,14 @@ export default function CounterFactualField({
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
+              <URIField
+                add={!disableURI}
+                edit={disableURI}
+                sx={{mt: 2, minWidth: 775}}
                 label="URI"
-                type="text"
-                defaultValue={state.uri}
+                value={state.uri}
                 onChange={handleChange('uri')}
                 required={isFieldRequired(attriConfig, attribute2Compass, 'uri')}
-                disabled={disabled}
                 error={!!errors.uri}
                 helperText={errors.uri}
                 onBlur={validateField(state, attriConfig, 'uri', attribute2Compass['uri'], setErrors)}
