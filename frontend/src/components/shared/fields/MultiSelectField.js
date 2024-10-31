@@ -5,7 +5,7 @@ import RadioField from "./RadioField";
 
 export default function Dropdown(props) {
   // options is {labelValue1: label1, labelValue2: label2, ...}
-  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth, fullWidth, chooseAll, twoLayerLabels} = props;
+  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth, fullWidth, chooseAll, twoLayerLabels, sx} = props;
 
   const handleChange = useCallback((e, value) => {
     if (value.includes('Choose All') && chooseAll) {
@@ -26,9 +26,9 @@ export default function Dropdown(props) {
   }, [value])
 
   return (
-    <div style={{ }}>
+    <div>
       <Autocomplete
-        sx={{mt: '16px'}}
+        sx={{mt: '16px', ...sx}}
         multiple
         options={twoLayerLabels? Object.keys(options[layer]) : (chooseAll? ['Choose All', ...Object.keys(options)]: Object.keys(options))}
         onChange={handleChange}
@@ -43,7 +43,7 @@ export default function Dropdown(props) {
             {...params}
             required={required}
             label={label}
-            sx={{minWidth: minWidth || 350}}
+            sx={{minWidth: minWidth || 350, ...sx}}
             fullWidth={fullWidth}
             helperText={helperText}
             error={error}

@@ -70,7 +70,7 @@ export default function IndicatorField({
   const [options, setOptions] = useState({});
   const [stakeholderOptions, setStakeholderOptions] = useState({});
   const [datasetOptions, setDatasetOptions] = useState({});
-  const [subIndicatorOptions, setSubIndicatorOptions] = useState({});
+  const [subIndicatorOptions, setSubIndicatorOptions] = useState({uri: {}, name: {}});
   const userContext = useContext(UserContext);
   const [codesInterfaces, setCodesInterfaces] = useState({});
 
@@ -107,7 +107,7 @@ export default function IndicatorField({
           options={subIndicatorOptions}
           key={`subIndicators_${id}`}
           value={state.subIndicatorRelationships[id].subIndicators}
-          sx={{mt: '16px', minWidth: 350}}
+          sx={{mt: '16px', minWidth: 350, maxWidth: 100}}
           onChange={(e) => {
             // const relationships = state.subIndicatorRelationships;
             // relationships[id].subIndicators = e.target.value;
