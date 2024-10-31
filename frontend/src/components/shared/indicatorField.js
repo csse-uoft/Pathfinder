@@ -109,16 +109,18 @@ export default function IndicatorField({
           value={state.subIndicatorRelationships[id].subIndicators}
           sx={{mt: '16px', minWidth: 350}}
           onChange={(e) => {
-            const relationships = state.subIndicatorRelationships;
-            relationships[id].subIndicators = e.target.value;
-            setState(state => ({...state, subIndicatorRelationships: relationships}));
-            const st = state;
-            st.subIndicatorRelationships = relationships;
-            onChange(st);
+            // const relationships = state.subIndicatorRelationships;
+            // relationships[id].subIndicators = e.target.value;
+            // setState(state => ({...state, subIndicatorRelationships: relationships}));
+            // const st = state;
+            // st.subIndicatorRelationships = relationships;
+            // onChange(st);
+            state.subIndicatorRelationships[id].subIndicators = e.target.value
           }
           }
           error={!!errors?.subIndicatorRelationships?.[id]?.subIndicators}
           helperText={errors?.subIndicatorRelationships?.[id]?.subIndicators}
+          twoLayerLabels
           // required={isFieldRequired(attriConfig, attribute2Compass, 'siubthemes')}
           // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
 
@@ -170,7 +172,11 @@ export default function IndicatorField({
     fetchDataTypeInterfaces('indicator').then(({success, interfaces}) => {
       if (success) {
         delete interfaces[state.uri];
-        setSubIndicatorOptions(interfaces);
+        const uri2uri = {}
+        for (let uri in interfaces) {
+          uri2uri[uri] = uri
+        }
+        setSubIndicatorOptions({uri: uri2uri, name: interfaces});
       }
     }).catch(e => {
       if (e.json)
