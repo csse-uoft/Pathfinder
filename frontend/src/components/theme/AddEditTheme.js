@@ -56,7 +56,10 @@ export default function AddEditTheme() {
     name: '',
     uri: '',
     description: '',
-    subThemeRelationships: [{organizations: [], subThemes: []}],
+    subThemeRelationships: [{
+      organizations: [],
+      subThemes: []
+    }],
     codes: []
   });
   const [loading, setLoading] = useState(true);
@@ -130,8 +133,13 @@ export default function AddEditTheme() {
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
+
+    const subThemeRelationships = form.subThemeRelationships.filter(relationship => relationship)
     if (mode === 'new') {
-      createDataType('theme', {form}).then((ret) => {
+      createDataType('theme', {
+        form: {
+          ...form, subThemeRelationships
+        }}).then((ret) => {
           if (ret.success) {
             setState({loadingButton: false, submitDialog: false,});
             navigate('/themes');
@@ -147,7 +155,10 @@ export default function AddEditTheme() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateDataType('theme', encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('theme', encodeURIComponent(uri), {
+      form: {
+        ...form, subThemeRelationships
+      }}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/themes');
@@ -169,9 +180,14 @@ export default function AddEditTheme() {
     const errors = {};
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
     form.subThemeRelationships.map((relationship, index) => {
-      if (index && (!relationship.organizations.length || !relationship.subThemes.length)) {
+      if (!relationship)
+        return
+      if (!relationship.organizations.length || !relationship.subThemes.length) {
         if (!errors.subThemeRelationships) {
-          errors.subThemeRelationships = {[index]: {}};
+          errors.subThemeRelationships = {};
+        }
+        if (!errors.subThemeRelationships[index]) {
+          errors.subThemeRelationships[index] = {}
         }
         if (!relationship.organizations.length) {
           errors.subThemeRelationships[index].organizations = 'Blank value is not valid';
@@ -180,17 +196,17 @@ export default function AddEditTheme() {
           errors.subThemeRelationships[index].subThemes = 'Blank value is not valid';
         }
       }
-      if (!index && ((relationship.organizations.length && !relationship.subThemes.length) || (!relationship.organizations.length && relationship.subThemes.length))) {
-        if (!errors.subThemeRelationships) {
-          errors.subThemeRelationships = {[index]: {}};
-        }
-        if (!relationship.organizations.length) {
-          errors.subThemeRelationships[index].organizations = 'Blank value is not valid';
-        }
-        if (!relationship.subThemes.length) {
-          errors.subThemeRelationships[index].subThemes = 'Blank value is not valid';
-        }
-      }
+      // if (!index && ((relationship.organizations.length && !relationship.subThemes.length) || (!relationship.organizations.length && relationship.subThemes.length))) {
+      //   if (!errors.subThemeRelationships) {
+      //     errors.subThemeRelationships = {[index]: {}};
+      //   }
+      //   if (!relationship.organizations.length) {
+      //     errors.subThemeRelationships[index].organizations = 'Blank value is not valid';
+      //   }
+      //   if (!relationship.subThemes.length) {
+      //     errors.subThemeRelationships[index].subThemes = 'Blank value is not valid';
+      //   }
+      // }
     });
     setErrors(errors);
     return Object.keys(errors).length === 0;
@@ -226,7 +242,7 @@ export default function AddEditTheme() {
           options={subThemes}
           key={`subThemes_${id}`}
           value={form.subThemeRelationships[id].subThemes}
-          sx={{mt: '16px', minWidth: 350}}
+          sx={{mt: '16px', width: 350}}
           onChange={(e) => {
             form.subThemeRelationships[id].subThemes = e.target.value
             // const relationships = form.subThemeRelationships;
@@ -241,25 +257,17 @@ export default function AddEditTheme() {
           // onBlur={validateField(form, attriConfig, 'description', attribute2Compass['description'], setErrors)}
 
         />
+        <Button onClick={() => {
+          const relationships = form.subThemeRelationships;
+          relationships[id] = null;
+          setForm(state => ({...state, subThemeRelationships: relationships}));
+        }
+        }> Remove </Button>
       </div>
 
-      {id === form.subThemeRelationships.length - 1 ?
-        <div>
-          <Button onClick={() => {
-            const relationships = form.subThemeRelationships;
-            relationships.push({organizations: [], subThemes: []});
-            setForm(state => ({...state, subThemeRelationships: relationships}));
-          }
-          }> Add Relationship </Button>
-
-          {id > 0 ? <Button onClick={() => {
-            const relationships = form.subThemeRelationships;
-            relationships.pop();
-            setForm(state => ({...state, subThemeRelationships: relationships}));
-          }
-          }> Remove </Button> : null}
-        </div>
-        : null}
+      {/*{id === form.subThemeRelationships.length - 1 ?*/}
+      {/*  */}
+      {/*  : null}*/}
     </div>;
 
   }
@@ -332,8 +340,20 @@ export default function AddEditTheme() {
 
             <Typography variant={'h5'} sx={{marginTop: '20px'}}> SubTheme Relationships </Typography>
             {
-              form.subThemeRelationships.map((relationship, id) => <SubThemeRelationships id={id}/>)
+              form.subThemeRelationships.map((relationship, id) => {
+                if (form.subThemeRelationships[id])
+                  return <SubThemeRelationships id={id}/>;
+              })
             }
+
+
+              <Button onClick={() => {
+                const relationships = form.subThemeRelationships;
+                relationships.push({organizations: [], subThemes: []});
+                setForm(state => ({...state, subThemeRelationships: relationships}));
+              }
+              }> Add Relationship </Button>
+
 
 
             <GeneralField

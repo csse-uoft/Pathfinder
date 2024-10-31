@@ -107,7 +107,7 @@ export default function IndicatorField({
           options={subIndicatorOptions}
           key={`subIndicators_${id}`}
           value={state.subIndicatorRelationships[id].subIndicators}
-          sx={{mt: '16px', minWidth: 350, maxWidth: 100}}
+          sx={{mt: '16px', width: 350}}
           onChange={(e) => {
             // const relationships = state.subIndicatorRelationships;
             // relationships[id].subIndicators = e.target.value;
@@ -262,7 +262,7 @@ export default function IndicatorField({
                 onBlur={validateURI(defaultValue, setErrors)}
               />
             </Grid>
-            <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubTheme Relationships </Typography>
+            <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubIndicator Relationships </Typography>
             <Grid item xs={12}>
               {
                 state.subIndicatorRelationships.map((relationship, id) => <SubIndicatorRelationships id={id}/>
