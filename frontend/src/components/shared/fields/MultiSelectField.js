@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import {Help as HelpIcon} from "@mui/icons-material";
 import RadioField from "./RadioField";
@@ -9,7 +9,7 @@ export default function Dropdown(props) {
 
   const handleChange = useCallback((e, value) => {
     if (value.includes('Choose All') && chooseAll) {
-      setState(value)
+      setState(Object.keys(options))
       onChange({target: {value: Object.keys(options)}});
     } else {
       setState(value)
@@ -17,8 +17,13 @@ export default function Dropdown(props) {
     }
   }, [onChange]);
 
+
   const [layer, setLayer] = useState(twoLayerLabels? Object.keys(options)[0] : null)
   const [state, setState] = useState(value)
+
+  useEffect(() => {
+    setState(value)
+  }, [value])
 
   return (
     <div style={{ }}>

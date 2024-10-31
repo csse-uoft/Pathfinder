@@ -9,6 +9,7 @@ import Dropdown from "./fields/MultiSelectField";
 import {Button, Dialog, DialogContent, Drawer, IconButton, Tab, Tabs, TextField} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {makeStyles} from "@mui/styles";
+import {Loading} from "./index";
 
 
 // Custom styles
@@ -90,6 +91,7 @@ export default function DataTypeGraph({Theme, Indicator}) {
   const [edgeCache, setEdgeCache] = useState({})
   const [hideOrRemove, setHideOrRemove] = useState('Hide')
   const [edgeStatus, setEdgeStatus] = useState({})
+  const [loading, setLoading] = useState(true)
 
   cytoscape.use(svg);
 
@@ -227,6 +229,7 @@ export default function DataTypeGraph({Theme, Indicator}) {
         });
         // setNodesDict(nodesDict)
         setElements({nodes, edges});
+        setLoading(false)
       }).catch(e => {
         reportErrorToBackend(e);
         console.log(e)
@@ -400,6 +403,9 @@ export default function DataTypeGraph({Theme, Indicator}) {
       <p key={node.id()}>Node ID: {node.id()}, Label: {node.data('label')}</p>
     ));
   };
+
+  if (loading)
+    return <Loading message={'Loading Graph'}/>;
 
   return (
     <div className={classes.root}>
