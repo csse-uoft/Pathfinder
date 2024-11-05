@@ -127,29 +127,36 @@ export default function IndicatorField({
         />
       </div>
 
-      {id === state.subIndicatorRelationships.length - 1 ?
-        <div>
-          <Button onClick={() => {
-            const relationships = state.subIndicatorRelationships;
-            relationships.push({organizations: [], subIndicators: []});
-            setState(state => ({...state, subIndicatorRelationships: relationships}));
-            const st = state;
-            st.subIndicatorRelationships = relationships;
-            onChange(st);
-          }
-          }> Add Relationship</Button>
+      <Button onClick={() => {
+        const relationships = state.subIndicatorRelationships;
+        relationships[id] = null;
+        setState(state => ({...state, subIndicatorRelationships: relationships}));
+      }
+      }> Remove </Button>
 
-          {id > 0 ? <Button onClick={() => {
-            const relationships = state.subIndicatorRelationships;
-            relationships.pop();
-            setState(state => ({...state, subIndicatorRelationships: relationships}));
-            const st = state;
-            st.subIndicatorRelationships = relationships;
-            onChange(st);
-          }
-          }> Remove </Button> : null}
-        </div>
-        : null}
+      {/*{id === state.subIndicatorRelationships.length - 1 ?*/}
+      {/*  <div>*/}
+      {/*    <Button onClick={() => {*/}
+      {/*      const relationships = state.subIndicatorRelationships;*/}
+      {/*      relationships.push({organizations: [], subIndicators: []});*/}
+      {/*      setState(state => ({...state, subIndicatorRelationships: relationships}));*/}
+      {/*      const st = state;*/}
+      {/*      st.subIndicatorRelationships = relationships;*/}
+      {/*      onChange(st);*/}
+      {/*    }*/}
+      {/*    }> Add Relationship</Button>*/}
+
+      {/*    {id > 0 ? <Button onClick={() => {*/}
+      {/*      const relationships = state.subIndicatorRelationships;*/}
+      {/*      relationships.pop();*/}
+      {/*      setState(state => ({...state, subIndicatorRelationships: relationships}));*/}
+      {/*      const st = state;*/}
+      {/*      st.subIndicatorRelationships = relationships;*/}
+      {/*      onChange(st);*/}
+      {/*    }*/}
+      {/*    }> Remove </Button> : null}*/}
+      {/*  </div>*/}
+      {/*  : null}*/}
     </div>;
 
   }
@@ -265,9 +272,18 @@ export default function IndicatorField({
             <Typography variant={'h5'}  sx={{ marginTop: '20px' }}> SubIndicator Relationships </Typography>
             <Grid item xs={12}>
               {
-                state.subIndicatorRelationships.map((relationship, id) => <SubIndicatorRelationships id={id}/>
+                state.subIndicatorRelationships.map((relationship, id) => {
+                  if (state.subIndicatorRelationships[id])
+                    return <SubIndicatorRelationships id={id}/>;
+                  }
                 )
               }
+              <Button onClick={() => {
+                const relationships = state.subIndicatorRelationships;
+                relationships.push({organizations: [], subIndicators: []});
+                setState(state => ({...state, subIndicatorRelationships: relationships}));
+              }
+              }> Add Relationship </Button>
             </Grid>
             <Grid item xs={12}>
               <GeneralField

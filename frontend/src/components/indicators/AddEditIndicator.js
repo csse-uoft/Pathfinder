@@ -164,8 +164,12 @@ export default function AddEditIndicator() {
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
+    const subIndicatorRelationships = form.subIndicatorRelationships.filter(relationship => relationship)
     if (mode === 'new') {
-      createDataType('indicator', {form}).then((ret) => {
+      createDataType('indicator', {
+        form: {
+          ...form, subIndicatorRelationships
+        }}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/indicators');
@@ -181,7 +185,9 @@ export default function AddEditIndicator() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateDataType('indicator',encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('indicator',encodeURIComponent(uri), {form: {
+          ...form, subIndicatorRelationships
+        }}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/indicators');
@@ -203,28 +209,34 @@ export default function AddEditIndicator() {
     const errors = {};
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
     form.subIndicatorRelationships.map((relationship, index) => {
-      if (index && (!relationship.organizations.length || !relationship.subIndicators.length)) {
+      if (!relationship)
+        return
+      if (!relationship.organizations.length || !relationship.subIndicators.length) {
         if (!errors.subIndicatorRelationships) {
-          errors.subIndicatorRelationships = {[index]: {}}
+          errors.subIndicatorRelationships = {}
+        }
+        if (!errors.subIndicatorRelationships[index]) {
+          errors.subIndicatorRelationships[index] = {}
         }
         if (!relationship.organizations.length) {
-          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
+          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid';
+          // errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid';
         }
         if (!relationship.subIndicators.length) {
-          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
+          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid';
         }
       }
-      if (!index && ((relationship.organizations.length && !relationship.subIndicators.length) || (!relationship.organizations.length && relationship.subIndicators.length))) {
-        if (!errors.subIndicatorRelationships) {
-          errors.subIndicatorRelationships = {[index]: {}}
-        }
-        if (!relationship.organizations.length) {
-          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
-        }
-        if (!relationship.subIndicators.length) {
-          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
-        }
-      }
+      // if (!index && ((relationship.organizations.length && !relationship.subIndicators.length) || (!relationship.organizations.length && relationship.subIndicators.length))) {
+      //   if (!errors.subIndicatorRelationships) {
+      //     errors.subIndicatorRelationships = {[index]: {}}
+      //   }
+      //   if (!relationship.organizations.length) {
+      //     errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
+      //   }
+      //   if (!relationship.subIndicators.length) {
+      //     errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
+      //   }
+      // }
     })
     setErrors(errors);
     return Object.keys(errors).length === 0;

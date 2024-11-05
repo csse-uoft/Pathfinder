@@ -4,7 +4,6 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {assignMeasure, assignValue, assignValues, assignUnitOfMeasure} = require("../helpers");
-const {GDBHasSubThemePropertyModel} = require("../../models/hasSubThemeProperty");
 const {GDBHasSubIndicatorPropertyModel} = require("../../models/hasSubIndicatorProperty");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
@@ -47,6 +46,9 @@ async function indicatorBuilder(environment, object, organization, error, {
 
     // add the organization to it, and add it to the organization
     if (environment === 'interface') {
+      if (!form.organization) {
+        throw Server400Error('Organization is Mandatory for Indicator')
+      }
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
       // impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})
       // if (!impactNorms.indicators)
