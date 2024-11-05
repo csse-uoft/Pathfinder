@@ -111,7 +111,8 @@ export default function DataDashboard() {
             <YAxis />
             <Tooltip />
             <Bar dataKey="objectsCount" fill="#82ca9d" />
-          </BarChart></div> : null
+          </BarChart>
+          </div> : null
       }
 
         {theme2OutcomesCount && theme2OutcomesCount.length?
