@@ -2,6 +2,7 @@ const {GDBThemeModel} = require("../../models/theme");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {fetchDataTypeInterfaces} = require("../../helpers/fetchHelper");
 const {SPARQL, GraphDB} = require("graphdb-utils");
+const {getRidOfQuotes} = require("../helpers");
 
 const resource = 'Theme'
 
@@ -36,12 +37,12 @@ const fetchThemeViewingPage = async (req, res) => {
 }`;
   await GraphDB.sendSelectQuery(query, false, ({theme, themeName, outcome, outcomeName, description, code, codeName}) => {
     if (!themes[singleThemeUri || theme.id]) {
-      themes[singleThemeUri || theme.id] = {name: themeName?.id || 'NA', _uri: singleThemeUri || theme.id, outcomes: {}, description: description?.id || '', codes: {}}
+      themes[singleThemeUri || theme.id] = {name: getRidOfQuotes(themeName?.id) || 'NA', _uri: singleThemeUri || theme.id, outcomes: {}, description: getRidOfQuotes(description?.id) || '', codes: {}}
     }
     if (code)
-      themes[singleThemeUri || theme.id].codes[code.id] = {_uri: code.id, name:codeName?.id || 'NA'}
+      themes[singleThemeUri || theme.id].codes[code.id] = {_uri: code.id, name:getRidOfQuotes(codeName?.id) || 'NA'}
     if (outcome)
-      themes[singleThemeUri || theme.id].outcomes[outcome.id] = {_uri: outcome.id, name:outcomeName?.id || 'NA'}
+      themes[singleThemeUri || theme.id].outcomes[outcome.id] = {_uri: outcome.id, name:getRidOfQuotes(outcomeName?.id) || 'NA'}
   });
   const ret = Object.values(themes).map((theme) => {
     theme.outcomes = Object.values(theme.outcomes)

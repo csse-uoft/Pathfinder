@@ -576,6 +576,13 @@ async function dataReferredBySubjects(subjectType, objectUri, predicate) {
   return subjects
 }
 
+function getRidOfQuotes(str) {
+  if (!str) {
+    return str
+  }
+  return str.replace(/^"(.*)"$/, '$1')
+}
+
 async function deleteDataAndAllReferees(objectUri, predicate) {
   let query;
   if (predicate) {
@@ -630,5 +637,6 @@ module.exports = {
   dataReferredBySubjects,
   deleteDataAndAllReferees,
   checkAllReferees,
-  assignUnitOfMeasure
+  assignUnitOfMeasure,
+  getRidOfQuotes
 };
