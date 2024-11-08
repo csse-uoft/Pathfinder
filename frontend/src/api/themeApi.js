@@ -8,6 +8,10 @@ export async function fetchThemes() {
   return getJson('/api/themes/');
 }
 
+export async function fetchForThemesViewingPage(singleThemeUri) {
+  return getJson(`/api/themes/viewingPage/${singleThemeUri || ''}`)
+}
+
 export async function fetchTheme(id) {
   return getJson('/api/theme/' + id + '/');
 }

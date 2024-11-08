@@ -47,7 +47,7 @@ async function indicatorBuilder(environment, object, organization, error, {
     // add the organization to it, and add it to the organization
     if (environment === 'interface') {
       if (!form.organization) {
-        throw Server400Error('Organization is Mandatory for Indicator')
+        throw new Server400Error('Organization is Mandatory for Indicator')
       }
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
       // impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})

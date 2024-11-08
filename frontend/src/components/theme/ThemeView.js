@@ -5,7 +5,7 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {deleteTheme, fetchThemes} from "../../api/themeApi";
+import {deleteTheme, fetchForThemesViewingPage, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
@@ -33,24 +33,25 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
   });
   const [trigger, setTrigger] = useState(true);
 
-  const [codeInterfaces, setCodeInterfaces] = useState({});
+  // const [codeInterfaces, setCodeInterfaces] = useState({});
 
-  const [outcomeNames, setOutcomeNames] = useState({})
+  // const [outcomeNames, setOutcomeNames] = useState({});
 
   useEffect(() => {
     if (multi) {
-      fetchDataTypes('theme').then(res => {
-        if(res.success)
-          setState(state => ({...state, loading: false, data: res.themes}));
+      fetchForThemesViewingPage().then(({data, success}) => {
+        if (success) {
+          setState(state => ({...state, loading: false, data: data}));
+        }
       }).catch(e => {
         setState(state => ({...state, loading: false}))
         navigate('/dashboard');
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if(single) {
-      fetchDataType('theme', encodeURIComponent(uri)).then(({theme, success}) => {
+    } else if (single) {
+      fetchForThemesViewingPage(encodeURIComponent(uri)).then(({data, success}) => {
         if (success) {
-          setState(state => ({...state, loading: false, data: [theme]}));
+          setState(state => ({...state, loading: false, data: data}));
         }
       }).catch(e => {
         setState(state => ({...state, loading: false}))
@@ -61,23 +62,23 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
 
   }, [trigger]);
 
-  useEffect(() => {
-    fetchDataTypeInterfaces('code').then(({interfaces}) => {
-      setCodeInterfaces(interfaces)
-    })
-  }, []);
+  // useEffect(() => {
+  //   fetchDataTypeInterfaces('code').then(({interfaces}) => {
+  //     setCodeInterfaces(interfaces)
+  //   })
+  // }, []);
 
-  useEffect(() => {
-    if (state.data.length) {
-      state.data.map((theme, index) => {
-        fetchDataTypes('outcome', `theme/${encodeURIComponent(theme._uri)}`).then(({outcomes, success}) => {
-          if (success) {
-            setOutcomeNames(({...outcomeNames}) => ({...outcomeNames, [theme._uri]: outcomes.map(outcome => outcome.name)}))
-          }
-        })
-      })
-    }
-  }, [state])
+  // useEffect(() => {
+  //   if (state.data.length) {
+  //     state.data.map((theme, index) => {
+  //       fetchDataTypes('outcome', `theme/${encodeURIComponent(theme._uri)}`).then(({outcomes, success}) => {
+  //         if (success) {
+  //           setOutcomeNames(({...outcomeNames}) => ({...outcomeNames, [theme._uri]: outcomes.map(outcome => outcome.name)}))
+  //         }
+  //       })
+  //     })
+  //   }
+  // }, [state])
 
   const showDeleteDialog = (uri) => {
     setState(state => ({
@@ -112,13 +113,13 @@ export default function ThemeView({single, multi, organizationUser, groupUser, s
     {
       label: 'Theme Code(s)',
       body: ({codes}) => {
-        return codes?.map(code => codeInterfaces[code]);
+        return codes?.map(code => code.name);
       }
     },
     {
       label: 'Associated Outcome(s)',
-      body: ({_uri}) => {
-        return outcomeNames[_uri];
+      body: ({outcomes}) => {
+        return outcomes.map(outcome => outcome.name);
       }
     },
     {
