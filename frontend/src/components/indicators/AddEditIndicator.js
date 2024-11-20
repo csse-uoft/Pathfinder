@@ -205,13 +205,20 @@ export default function AddEditIndicator() {
 
   };
 
+  const blankRelationship = (relationship) => {
+    return !relationship.organizations.length && !relationship.subIndicators.length
+  }
+
+
+
+
   const validate = () => {
     const errors = {};
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
     form.subIndicatorRelationships.map((relationship, index) => {
       if (!relationship)
         return
-      if (!relationship.organizations.length || !relationship.subIndicators.length) {
+      if (!blankRelationship(relationship) && (!relationship.organizations.length || !relationship.subIndicators.length)) {
         if (!errors.subIndicatorRelationships) {
           errors.subIndicatorRelationships = {}
         }
