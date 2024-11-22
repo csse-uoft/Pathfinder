@@ -26,7 +26,7 @@ const fetchDataTypeNodeGraphData = async (req, res) => {
     query = `${SPARQL.getSPARQLPrefixes()} 
  SELECT * WHERE {
   ?theme  rdf:type cids:Theme .
-    ?theme cids:hasName ?name .
+    OPTIONAL {?theme cids:hasName ?name .}
 }`;
     await GraphDB.sendSelectQuery(query, false, ({theme, name}) => {
       if (!nodes[theme.id]) {
@@ -56,7 +56,7 @@ SELECT * WHERE {
     query = `${SPARQL.getSPARQLPrefixes()} 
  SELECT * WHERE {
   ?indicator  rdf:type cids:Indicator .
-    ?indicator cids:hasName ?name .
+    OPTIONAL {?indicator cids:hasName ?name .}
 }`;
     await GraphDB.sendSelectQuery(query, false, ({indicator, name}) => {
       if (!nodes[indicator.id]) {

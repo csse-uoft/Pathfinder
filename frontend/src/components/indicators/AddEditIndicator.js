@@ -41,6 +41,7 @@ export default function AddEditIndicator() {
   const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
   const [state, setState] = useState({
+    popReportGenerator: false,
     submitDialog: false,
     loadingButton: false,
   });
@@ -158,9 +159,20 @@ export default function AddEditIndicator() {
 
   const handleSubmit = () => {
     if (validate()) {
-      setState(state => ({...state, submitDialog: true}));
+      if (popReportGenerator()) {
+        setState(state => ({...state, popReportGenerator: true}))
+      }
+      handleSubmitNext()
     }
   };
+
+  const handleSubmitNext = () => {
+    setState(state => ({...state, submitDialog: true}));
+  }
+
+  const popReportGenerator = () => {
+    return !form.reportGenerator && haveNonBlankRelationship()
+  }
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
@@ -181,7 +193,7 @@ export default function AddEditIndicator() {
         }
         console.log(e);
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating indicator', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
@@ -207,6 +219,10 @@ export default function AddEditIndicator() {
 
   const blankRelationship = (relationship) => {
     return !relationship.organizations.length && !relationship.subIndicators.length
+  }
+
+  const haveNonBlankRelationship = () => {
+    return form.subIndicatorRelationships?.some(relationship => relationship && !blankRelationship(relationship))
   }
 
 
@@ -342,6 +358,25 @@ export default function AddEditIndicator() {
                                         key={'confirm'}
                                         onClick={handleConfirm} children="confirm" autoFocus/>]}
                        open={state.submitDialog}/>
+
+          <AlertDialog dialogContentText={"Do you want this indicator automatically generate corresponding \n" +
+            "indicator reports based on given subIndicators' indicator reports? \n" +
+            "Notice: Once you made the choice, you will not be able to change later"}
+                       dialogTitle={'Auto subIndicator generating'}
+                       buttons={[<Button onClick={() => {
+                         setState(state => ({...state, popReportGenerator: false}))
+                         setForm(form => ({...form, reportGenerator: 'no'}))
+                         handleSubmitNext()
+                       }}
+                                         key={'NO'}>{'NO'}</Button>,
+                         <Button noDefaultStyle variant="text" color="primary"
+                                        key={'confirm'}
+                                        onClick={() => {
+                                          setState(state => ({...state, popReportGenerator: false}))
+                                          setForm(form => ({...form, reportGenerator: 'auto'}))
+                                          handleSubmitNext()
+                                        }} children="confirm" autoFocus/>]}
+                       open={state.popReportGenerator}/>
         </Paper>}
 
     </Container>);
