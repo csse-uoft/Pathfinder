@@ -12,7 +12,9 @@ export function AlertDialog(props) {
       <Dialog
         open={props.open}
       >
-        <DialogTitle>
+        <DialogTitle sx={{
+          color: props.dialogTitleColor
+        }}>
           {props.dialogTitle}
         </DialogTitle>
         <DialogContent>

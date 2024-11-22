@@ -161,8 +161,9 @@ export default function AddEditIndicator() {
     if (validate()) {
       if (popReportGenerator()) {
         setState(state => ({...state, popReportGenerator: true}))
+      } else {
+        handleSubmitNext()
       }
-      handleSubmitNext()
     }
   };
 
@@ -362,20 +363,25 @@ export default function AddEditIndicator() {
           <AlertDialog dialogContentText={"Do you want this indicator automatically generate corresponding \n" +
             "indicator reports based on given subIndicators' indicator reports? \n" +
             "Notice: Once you made the choice, you will not be able to change later"}
-                       dialogTitle={'Auto subIndicator generating'}
+                       dialogTitle={'Automatic generation of indicator reports'}
+                       dialogTitleColor={'red'}
                        buttons={[<Button onClick={() => {
+                         setState(state => ({...state, popReportGenerator: false}))
+                       }}
+                                         key={'return'}>{'Return'}</Button>,
+                         , <Button onClick={() => {
                          setState(state => ({...state, popReportGenerator: false}))
                          setForm(form => ({...form, reportGenerator: 'no'}))
                          handleSubmitNext()
                        }}
                                          key={'NO'}>{'NO'}</Button>,
                          <Button noDefaultStyle variant="text" color="primary"
-                                        key={'confirm'}
+                                        key={'yes'}
                                         onClick={() => {
                                           setState(state => ({...state, popReportGenerator: false}))
                                           setForm(form => ({...form, reportGenerator: 'auto'}))
                                           handleSubmitNext()
-                                        }} children="confirm" autoFocus/>]}
+                                        }} children="Yes" autoFocus/>]}
                        open={state.popReportGenerator}/>
         </Paper>}
 
