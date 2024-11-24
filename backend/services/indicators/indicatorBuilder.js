@@ -141,6 +141,7 @@ async function indicatorBuilder(environment, object, organization, error, {
         }
       }
       await assignIndicatorReports(uri, mainObject, form, organization._uri)
+      assignValue(environment, config, object, mainModel, mainObject, 'reportGenerator', ':reportGenerator', addMessage, form, uri, hasError, error);
 
       await mainObject.save();
       return true
