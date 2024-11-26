@@ -40,6 +40,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'directlyUpload':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     // users
     case 'inviteNewUser':
       return userAccount.isSuperuser;

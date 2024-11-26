@@ -3,13 +3,36 @@ const {Transaction} = require("graphdb-utils");
 const {fileUploadingMultiOrganization} = require("./fileUploadingMultiOrganization");
 const {fileUploading} = require("./fileUploading");
 const {fileUploadingMultiSubArray} = require("./fileUploadingMultiSubArray");
+const {fileUploadingDirectly} = require("./fileUploadingDirectly");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
-    const {multipleOrganizations} = req.body;
-    if (await hasAccess(req, multipleOrganizations ? 'fileUploadingMultiOrganization' : 'fileUploading')) {
+    let {mode} = req.body;
+    switch (mode) {
+      case 'Single Organization':
+        mode = 'fileUploading'
+        break
+      case 'Multiple Organizations':
+        mode = 'fileUploadingMultiOrganization'
+        break
+      case 'Directly Upload':
+        mode = 'directlyUpload'
+        break
+    }
+    if (await hasAccess(req, mode)) {
       await Transaction.beginTransaction();
-      return await multipleOrganizations? fileUploadingMultiSubArray(req, res, next) : fileUploading(req, res, next);
+      switch (mode) {
+        case 'fileUploading':
+          return await fileUploading(req, res, next);
+
+        case 'fileUploadingMultiOrganization':
+          return await fileUploadingMultiSubArray(req, res, next)
+
+        case 'directlyUpload':
+          return await fileUploadingDirectly(req, res, next)
+      }
+
+
     }
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {

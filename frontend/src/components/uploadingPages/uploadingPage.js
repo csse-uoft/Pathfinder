@@ -60,7 +60,7 @@ export default function FileUploadingPage() {
   const [options, setOptions] = useState({
     fileTypes: ['JSON-ld'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
-    mode: ['Single Organization', 'Multiple Organizations'],
+    mode: ['Single Organization', 'Multiple Organizations', 'Directly Upload'],
     organizations: {}
   });
   const [errors, setErrors] = useState(
@@ -99,7 +99,7 @@ export default function FileUploadingPage() {
     try {
       setState(state => ({...state, loadingButton: true}));
       let responds;
-      const respond = await uploadFile(state.fileContent,state.mode === 'Multiple Organizations', state.organization, fileName)
+      const respond = await uploadFile(state.fileContent,state.mode, state.organization, fileName)
       if (respond.success) {
         // let trace = ''
         // respond.traceOfUploading.map(message => trace += message)

@@ -90,7 +90,7 @@ export default function FileUploader({title, disabled, onchange, importedError, 
     <div>
       <Typography variant={'h6'}> {title} </Typography>
       <input type="file" id={'file-input'} onChange={handleFileSelect} style={{color: 'transparent'}}
-             disabled={disabled} accept={'.json'}/>
+             disabled={disabled} accept={".json, .jsonld"}/>
       {selectedFile ? <div>
         <Typography variant={'subtitle2'} style={{display: 'inline-block',}}> {selectedFile?.name} </Typography>
         <button onClick={handleRemoveFile} style={{display: 'inline-block', marginLeft: '10px'}}>
