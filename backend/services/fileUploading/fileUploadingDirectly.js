@@ -6,9 +6,9 @@ const { RDFMimeType } = require('graphdb').http;
 async function fileUploadingDirectly(req, res, next) {
 
   const {objects, fileName} = req.body;
-
   const expandedJsonLD = await expand(objects);
 
+  addTypeToAllObjects(expandedJsonLD)
   const jsonldData = JSON.stringify(expandedJsonLD);
   // await fs.writeFile(tempFilePath, jsonldData, 'utf8');
 
@@ -35,6 +35,33 @@ async function fileUploadingDirectly(req, res, next) {
 
 
 
+}
+
+function addTypeToAllObjects(jsonldData) {
+
+  for (let object of jsonldData) {
+    if (object['@value'] && isString(object['@value'])) {
+      continue
+    }
+    if (!object['@type']) {
+      object['@type'] = []
+    }
+    object['@type'].push('http://www.w3.org/2002/07/owl#NamedIndividual')
+
+    for (let property in object) {
+      if (property === '@id' || property === '@type') {
+        continue
+      }
+      if (Array.isArray(object[property])) {
+        addTypeToAllObjects(object[property])
+      }
+
+    }
+  }
+}
+
+function isString(item) {
+  return (typeof item === 'string' || item instanceof String)
 }
 
 module.exports = {fileUploadingDirectly}

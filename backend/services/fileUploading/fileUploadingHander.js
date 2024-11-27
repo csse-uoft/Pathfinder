@@ -20,12 +20,14 @@ const fileUploadingHandler = async (req, res, next) => {
         break
     }
     if (await hasAccess(req, mode)) {
-      await Transaction.beginTransaction();
+
       switch (mode) {
         case 'fileUploading':
+          await Transaction.beginTransaction();
           return await fileUploading(req, res, next);
 
         case 'fileUploadingMultiOrganization':
+          await Transaction.beginTransaction();
           return await fileUploadingMultiSubArray(req, res, next)
 
         case 'directlyUpload':
