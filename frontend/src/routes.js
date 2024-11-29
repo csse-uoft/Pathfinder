@@ -87,6 +87,7 @@ import NodeGraph from "./components/nodeGraph/nodeGraph";
 import DataDashboard from "./components/dataDashboard/DataDashboard";
 import AddEditThemeNetwork from "./components/themeNetwork/AddEditThemeNetwork";
 import ThemeNetworks from "./components/themeNetwork/ThemeNetworks";
+import SankeyDiagram from "./components/sankeyDiagram/SankeyDiagram";
 
 const routes = (<Routes>
     {/*basic*/}
@@ -313,6 +314,8 @@ const routes = (<Routes>
            element={<PrivateRoute element={NodeGraph}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/dataDashboard`}
            element={<PrivateRoute element={DataDashboard}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/sankeyDiagram`}
+           element={<PrivateRoute element={SankeyDiagram}/>}/>
 
   </Routes>);
 

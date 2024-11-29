@@ -29,6 +29,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'sankeyDiagram':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'dataExport':
       if (userAccount.isSuperuser)
         return true;
