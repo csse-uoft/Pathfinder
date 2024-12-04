@@ -207,7 +207,7 @@ export default function SankeyDiagram() {
             justifyContent: "center",
             marginTop: "20px",
           }}>
-          <Diagram width={1100} height={500} data={data}/>
+          <Diagram width={1000} height={900} data={data}/>
 
 
         </Container> : null
@@ -218,7 +218,7 @@ export default function SankeyDiagram() {
 }
 
 
-const Diagram = ({ width = 800, height = 500, data }) => {
+const Diagram = ({ width = 1000, height = 900, data }) => {
   const svgRef = useRef();
 
   useEffect(() => {
@@ -228,11 +228,15 @@ const Diagram = ({ width = 800, height = 500, data }) => {
 
     svg.selectAll("*").remove();
 
+    const labelPadding = 30; // Additional space for bottom labels
+    const svgHeight = height + labelPadding;
+
+
     const sankey = d3Sankey()
       .nodeId(d => d.id)
       .nodeWidth(40)
-      .nodePadding(20)
-      .extent([[1, 1], [width - 1, height - 1]])
+      .nodePadding(40)
+      .extent([[1, 1], [width - 1, height - labelPadding - 1]])
       .nodeAlign(node => (node.column !== undefined ? node.column : node.depth))
       .nodeSort(null);
 
@@ -328,9 +332,29 @@ const Diagram = ({ width = 800, height = 500, data }) => {
       .on("mouseout", function () {
         tooltip.style("opacity", 0);
       });
+
+    // Add node labels positioned under the nodes
+    nodeGroup.append("text")
+      .attr("x", d => {
+        if (d.depth === 0) return -5; // Left alignment for left-most nodes
+        if (d.depth === data.nodes.reduce((max, n) => Math.max(max, n.depth), 0)) return d.x1 - d.x0 + 5; // Right alignment for right-most nodes
+        return (d.x1 - d.x0) / 2; // Center alignment for other nodes
+      })
+      .attr("y", d => d.y1 - d.y0 + 20) // Position below the node
+      .attr("text-anchor", d => {
+        if (d.depth === 0) return "start"; // Align left-most nodes to left
+        if (d.depth === data.nodes.reduce((max, n) => Math.max(max, n.depth), 0)) return "end"; // Align right-most nodes to right
+        return "middle"; // Center alignment for others
+      })
+      .attr("font-size", "13px")
+      .attr("fill", "#000")
+      .text(d => d.id);
+
   }, [data, width, height]);
 
   return <svg ref={svgRef} />;
 };
+
+
 
 

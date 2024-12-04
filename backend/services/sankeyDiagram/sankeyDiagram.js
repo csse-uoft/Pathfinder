@@ -41,8 +41,8 @@ const buildSankeyDiagram = async (nodes, links, firstColumn, secondColumn, start
   const secondCols = {}
   const node2nodeCounting = {}
   await GraphDB.sendSelectQuery(query, false, ({firstCol,firstColName, secondCol, secondColName}) => {
-    firstCols[firstCol.id] = firstColName.id + ' ' + firstCol.id
-    secondCols[secondCol.id] = secondColName.id  + ' ' + secondCol.id
+    firstCols[firstCol.id] = firstColName?.id || firstCol.id
+    secondCols[secondCol.id] = secondColName?.id || secondCol.id
     if (!node2nodeCounting[firstCol.id]) {
       node2nodeCounting[firstCol.id] = {}
     }

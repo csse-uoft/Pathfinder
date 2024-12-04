@@ -13,7 +13,7 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 
 const config = require('../config');
 const {initUserAccounts, addSuperPassword, addSampleOrganizations} = require('../services/userAccount/user');
-const {initStreetTypes, initStreetDirections} = require('../services/address');
+const {initStreetTypes, initStreetDirections, initCities} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
   errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute, codeRoute, codesRoute, characteristicRoute,
@@ -123,6 +123,7 @@ initUserAccounts();
 addSuperPassword();
 initStreetTypes();
 initStreetDirections();
+// initCities();
 addSampleOrganizations();
 
 app.use(errorHandler);

@@ -474,7 +474,7 @@ async function assignUnitOfMeasure(environment, config, object, mainModel, mainO
 
   let label;
   if (!unitOfMeasureURI && unitOfMeasureObject) {
-    label = getValue(unitOfMeasureObject, GDBUnitOfMeasure, 'rdfs:label');
+    label = getValue(unitOfMeasureObject, GDBUnitOfMeasure, 'label');
   } else if (environment === 'interface' && form && propertyName) {
     label = form[propertyName];
   }

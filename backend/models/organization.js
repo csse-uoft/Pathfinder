@@ -19,7 +19,7 @@ const GDBOrganizationModel = createGraphDBModel({
   reporters: {type: [GDBUserAccountModel], internalKey: ':hasReporter'},
   editors: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},
   researchers: {type: [GDBUserAccountModel], internalKey: ':hasResearcher'},
-  legalName:{type: String, internalKey:'tove_org:hasLegalName'},
+  legalName: {type: String, internalKey:'tove_org:hasLegalName'},
   hasIds: {type: [GDBOrganizationIdModel], internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE},
   hasIndicators: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
   hasOutcomes: {type: [() => require("./outcome").GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
