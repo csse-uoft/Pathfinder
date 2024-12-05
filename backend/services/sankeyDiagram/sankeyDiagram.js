@@ -35,7 +35,48 @@ const buildSankeyDiagram = async (nodes, links, firstColumn, secondColumn, start
     OPTIONAL {?secondCol cids:hasName ?secondColName.} 
     OPTIONAL {?firstCol cids:hasName ?firstColName.}
 }`;
+  } else if (secondColumn.dataType === 'Theme' && firstColumn.dataType === 'Indicator') {
+    query = `${SPARQL.getSPARQLPrefixes()} 
+  SELECT * WHERE {
+  VALUES ?firstCol {${firstColumnItems}}
+  VALUES ?secondCol {${secondColumnItems}}
+    ?outcome cids:forTheme ?secondCol .
+    ?outcome cids:hasIndicator ?firstCol .
+    OPTIONAL {?secondCol cids:hasName ?secondColName.} 
+    OPTIONAL {?firstCol cids:hasName ?firstColName.}
+}`;
+  } else if (secondColumn.dataType === 'Indicator' && firstColumn.dataType === 'Organization') {
+    query = `${SPARQL.getSPARQLPrefixes()} 
+  SELECT * WHERE {
+  VALUES ?firstCol {${firstColumnItems}}
+  VALUES ?secondCol {${secondColumnItems}}
+    ?firstCol cids:hasOutcome ?outcome .
+    ?outcome cids:hasIndicator ?secondCol .
+    OPTIONAL {?secondCol cids:hasName ?secondColName.} 
+    OPTIONAL {?firstCol tove_org:hasLegalName ?firstColName.}
+}`;
+  } else if (secondColumn.dataType === 'Theme' && firstColumn.dataType === 'Theme') {
+    query = `${SPARQL.getSPARQLPrefixes()} 
+  SELECT * WHERE {
+  VALUES ?firstCol {${firstColumnItems}}
+  VALUES ?secondCol {${secondColumnItems}}
+    ?relationship cidsrep:hasParentTheme ?firstCol .
+    ?relationship cidsrep:hasSubTheme ?secondCol .
+    OPTIONAL {?secondCol cids:hasName ?secondColName.} 
+    OPTIONAL {?firstCol cids:hasName ?firstColName.}
+}`;
+  } else if (firstColumn.dataType === 'Theme' && secondColumn.dataType === 'Organization') {
+    query = `${SPARQL.getSPARQLPrefixes()} 
+  SELECT * WHERE {
+  VALUES ?firstCol {${firstColumnItems}}
+  VALUES ?secondCol {${secondColumnItems}}
+    ?secondCol cids:hasOutcome ?outcome .
+    ?outcome cids:forTheme ?firstCol .
+    OPTIONAL {?secondCol tove_org:hasLegalName ?secondColName.} 
+    OPTIONAL {?firstCol cids:hasName ?firstColName.}
+}`;
   }
+
 
   const firstCols = {}
   const secondCols = {}

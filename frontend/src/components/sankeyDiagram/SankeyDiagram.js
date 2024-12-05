@@ -9,6 +9,7 @@ import SelectField from "../shared/fields/SelectField";
 import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {Loading} from "../shared";
 import GeneralField from "../shared/fields/GeneralField";
+import {useSnackbar} from "notistack";
 
 
 export default function SankeyDiagram() {
@@ -29,7 +30,23 @@ export default function SankeyDiagram() {
     }
     return false;
   };
-  const dataTypes = ['Organization', 'Theme', 'Indicator'];
+  // const dataTypes = ['Organization', 'Theme', 'Indicator'];
+
+  const dataTypes = (id) => {
+    if (id == 0)
+      return ['Organization', 'Theme', 'Indicator']
+    const prevDataType = form[id - 1]['dataType']
+    switch (prevDataType) {
+      case 'Organization':
+        return ['Theme', 'Indicator']
+      case 'Theme':
+        return ['Organization', 'Theme', 'Indicator']
+      case 'Indicator':
+        return ['Theme']
+      default:
+        return []
+    }
+  }
   const [type2Individuals, setType2Individuals] = useState({
     'Organization': {}, 'Theme': {}, 'Indicator': {}
   });
@@ -128,7 +145,7 @@ export default function SankeyDiagram() {
               key={'colType' + id}
               label={`Column ${id} data types`}
               value={form[id]['dataType']}
-              options={dataTypes}
+              options={dataTypes(id)}
               // helperText={}
               // onBlur={() => {
               //   if (!form.administrator) {
@@ -187,6 +204,7 @@ export default function SankeyDiagram() {
           onClick={async () => {
 
             const data = await fetchSankeyDiagramData(form);
+
             setData(data);
             // objectsCount.map(organization => organization.organization = organizationInterfaces[organization.organization])
             // setObjectsCount(objectsCount)
@@ -220,7 +238,7 @@ export default function SankeyDiagram() {
 
 const Diagram = ({ width = 1000, height = 900, data }) => {
   const svgRef = useRef();
-
+  const {enqueueSnackbar} = useSnackbar();
   useEffect(() => {
     const svg = d3.select(svgRef.current)
       .attr("width", width)
@@ -240,7 +258,13 @@ const Diagram = ({ width = 1000, height = 900, data }) => {
       .nodeAlign(node => (node.column !== undefined ? node.column : node.depth))
       .nodeSort(null);
 
-    sankey(data);
+    try {
+      sankey(data);
+    } catch (error) {
+      console.error("Sankey layout error:", error);
+      enqueueSnackbar("Invalid Data Input", {variant: 'error'});
+      return;
+    }
 
     const nodeColor = d3.scaleOrdinal(d3.schemeCategory10);
 
