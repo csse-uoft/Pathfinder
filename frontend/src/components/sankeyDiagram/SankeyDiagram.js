@@ -10,6 +10,8 @@ import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {Loading} from "../shared";
 import GeneralField from "../shared/fields/GeneralField";
 import {useSnackbar} from "notistack";
+import {AlertDialog} from "../shared/Dialogs";
+import {parseInt} from "lodash/string";
 
 
 export default function SankeyDiagram() {
@@ -17,13 +19,17 @@ export default function SankeyDiagram() {
   const [data, setData] = useState({});
   const COLORS = ['#82ca9d', '#8884d8', '#ffc658', '#ff7300'];
   const [state, setState] = useState({
-    loading: true
+    loading: true,
+    dialog: false,
+    dialogTitle: '',
+    dialogContext: ''
   });
   const [errors, setErrors] = useState(
     {}
   );
+  const {enqueueSnackbar} = useSnackbar();
   const toBeDisabled = (id) => {
-    if (id > 0) {
+    if (id > 1) {
       if (!form[id - 1].dataType) {
         return true;
       }
@@ -33,16 +39,16 @@ export default function SankeyDiagram() {
   // const dataTypes = ['Organization', 'Theme', 'Indicator'];
 
   const dataTypes = (id) => {
-    if (id == 0)
+    if (id == 1)
       return ['Organization', 'Theme', 'Indicator']
     const prevDataType = form[id - 1]['dataType']
     switch (prevDataType) {
       case 'Organization':
         return ['Theme', 'Indicator']
       case 'Theme':
-        return ['Organization', 'Theme', 'Indicator']
+        return ['Organization', 'Indicator']
       case 'Indicator':
-        return ['Theme']
+        return ['Theme', 'Organization']
       default:
         return []
     }
@@ -126,7 +132,7 @@ export default function SankeyDiagram() {
           type="number"
           onChange={(e) => {
             const newForm = {}
-            for (let i = 0; i < e.target.value; i++) {
+            for (let i = 1; i < parseInt(e.target.value, 10) + 1; i++) {
               if (form[i]) {
                 newForm[i] = form[i]
               } else {
@@ -203,9 +209,26 @@ export default function SankeyDiagram() {
           endDecorator={<>{">"}</>}
           onClick={async () => {
 
-            const data = await fetchSankeyDiagramData(form);
+            try {
+              const data = await fetchSankeyDiagramData(form);
+              if (!data.error) {
+                console.log(data.messages)
+                if (data.messages)
+                  setState(state => ({...state, dialog: true, dialogTitle: 'Warning', dialogContext: data.messages}))
+                setData(data);
+              } else {
+                console.log(data.errorMessages)
+                // enqueueSnackbar(data.errorMessages, {variant: 'error'});
+                setState(state => ({...state, dialog: true, dialogTitle: 'Diagram cannot be generated', dialogContext: data.errorMessages}))
+                setData({nodes: [], links: []})
+              }
 
-            setData(data);
+            } catch (e) {
+              console.log(e)
+            }
+
+
+
             // objectsCount.map(organization => organization.organization = organizationInterfaces[organization.organization])
             // setObjectsCount(objectsCount)
             // setOrganization2IndicatorCount(organization2IndicatorCount)
@@ -231,6 +254,18 @@ export default function SankeyDiagram() {
         </Container> : null
       }
 
+      <AlertDialog
+        dialogContentText={state.dialogContext}
+        dialogTitle={state.dialogTitle}
+        buttons={[
+          <Button onClick={() => {
+            setState(state => ({...state, dialog: false, dialogTitle: '', dialogContext: ''}));
+            // window.location.reload();
+          }}
+                  key={'ok'}>{'ok'}</Button>
+        ]}
+        open={state.dialog}/>
+
     </Container>
   );
 }
@@ -238,7 +273,6 @@ export default function SankeyDiagram() {
 
 const Diagram = ({ width = 1000, height = 900, data }) => {
   const svgRef = useRef();
-  const {enqueueSnackbar} = useSnackbar();
   useEffect(() => {
     const svg = d3.select(svgRef.current)
       .attr("width", width)
@@ -262,7 +296,7 @@ const Diagram = ({ width = 1000, height = 900, data }) => {
       sankey(data);
     } catch (error) {
       console.error("Sankey layout error:", error);
-      enqueueSnackbar("Invalid Data Input", {variant: 'error'});
+      // enqueueSnackbar("Diagram cannot be generated", {variant: 'error'});
       return;
     }
 
