@@ -27,3 +27,8 @@ This repository contains:
 ---
 
 ## Features
+
+## Installation
+For installation instructions, please refer to the guides for the [Frontend](/frontend#installation) and [Backend](/backend#installation).
+
+---
