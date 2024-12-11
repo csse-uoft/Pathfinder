@@ -17,6 +17,7 @@
 ## Introduction
 
 The **Common Approach Sandbox** enable Social Purpose Organizations and their partners to share, exchange, pool, and aggregate impact measurement data to improve learning, advocacy, and portfolio assessment
+
 ---
 
 ## Project Structure
