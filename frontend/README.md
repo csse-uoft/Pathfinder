@@ -7,6 +7,7 @@
 ---
 ## Introduction
 The frontend uses React.js as the framework and primarily leverages MaterialUI for its theming.
+
 ---
 ## Installation
 ### Install dependencies
