@@ -49,21 +49,38 @@ The code building pages and components needed to build pages are in folder src/c
       - `StakeholderOutcomeReports.js`: Component for generating and displaying stakeholderOutcome-based data.
       - `ThemeReport.js`: Component for generating and displaying theme-based data.
     
-    - `characteristics/`: This folder organizes components related to displaying and managing characteristics data.
+    - `characteristics/`: This folder organizes components related to displaying and managing characteristics.
       - `AddEditCharacteristic.js`: A page component for creating and updating characteristic entries.
       - `Characteristic.js`: A component representing a single characteristic record or view.
       - `CharacteristicView.js`: A component displaying a detailed view of a characteristic.
       - `Characteristics.js`: A component listing and managing multiple characteristics.
     
-    - `codes/`: This folder stores components for managing code entries.
+    - `codes/`: This folder organizes components related to displaying and managing codes.
       - `AddEditCode.js`: Component for adding or editing code entries.
       - `Code.js`: Component representing an individual code.
       - `CodeView.js`: Component displaying a detailed view of a particular code.
       - `Codes.js`: A component listing and managing multiple codes.
      
+    - `counterfactual/`: This folder organizes components related to displaying and managing counterfactuals.
+      - `AddEditCounterfactual.js`: Component for adding or editing a counterfactual.
+      - `Counterfactuals.js`: Component for listing and managing counterfactuals.
+        
     - `dashboard/`: The dashboard folder includes components related to the dashboard page
       - `Dashboards.js`: The main component for rendering the dashboard page.
       - `NavButton.js`: A reusable button component for dashboard navigation. While primarily used in the dashboard, this component is designed for reuse across other navigation areas.
+        
+    - `dataDashboard/`: Components for displaying and managing data dashboards.
+      - `DataDashboard.js`: Main component of the data dashboard page, featuring various types of graphs to visually represent the data.
+        
+    - `dataExport/`: Components related to data exporting functionality.
+      - `dataExport.js`: Main component or module handling data export operations.
+        
+    - `datasets/`: This folder organizes components related to displaying and managing datasets.
+      - `AddEditDataset.js`: Component for adding or editing datasets.
+      - `Datasets.js`: Component for listing and managing datasets.
+        
+     
+
     - `impactRisk/`: The impactRisk folder contains components for managing and displaying impact risks
       - `AddEditImpactRisk.js`: A page component for adding or editing impact risks.
       - `ImpactRisks.js`:  A page component for listing impact risks.
