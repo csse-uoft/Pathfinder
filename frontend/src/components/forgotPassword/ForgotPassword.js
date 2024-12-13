@@ -8,7 +8,7 @@ import {forgotPasswordFields} from "../../constants/forgot_password_fields";
 import {isFieldEmpty} from "../../helpers";
 import {REQUIRED_HELPER_TEXT} from "../../constants";
 import {checkSecurityQuestion, fetchSecurityQuestionsByEmail, sendVerificationEmail} from "../../api/userApi";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import LoadingButton from "../shared/LoadingButton";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 

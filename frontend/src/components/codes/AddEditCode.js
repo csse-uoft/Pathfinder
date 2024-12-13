@@ -5,7 +5,7 @@ import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
@@ -20,7 +20,7 @@ import {
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateFieldAndURI, validateForm, validateURI} from "../../helpers";
-import URIField from "../shared/URIFields";
+import URIField from "../shared/fields/URIFields";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'

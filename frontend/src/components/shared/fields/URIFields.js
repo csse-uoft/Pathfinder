@@ -1,4 +1,4 @@
-import GeneralField from "./fields/GeneralField";
+import GeneralField from "./GeneralField";
 import React, {useState} from "react";
 
 export default function URIField({

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button} from "@mui/material";
-import LoadingButton from "./LoadingButton";
+import LoadingButton from "../LoadingButton";
 import {AlertDialog} from "./Dialogs";
 
 

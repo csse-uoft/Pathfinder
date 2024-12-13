@@ -4,10 +4,10 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import IndicatorField from "../shared/indicatorField";
+import IndicatorField from "../shared/fields/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
@@ -15,7 +15,7 @@ import {validateForm} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import Dropdown from "../shared/fields/MultiSelectField";
-import DataTypeGraph from "../shared/dataTypeGraph";
+import DataTypeGraph from "../shared/fields/dataTypeGraph";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'

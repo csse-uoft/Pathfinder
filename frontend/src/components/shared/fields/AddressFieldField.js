@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
-import {getInstancesInClass} from "../../api/dynamicClassInstance";
+import {getInstancesInClass} from "../../../api/dynamicClassInstance";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {Validator} from "../../helpers";
+import {Validator} from "../../../helpers";
 
 
 const filterOptions = createFilterOptions({

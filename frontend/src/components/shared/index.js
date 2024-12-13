@@ -3,14 +3,9 @@ import { Menu, MenuItem, CircularProgress, Typography, Chip } from '@mui/materia
 import { makeStyles } from "@mui/styles";
 import { Link as DomLink, useNavigate } from 'react-router-dom';
 import { Add as AddIcon, CloudUpload as UploadIcon } from '@mui/icons-material';
-import GoogleMap from './GoogleMap';
-import CSVUploadModal from './CSVUploadModal';
+import CSVUploadModal from './fields/CSVUploadModal';
 import DeleteModal from './DeleteModal';
 import DropdownMenu from './DropdownMenu';
-import GenericPage from './GenericPage';
-import FormStepper from './FormStepper';
-import FieldsWrapper from "./FieldsWrapper";
-import OtherLocationsFields from "./OtherLocationsFields";
 import SearchIcon from '@mui/icons-material/Search';
 
 import { providerFormTypes } from '../../constants/provider_fields.js'
@@ -127,7 +122,6 @@ export function Loading({message = 'Loading Components...'}) {
 
 
 export {
-  GoogleMap, CSVUploadModal, DeleteModal, DropdownMenu, GenericPage, FormStepper, FieldsWrapper,
-  OtherLocationsFields
+  CSVUploadModal, DeleteModal, DropdownMenu,
 }
 export {EnhancedTable as DataTable} from './Table';

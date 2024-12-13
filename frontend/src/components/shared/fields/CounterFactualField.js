@@ -1,13 +1,13 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {UserContext} from "../../context";
-import Dropdown from "./fields/MultiSelectField";
-import GeneralField from "./fields/GeneralField";
-import {fetchDataTypeInterfaces} from "../../api/generalAPI";
-import {isFieldRequired, validateField} from "../../helpers";
-import {CONFIGLEVEL} from "../../helpers/attributeConfig";
-import configs from "../../helpers/attributeConfig";
+import {UserContext} from "../../../context";
+import Dropdown from "./MultiSelectField";
+import GeneralField from "./GeneralField";
+import {fetchDataTypeInterfaces} from "../../../api/generalAPI";
+import {isFieldRequired, validateField} from "../../../helpers";
+import {CONFIGLEVEL} from "../../../helpers/attributeConfig";
+import configs from "../../../helpers/attributeConfig";
 import URIField from "./URIFields";
 
 

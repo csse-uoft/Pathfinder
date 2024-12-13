@@ -2,14 +2,14 @@ import React, {useEffect, useState, useContext, useRef} from "react";
 import {useSnackbar} from "notistack";
 import cytoscape from "cytoscape";
 import svg from "cytoscape-svg";
-import RadioField from "./fields/RadioField";
-import {fetchNodeGraphData, fetchNodeGraphDataByOrganization} from "../../api/nodeGraphApi";
-import {reportErrorToBackend} from "../../api/errorReportApi";
-import Dropdown from "./fields/MultiSelectField";
+import RadioField from "./RadioField";
+import {fetchNodeGraphData, fetchNodeGraphDataByOrganization} from "../../../api/nodeGraphApi";
+import {reportErrorToBackend} from "../../../api/errorReportApi";
+import Dropdown from "./MultiSelectField";
 import {Button, Dialog, DialogContent, Drawer, IconButton, Tab, Tabs, TextField} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {makeStyles} from "@mui/styles";
-import {Loading} from "./index";
+import {Loading} from "../index";
 
 
 // Custom styles

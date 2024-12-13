@@ -20,7 +20,7 @@ import {
 } from "../../helpers/helpersForDropdownFilter";
 import DropdownFilter from "../shared/DropdownFilter";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 
 export default function IndicatorReportView({single, multi, organizationUser, groupUser, superUser, organizationUri}) {
   const {enqueueSnackbar} = useSnackbar();

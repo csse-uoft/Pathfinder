@@ -1,17 +1,17 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {UserContext} from "../../context";
+import {UserContext} from "../../../context";
 import {useSnackbar} from "notistack";
-import GeneralField from "./fields/GeneralField";
-import {reportErrorToBackend} from "../../api/errorReportApi";
-import {fetchHowMuchImpacts} from "../../api/howMuchImpactApi";
-import {fetchImpactRisks} from "../../api/impactRiskApi";
-import Dropdown from "./fields/MultiSelectField";
-import {fetchDataTypeInterfaces} from "../../api/generalAPI";
-import {isFieldRequired, validateField, validateURI, validateFieldAndURI} from "../../helpers";
-import {CONFIGLEVEL} from "../../helpers/attributeConfig";
-import configs from "../../helpers/attributeConfig";
+import GeneralField from "./GeneralField";
+import {reportErrorToBackend} from "../../../api/errorReportApi";
+import {fetchHowMuchImpacts} from "../../../api/howMuchImpactApi";
+import {fetchImpactRisks} from "../../../api/impactRiskApi";
+import Dropdown from "./MultiSelectField";
+import {fetchDataTypeInterfaces} from "../../../api/generalAPI";
+import {isFieldRequired, validateField, validateURI, validateFieldAndURI} from "../../../helpers";
+import {CONFIGLEVEL} from "../../../helpers/attributeConfig";
+import configs from "../../../helpers/attributeConfig";
 import URIField from "./URIFields";
 
 const filterOptions = createFilterOptions({

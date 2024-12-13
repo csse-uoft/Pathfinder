@@ -3,7 +3,7 @@ import {makeStyles} from "@mui/styles";
 import {Button, Container, Typography} from "@mui/material";
 import {useNavigate, useParams} from "react-router-dom";
 import {verifyChangePrimaryEmail} from "../../api/userApi";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 
 
 const useStyles = makeStyles(() => ({

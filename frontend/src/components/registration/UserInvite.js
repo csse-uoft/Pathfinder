@@ -5,7 +5,7 @@ import {Button, Container, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import {createUser} from "../../api/userApi";
 import {Loading} from "../shared";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {verifyEmail} from "../../helpers";
 import LoadingButton from "../shared/LoadingButton";
 import {UserContext} from "../../context";

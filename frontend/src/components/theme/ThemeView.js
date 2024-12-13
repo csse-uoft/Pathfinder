@@ -10,7 +10,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 
 export default function ThemeView({single, multi, organizationUser, groupUser, superUser}) {
   const {uri} = useParams();

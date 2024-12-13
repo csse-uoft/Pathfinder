@@ -26,7 +26,7 @@ import {
 
 
 import {handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 
 export default function IndicatorView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const {enqueueSnackbar} = useSnackbar();

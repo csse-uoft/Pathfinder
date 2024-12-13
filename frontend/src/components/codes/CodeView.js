@@ -7,7 +7,7 @@ import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes, fetchDataType, deleteDataType} from "../../api/generalAPI";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
 
 export default function CodeView({organizationUser, groupUser, superUser, multi, single, uri}) {

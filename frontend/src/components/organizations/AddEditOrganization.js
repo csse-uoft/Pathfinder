@@ -5,7 +5,7 @@ import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {
   updateOrganization
 } from "../../api/organizationApi";
@@ -18,7 +18,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, fetchDataTypes} from "../../api/generalAPI";
-import URIField from "../shared/URIFields";
+import URIField from "../shared/fields/URIFields";
 
 const useStyles = makeStyles(() => ({
   root: {

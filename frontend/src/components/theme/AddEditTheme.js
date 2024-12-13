@@ -5,7 +5,7 @@ import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -16,8 +16,8 @@ import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
-import DataTypeGraph from "../shared/dataTypeGraph";
-import URIField from "../shared/URIFields";
+import DataTypeGraph from "../shared/fields/dataTypeGraph";
+import URIField from "../shared/fields/URIFields";
 
 const useStyles = makeStyles(() => ({
   root: {

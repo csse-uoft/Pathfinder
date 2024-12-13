@@ -10,7 +10,7 @@ import {fetchDataTypeInterfaces} from "../../api/generalAPI";
 import {Loading} from "../shared";
 import GeneralField from "../shared/fields/GeneralField";
 import {useSnackbar} from "notistack";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {parseInt} from "lodash/string";
 
 

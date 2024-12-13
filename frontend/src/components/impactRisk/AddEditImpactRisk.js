@@ -4,7 +4,7 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -15,7 +15,7 @@ import {createDataType, fetchDataType, updateDataType} from "../../api/generalAP
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
-import URIField from "../shared/URIFields";
+import URIField from "../shared/fields/URIFields";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'

@@ -8,7 +8,7 @@ import {Button, Container, TextField} from "@mui/material";
 import {userFirstEntryFields} from "../../constants/userFirstEntryFields";
 import {isFieldEmpty} from "../../helpers";
 import {REQUIRED_HELPER_TEXT} from "../../constants";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import LoadingButton from "../shared/LoadingButton";
 import PasswordHint from "../shared/PasswordHint";
 import { useSnackbar } from 'notistack';
