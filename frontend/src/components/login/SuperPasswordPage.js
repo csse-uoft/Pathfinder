@@ -3,10 +3,10 @@ import React, {useContext, useState} from 'react';
 import {TextField, Container, Paper, Typography, Button, Divider} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 
-import {UserContext} from "../context";
-import {loginSuperPassword} from "../api/auth";
+import {UserContext} from "../../context";
+import {loginSuperPassword} from "../../api/auth";
 import {useNavigate} from "react-router-dom";
-import {navigateHelper} from "../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   container: {
