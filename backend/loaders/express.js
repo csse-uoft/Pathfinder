@@ -13,14 +13,15 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 
 const config = require('../config');
 const {initUserAccounts, addSuperPassword, addSampleOrganizations} = require('../services/userAccount/user');
-const {initStreetTypes, initStreetDirections} = require('../services/address');
+const {initStreetTypes, initStreetDirections, initCities} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
   errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute, codeRoute, codesRoute, characteristicRoute,
   characteristicsRoute, stakeholderOutcomeRoute, impactReportsRoute, impactReportRoute,
   stakeholderOutcomesRoute, impactModelsRoute, featuresRoute, impactModelRoute, impactRiskRoute, impactRisksRoute,
   howMuchImpactsRoute, counterfactualRoute, counterfactualsRoute, datasetRoute, datasetsRoute, howMuchImpactRoute,
-  dataExportRoute, nodeGraphRoute, dataDashboardRoute, hasSubThemePropertiesRoute, themeNetworkRoute, themeNetworksRoute
+  dataExportRoute, nodeGraphRoute, dataDashboardRoute, hasSubThemePropertiesRoute, themeNetworkRoute, themeNetworksRoute,
+  sankeyDiagramRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -109,6 +110,7 @@ app.use('/api/datasets', datasetsRoute);
 app.use('/api/dataExport', dataExportRoute);
 app.use('/api/nodeGraph', nodeGraphRoute);
 app.use('/api/dataDashboard', dataDashboardRoute);
+app.use('/api/sankeyDiagram', sankeyDiagramRoute);
 app.use('/api/hasSubThemeProperties', hasSubThemePropertiesRoute);
 app.use('/api/themeNetwork', themeNetworkRoute)
 app.use('/api/themeNetworks', themeNetworksRoute)
@@ -121,6 +123,7 @@ initUserAccounts();
 addSuperPassword();
 initStreetTypes();
 initStreetDirections();
+// initCities();
 addSampleOrganizations();
 
 app.use(errorHandler);

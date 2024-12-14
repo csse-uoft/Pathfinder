@@ -180,6 +180,7 @@ const fileUploading = async (req, res, next) => {
                           value,
                           referenceURI,
                           subjectURI,
+                          invalidURI,
                           error,
                           url,
                           impactNormsURI
@@ -200,7 +201,7 @@ const fileUploading = async (req, res, next) => {
       } else if (ignoreInstance) {
         title = 'Object Ignored'
       } else {
-        title = 'Error'
+        title = 'Error Occur'
       }
 
 
@@ -234,9 +235,9 @@ const fileUploading = async (req, res, next) => {
           messageBuffer['begin'].push(whiteSpaces + '    The file failed to upload');
           break;
         case 'invalidURI':
-          messageBuffer[uri].push(`\n`);
+          // messageBuffer[uri].push(`\n`);
           messageBuffer[uri].push(whiteSpaces + `${title}: Invalid URI`);
-          messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} has been used as an invalid URI`);
+          messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type}, ${invalidURI} has been used as an invalid URI`);
           if (ignoreInstance)
             messageBuffer[uri].push(whiteSpaces + '    The object is ignored');
           break;
@@ -278,7 +279,7 @@ const fileUploading = async (req, res, next) => {
           messageBuffer['end'].push(whiteSpaces + `    Object with URI ${uri} is being ignored: The object type is not supported`);
           break;
         case 'invalidValue':
-          messageBuffer[uri].push(whiteSpaces + `${title}: Invalid URI`);
+          messageBuffer[uri].push(whiteSpaces + `${title}: Invalid Value`);
           messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} attribute ${property}  contains invalid value(s): ${value}`);
           break;
         case 'badReference':
@@ -335,7 +336,7 @@ const fileUploading = async (req, res, next) => {
               uri: object['@id'],
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(graphdbModel, property)),
-              value: obj['@value']
+              value: obj['@value'] || 'Empty String'
             }, {});
         }
 

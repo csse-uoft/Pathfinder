@@ -4,10 +4,10 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import IndicatorField from "../shared/indicatorField";
+import IndicatorField from "../shared/fields/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";
@@ -15,6 +15,7 @@ import {validateForm} from "../../helpers";
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import Dropdown from "../shared/fields/MultiSelectField";
+import DataTypeGraph from "../shared/fields/dataTypeGraph";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -40,6 +41,7 @@ export default function AddEditIndicator() {
   const [datasetInterfaces, setDatasetInterfaces] = useState({});
 
   const [state, setState] = useState({
+    popReportGenerator: false,
     submitDialog: false,
     loadingButton: false,
   });
@@ -157,14 +159,30 @@ export default function AddEditIndicator() {
 
   const handleSubmit = () => {
     if (validate()) {
-      setState(state => ({...state, submitDialog: true}));
+      if (popReportGenerator()) {
+        setState(state => ({...state, popReportGenerator: true}))
+      } else {
+        handleSubmitNext()
+      }
     }
   };
 
+  const handleSubmitNext = () => {
+    setState(state => ({...state, submitDialog: true}));
+  }
+
+  const popReportGenerator = () => {
+    return !form.reportGenerator && haveNonBlankRelationship()
+  }
+
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
+    const subIndicatorRelationships = form.subIndicatorRelationships.filter(relationship => relationship)
     if (mode === 'new') {
-      createDataType('indicator', {form}).then((ret) => {
+      createDataType('indicator', {
+        form: {
+          ...form, subIndicatorRelationships
+        }}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/indicators');
@@ -176,11 +194,13 @@ export default function AddEditIndicator() {
         }
         console.log(e);
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating indicator', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateDataType('indicator',encodeURIComponent(uri), {form}).then((res) => {
+      updateDataType('indicator',encodeURIComponent(uri), {form: {
+          ...form, subIndicatorRelationships
+        }}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/indicators');
@@ -198,32 +218,49 @@ export default function AddEditIndicator() {
 
   };
 
+  const blankRelationship = (relationship) => {
+    return !relationship.organizations.length && !relationship.subIndicators.length
+  }
+
+  const haveNonBlankRelationship = () => {
+    return form.subIndicatorRelationships?.some(relationship => relationship && !blankRelationship(relationship))
+  }
+
+
+
+
   const validate = () => {
     const errors = {};
     validateForm(form, attriConfig, attribute2Compass, errors, ['uri']);
     form.subIndicatorRelationships.map((relationship, index) => {
-      if (index && (!relationship.organizations.length || !relationship.subIndicators.length)) {
+      if (!relationship)
+        return
+      if (!blankRelationship(relationship) && (!relationship.organizations.length || !relationship.subIndicators.length)) {
         if (!errors.subIndicatorRelationships) {
-          errors.subIndicatorRelationships = {[index]: {}}
+          errors.subIndicatorRelationships = {}
+        }
+        if (!errors.subIndicatorRelationships[index]) {
+          errors.subIndicatorRelationships[index] = {}
         }
         if (!relationship.organizations.length) {
-          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
+          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid';
+          // errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid';
         }
         if (!relationship.subIndicators.length) {
-          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
+          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid';
         }
       }
-      if (!index && ((relationship.organizations.length && !relationship.subIndicators.length) || (!relationship.organizations.length && relationship.subIndicators.length))) {
-        if (!errors.subIndicatorRelationships) {
-          errors.subIndicatorRelationships = {[index]: {}}
-        }
-        if (!relationship.organizations.length) {
-          errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
-        }
-        if (!relationship.subIndicators.length) {
-          errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
-        }
-      }
+      // if (!index && ((relationship.organizations.length && !relationship.subIndicators.length) || (!relationship.organizations.length && relationship.subIndicators.length))) {
+      //   if (!errors.subIndicatorRelationships) {
+      //     errors.subIndicatorRelationships = {[index]: {}}
+      //   }
+      //   if (!relationship.organizations.length) {
+      //     errors.subIndicatorRelationships[index].organizations = 'Blank value is not valid'
+      //   }
+      //   if (!relationship.subIndicators.length) {
+      //     errors.subIndicatorRelationships[index].subIndicators = 'Blank value is not valid'
+      //   }
+      // }
     })
     setErrors(errors);
     return Object.keys(errors).length === 0;
@@ -287,6 +324,8 @@ export default function AddEditIndicator() {
         :
         <Paper sx={{p: 2}} variant={'outlined'}>
           <Typography variant={'h4'}> Indicator </Typography>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{flex: 0.5}}>
           <IndicatorField
             disabled={mode === 'view'}
             disabledURI={mode !== 'new'}
@@ -299,6 +338,11 @@ export default function AddEditIndicator() {
             importErrors={errors}
             attribute2Compass={attribute2Compass}
           />
+            </div>
+            <div style={{ flex: 1, maxHeight: '600px', overflowY: 'auto' }}>
+              <DataTypeGraph Indicator/>
+            </div>
+          </div>
 
           {mode === 'view' ?
             <div/> :
@@ -315,6 +359,30 @@ export default function AddEditIndicator() {
                                         key={'confirm'}
                                         onClick={handleConfirm} children="confirm" autoFocus/>]}
                        open={state.submitDialog}/>
+
+          <AlertDialog dialogContentText={"Do you want this indicator automatically generate corresponding \n" +
+            "indicator reports based on given subIndicators' indicator reports? \n" +
+            "Notice: Once you made the choice, you will not be able to change later"}
+                       dialogTitle={'Automatic generation of indicator reports'}
+                       dialogTitleColor={'red'}
+                       buttons={[<Button onClick={() => {
+                         setState(state => ({...state, popReportGenerator: false}))
+                       }}
+                                         key={'return'}>{'Return'}</Button>,
+                         , <Button onClick={() => {
+                         setState(state => ({...state, popReportGenerator: false}))
+                         setForm(form => ({...form, reportGenerator: 'no'}))
+                         handleSubmitNext()
+                       }}
+                                         key={'NO'}>{'NO'}</Button>,
+                         <Button noDefaultStyle variant="text" color="primary"
+                                        key={'yes'}
+                                        onClick={() => {
+                                          setState(state => ({...state, popReportGenerator: false}))
+                                          setForm(form => ({...form, reportGenerator: 'auto'}))
+                                          handleSubmitNext()
+                                        }} children="Yes" autoFocus/>]}
+                       open={state.popReportGenerator}/>
         </Paper>}
 
     </Container>);

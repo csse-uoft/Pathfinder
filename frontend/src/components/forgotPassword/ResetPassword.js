@@ -5,7 +5,7 @@ import {defaultNewPasswordFields} from "../../constants/default_fields";
 import {Loading} from "../shared";
 import {forgotPasswordSaveNewPassword, verifyForgotPasswordUser} from "../../api/userApi";
 import {Button, Container, TextField} from "@mui/material";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {newPasswordFields} from "../../constants/updatePasswordFields";
 import {isFieldEmpty} from "../../helpers";
 import {REQUIRED_HELPER_TEXT} from "../../constants";

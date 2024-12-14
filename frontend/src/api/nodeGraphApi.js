@@ -1,7 +1,7 @@
 import {getJson, postJson} from "./index";
 
-export async function fetchNodeGraphData() {
-  return getJson('/api/nodeGraph/');
+export async function fetchNodeGraphData(classType) {
+  return getJson('/api/nodeGraph/' + classType);
 }
 
 export async function fetchNodeGraphDataByOrganization(organizations) {

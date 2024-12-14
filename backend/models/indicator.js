@@ -16,7 +16,8 @@ const GDBIndicatorModel = createGraphDBModel({
   hasAccesss: {type: [() => require("./organization").GDBOrganizationModel], internalKey: 'cids:hasAccess'},
   identifier: {type: String, internalKey: 'tove_org:hasIdentifier'},
   dateCreated: {type: Date, internalKey: 'schema:dateCreated'},
-  datasets: {type: [() => require('./dataset').GDBDataSetModel], internalKey: 'dcat:dataset', onDelete: DeleteType.CASCADE}
+  datasets: {type: [() => require('./dataset').GDBDataSetModel], internalKey: 'dcat:dataset', onDelete: DeleteType.CASCADE},
+  reportGenerator: {type: String, internalKey: ':reportGenerator'}
 }, {
   rdfTypes: ['cids:Indicator'], name: 'indicator'
 });

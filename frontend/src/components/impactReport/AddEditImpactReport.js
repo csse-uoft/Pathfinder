@@ -4,10 +4,10 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import ImpactReportField from "../shared/ImpactReportField";
+import ImpactReportField from "../shared/fields/ImpactReportField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {
@@ -67,7 +67,7 @@ export default function AddEditImpactReport() {
     forStakeholderOutcome: null,
     reportedImpact: null,
     organization: null,
-    impactRisks: null,
+    impactRisks: [],
     startTime: '',
     endTime: '',
     uri: '',
@@ -150,7 +150,6 @@ export default function AddEditImpactReport() {
     reportedImpact: 'cids:hasReportedImpact',
     expectation: 'cids:hasExpectation',
     impactRisks: 'cids:hasImpactRisk',
- 
   }
 
   const handleConfirm = () => {
@@ -258,7 +257,7 @@ export default function AddEditImpactReport() {
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
-          uriDiasbled={mode !== 'new'}
+          uriDisabled={mode !== 'new'}
           importErrors={errors}
           attribute2Compass={attribute2Compass}
         />

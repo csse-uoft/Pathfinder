@@ -9,7 +9,7 @@ import {defaultSecurityQuestionsFields} from "../../constants/default_fields";
 import {Loading} from "../shared";
 import {Button, Container, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {loginDoubleAuthFields} from "../../constants/login_double_auth_fields";
 import {UserContext} from "../../context";
 import {navigateHelper} from "../../helpers/navigatorHelper";

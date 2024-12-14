@@ -4,7 +4,7 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -16,6 +16,7 @@ import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} 
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateURI} from "../../helpers";
+import URIField from "../shared/fields/URIFields";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -212,7 +213,9 @@ export default function AddEditHowMuchImpact() {
       ) : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
         <Typography variant={'h4'}> How Much Impact </Typography>
 
-        <GeneralField
+        <URIField
+          add={mode === 'new'}
+          edit={mode !== 'new'}
           key={'uri'}
           label={'URI'}
           value={form.uri}

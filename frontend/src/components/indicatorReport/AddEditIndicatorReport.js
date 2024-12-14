@@ -4,9 +4,9 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
-import IndicatorReportField from "../shared/IndicatorReportField";
+import IndicatorReportField from "../shared/fields/IndicatorReportField";
 import {updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
@@ -219,7 +219,7 @@ export default function AddEditIndicatorReport() {
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
-          uriDiasbled={mode !== 'new'}
+          uriDisabled={mode !== 'new'}
           importErrors={errors}
           attribute2Compass={attribute2Compass}
         />

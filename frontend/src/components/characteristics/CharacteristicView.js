@@ -9,7 +9,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes, fetchDataType, fetchDataTypeInterfaces, deleteDataType} from "../../api/generalAPI";
 import {deletingObjectHelper, handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 
 export default function CharacteristicView({organizationUser, groupUser, superUser, multi, single, uri}) {
   const navigator = useNavigate();

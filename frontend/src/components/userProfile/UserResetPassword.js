@@ -3,7 +3,7 @@ import {makeStyles} from "@mui/styles";
 import {Button, Container, Typography} from "@mui/material";
 import {Validator} from "../../helpers";
 import {useNavigate} from "react-router-dom";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useParams} from "react-router-dom";
 import {updatePassword} from "../../api/userApi";
 import LoadingButton from "../shared/LoadingButton";

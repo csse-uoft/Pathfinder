@@ -20,7 +20,7 @@ import {
 } from "../../helpers/helpersForDropdownFilter";
 import DropdownFilter from "../shared/DropdownFilter";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 
 export default function IndicatorReportView({single, multi, organizationUser, groupUser, superUser, organizationUri}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -93,12 +93,10 @@ export default function IndicatorReportView({single, multi, organizationUser, gr
   useEffect(() => {
     if (multi) {
       fetchDataTypesGivenListOfUris('indicator', '', selectedOrganizations, 'indicators').then(objectsDict => {
-        console.log(objectsDict);
         let indicators = [];
         for (let organization in objectsDict) {
           indicators = [...indicators, ...objectsDict[organization]];
         }
-        console.log(indicators);
         setState(state => ({...state, loading: false, data: indicators}));
       }).catch(e => {
         setState(state => ({...state, loading: false}));

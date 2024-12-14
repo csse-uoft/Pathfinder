@@ -8,7 +8,7 @@ import {UserContext} from "../../context";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {fetchDataTypes} from "../../api/generalAPI";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 export default function Datasets() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();

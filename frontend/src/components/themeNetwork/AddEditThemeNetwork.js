@@ -5,7 +5,7 @@ import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -18,6 +18,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import * as PropTypes from "prop-types";
 import SelectField from "../shared/fields/SelectField";
+import URIField from "../shared/fields/URIFields";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -196,8 +197,9 @@ export default function AddEditThemeNetwork() {
           onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
         />
 
-        <GeneralField
-          disabled={mode !== 'new'}
+        <URIField
+          add={mode === 'new'}
+          edit={mode !== 'new'}
           key={'uri'}
           label={'URI'}
           value={form.uri}

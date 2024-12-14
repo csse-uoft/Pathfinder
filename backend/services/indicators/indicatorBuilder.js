@@ -4,8 +4,9 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {assignMeasure, assignValue, assignValues, assignUnitOfMeasure} = require("../helpers");
-const {GDBHasSubThemePropertyModel} = require("../../models/hasSubThemeProperty");
-const {GDBHasSubIndicatorPropertyModel} = require("../../models/hasSubIndicatorProperty");
+const {GDBHasSubIndicatorPropertyModel, GDBIndicatorReportCorrespondenceModel} = require("../../models/hasSubIndicatorProperty");
+const {SPARQL, GraphDB} = require("graphdb-utils");
+const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, object, organization, error, {
@@ -47,6 +48,9 @@ async function indicatorBuilder(environment, object, organization, error, {
 
     // add the organization to it, and add it to the organization
     if (environment === 'interface') {
+      if (!form.organization) {
+        throw new Server400Error('Organization is Mandatory for Indicator')
+      }
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
       // impactNorms = await GDBImpactNormsModel.findOne({_uri: form.impactNorms, organization: organization._uri})
       // if (!impactNorms.indicators)
@@ -136,6 +140,8 @@ async function indicatorBuilder(environment, object, organization, error, {
 
         }
       }
+      await assignIndicatorReports(uri, mainObject, form, organization._uri)
+      assignValue(environment, config, object, mainModel, mainObject, 'reportGenerator', ':reportGenerator', addMessage, form, uri, hasError, error);
 
       await mainObject.save();
       return true
@@ -244,6 +250,52 @@ async function indicatorBuilder(environment, object, organization, error, {
   }
   return error;
 
+}
+
+async function assignIndicatorReports(uri, headlineIndicator, form, organizationUri) {
+  if ((headlineIndicator && form?.reportGenerator === 'auto') || (headlineIndicator?.reportGenerator === 'auto')) {
+    let query = `${SPARQL.getSPARQLPrefixes()} 
+  SELECT DISTINCT ?subIndicatorReport ?value WHERE {
+    ?subIndicatorProperty rdf:type :hasSubIndicatorProperty .
+    ?subIndicatorProperty :hasHeadlineIndicator <${uri}> .
+  	?subIndicatorProperty :hasSubIndicator ?subIndicator .
+    ?subIndicator cids:hasIndicatorReport ?subIndicatorReport .
+    ?subIndicatorReport iso21972:value ?measure .
+    ?measure iso21972:numerical_value ?value .
+    
+    FILTER NOT EXISTS {?indicatorReportCorrespondence rdf:type :indicatorReportCorrespondence .
+    ?indicatorReportCorrespondence :hasSubIndicatorReport ?subIndicatorReport .
+    ?indicatorReportCorrespondence :hasHeadlineIndicatorReport ?headlineIndicatorReport .
+    <${uri}> cids:hasIndicatorReport ?headlineIndicatorReport .}
+}`;
+    const subIndicatorReport2newIndicatorReports = {}
+    await GraphDB.sendSelectQuery(query, false, ({subIndicatorReport, value}) => {
+      subIndicatorReport2newIndicatorReports[subIndicatorReport.id] = GDBIndicatorReportModel({
+        forIndicator: uri,
+        forOrganization: organizationUri,
+        value: {numericalValue: value.id},
+        unitOfMeasure: {label: form.unitOfMeasure}
+      })
+    })
+
+    // store indicatorReports to have their uri, add new indicatorReport to the newIndicator, add the correspondance relationship
+    for (let subIndicatorReportUri in subIndicatorReport2newIndicatorReports) {
+      const newIndicatorReport = subIndicatorReport2newIndicatorReports[subIndicatorReportUri]
+      await newIndicatorReport.save()
+      if (!headlineIndicator.indicatorReports) {
+        headlineIndicator.indicatorReports = []
+      }
+      headlineIndicator.indicatorReports.push(newIndicatorReport)
+      await GDBIndicatorReportCorrespondenceModel({
+        hasHeadlineIndicatorReport: newIndicatorReport._uri,
+        hasChildIndicatorReport: subIndicatorReportUri,
+        // forOrganization:
+      }).save()
+    }
+
+
+
+  }
 }
 
 module.exports = {indicatorBuilder};

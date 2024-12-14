@@ -28,14 +28,14 @@ import Groups from "./components/groups/Groups";
 import AddEditGroup from "./components/groups/AddEditGroup";
 import Themes from "./components/theme/Themes";
 import AddEditTheme from "./components/theme/AddEditTheme";
-import Organization_indicators from "./components/indicators/Organization-indicators";
+// import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
 import AddEditIndicator from "./components/indicators/AddEditIndicator";
 import Organization_outcomes from "./components/outcomes/Organization-outcomes";
 import Outcomes from "./components/outcomes/Outcomes";
 import AddEditOutcome from "./components/outcomes/AddEditOutcome";
 import AddEditIndicatorReport from "./components/indicatorReport/AddEditIndicatorReport";
-import Organization_indicatorReports from "./components/indicatorReport/Organization-indicatorReports";
+// import Organization_indicatorReports from "./components/indicatorReport/Organization-indicatorReports";
 import IndicatorReports from "./components/indicatorReport/IndicatorReports";
 import FileUploadingPage from "./components/uploadingPages/uploadingPage";
 import ReportTypesPage from "./components/ReportGenerate/ReportTypesPage";
@@ -44,7 +44,7 @@ import IndicatorReports_ReportGenerate from "./components/ReportGenerate/Indicat
 import OutcomeReports from "./components/ReportGenerate/OutcomeReports";
 import ThemeReports from "./components/ReportGenerate/ThemeReport";
 import OrganizationUsers from "./components/users/organizationUsers";
-import SuperPassword from "./components/SuperPasswordPage";
+import SuperPassword from "./components/login/SuperPasswordPage";
 import Stakeholders from "./components/stakeholders/Stakeholders";
 import AddEditStakeholder from "./components/stakeholders/AddEditStakeholder";
 import AddEditCode from "./components/codes/AddEditCode";
@@ -57,7 +57,7 @@ import StakeholderOutcomeReports from "./components/ReportGenerate/StakeholderOu
 import AddEditStakeholderOutcome from "./components/stakeholderOutcome/AddEditStakeholderOutcome";
 import ImpactReports_ReportGenerate from "./components/ReportGenerate/ImpactReports";
 import AddEditImpactReport from "./components/impactReport/AddEditImpactReport";
-import Organization_impactReports from "./components/impactReport/Organization-impactReports";
+// import Organization_impactReports from "./components/impactReport/Organization-impactReports";
 import ImpactReports from "./components/impactReport/ImpactReports";
 import ImpactReport from "./components/impactReport/ImpactReport";
 import Organization_stakeholderOutcomes from "./components/stakeholderOutcome/organization-stakeholderOutcomes";
@@ -87,6 +87,7 @@ import NodeGraph from "./components/nodeGraph/nodeGraph";
 import DataDashboard from "./components/dataDashboard/DataDashboard";
 import AddEditThemeNetwork from "./components/themeNetwork/AddEditThemeNetwork";
 import ThemeNetworks from "./components/themeNetwork/ThemeNetworks";
+import SankeyDiagram from "./components/sankeyDiagram/SankeyDiagram";
 
 const routes = (<Routes>
     {/*basic*/}
@@ -313,6 +314,8 @@ const routes = (<Routes>
            element={<PrivateRoute element={NodeGraph}/>}/>
     <Route path={`${process.env.PUBLIC_URL}/dataDashboard`}
            element={<PrivateRoute element={DataDashboard}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/sankeyDiagram`}
+           element={<PrivateRoute element={SankeyDiagram}/>}/>
 
   </Routes>);
 

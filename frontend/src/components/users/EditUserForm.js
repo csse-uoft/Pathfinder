@@ -11,7 +11,7 @@ import { isFieldEmpty } from "../../helpers";
 import {DUPLICATE_HELPER_TEXT, REQUIRED_HELPER_TEXT} from "../../constants";
 import {userProfileFields} from "../../constants/userProfileFields";
 import {formatPhoneNumber} from "../../helpers/phone_number_helpers";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import LoadingButton from "../shared/LoadingButton";
 import GeneralField from "../shared/fields/GeneralField";
 import Dropdown from "../shared/fields/MultiSelectField";

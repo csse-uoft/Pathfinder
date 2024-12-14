@@ -4,7 +4,7 @@ import React, {useEffect, useState, useContext} from "react";
 import {Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";

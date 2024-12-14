@@ -114,6 +114,9 @@ function Dashboard() {
       <NavButton to={'/dataDashboard'} icon={<Leaderboard/>} key={`dataDashboard`}
                  text="Data Dashboard"/>
 
+      <NavButton to={'/sankeyDiagram'} icon={<Summarize/>} key={`sankeyDiagram`}
+                 text="Sankey Diagram"/>
+
 
 
 

@@ -19,6 +19,10 @@ const GDBStreetDirection = createGraphDBModel({
   code: {type: String, internalKey: 'ic:hasISO3166Code'}
 }, {rdfTypes: ['ic:StreetDirection'], name: 'streetDirection'});
 
+const GDBCity = createGraphDBModel({
+  label: {type: String, internalKey: 'rdfs:label'},
+}, {rdfTypes: ['schema:City'], name: 'city'});
+
 
 const GDBAddressModel = createGraphDBModel({
   lat: {type: String, internalKey: 'geo:lat'},
@@ -33,7 +37,7 @@ const GDBAddressModel = createGraphDBModel({
   streetType: {type: GDBStreetType, internalKey: 'ic:hasStreetType'},
   streetDirection: {type: GDBStreetDirection, internalKey: 'ic:hasStreetDirection'},
 
-  city: {type: String, internalKey: 'ic:hasCityS'},
+  city: {type: GDBCity, internalKey: 'ic:hasCity'},
   citySection: {type: String, internalKey: 'ic:hasCitySection'},
   country: {type: GDBSchemaCountry, internalKey: 'ic:hasCountry'},
   state: {type: GDBSchemaState, internalKey: 'ic:hasState'},
@@ -44,5 +48,5 @@ const GDBAddressModel = createGraphDBModel({
 });
 
 module.exports = {
-  GDBAddressModel, GDBSchemaCountry, GDBSchemaState, GDBStreetDirection, GDBStreetType
+  GDBAddressModel, GDBSchemaCountry, GDBSchemaState, GDBStreetDirection, GDBStreetType, GDBCity
 }

@@ -16,7 +16,7 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel, CircularProgress
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import {makeStyles} from "@mui/styles";
@@ -28,13 +28,27 @@ import {useSnackbar} from "notistack";
 import RadioField from "../shared/fields/RadioField";
 
 // Custom styles
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100vw',
     height: '100vh',
     margin: 0,
     padding: 0,
     display: 'flex',
+  },
+  loading: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%', // Adjust height as necessary
+    width: '100%',   // Ensures full width of the container
+    textAlign: 'center',
+  },
+  progress: {
+    position: 'absolute', // Ensures exact centering
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)', // Center align
   },
   cyContainer: {
     width: '100%',
@@ -157,59 +171,6 @@ function TabPanel(props) {
   );
 }
 
-// Empty Module 1: NodeShapeSelector
-function NodeShapeSelector() {
-  return (
-    <TextField
-      label="Shape"
-    />
-  );
-}
-
-// Empty Module 2: NodeSizeSelector
-function NodeSizeSelector() {
-  return (
-    <TextField
-      label="Size"
-    />
-  );
-}
-
-// Empty Module 3: NodeLabelEditor
-function NodeLabelEditor() {
-  return (
-    <TextField
-      label="Label"
-    />
-  );
-}
-
-// Empty Module 4: EdgeStyleEditor
-function EdgeStyleEditor() {
-  return (
-    <TextField
-      label="Edge"
-    />
-  );
-}
-
-// Empty Module 5: LayoutSelector
-function LayoutSelector() {
-  return (
-    <TextField
-      label="Layout"
-    />
-  );
-}
-
-// Empty Module 6: DataImportExport
-function DataImportExport() {
-  return (
-    <TextField
-      label="Import"
-    />
-  );
-}
 
 // Main NodeGraph Component
 export default function NodeGraph() {
@@ -239,6 +200,8 @@ export default function NodeGraph() {
   const [edgeCache, setEdgeCache] = useState({})
   const [hideOrRemove, setHideOrRemove] = useState('Hide')
   const [edgeStatus, setEdgeStatus] = useState({})
+  const [loading, setLoading] = useState(true)
+
 
   cytoscape.use(svg);
 
@@ -411,6 +374,7 @@ export default function NodeGraph() {
         });
         setNodesDict(nodesDict)
         setElements({nodes, edges});
+        setLoading(false)
       }).catch(e => {
         reportErrorToBackend(e);
         console.log(e)
@@ -418,6 +382,7 @@ export default function NodeGraph() {
       });
     } else {
       setElements({nodes: [], edges: []});
+      setLoading(false)
       setNodeTypes([]);
       setVisibleDataTypes([]);
     }
@@ -584,9 +549,15 @@ export default function NodeGraph() {
     ));
   };
 
+
   return (
     <div className={classes.root}>
-      <div id="cy" className={classes.cyContainer}></div>
+      {loading?
+        <div style={{textAlign: 'center'}} className={classes.loading}>
+          <CircularProgress className={classes.progress}/>
+        </div>
+        : <div id="cy" className={classes.cyContainer}/> }
+
 
       <div className={classes.dropdownContainer}>
         <Dropdown
@@ -598,7 +569,9 @@ export default function NodeGraph() {
           error={!!errors.organizations}
           helperText={errors.organizations}
           onChange={e => {
+            setLoading(true)
             setSelectedOrganizations(e.target.value);
+            cyRef.current.destroy();
           }}
         />
         <div style={{ marginLeft: '20px' }}>
@@ -696,16 +669,6 @@ export default function NodeGraph() {
             />)}
           </div>
 
-
-
-
-          {/* Future Expansion: Empty modules added for potential future functionalities */}
-          {/*<NodeShapeSelector />*/}
-          {/*<NodeSizeSelector />*/}
-          {/*<NodeLabelEditor />*/}
-          {/*<EdgeStyleEditor />*/}
-          {/*<LayoutSelector />*/}
-          {/*<DataImportExport />*/}
         </DialogContent>
         <DialogActionsModule handleUpdateColor={handleUpdateNodeColor}/>
       </Dialog>

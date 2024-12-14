@@ -4,6 +4,7 @@ const {Transaction, SPARQL, GraphDB} = require("graphdb-utils");
 const {GDBImpactNormsModel} = require("../models/impactStuffs");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../models/time");
 const configs = require("./fileUploading/configs");
+const {isValidURL} = require("../helpers/validator");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
@@ -472,13 +473,25 @@ async function assignUnitOfMeasure(environment, config, object, mainModel, mainO
   let unitOfMeasureObject = environment === 'interface' ? null : getObjectValue(object, mainModel, propertyName);
 
   let label;
-  if (unitOfMeasureObject) {
-    label = getValue(measureObject, GDBMeasureModel, 'numericalValue');
+  if (!unitOfMeasureURI && unitOfMeasureObject) {
+    label = getValue(unitOfMeasureObject, GDBUnitOfMeasure, 'label');
   } else if (environment === 'interface' && form && propertyName) {
     label = form[propertyName];
   }
 
-  if (!unitOfMeasureURI && !label && config[internalKey]) {
+  if (unitOfMeasureURI && !isValidURL(unitOfMeasureURI)) {
+    error += 1
+    hasError = true
+    addMessage(8, 'invalidURI',
+      {
+        uri,
+        invalidURI: unitOfMeasureURI,
+        type: getPrefixedURI(object['@type'][0]),
+        property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+      },
+      config[internalKey] || {},
+    );
+  } else if (!unitOfMeasureURI && !label && config[internalKey]) {
     if (config[internalKey].rejectFile) {
       if (environment === 'interface') {
         throw new Server400Error(`${propertyName} is Mandatory`);
@@ -494,7 +507,7 @@ async function assignUnitOfMeasure(environment, config, object, mainModel, mainO
           type: getPrefixedURI(object['@type'][0]),
           property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
         },
-        config[internalKey]
+        config[internalKey] || {}
       );
   } else if (unitOfMeasureURI || label) {
     mainObject[propertyName] = unitOfMeasureURI ||
@@ -563,6 +576,13 @@ async function dataReferredBySubjects(subjectType, objectUri, predicate) {
   return subjects
 }
 
+function getRidOfQuotes(str) {
+  if (!str) {
+    return str
+  }
+  return str.replace(/^"(.*)"$/, '$1')
+}
+
 async function deleteDataAndAllReferees(objectUri, predicate) {
   let query;
   if (predicate) {
@@ -617,5 +637,6 @@ module.exports = {
   dataReferredBySubjects,
   deleteDataAndAllReferees,
   checkAllReferees,
-  assignUnitOfMeasure
+  assignUnitOfMeasure,
+  getRidOfQuotes
 };

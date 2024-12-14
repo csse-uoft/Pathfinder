@@ -4,13 +4,13 @@ import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import FileUploader from "../shared/fields/fileUploader";
+import FileUploader from "../shared/fields/FileUploader";
 import {uploadFile} from "../../api/fileUploadingApi";
 import { saveAs } from 'file-saver';
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
@@ -60,7 +60,7 @@ export default function FileUploadingPage() {
   const [options, setOptions] = useState({
     fileTypes: ['JSON-ld'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
-    mode: ['Single Organization', 'Multiple Organizations'],
+    mode: ['Single Organization', 'Multiple Organizations', 'Directly Upload'],
     organizations: {}
   });
   const [errors, setErrors] = useState(
@@ -99,7 +99,7 @@ export default function FileUploadingPage() {
     try {
       setState(state => ({...state, loadingButton: true}));
       let responds;
-      const respond = await uploadFile(state.fileContent,state.mode === 'Multiple Organizations', state.organization, fileName)
+      const respond = await uploadFile(state.fileContent,state.mode, state.organization, fileName)
       if (respond.success) {
         // let trace = ''
         // respond.traceOfUploading.map(message => trace += message)

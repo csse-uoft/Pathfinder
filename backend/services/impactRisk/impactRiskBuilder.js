@@ -40,28 +40,28 @@ async function impactRiskBuilder(environment, subType, object, organization, err
   let ret;
   let ignore;
   const objectDicts = {
-    'impactRisk': impactRiskDict,
-    'evidenceRisk': evidenceRiskDict,
-    'externalRisk': externalRiskDict,
-    'stakeholderParticipationRisk': stakeholderParticipationRiskDict,
-    'dropOffRisk': dropOffRiskDict,
-    'efficiencyRisk': efficiencyRiskDict,
-    'executionRisk': executionRiskDict,
-    'alignmentRisk': alignmentRiskDict,
-    'enduranceRisk': enduranceRiskDict,
-    'unexpectedImpactRisk': unexpectedImpactRiskDict
+    'impact Risk': impactRiskDict,
+    'evidence Risk': evidenceRiskDict,
+    'external Risk': externalRiskDict,
+    'stakeholder Participation Risk': stakeholderParticipationRiskDict,
+    'drop Off Risk': dropOffRiskDict,
+    'efficiency Risk': efficiencyRiskDict,
+    'execution Risk': executionRiskDict,
+    'alignment Risk': alignmentRiskDict,
+    'endurance Risk': enduranceRiskDict,
+    'unexpected Impact Risk': unexpectedImpactRiskDict
   }
   const GDBDict = {
-    'impactRisk': GDBImpactRiskModel,
-    'evidenceRisk': GDBEvidenceRiskModel,
-    'externalRisk': GDBExternalRiskModel,
-    'stakeholderParticipationRisk': GDBStakeholderParticipationRiskModel,
-    'dropOffRisk': GDBDropOffRiskModel,
-    'efficiencyRisk': GDBEfficiencyRiskModel,
-    'executionRisk': GDBExecutionRiskModel,
-    'alignmentRisk': GDBAlignmentRiskModel,
-    'enduranceRisk': GDBEnduranceRiskModel,
-    'unexpectedImpactRisk': GDBUnexpectedImpactRiskModel
+    'impact Risk': GDBImpactRiskModel,
+    'evidence Risk': GDBEvidenceRiskModel,
+    'external Risk': GDBExternalRiskModel,
+    'stakeholder Participation Risk': GDBStakeholderParticipationRiskModel,
+    'drop Off Risk': GDBDropOffRiskModel,
+    'efficiency Risk': GDBEfficiencyRiskModel,
+    'execution Risk': GDBExecutionRiskModel,
+    'alignment Risk': GDBAlignmentRiskModel,
+    'endurance Risk': GDBEnduranceRiskModel,
+    'unexpected Impact Risk': GDBUnexpectedImpactRiskModel
   };
   const mainModel = GDBDict[subType];
   const mainObject = environment === 'fileUploading' ? objectDicts[subType][uri] : await GDBDict[subType].findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});

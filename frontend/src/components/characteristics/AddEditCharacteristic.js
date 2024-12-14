@@ -5,7 +5,7 @@ import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
+import {AlertDialog} from "../shared/dialogs/Dialogs";
 
 import {useSnackbar} from "notistack";
 import Dropdown from "../shared/fields/MultiSelectField";
@@ -16,6 +16,7 @@ import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType,}
 import {CONFIGLEVEL} from "../../helpers/attributeConfig";
 import configs from "../../helpers/attributeConfig";
 import {isFieldRequired, validateField, validateForm, validateURI} from "../../helpers";
+import URIField from "../shared/fields/URIFields";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -223,7 +224,9 @@ export default function AddEditCharacteristic() {
             onBlur={validateField(form, attriConfig, 'name', attribute2Compass['name'], setErrors)}
           />
 
-          <GeneralField
+          <URIField
+            add={mode === 'new'}
+            edit={mode === 'edit'}
             key={'uri'}
             label={'URI'}
             value={form.uri}

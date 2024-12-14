@@ -29,7 +29,7 @@ import {EnhancedTableToolbar} from "../shared/Table/EnhancedTableToolbar";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 
 
 export default function OutcomeView({multi, single, organizationUser, groupUser, superUser, organizationUri}) {

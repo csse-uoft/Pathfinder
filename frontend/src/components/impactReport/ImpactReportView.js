@@ -23,7 +23,7 @@ import {
   handleSelectAllClick
 } from "../../helpers/helpersForDropdownFilter";
 import {handleDelete} from "../../helpers/deletingObjectHelper";
-import DeleteDialog from "../shared/DeleteDialog";
+import DeleteDialog from "../shared/dialogs/DeleteDialog";
 
 export default function ImpactReportView({multi, single, organizationUser, superUser, groupUser}) {
   const {enqueueSnackbar} = useSnackbar();

@@ -5,6 +5,8 @@ const {assignValue, assignValues,
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBIndicatorModel} = require("../../models/indicator");
+const {SPARQL, GraphDB} = require("graphdb-utils");
+const {GDBIndicatorReportCorrespondenceModel} = require("../../models/hasSubIndicatorProperty");
 const {getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorReportBuilder(environment, object, organization, error, {
@@ -25,7 +27,7 @@ async function indicatorReportBuilder(environment, object, organization, error, 
   let ignore;
   const mainModel = GDBIndicatorReportModel;
   // todo: await mainModel.findOne({_uri: uri}) || should be also good for fileUploading mode, there is bugs in graphdb utils
-  const mainObject = environment === 'fileUploading' ?  indicatorReportDict[uri] : await mainModel.findOne({_uri: form.uri}) || mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ?  indicatorReportDict[uri] : (form.uri? await mainModel.findOne({_uri: form.uri}): mainModel({}, {uri: form.uri}))  || mainModel({}, {uri: form.uri});
   if (environment === 'interface') {
     await mainObject.save();
     uri = mainObject._uri;
@@ -85,7 +87,10 @@ async function indicatorReportBuilder(environment, object, organization, error, 
 
     if (environment === 'interface') {
       form.forIndicator = form.indicator
+
     }
+
+
 
     ret = await assignInvertValue(environment, config, object, mainModel, mainObject, {
       propertyName: 'forIndicator', internalKey: 'cids:forIndicator'
@@ -179,6 +184,46 @@ async function indicatorReportBuilder(environment, object, organization, error, 
       //     hasBeginning: {date: new Date(form.startTime)},
       //     hasEnd: {date: new Date(form.endTime)}
       //   })
+
+      //check if the indicator report's indicator have headlineIndicator
+      const headlineIndicatorUris = await haveHeadlineIndicators(uri)
+      if (headlineIndicatorUris.length) {
+        // does the indicatorReport have corresponding headline indicator reports
+        const correspondingHeadlineIndicatorReports = await haveHeadlineIndicatorReports(uri)
+        if (correspondingHeadlineIndicatorReports.length) {
+          // if yes, means that the indicator report was defined before, modify the value of them
+          for (let headlineIndicatorReportUri of correspondingHeadlineIndicatorReports) {
+            const headlineIndicatorReport = await GDBIndicatorReportModel.findOne({_uri: headlineIndicatorReportUri}, {populates: ['value']});
+            headlineIndicatorReport.value.numericalValue = form.value
+            await headlineIndicatorReport.save()
+          }
+        } else {
+          // if no, means that the indicator report is newly added, create one for each of its headline Indicators, and have correspondence for all of them
+          for (let headlineIndicatorUri of headlineIndicatorUris) {
+            const headlineIndicator = await GDBIndicatorModel.findOne({_uri: headlineIndicatorUri}, {populates: ['unitOfMeasure']})
+            const newIndicatorReport = GDBIndicatorReportModel({
+              forIndicator: headlineIndicatorUri,
+              forOrganization: headlineIndicator.forOrganization,
+              value: {numericalValue: form.value},
+              unitOfMeasure: {label: headlineIndicator.unitOfMeasure.label}
+            })
+            if (!headlineIndicator.indicatorReports?.length) {
+              headlineIndicator.indicatorReports = []
+            }
+            await newIndicatorReport.save()
+            await GDBIndicatorReportCorrespondenceModel({
+              hasHeadlineIndicatorReport: newIndicatorReport._uri,
+              hasChildIndicatorReport: uri,
+              // forOrganization:
+            }).save()
+            headlineIndicator.indicatorReports = [...headlineIndicator.indicatorReports, newIndicatorReport._uri]
+            await headlineIndicator.save()
+          }
+        }
+
+
+
+      }
       await mainObject.save();
       return true
     }
@@ -195,5 +240,37 @@ async function indicatorReportBuilder(environment, object, organization, error, 
   return error;
 
 }
+
+async function haveHeadlineIndicators(indicatorReportUri) {
+  let query = `${SPARQL.getSPARQLPrefixes()} 
+ SELECT DISTINCT ?headlineIndicator WHERE {
+    ?subIndicatorProperty rdf:type :hasSubIndicatorProperty .
+    ?subIndicatorProperty :hasHeadlineIndicator ?headlineIndicator .
+  ?subIndicatorProperty :hasSubIndicator ?subIndicator .
+    ?subIndicator cids:hasIndicatorReport <${indicatorReportUri}> .
+    ?headlineIndicator :reportGenerator "auto" .
+}`;
+  const headlineIndicators = []
+  await GraphDB.sendSelectQuery(query, false, ({headlineIndicator}) => {
+    headlineIndicators.push(headlineIndicator.id)
+  });
+  return headlineIndicators
+}
+
+async function haveHeadlineIndicatorReports(indicatorReportUri) {
+  let query = `${SPARQL.getSPARQLPrefixes()} 
+   SELECT ?headlineIndicatorReport WHERE {
+    ?indicatorReportCorrespondence rdf:type cidsrep:indicatorReportCorrespondence .
+    ?indicatorReportCorrespondence cidsrep:hasHeadlineIndicatorReport ?headlineIndicatorReport .
+  	?indicatorReportCorrespondence cidsrep:hasSubIndicatorReport <${indicatorReportUri}> .
+}`;
+  const headlineIndicatorReports = []
+  await GraphDB.sendSelectQuery(query, false, ({headlineIndicatorReport}) => {
+    headlineIndicatorReports.push(headlineIndicatorReport.id)
+  });
+  return headlineIndicatorReports
+}
+
+
 
 module.exports = {indicatorReportBuilder}

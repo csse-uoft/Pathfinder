@@ -10,7 +10,7 @@ export function handleSelectAllClick(organizationsWithGroups, setSelectedOrganiz
 
     // If all organizations are already selected, deselect all
     // Otherwise, select all organizations
-    const updatedSelectedOrganizations = selectedOrganizations.length === allOrganizationUris.length
+    const updatedSelectedOrganizations = selectedOrganizations.filter(uri => uri).length === allOrganizationUris.length
       ? []
       : allOrganizationUris;
 

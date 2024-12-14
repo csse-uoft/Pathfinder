@@ -29,6 +29,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'sankeyDiagram':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
     case 'dataExport':
       if (userAccount.isSuperuser)
         return true;
@@ -37,6 +41,10 @@ async function hasAccess(req, operationType) {
       return true; // todo: only editors can upload files
       break;
     case 'fileUploadingMultiOrganization':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'directlyUpload':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -61,6 +69,15 @@ async function hasAccess(req, operationType) {
       break;
 
     case 'fetchNodeGraphData':
+      if (userAccount.isSuperuser)
+        return true;
+      break
+
+    case 'fetchThemeNodeGraph':
+      return true;
+      break
+
+    case 'fetchIndicatorNodeGraph':
       if (userAccount.isSuperuser)
         return true;
       break
