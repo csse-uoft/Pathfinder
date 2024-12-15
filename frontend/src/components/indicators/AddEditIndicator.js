@@ -7,7 +7,7 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/dialogs/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import IndicatorField from "../shared/fields/indicatorField";
+import IndicatorField from "../shared/fields/IndicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {navigateHelper} from "../../helpers/navigatorHelper";
 import {createDataType, fetchDataType, fetchDataTypeInterfaces, updateDataType} from "../../api/generalAPI";

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import TR from '../shared/TR'
+import TR from '../shared/Table/TR'
 import {fetchUser, getProfile,} from '../../api/userApi'
 import {useNavigate, useParams} from "react-router-dom";
 import { Link, Loading } from "../shared";
